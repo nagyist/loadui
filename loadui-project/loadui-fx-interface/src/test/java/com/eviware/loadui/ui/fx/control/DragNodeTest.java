@@ -23,7 +23,9 @@ import java.util.concurrent.TimeUnit;
 
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
+import javafx.collections.ListChangeListener;
 import javafx.event.EventHandler;
+import javafx.scene.Group;
 import javafx.scene.GroupBuilder;
 import javafx.scene.Node;
 import javafx.scene.SceneBuilder;
@@ -38,10 +40,10 @@ import org.junit.experimental.categories.Category;
 
 import com.eviware.loadui.test.categories.GUITest;
 import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
-import com.eviware.loadui.ui.fx.util.test.TestFX.MouseMotion;
 import com.eviware.loadui.ui.fx.util.test.FXScreenController;
 import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
+import com.eviware.loadui.ui.fx.util.test.TestFX;
+import com.eviware.loadui.ui.fx.util.test.TestFX.MouseMotion;
 import com.google.common.util.concurrent.SettableFuture;
 
 @Category( GUITest.class )
@@ -68,14 +70,14 @@ public class DragNodeTest
 			dropRect.fillProperty().bind(
 					Bindings.when( dragNode.acceptableProperty() ).then( Color.GREEN ).otherwise( Color.RED ) );
 
-			primaryStage.setScene( SceneBuilder.create().width( 300 ).height( 200 )
-					.root( GroupBuilder.create().children( dropRect, dragRect ).build() ).build() );
+			Group root = GroupBuilder.create().children( dropRect, dragRect ).build();
+			final Group s = GroupBuilder.create().children( root ).build();
+			primaryStage.setScene( SceneBuilder.create().width( 300 ).height( 200 ).root( s ).build() );
 
 			primaryStage.show();
 
 			stageFuture.set( primaryStage );
 		}
-
 	}
 
 	@BeforeClass
@@ -113,6 +115,7 @@ public class DragNodeTest
 			@Override
 			public void handle( DraggableEvent event )
 			{
+				System.out.println( "RECEIVING EVENT" );
 				if( event.getEventType() == DraggableEvent.DRAGGABLE_ENTERED )
 				{
 					event.accept();

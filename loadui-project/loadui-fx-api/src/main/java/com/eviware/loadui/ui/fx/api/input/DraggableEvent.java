@@ -68,6 +68,8 @@ public class DraggableEvent extends InputEvent
 	{
 		super( source, target, eventType );
 
+		System.out.println( source + " " + target + " " + draggable + " " + x + " " + y );
+
 		this.onAccept = onAccept;
 		this.draggable = draggable;
 		this.sceneX = x;

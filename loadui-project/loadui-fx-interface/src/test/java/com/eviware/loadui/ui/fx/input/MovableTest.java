@@ -15,6 +15,7 @@
  */
 package com.eviware.loadui.ui.fx.input;
 
+import static javafx.beans.binding.Bindings.when;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -70,8 +71,7 @@ public class MovableTest
 
 			Rectangle dropRect = RectangleBuilder.create().id( "droprect" ).width( 50 ).height( 50 ).layoutX( 100 )
 					.layoutY( 100 ).build();
-			dropRect.fillProperty().bind(
-					Bindings.when( movable.acceptableProperty() ).then( Color.GREEN ).otherwise( Color.RED ) );
+			dropRect.fillProperty().bind( when( movable.acceptableProperty() ).then( Color.GREEN ).otherwise( Color.RED ) );
 
 			group = GroupBuilder.create().children( dropRect, dragRect ).build();
 
