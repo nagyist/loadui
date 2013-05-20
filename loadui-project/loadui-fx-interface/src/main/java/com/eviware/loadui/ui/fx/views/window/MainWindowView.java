@@ -23,6 +23,7 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.MenuButton;
@@ -30,6 +31,8 @@ import javafx.scene.effect.Glow;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +67,7 @@ import com.eviware.loadui.ui.fx.views.workspace.SystemPropertiesDialog;
 import com.eviware.loadui.ui.fx.views.workspace.WorkspaceView;
 import com.google.common.base.Preconditions;
 
-public class MainWindowView extends StackPane
+public class MainWindowView extends StackPane implements OverlayHolder
 {
 	@FXML
 	private MenuButton mainButton;
@@ -74,6 +77,12 @@ public class MainWindowView extends StackPane
 
 	@FXML
 	private InspectorView inspectorView;
+
+	@FXML
+	private Group overlay;
+
+	@FXML
+	private Rectangle rectangle;
 
 	@FXML
 	private NotificationPanel notificationPanel;
@@ -97,6 +106,10 @@ public class MainWindowView extends StackPane
 	@FXML
 	private void initialize()
 	{
+		rectangle.setFill( Color.TRANSPARENT );
+		rectangle.widthProperty().bind( widthProperty() );
+		rectangle.heightProperty().bind( heightProperty() );
+
 		notificationPanel.setVisible( false );
 		notificationPanel.setMainWindowView( this );
 		notificationPanel.listenOnDetachedTabs();
@@ -125,7 +138,9 @@ public class MainWindowView extends StackPane
 		{
 			mainButton.setGraphic( new ImageView( LoadUI.relativeFile( "res/logo-button.png" ).toURI().toURL()
 					.toExternalForm() ) );
-			mainButton.effectProperty().bind(Bindings.when( Bindings.or( mainButton.hoverProperty(), mainButton.showingProperty() ) ).then( new Glow(0.4d) ).otherwise( new Glow( 0d ) ) );
+			mainButton.effectProperty().bind(
+					Bindings.when( Bindings.or( mainButton.hoverProperty(), mainButton.showingProperty() ) )
+							.then( new Glow( 0.4d ) ).otherwise( new Glow( 0d ) ) );
 			SelectableImpl.installDeleteKeyHandler( this );
 
 			initIntentEventHanding();
@@ -351,4 +366,9 @@ public class MainWindowView extends StackPane
 		}
 	}
 
+	@Override
+	public Group getOverlay()
+	{
+		return overlay;
+	}
 }

@@ -15,6 +15,8 @@
  */
 package com.eviware.loadui.ui.fx.control.skin;
 
+import static javafx.beans.binding.Bindings.when;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -38,12 +40,12 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
-import javafx.scene.control.PopupControl;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
@@ -51,7 +53,9 @@ import javafx.scene.layout.RegionBuilder;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
-import javafx.stage.WindowEvent;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.RectangleBuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +63,7 @@ import org.slf4j.LoggerFactory;
 import com.eviware.loadui.ui.fx.control.ScrollableList;
 import com.eviware.loadui.ui.fx.control.ToolBox;
 import com.eviware.loadui.ui.fx.control.behavior.ToolBoxBehavior;
+import com.eviware.loadui.ui.fx.views.window.MainWindowView;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.sun.javafx.scene.control.behavior.BehaviorBase;
@@ -229,8 +234,8 @@ public class ToolBoxSkin<E extends Node> extends SkinBase<ToolBox<E>, BehaviorBa
 	private class ToolBoxCategory extends BorderPane
 	{
 		private final ObservableList<E> categoryItems = FXCollections.observableArrayList();
-		private final ObjectBinding<E> shownElement = Bindings.when( expander.expandedCategory.isNotEqualTo( this ) )
-				.then( Bindings.valueAt( categoryItems, 0 ) ).otherwise( ( E )null );
+		private final ObjectBinding<E> shownElement = when( expander.expandedCategory.isNotEqualTo( this ) ).then(
+				Bindings.valueAt( categoryItems, 0 ) ).otherwise( ( E )null );
 		private final String category;
 		private final Button expanderButton;
 		private final ItemHolder itemHolder;
@@ -286,12 +291,12 @@ public class ToolBoxSkin<E extends Node> extends SkinBase<ToolBox<E>, BehaviorBa
 					Bindings.when( expander.expandedCategory.isEqualTo( this ) ).then( heightProperty() )
 							.otherwise( USE_COMPUTED_SIZE ) );
 
-			itemHolder
-					.getCategory()
-					.visibleProperty()
-					.bind(
-							Bindings.when( expander.showingProperty() )
-									.then( expander.expandedCategory.isEqualTo( this ).not() ).otherwise( true ) );
+			//			itemHolder
+			//					.getCategory()
+			//					.visibleProperty()
+			//					.bind(
+			//							when( expander.showingProperty() ).then( expander.expandedCategory.isEqualTo( this ).not() )
+			//									.otherwise( true ) );
 			/*
 			 * expander.showingProperty().addListener( new InvalidationListener(){
 			 * 
@@ -333,30 +338,47 @@ public class ToolBoxSkin<E extends Node> extends SkinBase<ToolBox<E>, BehaviorBa
 		}
 	}
 
-	private class ToolBoxExpander extends PopupControl
+	private class ToolBoxExpander extends StackPane
 	{
+		private final class ModalWindowHider implements EventHandler<MouseEvent>
+		{
+			private final Rectangle modalLayer;
+
+			private ModalWindowHider( Rectangle modalLayer )
+			{
+				this.modalLayer = modalLayer;
+			}
+
+			@Override
+			public void handle( MouseEvent e )
+			{
+				System.out.println( "Hide!!!" );
+				MainWindowView p = ( MainWindowView )ToolBoxSkin.this.getScene().getRoot();
+				p.getOverlay().getChildren().removeAll( modalLayer, ToolBoxExpander.this );
+				expandedCategory.set( null );
+			}
+		}
+
 		private final ObjectProperty<ToolBoxCategory> expandedCategory = new SimpleObjectProperty<>( this,
 				"expandedCategory" );
 
 		private ToolBoxExpander()
 		{
 			getStyleClass().setAll( "tool-box-expander" );
-			setAutoFix( false );
-			setAutoHide( true );
 			setAlignment( Pos.BOTTOM_LEFT );
 
-			setOnHidden( new EventHandler<WindowEvent>()
-			{
-				@Override
-				public void handle( WindowEvent event )
-				{
-					expandedCategory.set( null );
-				}
-			} );
 		}
 
 		public void show( ToolBoxCategory category )
 		{
+			final Rectangle modalLayer = RectangleBuilder.create().fill( Color.BROWN ).build();
+
+			modalLayer.setOnMousePressed( new ModalWindowHider( modalLayer ) );
+			modalLayer.setOnMouseReleased( new ModalWindowHider( modalLayer ) );
+
+			modalLayer.widthProperty().bind( ToolBoxSkin.this.getScene().widthProperty() );
+			modalLayer.heightProperty().bind( ToolBoxSkin.this.getScene().heightProperty() );
+
 			expandedCategory.set( category );
 
 			ItemHolder itemHolder = new ItemHolder( category.category );
@@ -379,14 +401,17 @@ public class ToolBoxSkin<E extends Node> extends SkinBase<ToolBox<E>, BehaviorBa
 			pane.setAlignment( Pos.BOTTOM_LEFT );
 			pane.getChildren().setAll( itemHolder );
 
-			bridge.getChildren().setAll( pane );
-			Scene scene = category.getScene();
+			getChildren().setAll( pane );
 
 			Bounds sceneBounds = category.localToScene( category.getBoundsInLocal() );
-			final double xPos = sceneBounds.getMinX() + scene.getX() + scene.getWindow().getX();
-			final double yPos = sceneBounds.getMinY() + scene.getY() + scene.getWindow().getY();
+			final double xPos = sceneBounds.getMinX();
+			final double yPos = sceneBounds.getMinY();
 
-			super.show( category, xPos - padding, yPos - padding );
+			setLayoutX( xPos - padding );
+			setLayoutY( yPos - padding );
+			MainWindowView p = ( MainWindowView )ToolBoxSkin.this.getScene().getRoot();
+			System.out.println( xPos + " !!! " + yPos + " pane:" + p );
+			p.getOverlay().getChildren().addAll( modalLayer, this );
 		}
 	}
 }

@@ -15,6 +15,7 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
+import static javafx.beans.binding.Bindings.when;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -22,8 +23,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import javafx.application.Application;
-import javafx.beans.binding.Bindings;
-import javafx.collections.ListChangeListener;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.GroupBuilder;
@@ -44,6 +43,7 @@ import com.eviware.loadui.ui.fx.util.test.FXScreenController;
 import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
 import com.eviware.loadui.ui.fx.util.test.TestFX;
 import com.eviware.loadui.ui.fx.util.test.TestFX.MouseMotion;
+import com.eviware.loadui.ui.fx.views.window.OverlayHolder;
 import com.google.common.util.concurrent.SettableFuture;
 
 @Category( GUITest.class )
@@ -59,19 +59,19 @@ public class DragNodeTest
 		@Override
 		public void start( Stage primaryStage ) throws Exception
 		{
-			Rectangle dragRect = RectangleBuilder.create().id( "dragrect" ).width( 25 ).height( 25 ).fill( Color.BLUE )
-					.build();
+			Rectangle dragRect = RectangleBuilder.create().id( "dragrect" ).width( 25 ).height( 25 ).layoutX( 80 )
+					.fill( Color.BLUE ).build();
 
 			dragNode = DragNode.install( dragRect, RectangleBuilder.create().id( "dragnode" ).width( 25 ).height( 25 )
 					.fill( Color.GREEN ).build() );
 
 			Rectangle dropRect = RectangleBuilder.create().id( "droprect" ).width( 50 ).height( 50 ).layoutX( 100 )
 					.layoutY( 100 ).build();
-			dropRect.fillProperty().bind(
-					Bindings.when( dragNode.acceptableProperty() ).then( Color.GREEN ).otherwise( Color.RED ) );
+			dropRect.fillProperty()
+					.bind( when( dragNode.acceptableProperty() ).then( Color.GREEN ).otherwise( Color.RED ) );
 
 			Group root = GroupBuilder.create().children( dropRect, dragRect ).build();
-			final Group s = GroupBuilder.create().children( root ).build();
+			final RootNode s = new RootNode( root );
 			primaryStage.setScene( SceneBuilder.create().width( 300 ).height( 200 ).root( s ).build() );
 
 			primaryStage.show();
@@ -124,7 +124,6 @@ public class DragNodeTest
 				{
 					dropLatch.countDown();
 				}
-
 				event.consume();
 			}
 		} );
@@ -138,5 +137,21 @@ public class DragNodeTest
 		dragging.drop();
 
 		dropLatch.await( 2, TimeUnit.SECONDS );
+	}
+
+	static class RootNode extends Group implements OverlayHolder
+	{
+		private Group overlay = GroupBuilder.create().id( "overlay" ).build();
+
+		RootNode( Node child )
+		{
+			getChildren().addAll( child, overlay );
+		}
+
+		@Override
+		public Group getOverlay()
+		{
+			return overlay;
+		}
 	}
 }

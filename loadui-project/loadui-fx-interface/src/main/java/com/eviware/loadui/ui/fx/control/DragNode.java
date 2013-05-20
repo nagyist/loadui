@@ -19,8 +19,6 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.TimelineBuilder;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -36,16 +34,12 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.PopupControl;
 import javafx.scene.effect.DropShadowBuilder;
 import javafx.scene.effect.Effect;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.PopupWindow;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -54,6 +48,7 @@ import javafx.util.Duration;
 import com.eviware.loadui.ui.fx.api.input.Draggable;
 import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
 import com.eviware.loadui.ui.fx.util.NodeUtils;
+import com.eviware.loadui.ui.fx.views.window.OverlayHolder;
 
 /**
  * Adds the ability to drag an object from a source Node, which can potentially
@@ -62,7 +57,7 @@ import com.eviware.loadui.ui.fx.util.NodeUtils;
  * @author dain.nilsson
  * @author Henrik
  */
-public class DragNode extends Rectangle implements Draggable
+public class DragNode implements Draggable
 {
 	private static final Duration REVERT_DURATION = new Duration( 300 );
 	private static final String DRAG_NODE_PROP_KEY = DragNode.class.getName();
@@ -222,16 +217,16 @@ public class DragNode extends Rectangle implements Draggable
 
 	public DragNode( Node node )
 	{
-		nodeProperty.addListener( new InvalidationListener()
-		{
-			@Override
-			public void invalidated( Observable observable )
-			{
-				setWidth( 20 );
-				setHeight( 20 );
-				setFill( Color.BROWN );
-			}
-		} );
+		//		nodeProperty.addListener( new InvalidationListener()
+		//		{
+		//			@Override
+		//			public void invalidated( Observable observable )
+		//			{
+		//				setWidth( 20 );
+		//				setHeight( 20 );
+		//				setFill( Color.BROWN );
+		//			}
+		//		} );
 		nodeProperty.set( node );
 	}
 
@@ -240,15 +235,56 @@ public class DragNode extends Rectangle implements Draggable
 		return dragSource;
 	}
 
+	public Parent getParent()
+	{
+		return getNode().getParent();
+	}
+
+	public void setVisible( boolean visible )
+	{
+		getNode().setVisible( visible );
+	}
+
+	public void setX( double x )
+	{
+		getNode().setLayoutX( x );
+	}
+
+	public void setY( double y )
+	{
+		getNode().setLayoutY( y );
+	}
+
+	public double getX()
+	{
+		return getNode().getLayoutX();
+	}
+
+	public double getY()
+	{
+		return getNode().getLayoutY();
+	}
+
+	public double getWidth()
+	{
+		return getNode().getBoundsInLocal().getWidth();
+	}
+
+	public double getHeight()
+	{
+		return getNode().getBoundsInLocal().getHeight();
+	}
+
 	private void revert()
 	{
-		System.out.println( !isRevert() + "  --------OR-------- " + isAcceptable() );
+		System.out.println( "11111111111111" + isRevert() + " " + isAcceptable() );
 		if( !isRevert() || isAcceptable() )
 		{
-			Parent p = getParent();
-			if( p instanceof Group )
+			Parent p = getNode().getScene().getRoot();
+			if( p instanceof OverlayHolder )
 			{
-				( ( Group )p ).getChildren().remove( this );
+				( ( OverlayHolder )p ).getOverlay().getChildren().remove( getNode() );
+				System.out.println( "REMOVING" );
 			}
 			DragNode.this.setVisible( false );
 			//			hide();
@@ -274,8 +310,7 @@ public class DragNode extends Rectangle implements Draggable
 			}
 		} );
 
-		System.out.println( " x:" + startPoint.getX() + "  y:" + startPoint.getY() );
-
+		System.out.println( startPoint.getX() + "  --------X-Y-------- " + startPoint.getY() );
 		TimelineBuilder
 				.create()
 				.keyFrames(
@@ -286,12 +321,10 @@ public class DragNode extends Rectangle implements Draggable
 					@Override
 					public void handle( ActionEvent event )
 					{
-						System.out.println( "444444444444" );
-						Parent p = getParent();
-						if( p instanceof Group )
+						Parent p = getNode().getScene().getRoot();
+						if( p instanceof OverlayHolder )
 						{
-							System.out.println( "5555555555" );
-							( ( Group )p ).getChildren().remove( this );
+							( ( OverlayHolder )p ).getOverlay().getChildren().remove( getNode() );
 							DragNode.this.setVisible( false );
 						}
 						//						hide();
@@ -313,19 +346,16 @@ public class DragNode extends Rectangle implements Draggable
 				DragNode dragNode = ( DragNode )source.getProperties().get( DRAG_NODE_PROP_KEY );
 				if( dragNode != null )
 				{
-					dragNode.startPoint = new Point2D( event.getSceneX() - dragNode.getWidth() / 2, event.getSceneX()
+					dragNode.startPoint = new Point2D( event.getSceneX() - dragNode.getWidth() / 2, event.getSceneY()
 							- dragNode.getHeight() / 2 );
-					Group g = ( Group )source.getScene().getRoot();
-					dragNode.setWidth( 20 );
-					dragNode.setHeight( 20 );
-					dragNode.setFill( Color.RED );
+					OverlayHolder g = ( OverlayHolder )source.getScene().getRoot();
 					dragNode.setX( dragNode.startPoint.getX() );
 					dragNode.setY( dragNode.startPoint.getY() );
 					dragNode.setVisible( true );
-					g.getChildren().add( dragNode );
+					g.getOverlay().getChildren().add( dragNode.getNode() );
 
 					dragNode.setDragging( true );
-					dragNode.dragSource.fireEvent( new DraggableEvent( null, dragNode.dragSource, dragNode,
+					dragNode.dragSource.fireEvent( new DraggableEvent( null, dragNode.dragSource, dragNode.getNode(),
 							DraggableEvent.DRAGGABLE_STARTED, dragNode, event.getSceneX(), event.getSceneY() ) );
 				}
 			}
@@ -351,7 +381,8 @@ public class DragNode extends Rectangle implements Draggable
 						Scene scene = window.getScene();
 						scenePoint = new Point2D( event.getScreenX() - window.getX() - scene.getX(), event.getScreenY()
 								- window.getY() - scene.getY() );
-						currentNode = NodeUtils.findFrontNodeAtCoordinate( scene.getRoot(), scenePoint, dragNode );
+						currentNode = NodeUtils.findFrontNodeAtCoordinate( scene.getRoot(), scenePoint, dragNode.getNode(),
+								( ( OverlayHolder )window.getScene().getRoot() ).getOverlay() );
 
 						if( window instanceof PopupWindow )
 						{
@@ -371,7 +402,6 @@ public class DragNode extends Rectangle implements Draggable
 
 					if( dragNode.currentlyHovered != currentNode )
 					{
-						System.out.println( "FALSE" );
 						dragNode.setAcceptable( false );
 						if( dragNode.currentlyHovered != null )
 						{
@@ -381,6 +411,7 @@ public class DragNode extends Rectangle implements Draggable
 						}
 						if( currentNode != null )
 						{
+							System.out.println( "Currently hovering " + currentNode );
 							currentNode.fireEvent( new DraggableEvent( new Runnable()
 							{
 								@Override
@@ -396,7 +427,7 @@ public class DragNode extends Rectangle implements Draggable
 						dragNode.currentlyHovered = currentNode;
 					}
 
-					dragNode.dragSource.fireEvent( new DraggableEvent( null, dragNode.dragSource, dragNode,
+					dragNode.dragSource.fireEvent( new DraggableEvent( null, dragNode.dragSource, dragNode.getNode(),
 							DraggableEvent.DRAGGABLE_DRAGGED, dragNode, scenePoint.getX(), scenePoint.getY() ) );
 				}
 			}
@@ -426,11 +457,10 @@ public class DragNode extends Rectangle implements Draggable
 					}
 
 					dragNode.currentlyHovered = null;
-					System.out.println( 5555 );
 					dragNode.revert();
 					dragNode.setAcceptable( false );
 					dragNode.setDragging( false );
-					dragNode.dragSource.fireEvent( new DraggableEvent( null, dragNode.dragSource, dragNode,
+					dragNode.dragSource.fireEvent( new DraggableEvent( null, dragNode.dragSource, dragNode.getNode(),
 							DraggableEvent.DRAGGABLE_STOPPED, dragNode, event.getSceneX(), event.getSceneY() ) );
 				}
 			}

@@ -2,11 +2,13 @@
 
 <?import com.eviware.loadui.ui.fx.views.inspector.InspectorView?>
 
+<?import javafx.scene.Group?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.geometry.Insets?>
@@ -34,4 +36,7 @@
 		</items>
 	</MenuButton>
 	<NotificationPanel fx:id="notificationPanel" StackPane.alignment="top_center" />
+	<Group fx:id="overlay" >
+		<Rectangle fx:id="rectangle" mouseTransparent="true" />
+	</Group>
 </fx:root>
