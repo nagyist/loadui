@@ -11,3 +11,6 @@ bin/
 *.iml
 .idea/
 lib/
+
+#LoadUI Pro Repository:
+loadui-pro/

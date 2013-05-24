@@ -33,6 +33,7 @@
 		</plugins>
 	</build>
 	<dependencies>
+
 		<dependency>
 			<groupId>com.eviware.loadui</groupId>
 			<artifactId>loadui-core-deps</artifactId>

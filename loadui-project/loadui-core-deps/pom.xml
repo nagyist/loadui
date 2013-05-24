@@ -9,6 +9,7 @@
 	<artifactId>loadui-core-deps</artifactId>
 	<packaging>pom</packaging>
 	<name>loadUI Core Dependencies</name>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.osgi</groupId>

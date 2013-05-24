@@ -10,6 +10,7 @@
 	<includeBaseDirectory>false</includeBaseDirectory>
 	<dependencySets>
 		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
 			<outputDirectory>bundle</outputDirectory>
 			<includes>
 				<include>com.eviware.loadui:loadui-controller-deps</include>
@@ -24,6 +25,7 @@
 			<scope>compile</scope>
 		</dependencySet>
 		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
 			<outputDirectory>lib</outputDirectory>
 			<includes>
 				<include>com.eviware.loadui:loadui-launcher</include>
@@ -38,6 +40,7 @@
 			<scope>compile</scope>
 		</dependencySet>
 		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
 			<outputDirectory>script-components</outputDirectory>
 			<includes>
 				<include>com.eviware.loadui:loadui-groovy-component-pack</include>
