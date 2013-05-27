@@ -38,6 +38,15 @@
 			<scope>compile</scope>
 		</dependencySet>
 		<dependencySet>
+			<outputDirectory>license-manager</outputDirectory>
+			<outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+			<includes>
+				<include>com.eviware.loadui.pro:loadui-pro-licensing-manager</include>
+			</includes>
+			<scope>compile</scope>
+			<unpack>false</unpack>
+		</dependencySet>
+		<dependencySet>
 			<outputDirectory>script-components</outputDirectory>
 			<includes>
 				<include>com.eviware.loadui:loadui-groovy-component-pack</include>
