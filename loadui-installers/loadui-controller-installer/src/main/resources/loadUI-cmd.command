@@ -25,7 +25,7 @@ then
 fi
 export LOADUI_AGENT_HOME
 
-LOADUI_AGENT_CLASSPATH="$LOADUI_AGENT_HOME:$LOADUI_AGENT_HOME/lib/*"
+LOADUI_AGENT_CLASSPATH="$LOADUI_AGENT_HOME:$LOADUI_AGENT_HOME/lib/*:$LOADUI_AGENT_HOME/../../PlugIns/jre.bundle/Contents/Home/jre/lib/*"
 
 # For Cygwin, switch paths to Windows format before running java
 if $cygwin
@@ -36,4 +36,4 @@ fi
 
 JAVA_OPTS="-Xms128m -Xmx768m -XX:MaxPermSize=128m"
 
-java $JAVA_OPTS -cp "$LOADUI_AGENT_CLASSPATH" com.eviware.loadui.launcher.LoadUICommandLineLauncher "$@"
+../../PlugIns/jre.bundle/Contents/Home/jre/bin/java $JAVA_OPTS -cp "$LOADUI_AGENT_CLASSPATH" com.eviware.loadui.launcher.LoadUICommandLineLauncher "$@"

@@ -75,16 +75,23 @@ public class TestUtils
 		awaitCondition( condition, 5 );
 	}
 
-	public static void awaitCondition( Callable<Boolean> condition, int timeoutInSeconds ) throws Exception
+	public static void awaitCondition( Callable<Boolean> condition, int timeoutInSeconds )
 	{
 		long timeout = System.currentTimeMillis() + timeoutInSeconds * 1000;
-		while( !condition.call() )
+		try
 		{
-			Thread.sleep( 10 );
-			if( System.currentTimeMillis() > timeout )
+			while( !condition.call() )
 			{
-				throw new TimeoutException();
+				Thread.sleep( 10 );
+				if( System.currentTimeMillis() > timeout )
+				{
+					throw new TimeoutException();
+				}
 			}
+		}
+		catch( Exception e )
+		{
+			throw new RuntimeException( e );
 		}
 	}
 }

@@ -6,6 +6,7 @@ import java.awt.Point;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import javafx.scene.Node;
 import javafx.stage.Window;
@@ -48,14 +49,14 @@ public class LoadUiRobot
 		return new LoadUiRobot( controller );
 	}
 
-	public ComponentHandle createComponent( final Component component ) throws Exception
+	public ComponentHandle createComponent( final Component component )
 	{
 		Preconditions.checkNotNull( predefinedPoints.peek(),
 				"All predefined points (x,y) for component placement are used. Please add new ones." );
 		return createComponentAt( component, predefinedPoints.poll() );
 	}
 
-	public ComponentHandle createComponentAt( final Component component, Point targetPoint ) throws Exception
+	public ComponentHandle createComponentAt( final Component component, Point targetPoint )
 	{
 		final int numberOfComponents = TestFX.findAll( ".canvas-object-view" ).size();
 		Set<Node> oldOutputs = findAll( ".canvas-object-view .terminal-view.output-terminal" );
@@ -107,7 +108,7 @@ public class LoadUiRobot
 		inputs.removeAll( oldInputs );
 		outputs.removeAll( oldOutputs );
 
-		return new ComponentHandle( inputs, outputs, controller );
+		return new ComponentHandle( inputs, outputs, controller, this );
 	}
 
 	public void clickPlayStopButton()
@@ -115,10 +116,10 @@ public class LoadUiRobot
 		controller.click( ".project-playback-panel .play-button" );
 	}
 
-	public void runTestFor( Duration duration )
+	public void runTestFor( int number, TimeUnit unit )
 	{
 		clickPlayStopButton();
-		controller.sleep( ( long )duration.toMillis() );
+		controller.sleep( unit.toMillis( number ) );
 		clickPlayStopButton();
 		controller.sleep( 2000 );
 	}

@@ -17,10 +17,8 @@ package com.eviware.loadui.test.ui.fx;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeoutException;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -65,21 +63,14 @@ public class DetachTabsTest
 
 		controller.click( "#designTab" ).click( "#designTab #detachButton" );
 
-		try
+		TestUtils.awaitCondition( new Callable<Boolean>()
 		{
-			TestUtils.awaitCondition( new Callable<Boolean>()
+			@Override
+			public Boolean call() throws Exception
 			{
-				@Override
-				public Boolean call() throws Exception
-				{
-					return TestFX.findAll( ".detached-content .project-canvas-view" ).size() == 1;
-				}
-			}, 2 );
-		}
-		catch( TimeoutException e )
-		{
-			fail( "cannot create project-canvas-view" );
-		}
+				return TestFX.findAll( ".detached-content .project-canvas-view" ).size() == 1;
+			}
+		}, 2 );
 		//Check so that 
 		assertThat( TestFX.findAll( ".detached-content .project-canvas-view" ).size(), is( 1 ) );
 
@@ -92,21 +83,14 @@ public class DetachTabsTest
 
 		controller.click( "#statsTab" ).click( "#statsTab #detachButton" );
 
-		try
+		TestUtils.awaitCondition( new Callable<Boolean>()
 		{
-			TestUtils.awaitCondition( new Callable<Boolean>()
+			@Override
+			public Boolean call() throws Exception
 			{
-				@Override
-				public Boolean call() throws Exception
-				{
-					return TestFX.findAll( ".detached-content .analysis-view" ).size() == 1;
-				}
-			}, 2 );
-		}
-		catch( TimeoutException e )
-		{
-			fail( "cannot create analysis-view" );
-		}
+				return TestFX.findAll( ".detached-content .analysis-view" ).size() == 1;
+			}
+		}, 2 );
 
 		//Check so that 
 		assertThat( TestFX.findAll( ".detached-content .analysis-view" ).size(), is( 1 ) );
