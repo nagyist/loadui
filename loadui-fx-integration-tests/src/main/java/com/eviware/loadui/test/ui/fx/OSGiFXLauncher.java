@@ -81,21 +81,13 @@ public class OSGiFXLauncher extends LoadUIFXLauncher
 		try
 		{
 			IntegrationTestUtils.copyDirectory( new File(
-					"../../loadui-installers/loadui-controller-installer/target/main" ), baseDir );
-			//IntegrationTestUtils.copyDirectory( new File( "../loadui-controller-deps/target/bundle" ), bundleDir );
+					"../loadui-installers/loadui-controller-installer/target/main" ), baseDir );
 			IntegrationTestUtils.copyDirectory( new File( "target/bundle" ), bundleDir );
 		}
 		catch( IOException e1 )
 		{
 			throw new RuntimeException( e1 );
 		}
-
-		// osgi = new OSGiWrapper();
-		// Properties config = osgi.getConfig();
-		// config.setProperty( "felix.cache.rootdir", baseDir.getAbsolutePath() );
-		// File bundleDir = new File( baseDir, "bundle" );
-		// Utilities.copyDirectory( new File(
-		// "../loadui-controller-deps/target/bundle" ), bundleDir );
 
 		//Add the required packages that should be in the OSGi config file.
 		StringBuilder apiPackages = new StringBuilder(

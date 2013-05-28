@@ -26,6 +26,7 @@ import java.util.concurrent.Callable;
 import javafx.scene.Node;
 import javafx.stage.Stage;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -80,6 +81,11 @@ public class ExecutionTest
 	{
 		ProjectLoadedWithoutAgentsState.STATE.enter();
 		controller = GUI.getController();
+	}
+
+	@AfterClass
+	public static void leaveState() throws Exception {
+		ProjectLoadedWithoutAgentsState.STATE.getParent().enter();
 	}
 
 	@Test

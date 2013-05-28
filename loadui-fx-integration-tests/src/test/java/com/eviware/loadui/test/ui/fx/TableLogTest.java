@@ -83,6 +83,6 @@ public class TableLogTest
 
 	private Set<Node> numberOfTableRows()
 	{
-		return findAll( ".table-row-cell" );
+		return findAll( ".component-view .table-row-cell" );
 	}
 }

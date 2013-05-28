@@ -22,10 +22,7 @@ import java.util.Set;
 
 import javafx.scene.Node;
 
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.experimental.categories.Category;
 
 import com.eviware.loadui.test.categories.IntegrationTest;
@@ -39,6 +36,7 @@ import com.google.common.base.Predicate;
  * @author henrik.olsson
  */
 @Category( IntegrationTest.class )
+@Ignore
 public class ChartsTest
 {
 	private static final Predicate<Node> WEB_RUNNER = new Predicate<Node>()

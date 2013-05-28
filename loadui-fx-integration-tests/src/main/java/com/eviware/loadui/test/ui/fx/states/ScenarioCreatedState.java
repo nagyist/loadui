@@ -28,7 +28,7 @@ import com.eviware.loadui.util.test.TestUtils;
 public class ScenarioCreatedState extends TestState
 {
 	public static final ScenarioCreatedState STATE = new ScenarioCreatedState();
-	public static final String SCENARIO_NAME = "Scenario 1";
+	public static final String SCENARIO_NAME = "Scenario";
 
 	private SceneItem scenario = null;
 
@@ -46,8 +46,7 @@ public class ScenarioCreatedState extends TestState
 	protected void enterFromParent() throws Exception
 	{
 		log.debug( "Creating scenario." );
-		GUI.getController().drag( "#newScenarioIcon" ).by( 300, 0 ).drop().sleep( 100 ).click( "#scenario-name" )
-				.type( SCENARIO_NAME ).click( "#default" );
+		GUI.getController().drag( "#newScenarioIcon" ).by( 300, 0 ).drop();
 
 		TestUtils.awaitCondition( new Callable<Boolean>()
 		{
