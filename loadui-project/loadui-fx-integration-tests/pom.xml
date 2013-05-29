@@ -12,7 +12,7 @@
     <description>loadUI integration tests for the JavaFX GUI</description>
 
     <profiles>
-       <profile>
+        <profile>
             <id>int-tests</id>
             <build>
                 <plugins>
@@ -23,6 +23,13 @@
                             <groups>com.eviware.loadui.test.categories.IntegrationTest</groups>
                             <argLine>-Xms256m -Xmx1024m -XX:MaxPermSize=128M</argLine>
                         </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
@@ -90,7 +97,7 @@
             <systemPath>${env.JAVA_HOME}/jre/lib/jfxrt.jar</systemPath>
             <scope>system</scope>
         </dependency>
-            
+
         <!-- 		<dependency> -->
         <!-- 			<groupId>com.eviware.loadui</groupId> -->
         <!-- 			<artifactId>loadui-fx-interface</artifactId> -->
