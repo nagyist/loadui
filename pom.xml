@@ -5,8 +5,8 @@
 	<artifactId>loadui-parent</artifactId>
 	<packaging>pom</packaging>
 	<version>2.5.4-SNAPSHOT</version>
-	<name>loadUI Parent</name>
-	<description>LoadUI Parent is the top-level LoadUI project which triggers the build of LoadUI OS and Pro, including integration tests</description>
+	<name>LoadUI Parent</name>
+	<description>LoadUI Parent is the top-level project which triggers the build of LoadUI OS, including integration tests</description>
 	<url>http://www.loadui.org</url>
 	<scm>
    		<developerConnection>scm:git:ssh://git@github.com:SmartBear/loadui.git</developerConnection>
