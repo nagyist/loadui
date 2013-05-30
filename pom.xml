@@ -29,7 +29,6 @@
 		<module>loadui-soapui-plugin</module>
 		<module>loadui-installers</module>
 		<module>loadui-integration-tests</module>
-		<module>loadui-pro</module>
 		<module>loadui-fx-integration-tests</module>
 	</modules>
 	
