@@ -25,6 +25,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
+import javafx.scene.Group;
+import javafx.scene.GroupBuilder;
 import javafx.scene.Node;
 import javafx.scene.SceneBuilder;
 import javafx.scene.control.Button;
@@ -32,18 +35,20 @@ import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.SplitPaneBuilder;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextAreaBuilder;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.StackPaneBuilder;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.RectangleBuilder;
 import javafx.scene.text.TextBuilder;
 import javafx.stage.Stage;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
+
 //import com.javafx.experiments.scenicview.ScenicView;
 
 public class StyleTester extends Application
@@ -52,11 +57,21 @@ public class StyleTester extends Application
 	protected Node createTestNode()
 	{
 
-		Image image = new Image("287.jpg", 500, 0, true, true);
-		ImageView iview = new ImageView(image);
+		Rectangle image = RectangleBuilder.create().width( 50 ).height( 50 ).fill( Color.BROWN ).build();
 
-		iview.setPreserveRatio( true );
-		return HBoxBuilder.create().children( iview, TextBuilder.create().text( "hello" ).build() ).build();
+		Rectangle r = RectangleBuilder.create().width( 50 ).height( 50 ).fill( Color.TRANSPARENT ).build();
+		StackPane s = StackPaneBuilder.create().build();
+		r.widthProperty().bind( s.widthProperty() );
+		r.heightProperty().bind( s.heightProperty() );
+		Group g = GroupBuilder
+				.create()
+				.children(
+						r,
+						RectangleBuilder.create().width( 20 ).height( 20 ).layoutX( 20 ).layoutY( 60 ).fill( Color.YELLOW )
+								.build() ).build();
+		StackPane.setAlignment( g, Pos.TOP_LEFT );
+		s.getChildren().addAll( g, image );
+		return s;
 	}
 
 	protected String[] getAdditionalStyleSheets() throws MalformedURLException
@@ -65,7 +80,7 @@ public class StyleTester extends Application
 				"../loadui-fx-interface/src/main/resources/com/eviware/loadui/ui/fx/loadui-style.css" ).toURI().toURL()
 				.toExternalForm() };
 		return styleSheets;
-  	}
+	}
 
 	@Override
 	public void start( final Stage primaryStage ) throws Exception

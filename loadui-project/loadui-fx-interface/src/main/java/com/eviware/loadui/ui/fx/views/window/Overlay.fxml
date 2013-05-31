@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.shape.Rectangle?>
+<fx:root type="com.eviware.loadui.ui.fx.views.window.Overlay" xmlns:fx="http://javafx.com/fxml">
+    <Rectangle fx:id="rectangle" mouseTransparent="true" fill="transparent"/>
+</fx:root>
