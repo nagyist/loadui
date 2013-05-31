@@ -233,7 +233,7 @@ public class ToolBoxSkin<E extends Node> extends SkinBase<ToolBox<E>, BehaviorBa
 		public ToolBoxCategory( String category )
 		{
 			getStyleClass().setAll("category");
-			setId(category);
+			setId( UIUtils.toCssId( category ) );
 			this.category = category;
 
 			itemHolder = new ItemHolder(category);

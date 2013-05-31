@@ -283,6 +283,13 @@ public class TestFX
 		move( target );
 		return click( buttons );
 	}
+
+	public TestFX eraseCharacters( int characters ){
+		for( int i = 0; i < characters; i++ ){
+			type( KeyCode.BACK_SPACE );
+		}
+		return this;
+	}
 	
 	public TestFX doubleClick( MouseButton... buttons )
 	{
