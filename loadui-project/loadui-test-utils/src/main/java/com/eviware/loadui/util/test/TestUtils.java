@@ -37,7 +37,7 @@ public class TestUtils
 	 * Inserts an event into the EventFirers event queue, and waits for it to be
 	 * triggered, causing all previously queued events to also have been
 	 * triggered.
-	 *
+	 * 
 	 * @param eventFirer
 	 * @throws InterruptedException
 	 * @throws ExecutionException
@@ -46,13 +46,13 @@ public class TestUtils
 	public static void awaitEvents( EventFirer eventFirer ) throws InterruptedException, ExecutionException,
 			TimeoutException
 	{
-		awaitEvents(eventFirer, 1);
+		awaitEvents( eventFirer, 1 );
 	}
 
 	/**
 	 * Like AwaitEvents, but runs multiple times to ensure waiting for events
 	 * triggered by other event handlers.
-	 *
+	 * 
 	 * @param eventFirer
 	 * @param times
 	 * @throws InterruptedException
@@ -64,15 +64,15 @@ public class TestUtils
 	{
 		for( int i = 0; i < times; i++ )
 		{
-			EventFuture<BaseEvent> eventFuture = EventFuture.forKey(eventFirer, AWAIT_EVENTS);
-			eventFirer.fireEvent(new BaseEvent(eventFirer, AWAIT_EVENTS));
-			eventFuture.get(5, TimeUnit.SECONDS);
+			EventFuture<BaseEvent> eventFuture = EventFuture.forKey( eventFirer, AWAIT_EVENTS );
+			eventFirer.fireEvent( new BaseEvent( eventFirer, AWAIT_EVENTS ) );
+			eventFuture.get( 5, TimeUnit.SECONDS );
 		}
 	}
 
 	public static void awaitCondition( Callable<Boolean> condition )
 	{
-		awaitCondition(condition, 5);
+		awaitCondition( condition, 5 );
 	}
 
 	public static void awaitCondition( Callable<Boolean> condition, int timeoutInSeconds )
@@ -82,7 +82,7 @@ public class TestUtils
 		{
 			while( !condition.call() )
 			{
-				Thread.sleep(10);
+				Thread.sleep( 10 );
 				if( System.currentTimeMillis() > timeout )
 				{
 					throw new TimeoutException();
@@ -90,7 +90,7 @@ public class TestUtils
 			}
 		} catch( Exception e )
 		{
-			throw new RuntimeException(e);
+			throw new RuntimeException( e );
 		}
 	}
 }

@@ -11,3 +11,6 @@ bin/
 *.iml
 .idea/
 lib/
+
+#Others
+*.versionsBackup

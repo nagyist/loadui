@@ -1,9 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.eviware.loadui</groupId>
+	
+	<parent>
+        <groupId>com.eviware.loadui</groupId>
+		<artifactId>loadui-parent</artifactId>
+        <version>2.5.4-SNAPSHOT</version>
+    </parent>
+	
 	<artifactId>loadui-installers</artifactId>
-	<version>2.5.4-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>loadUI Installers</name>
 	<description>This project builds the loadUI installers</description>
@@ -22,17 +27,59 @@
 			<url>http://maven-install4j.googlecode.com/svn/m2-repo</url>
 		</pluginRepository>
 	</pluginRepositories>
+	
 	<modules>
 		<module>loadui-controller-installer</module>
-		<module>loadui-agent-installer</module>
-		<module>loadui-pro-controller-installer</module>
 	</modules>
+	
 	<build>
 		<plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.5</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources</directory>
+                                </resource>
+                                <resource>
+                                    <directory>${project.basedir}/src/main/filtered_resources</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                            <outputDirectory>${project.build.directory}/main</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-install4j-resources</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <overwrite>true</overwrite>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/install4j_resources</directory>
+                                </resource>
+                            </resources>
+                            <outputDirectory>${project.build.directory}/install4j_resources</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.2.2</version><!--$NO-MVN-MAN-VER$ -->
+				<version>2.2.2</version>
 				<executions>
 					<execution>
 						<id>default</id>
@@ -63,7 +110,7 @@
 					<compilerVariables>
 						<property>
 							<name>builddir</name>
-							<value>../../../target/main</value>
+							<value>../../../target/main</value> <!-- TODO this does not seem right -->
 						</property>
 						<property>
 							<name>resourcedir</name>
@@ -88,6 +135,26 @@
 					</compilerVariables>
 				</configuration>
 			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>core-installer</classifier>
+                            <includes>
+                                <include>main/**/*</include>
+                            </includes>
+                            <classesDirectory>${project.build.directory}</classesDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jarsigner-plugin</artifactId>

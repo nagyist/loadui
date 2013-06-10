@@ -221,7 +221,6 @@ public class GeneralSettings
 			}
 			else if( property == closeConnections )
 			{
-				log.debug( "setting closeConnections to " + closeConnections.getValue() );
 				testCaseRunner.setCloseConnections( closeConnections.getValue() );
 			}
 			else if( property == disableSoapUIAssertions )

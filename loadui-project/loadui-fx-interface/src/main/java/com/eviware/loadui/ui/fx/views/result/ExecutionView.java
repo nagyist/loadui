@@ -43,7 +43,7 @@ import java.io.IOException;
 
 public class ExecutionView extends Pane
 {
-	protected static final Logger log = LoggerFactory.getLogger(ExecutionView.class);
+	protected static final Logger log = LoggerFactory.getLogger( ExecutionView.class );
 
 	@FXML
 	private MenuButton menuButton;
@@ -65,7 +65,7 @@ public class ExecutionView extends Pane
 
 	public ExecutionView( final Execution execution, ExecutionState state, @Nullable Closeable toClose )
 	{
-		this(execution, state, false, toClose);
+		this( execution, state, false, toClose );
 	}
 
 	private ExecutionView( final Execution execution, ExecutionState state, boolean isDragIcon, Closeable toClose )
@@ -75,7 +75,8 @@ public class ExecutionView extends Pane
 		this.state = state;
 		this.toClose = toClose;
 
-		FXMLUtils.load(this);
+		FXMLUtils.load( this );
+
 	}
 
 	@FXML
@@ -83,33 +84,33 @@ public class ExecutionView extends Pane
 	{
 		if( !isDragIcon )
 		{
-			log.debug("Initializing Execution " + execution.getLabel());
-			menuButton.textProperty().bind(Properties.forLabel(execution));
+			log.debug( "Initializing Execution " + execution.getLabel() );
+			menuButton.textProperty().bind( Properties.forLabel( execution ) );
 
-			DragNode.install(this, new ExecutionView(execution, state, true, null)).setData(execution);
+			DragNode.install( this, new ExecutionView( execution, state, true, null ) ).setData( execution );
 
-			Options menuOptions = Options.are().open(closeWindowRunnable);
+			Options menuOptions = Options.are().open( closeWindowRunnable );
 
 			if( state == ExecutionState.RECENT )
 				menuOptions.noRename();
 
-			MenuItem[] menuItems = MenuItemsProvider.createWith(this, execution, menuOptions).items();
-			menuButton.getItems().setAll(menuItems);
-			final ContextMenu ctxMenu = ContextMenuBuilder.create().items(menuItems).build();
+			MenuItem[] menuItems = MenuItemsProvider.createWith( this, execution, menuOptions ).items();
+			menuButton.getItems().setAll( menuItems );
+			final ContextMenu ctxMenu = ContextMenuBuilder.create().items( menuItems ).build();
 
-			setOnContextMenuRequested(new EventHandler<ContextMenuEvent>()
+			setOnContextMenuRequested( new EventHandler<ContextMenuEvent>()
 			{
 				@Override
 				public void handle( ContextMenuEvent event )
 				{
 					// never show contextMenu when on top of the menuButton
-					if( !NodeUtils.isMouseOn(menuButton) )
+					if( !NodeUtils.isMouseOn( menuButton ) )
 					{
-						MenuItemsProvider.showContextMenu(menuButton, ctxMenu);
+						MenuItemsProvider.showContextMenu( menuButton, ctxMenu );
 						event.consume();
 					}
 				}
-			});
+			} );
 
 		}
 	}
@@ -119,8 +120,8 @@ public class ExecutionView extends Pane
 	{
 		if( event == null || event.getClickCount() == 2 )
 		{
-			fireEvent(IntentEvent.create(IntentEvent.INTENT_OPEN, execution));
-			log.debug("Finished open of execution: " + execution.getLabel());
+			fireEvent( IntentEvent.create( IntentEvent.INTENT_OPEN, execution ) );
+			log.debug( "Finished open of execution: " + execution.getLabel() );
 
 			closeWindow();
 
@@ -132,7 +133,7 @@ public class ExecutionView extends Pane
 		if( toClose != null )
 		{
 			// cannot run this now or will have ConcurrentModificationException
-			Platform.runLater(new Runnable()
+			Platform.runLater( new Runnable()
 			{
 				@Override
 				public void run()
@@ -140,12 +141,13 @@ public class ExecutionView extends Pane
 					try
 					{
 						toClose.close();
-					} catch( IOException e )
+					}
+					catch( IOException e )
 					{
-						log.warn("Problem closing ResultsPopup", e);
+						log.warn( "Problem closing ResultsPopup", e );
 					}
 				}
-			});
+			} );
 		}
 
 	}

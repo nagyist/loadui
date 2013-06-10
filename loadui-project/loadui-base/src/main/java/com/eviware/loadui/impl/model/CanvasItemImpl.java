@@ -525,9 +525,9 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 	 * Called on a CanvasItem to append its summary chapters to a common summary
 	 * object.
 	 * 
-	 * @param summary
+	 * @param mutableSummary
 	 */
-	abstract void appendToSummary( MutableSummary mutableummary );
+	abstract void appendToSummary( MutableSummary mutableSummary );
 
 	@Override
 	public void generateSummary()

@@ -7,7 +7,7 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>loadui-controller-installer</artifactId>
-	<packaging>pom</packaging>
+    <packaging>pom</packaging>
 	<name>loadUI Controller Installer</name>
 	<build>
 		<plugins>
@@ -72,13 +72,13 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
+            <plugin>
 				<groupId>com.google.code.maven-install4j</groupId>
 				<artifactId>maven-install4j-plugin</artifactId>
 				<executions>
 					<execution>
 						<id>install-controller</id>
-						<phase>package</phase>
+						<phase>test</phase>
 						<goals>
 							<goal>compile</goal>
 						</goals>
@@ -88,6 +88,36 @@
 					</execution>
 				</executions>
 			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>full-installation</classifier>
+                            <includes>
+                                <include>main/*</include>
+                                <include>main/res/**/*</include>
+                                <include>main/conf/**/*</include>
+                                <include>main/ext/**/*</include>
+                                <include>main/reports/**/*</include>
+                                <include>main/samples/**/*</include>
+                                <include>main/licenses/**/*</include>
+                                <include>main/.groovy/**/*</include>
+                            </includes>
+                            <excludes>
+                                <exclude>main/res/*.png</exclude>
+                            </excludes>
+                            <classesDirectory>${project.build.directory}</classesDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 	<dependencies>
