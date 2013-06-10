@@ -13,4 +13,4 @@ bin/
 lib/
 
 #Others
-*.versionsBackup
+*pom.xml.versionsBackup
