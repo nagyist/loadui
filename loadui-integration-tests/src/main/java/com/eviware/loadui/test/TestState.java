@@ -58,6 +58,8 @@ public abstract class TestState
 		}
 	};
 
+	public TestState STATE;
+
 	private static TestState currentState = ROOT;
 
 	private final String name;

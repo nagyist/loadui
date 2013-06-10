@@ -13,31 +13,28 @@
  * express or implied. See the Licence for the specific language governing permissions and limitations
  * under the Licence.
  */
-package com.eviware.loadui.test.ui.fx;
+package com.eviware.loadui.test.ui.fx.chart;
 
-import static javafx.util.Duration.seconds;
-import static org.junit.Assert.assertEquals;
-
-import java.util.Set;
-
+import com.eviware.loadui.test.TestState;
+import com.eviware.loadui.test.categories.IntegrationTest;
+import com.eviware.loadui.test.ui.fx.FxIntegrationTestBase;
+import com.eviware.loadui.test.ui.fx.states.SimpleWebTestState;
+import com.google.common.base.Predicate;
 import javafx.scene.Node;
-
-import org.junit.*;
+import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.eviware.loadui.test.categories.IntegrationTest;
-import com.eviware.loadui.test.ui.fx.GUI;
-import com.eviware.loadui.test.ui.fx.states.SimpleWebTestState;
-import com.eviware.loadui.ui.fx.util.test.LoadUiRobot;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
-import com.google.common.base.Predicate;
+import static com.eviware.loadui.test.ui.fx.chart.ChartTestSupport.allChartLines;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author henrik.olsson
  */
 @Category( IntegrationTest.class )
-@Ignore
-public class ChartsTest
+public class ChartsTest extends FxIntegrationTestBase
 {
 	private static final Predicate<Node> WEB_RUNNER = new Predicate<Node>()
 	{
@@ -52,39 +49,20 @@ public class ChartsTest
 		}
 	};
 
-	private TestFX controller;
-	private LoadUiRobot robot;
-
-	@BeforeClass
-	public static void enterState() throws Exception
-	{
-		SimpleWebTestState.STATE.enter();
-	}
-
-	@AfterClass
-	public static void leaveState() throws Exception
-	{
-	}
-
-	@Before
-	public void setup()
-	{
-		controller = GUI.getController();
-		robot = LoadUiRobot.usingController( controller );
-	}
-
 	@Test
 	public void shouldHaveTwoLines()
 	{
-		robot.runTestFor( seconds( 5 ) );
+        runTestFor( 5, SECONDS );
+
 		controller.click( "#statsTab" );
 		controller.drag( WEB_RUNNER ).by( 150, 150 ).drop().click( "#default" );
 
-		assertEquals( 2, allChartLines().size() );
+        assertThat( allChartLines().size(), is(2) );
 	}
 
-	private Set<Node> allChartLines()
+	@Override
+	public TestState getStartingState()
 	{
-		return TestFX.findAll( "LineSegmentView" );
+		return SimpleWebTestState.STATE;
 	}
 }

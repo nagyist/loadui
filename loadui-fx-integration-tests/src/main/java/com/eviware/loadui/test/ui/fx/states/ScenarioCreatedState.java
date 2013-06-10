@@ -15,17 +15,14 @@
  */
 package com.eviware.loadui.test.ui.fx.states;
 
-import static com.eviware.loadui.ui.fx.util.test.TestFX.findAll;
-
-import java.util.concurrent.Callable;
 
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.model.SceneItem;
-import com.eviware.loadui.test.TestState;
+import com.eviware.loadui.test.ui.fx.FxTestState;
 import com.eviware.loadui.test.ui.fx.GUI;
-import com.eviware.loadui.util.test.TestUtils;
 
-public class ScenarioCreatedState extends TestState
+
+public class ScenarioCreatedState extends FxTestState
 {
 	public static final ScenarioCreatedState STATE = new ScenarioCreatedState();
 	public static final String SCENARIO_NAME = "Scenario";
@@ -43,39 +40,26 @@ public class ScenarioCreatedState extends TestState
 	}
 
 	@Override
-	protected void enterFromParent() throws Exception
+	protected void enterFromParent()
 	{
 		log.debug( "Creating scenario." );
 		GUI.getController().drag( "#newScenarioIcon" ).by( 300, 0 ).drop();
 
-		TestUtils.awaitCondition( new Callable<Boolean>()
-		{
-			@Override
-			public Boolean call() throws Exception
-			{
-				return !findAll( ".scenario-view" ).isEmpty();
-			}
-		} );
+		waitForNode( ".scenario-view" );
 
 		ProjectItem project = ProjectLoadedWithoutAgentsState.STATE.getProject();
 		scenario = project.getSceneByLabel( SCENARIO_NAME );
 	}
 
 	@Override
-	protected void exitToParent() throws Exception
+	protected void exitToParent()
 	{
 		log.debug( "Deleting scenario." );
 
 		GUI.getController().click( ".scenario-view #menu" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
 
-		TestUtils.awaitCondition( new Callable<Boolean>()
-		{
-			@Override
-			public Boolean call() throws Exception
-			{
-				return findAll( ".scenario-view" ).isEmpty();
-			}
-		} );
+		waitForNodeToDisappear( ".scenario-view" );
+
 		scenario = null;
 	}
 }

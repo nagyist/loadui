@@ -40,6 +40,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PopupControl;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.PaneBuilder;
+import javafx.scene.layout.StackPaneBuilder;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
@@ -80,19 +82,19 @@ public class ToolBoxTest
 		public void start( Stage primaryStage ) throws Exception
 		{
 			toolbox = new ToolBox<>( "ToolBox" );
+			toolbox.setMaxWidth( 120 );
 			List<Rectangle> everything = new ArrayList<Rectangle>( allRects );
 			everything.addAll( rectsToAdd );
 			toolbox.setComparator( Ordering.explicit( everything ) );
 			toolbox.setCategoryComparator( Ordering.explicit( Color.RED.toString(), Color.BLUE.toString(),
 					Color.GREEN.toString(), Color.YELLOW.toString(), Color.ORANGE.toString(), "Renamed" ) );
 			primaryStage.setScene( SceneBuilder.create().stylesheets( "/com/eviware/loadui/ui/fx/loadui-style.css" )
-					.width( 100 ).height( 350 ).root( toolbox ).build() );
+					.width( 600 ).height( 350 ).root( PaneBuilder.create().children( toolbox ).build() ).build() );
 
 			primaryStage.show();
 
 			stageFuture.set( primaryStage );
 		}
-
 	}
 
 	@BeforeClass
@@ -141,11 +143,11 @@ public class ToolBoxTest
 		controller.click( ".expander-button" ).click( rectangle2 ).click( rectangle0 ).click( rectangle1 );
 
 		assertThat( clicked, is( Arrays.asList( rectangle2, rectangle0, rectangle1 ) ) );
-		PopupControl expander = ( PopupControl )rectangle2.getScene().getWindow();
-		assertThat( expander.isShowing(), is( true ) );
+
+		assertTrue( TestFX.findAll( ".tool-box-expander" ).size() == 1 );
 
 		controller.target( stage ).click( ".tool-box .title" );
-		assertThat( expander.isShowing(), is( false ) );
+		assertTrue( TestFX.findAll( ".tool-box-expander" ).size() == 0 );
 	}
 
 	@Test

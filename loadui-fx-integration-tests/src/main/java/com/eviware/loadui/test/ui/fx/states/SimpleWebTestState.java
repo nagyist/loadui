@@ -20,6 +20,7 @@ import static com.eviware.loadui.ui.fx.util.test.TestFX.findAll;
 import java.util.concurrent.Callable;
 
 import com.eviware.loadui.test.TestState;
+import com.eviware.loadui.test.ui.fx.FxTestState;
 import com.eviware.loadui.test.ui.fx.GUI;
 import com.eviware.loadui.ui.fx.util.test.ComponentHandle;
 import com.eviware.loadui.ui.fx.util.test.LoadUiRobot;
@@ -27,7 +28,7 @@ import com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component;
 import com.eviware.loadui.ui.fx.util.test.TestFX;
 import com.eviware.loadui.util.test.TestUtils;
 
-public class SimpleWebTestState extends TestState
+public class SimpleWebTestState extends FxTestState
 {
 	public static final SimpleWebTestState STATE = new SimpleWebTestState();
 
@@ -44,15 +45,7 @@ public class SimpleWebTestState extends TestState
 	@Override
 	protected void enterFromParent() throws Exception
 	{
-		TestFX controller = GUI.getController();
-		LoadUiRobot robot = LoadUiRobot.usingController( controller );
-
-		ComponentHandle webRunner = robot.createComponent( Component.WEB_PAGE_RUNNER );
 		controller.click( ".component-view .text-field" ).type( "www.google.com" );
-
-		ComponentHandle fixedRate = robot.createComponent( Component.FIXED_RATE_GENERATOR );
-
-		fixedRate.connectTo( webRunner );
 	}
 
 	@Override

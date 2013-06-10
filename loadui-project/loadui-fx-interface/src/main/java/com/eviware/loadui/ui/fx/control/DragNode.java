@@ -15,21 +15,17 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
+import com.eviware.loadui.ui.fx.api.input.Draggable;
+import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
+import com.eviware.loadui.ui.fx.util.ManualObservable;
+import com.eviware.loadui.ui.fx.util.NodeUtils;
+import com.eviware.loadui.ui.fx.util.UIUtils;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.TimelineBuilder;
-import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.ReadOnlyBooleanWrapper;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -37,49 +33,49 @@ import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.PopupControl;
-import javafx.scene.effect.DropShadowBuilder;
-import javafx.scene.effect.Effect;
 import javafx.scene.input.MouseEvent;
-import javafx.stage.PopupWindow;
-import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Duration;
-
-import com.eviware.loadui.ui.fx.api.input.Draggable;
-import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
-import com.eviware.loadui.ui.fx.util.NodeUtils;
 
 /**
  * Adds the ability to drag an object from a source Node, which can potentially
  * be dropped on a target.
- * 
+ *
  * @author dain.nilsson
+ * @author Henrik
  */
-public class DragNode extends PopupControl implements Draggable
+public class DragNode implements Draggable
 {
-	private static final Duration REVERT_DURATION = new Duration( 300 );
+	private static final Duration REVERT_DURATION = new Duration(300);
 	private static final String DRAG_NODE_PROP_KEY = DragNode.class.getName();
 	private static final DragNodeBehavior BEHAVIOR = new DragNodeBehavior();
 
+	private static ManualObservable onReleased = new ManualObservable();
+
+	public static Observable onReleased()
+	{
+		return onReleased;
+	}
+
 	public static void install( Node node, DragNode dragNode )
 	{
-		BEHAVIOR.install( node, dragNode );
+		BEHAVIOR.install(node, dragNode);
 	}
 
 	public static DragNode install( Node node, Node draggableNode )
 	{
-		DragNode dragNode = new DragNode( draggableNode );
-		node.setCursor( Cursor.MOVE );
-		BEHAVIOR.install( node, dragNode );
+		DragNode dragNode = new DragNode(draggableNode);
+		node.setCursor(Cursor.MOVE);
+		BEHAVIOR.install(node, dragNode);
 
 		return dragNode;
 	}
 
 	public static void uninstall( Node node, DragNode dragNode )
 	{
-		BEHAVIOR.uninstall( node );
+		BEHAVIOR.uninstall(node);
 	}
 
 	private final ObjectProperty<Node> nodeProperty = new SimpleObjectProperty<>();
@@ -91,7 +87,7 @@ public class DragNode extends PopupControl implements Draggable
 
 	public void setNode( Node content )
 	{
-		nodeProperty.set( content );
+		nodeProperty.set(content);
 	}
 
 	public Node getNode()
@@ -105,7 +101,7 @@ public class DragNode extends PopupControl implements Draggable
 	{
 		if( draggingProperty == null )
 		{
-			draggingProperty = new ReadOnlyBooleanWrapper( false );
+			draggingProperty = new ReadOnlyBooleanWrapper(false);
 		}
 
 		return draggingProperty;
@@ -115,7 +111,7 @@ public class DragNode extends PopupControl implements Draggable
 	{
 		if( isDragging() != dragging )
 		{
-			draggingPropertyImpl().set( dragging );
+			draggingPropertyImpl().set(dragging);
 		}
 	}
 
@@ -137,7 +133,7 @@ public class DragNode extends PopupControl implements Draggable
 	{
 		if( acceptableProperty == null )
 		{
-			acceptableProperty = new ReadOnlyBooleanWrapper( false );
+			acceptableProperty = new ReadOnlyBooleanWrapper(false);
 		}
 
 		return acceptableProperty;
@@ -147,7 +143,7 @@ public class DragNode extends PopupControl implements Draggable
 	{
 		if( isAcceptable() != acceptable )
 		{
-			acceptablePropertyImpl().set( acceptable );
+			acceptablePropertyImpl().set(acceptable);
 		}
 	}
 
@@ -170,7 +166,7 @@ public class DragNode extends PopupControl implements Draggable
 	{
 		if( dataProperty == null )
 		{
-			dataProperty = new SimpleObjectProperty<>( this, "data" );
+			dataProperty = new SimpleObjectProperty<>(this, "data");
 		}
 
 		return dataProperty;
@@ -179,7 +175,7 @@ public class DragNode extends PopupControl implements Draggable
 	@Override
 	public void setData( Object data )
 	{
-		dataProperty().set( data );
+		dataProperty().set(data);
 	}
 
 	@Override
@@ -194,7 +190,7 @@ public class DragNode extends PopupControl implements Draggable
 	{
 		if( revertProperty == null )
 		{
-			revertProperty = new SimpleBooleanProperty( this, "revert", true );
+			revertProperty = new SimpleBooleanProperty(this, "revert", true);
 		}
 
 		return revertProperty;
@@ -207,30 +203,62 @@ public class DragNode extends PopupControl implements Draggable
 
 	public void setRevert( boolean revert )
 	{
-		revertProperty().set( revert );
+		revertProperty().set(revert);
 	}
 
 	private Node dragSource;
 	private Node currentlyHovered;
-	private Point2D startPoint = new Point2D( 0, 0 );
-	private Point2D lastPoint = new Point2D( 0, 0 );
+	private Point2D startPoint = new Point2D(0, 0);
+	private Point2D lastPoint = new Point2D(0, 0);
 
 	public DragNode( Node node )
 	{
-		nodeProperty.addListener( new InvalidationListener()
-		{
-			@Override
-			public void invalidated( Observable observable )
-			{
-				bridge.getChildren().setAll( getNode() );
-			}
-		} );
-		nodeProperty.set( node );
+		nodeProperty.set(node);
 	}
 
 	public Node getDragSource()
 	{
 		return dragSource;
+	}
+
+	public Parent getParent()
+	{
+		return getNode().getParent();
+	}
+
+	public void setVisible( boolean visible )
+	{
+		getNode().setVisible(visible);
+	}
+
+	public void setX( double x )
+	{
+		getNode().setLayoutX(x);
+	}
+
+	public void setY( double y )
+	{
+		getNode().setLayoutY(y);
+	}
+
+	public double getX()
+	{
+		return getNode().getLayoutX();
+	}
+
+	public double getY()
+	{
+		return getNode().getLayoutY();
+	}
+
+	public double getWidth()
+	{
+		return getNode().getBoundsInLocal().getWidth();
+	}
+
+	public double getHeight()
+	{
+		return getNode().getBoundsInLocal().getHeight();
 	}
 
 	private void revert()
@@ -241,60 +269,71 @@ public class DragNode extends PopupControl implements Draggable
 			return;
 		}
 
-		DoubleProperty xProp = new SimpleDoubleProperty( getX() );
-		xProp.addListener( new ChangeListener<Number>()
+		DoubleProperty xProp = new SimpleDoubleProperty(getX());
+		xProp.addListener(new ChangeListener<Number>()
 		{
 			@Override
 			public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
 			{
-				setX( newValue.doubleValue() );
+				setX(newValue.doubleValue());
 			}
-		} );
-		DoubleProperty yProp = new SimpleDoubleProperty( getY() );
-		yProp.addListener( new ChangeListener<Number>()
+		});
+		DoubleProperty yProp = new SimpleDoubleProperty(getY());
+		yProp.addListener(new ChangeListener<Number>()
 		{
 			@Override
 			public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
 			{
-				setY( newValue.doubleValue() );
+				setY(newValue.doubleValue());
 			}
-		} );
+		});
 
 		TimelineBuilder
 				.create()
 				.keyFrames(
-						new KeyFrame( REVERT_DURATION, new KeyValue( xProp, startPoint.getX(), Interpolator.EASE_BOTH ),
-								new KeyValue( yProp, startPoint.getY(), Interpolator.EASE_BOTH ) ) )
-				.onFinished( new EventHandler<ActionEvent>()
+						new KeyFrame(REVERT_DURATION, new KeyValue(xProp, startPoint.getX(), Interpolator.EASE_BOTH),
+								new KeyValue(yProp, startPoint.getY(), Interpolator.EASE_BOTH)))
+				.onFinished(new EventHandler<ActionEvent>()
 				{
 					@Override
 					public void handle( ActionEvent event )
 					{
 						hide();
 					}
-				} ).build().playFromStart();
+				}).build().playFromStart();
+	}
+
+	private void hide()
+	{
+		UIUtils.getOverlayFor(getNode().getScene()).hide(getNode());
+		DragNode.this.setVisible(false);
 	}
 
 	private static class DragNodeBehavior
 	{
-		private static final Effect SHADOW_EFFECT = DropShadowBuilder.create().radius( 5 ).offsetX( 3 ).offsetY( 3 )
-				.build();
-
 		private final EventHandler<MouseEvent> PRESSED_HANDLER = new EventHandler<MouseEvent>()
 		{
 			@Override
 			public void handle( MouseEvent event )
 			{
-				Node source = ( Node )event.getSource();
-				DragNode dragNode = ( DragNode )source.getProperties().get( DRAG_NODE_PROP_KEY );
+				Node source = (Node) event.getSource();
+				DragNode dragNode = (DragNode) source.getProperties().get(DRAG_NODE_PROP_KEY);
 				if( dragNode != null )
 				{
-					dragNode.startPoint = new Point2D( event.getScreenX() - dragNode.getWidth() / 2, event.getScreenY()
-							- dragNode.getHeight() / 2 );
-					dragNode.show( source, dragNode.startPoint.getX(), dragNode.startPoint.getY() );
-					dragNode.setDragging( true );
-					dragNode.dragSource.fireEvent( new DraggableEvent( null, dragNode.dragSource, dragNode,
-							DraggableEvent.DRAGGABLE_STARTED, dragNode, event.getSceneX(), event.getSceneY() ) );
+					double xOffset = dragNode.getNode().getLayoutBounds().getMinX();
+					double yOffset = dragNode.getNode().getLayoutBounds().getMinY();
+
+					dragNode.startPoint = new Point2D(event.getSceneX() - dragNode.getWidth() / 2 - xOffset, event.getSceneY()
+							- dragNode.getHeight() / 2 - yOffset);
+					dragNode.setX(dragNode.startPoint.getX());
+					dragNode.setY(dragNode.startPoint.getY());
+					dragNode.setVisible(true);
+
+					UIUtils.getOverlayFor(source.getScene()).show(dragNode.getNode());
+
+					dragNode.setDragging(true);
+					dragNode.dragSource.fireEvent(new DraggableEvent(null, dragNode.dragSource, dragNode.getNode(),
+							DraggableEvent.DRAGGABLE_STARTED, dragNode, event.getSceneX(), event.getSceneY()));
 				}
 			}
 		};
@@ -304,67 +343,65 @@ public class DragNode extends PopupControl implements Draggable
 			@Override
 			public void handle( MouseEvent event )
 			{
-				Node source = ( Node )event.getSource();
-				final DragNode dragNode = ( DragNode )source.getProperties().get( DRAG_NODE_PROP_KEY );
+				Node source = (Node) event.getSource();
+				final DragNode dragNode = (DragNode) source.getProperties().get(DRAG_NODE_PROP_KEY);
 				if( dragNode != null )
 				{
-					dragNode.setX( event.getScreenX() - dragNode.getWidth() / 2 );
-					dragNode.setY( event.getScreenY() - dragNode.getHeight() / 2 );
+					positionNodeAtMouseEvent(event, dragNode);
 
-					Window window = dragNode.getDragSource().getScene().getWindow();
-					Point2D scenePoint = new Point2D( event.getSceneX(), event.getSceneY() );
+					Window window = source.getScene().getWindow();
+
+					Point2D scenePoint = new Point2D(event.getSceneX(), event.getSceneY());
 					Node currentNode = null;
 					while( currentNode == null && window != null )
 					{
 						Scene scene = window.getScene();
-						scenePoint = new Point2D( event.getScreenX() - window.getX() - scene.getX(), event.getScreenY()
-								- window.getY() - scene.getY() );
-						currentNode = NodeUtils.findFrontNodeAtCoordinate( scene.getRoot(), scenePoint );
+						scenePoint = new Point2D(event.getScreenX() - window.getX() - scene.getX(), event.getScreenY()
+								- window.getY() - scene.getY());
+						currentNode = NodeUtils.findFrontNodeAtCoordinate(scene.getRoot(), scenePoint, dragNode.getNode(),
+								UIUtils.getOverlayFor(window.getScene()));
 
-						if( window instanceof PopupWindow )
-						{
-							window = ( ( PopupWindow )window ).getOwnerWindow();
-						}
-						else if( window instanceof Stage )
-						{
-							window = ( ( Stage )window ).getOwner();
-						}
-						else
-						{
-							window = null;
-						}
+						window = UIUtils.getParentWindow(window);
 					}
 
 					dragNode.lastPoint = scenePoint;
 
 					if( dragNode.currentlyHovered != currentNode )
 					{
-						dragNode.setAcceptable( false );
+						dragNode.setAcceptable(false);
 						if( dragNode.currentlyHovered != null )
 						{
-							dragNode.currentlyHovered.fireEvent( new DraggableEvent( null, dragNode.getNode(),
+							dragNode.currentlyHovered.fireEvent(new DraggableEvent(null, dragNode.getNode(),
 									dragNode.currentlyHovered, DraggableEvent.DRAGGABLE_EXITED, dragNode, event.getSceneX(),
-									event.getSceneY() ) );
+									event.getSceneY()));
 						}
 						if( currentNode != null )
 						{
-							currentNode.fireEvent( new DraggableEvent( new Runnable()
+							currentNode.fireEvent(new DraggableEvent(new Runnable()
 							{
 								@Override
 								public void run()
 								{
-									dragNode.setAcceptable( true );
+									dragNode.setAcceptable(true);
 								}
 							}, dragNode.getNode(), currentNode, DraggableEvent.DRAGGABLE_ENTERED, dragNode, scenePoint.getX(),
-									scenePoint.getY() ) );
+									scenePoint.getY()));
 						}
 
 						dragNode.currentlyHovered = currentNode;
 					}
 
-					dragNode.dragSource.fireEvent( new DraggableEvent( null, dragNode.dragSource, dragNode,
-							DraggableEvent.DRAGGABLE_DRAGGED, dragNode, scenePoint.getX(), scenePoint.getY() ) );
+					dragNode.dragSource.fireEvent(new DraggableEvent(null, dragNode.dragSource, dragNode.getNode(),
+							DraggableEvent.DRAGGABLE_DRAGGED, dragNode, scenePoint.getX(), scenePoint.getY()));
 				}
+			}
+
+			private void positionNodeAtMouseEvent( MouseEvent event, DragNode dragNode )
+			{
+				double xOffset = dragNode.getNode().getLayoutBounds().getMinX();
+				double yOffset = dragNode.getNode().getLayoutBounds().getMinY();
+				dragNode.setX(event.getSceneX() - dragNode.getWidth() / 2 - xOffset);
+				dragNode.setY(event.getSceneY() - dragNode.getHeight() / 2 - yOffset);
 			}
 		};
 
@@ -373,30 +410,32 @@ public class DragNode extends PopupControl implements Draggable
 			@Override
 			public void handle( MouseEvent event )
 			{
-				Node source = ( Node )event.getSource();
-				final DragNode dragNode = ( DragNode )source.getProperties().get( DRAG_NODE_PROP_KEY );
+				onReleased.fireInvalidation();
+
+				Node source = (Node) event.getSource();
+				final DragNode dragNode = (DragNode) source.getProperties().get(DRAG_NODE_PROP_KEY);
 				if( dragNode != null )
 				{
 					if( dragNode.currentlyHovered != null )
 					{
-						dragNode.currentlyHovered.fireEvent( new DraggableEvent( null, dragNode.getNode(),
+						dragNode.currentlyHovered.fireEvent(new DraggableEvent(null, dragNode.getNode(),
 								dragNode.currentlyHovered, DraggableEvent.DRAGGABLE_EXITED, dragNode, event.getSceneX(), event
-										.getSceneY() ) );
+								.getSceneY()));
 
 						if( dragNode.isAcceptable() )
 						{
-							dragNode.currentlyHovered.fireEvent( new DraggableEvent( null, dragNode.getNode(),
+							dragNode.currentlyHovered.fireEvent(new DraggableEvent(null, dragNode.getNode(),
 									dragNode.currentlyHovered, DraggableEvent.DRAGGABLE_DROPPED, dragNode, dragNode.lastPoint
-											.getX(), dragNode.lastPoint.getY() ) );
+									.getX(), dragNode.lastPoint.getY()));
 						}
 					}
 
 					dragNode.currentlyHovered = null;
 					dragNode.revert();
-					dragNode.setAcceptable( false );
-					dragNode.setDragging( false );
-					dragNode.dragSource.fireEvent( new DraggableEvent( null, dragNode.dragSource, dragNode,
-							DraggableEvent.DRAGGABLE_STOPPED, dragNode, event.getSceneX(), event.getSceneY() ) );
+					dragNode.setAcceptable(false);
+					dragNode.setDragging(false);
+					dragNode.dragSource.fireEvent(new DraggableEvent(null, dragNode.dragSource, dragNode.getNode(),
+							DraggableEvent.DRAGGABLE_STOPPED, dragNode, event.getSceneX(), event.getSceneY()));
 				}
 			}
 		};
@@ -409,20 +448,10 @@ public class DragNode extends PopupControl implements Draggable
 			}
 
 			dragNode.dragSource = node;
-			node.getProperties().put( DRAG_NODE_PROP_KEY, dragNode );
-			node.addEventHandler( MouseEvent.DRAG_DETECTED, PRESSED_HANDLER );
-			node.addEventHandler( MouseEvent.MOUSE_DRAGGED, DRAGGED_HANDLER );
-			node.addEventHandler( MouseEvent.MOUSE_RELEASED, RELEASED_HANDLER );
-
-			dragNode.getNode().effectProperty()
-					.bind( Bindings.when( dragNode.draggingProperty() ).then( SHADOW_EFFECT ).otherwise( ( Effect )null ) );
-
-			//			dragNode
-			//					.getNode()
-			//					.cursorProperty()
-			//					.bind(
-			//							Bindings.when( dragNode.draggingProperty() ).then( Cursor.CLOSED_HAND )
-			//									.otherwise( Cursor.OPEN_HAND ) );
+			node.getProperties().put(DRAG_NODE_PROP_KEY, dragNode);
+			node.addEventHandler(MouseEvent.DRAG_DETECTED, PRESSED_HANDLER);
+			node.addEventHandler(MouseEvent.MOUSE_DRAGGED, DRAGGED_HANDLER);
+			node.addEventHandler(MouseEvent.MOUSE_RELEASED, RELEASED_HANDLER);
 		}
 
 		private void uninstall( Node node )
@@ -432,14 +461,10 @@ public class DragNode extends PopupControl implements Draggable
 				return;
 			}
 
-			node.removeEventHandler( MouseEvent.DRAG_DETECTED, PRESSED_HANDLER );
-			node.removeEventHandler( MouseEvent.MOUSE_DRAGGED, DRAGGED_HANDLER );
-			node.removeEventHandler( MouseEvent.MOUSE_RELEASED, RELEASED_HANDLER );
-			DragNode dragNode = ( DragNode )node.getProperties().remove( DRAG_NODE_PROP_KEY );
-			if( dragNode != null && dragNode.isShowing() )
-			{
-				dragNode.hide();
-			}
+			node.removeEventHandler(MouseEvent.DRAG_DETECTED, PRESSED_HANDLER);
+			node.removeEventHandler(MouseEvent.MOUSE_DRAGGED, DRAGGED_HANDLER);
+			node.removeEventHandler(MouseEvent.MOUSE_RELEASED, RELEASED_HANDLER);
+			node.getProperties().remove(DRAG_NODE_PROP_KEY);
 		}
 	}
 }
