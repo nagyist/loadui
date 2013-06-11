@@ -19,9 +19,11 @@ import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.FxIntegrationTestBase;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
+import com.eviware.loadui.ui.fx.util.test.TestFX;
 import javafx.scene.Node;
 import javafx.scene.control.MenuButton;
 import javafx.scene.input.KeyCode;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -34,80 +36,85 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-@Category(IntegrationTest.class)
+@Category( IntegrationTest.class )
 public class ResultViewTest extends FxIntegrationTestBase
 {
 	public static final String ARCHIVE = "#archive-node-list";
 	public static final String RECENT = "#result-node-list";
 	public static final String TEST_RUNS = ".execution-view";
 
+	@After
+	public void cleanup()
+	{
+		if( resultsViewWindowIsOpen() )
+		{
+			controller.closeCurrentWindow();
+		}
+	}
+
 	@Test
 	public void executionLanesWorking()
 	{
-		runTestFor(2, SECONDS);
-		runTestFor(2, SECONDS);
+		runTestFor( 2, SECONDS );
+		runTestFor( 2, SECONDS );
 
 		openManageTestRunsDialog();
 
-		assertThat(RECENT, contains(2, TEST_RUNS));
-		assertThat(ARCHIVE, contains(0, TEST_RUNS));
+		assertThat( RECENT, contains( 2, TEST_RUNS ) );
+		assertThat( ARCHIVE, contains( 0, TEST_RUNS ) );
 
-		archiveResult(firstRecentTestRun());
+		archiveResult( firstRecentTestRun() );
 
-		assertThat(RECENT, contains(1, TEST_RUNS));
-		assertThat(ARCHIVE, contains(1, TEST_RUNS));
+		assertThat( RECENT, contains( 1, TEST_RUNS ) );
+		assertThat( ARCHIVE, contains( 1, TEST_RUNS ) );
 
-		archiveResult(firstRecentTestRun());
+		archiveResult( firstRecentTestRun() );
 
-		assertThat(RECENT, contains(0, TEST_RUNS));
-		assertThat(ARCHIVE, contains(2, TEST_RUNS));
-
-		controller.closeCurrentWindow();
+		assertThat( RECENT, contains( 0, TEST_RUNS ) );
+		assertThat( ARCHIVE, contains( 2, TEST_RUNS ) );
 	}
 
 
 	@Test
 	public void menuOptionsAreCorrectAndWorking()
 	{
-		runTestFor(2, SECONDS);
+		runTestFor( 2, SECONDS );
 
 		openManageTestRunsDialog();
 
 		// check recent execution menu's options
-		controller.click("#result-0 #menuButton");
+		controller.click( "#result-0 #menuButton" );
 
-		assertThat("#open-item", is(visible()));
-		assertThat("#delete-item", is(visible()));
-		assertThat("#rename-item", is(not(visible())));
+		assertThat( "#open-item", is( visible() ) );
+		assertThat( "#delete-item", is( visible() ) );
+		assertThat( "#rename-item", is( not( visible() ) ) );
 
 		// check if Open option works
-		controller.click("#open-item");
-		getOrFail(".analysis-view");
-		getOrFail("#statsTab");
+		controller.click( "#open-item" );
+		getOrFail( ".analysis-view" );
+		getOrFail( "#statsTab" );
 
-		controller.click("#open-execution").sleep(500);
+		controller.click( "#open-execution" ).sleep( 500 );
 
 		// check archive execution menu's options
-		controller.drag("#result-0").to("#archive-node-list").click("#archive-0 #menuButton");
-		assertThat("#open-item", is(visible()));
-		assertThat("#delete-item", is(visible()));
-		assertThat("#rename-item", is(visible()));
+		controller.drag( "#result-0" ).to( "#archive-node-list" ).click( "#archive-0 #menuButton" );
+		assertThat( "#open-item", is( visible() ) );
+		assertThat( "#delete-item", is( visible() ) );
+		assertThat( "#rename-item", is( visible() ) );
 
 		// test rename function
 		renameTestRun();
-		MenuButton menuButton = (MenuButton) getOrFail("#archive-0 #menuButton");
-		assertEquals("Renamed Execution", menuButton.textProperty().get());
+		MenuButton menuButton = ( MenuButton )getOrFail( "#archive-0 #menuButton" );
+		assertEquals( "Renamed Execution", menuButton.textProperty().get() );
 
 		// delete execution
-		controller.click("#archive-0 #menuButton").click("#delete-item").click(".confirmation-dialog #default");
-		assertThat(ARCHIVE, contains(0, TEST_RUNS));
-
-		controller.closeCurrentWindow();
+		controller.click( "#archive-0 #menuButton" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
+		assertThat( ARCHIVE, contains( 0, TEST_RUNS ) );
 	}
 
 	private void renameTestRun()
 	{
-		controller.click("#rename-item").type("Renamed Execution").type(KeyCode.ENTER);
+		controller.click( "#rename-item" ).type( "Renamed Execution" ).type( KeyCode.ENTER );
 	}
 
 	@Override
@@ -118,16 +125,22 @@ public class ResultViewTest extends FxIntegrationTestBase
 
 	private Node firstRecentTestRun()
 	{
-		return getOrFail(RECENT + " #result-0");
+		return getOrFail( RECENT + " #result-0" );
 	}
 
 	private void openManageTestRunsDialog()
 	{
-		controller.click("#statsTab").sleep(500).click("#open-execution").sleep(500);
+		controller.click( "#statsTab" ).sleep( 500 ).click( "#open-execution" ).sleep( 500 );
 	}
 
 	private void archiveResult( Node result0 )
 	{
-		controller.drag(result0).to("#archive-node-list");
+		controller.drag( result0 ).to( "#archive-node-list" );
 	}
+
+	private boolean resultsViewWindowIsOpen()
+	{
+		return !TestFX.findAll( ".analysis-view" ).isEmpty();
+	}
+
 }

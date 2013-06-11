@@ -33,7 +33,7 @@ import static org.junit.Assert.assertThat;
 /**
  * @author henrik.olsson
  */
-@Category( IntegrationTest.class )
+@Category(IntegrationTest.class)
 public class ChartsTest extends FxIntegrationTestBase
 {
 	private static final Predicate<Node> WEB_RUNNER = new Predicate<Node>()
@@ -52,12 +52,12 @@ public class ChartsTest extends FxIntegrationTestBase
 	@Test
 	public void shouldHaveTwoLines()
 	{
-        runTestFor( 5, SECONDS );
+		runTestFor( 5, SECONDS );
 
 		controller.click( "#statsTab" );
 		controller.drag( WEB_RUNNER ).by( 150, 150 ).drop().click( "#default" );
 
-        assertThat( allChartLines().size(), is(2) );
+		assertThat( allChartLines().size(), is( 2 ) );
 	}
 
 	@Override

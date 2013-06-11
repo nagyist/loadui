@@ -6,7 +6,7 @@
 	<version>2.5.5-SNAPSHOT</version>
 	<name>loadUI Project</name>
 	<url>http://www.loadui.org</url>
-	
+
     <parent>
         <groupId>com.eviware.loadui</groupId>
 		<artifactId>loadui-parent</artifactId>
@@ -121,96 +121,6 @@
 			</build>
 		</profile>
 	</profiles>
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>findbugs-maven-plugin</artifactId>
-				<version>2.4.0</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jxr-plugin</artifactId>
-				<version>2.3</version>
-				<configuration>
-					<aggregate>true</aggregate>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>2.4</version>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>index</report>
-							<report>license</report>
-							<report>project-team</report>
-							<report>dependency-convergence</report>
-							<report>plugin-management</report>
-							<report>plugins</report>
-							<report>scm</report>
-							<report>issue-tracking</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-				<configuration>
-					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.8</version>
-				<reportSets>
-					<reportSet>
-						<id>aggregate</id>
-						<reports>
-							<report>aggregate</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jxr-plugin</artifactId>
-				<version>2.2</version>
-				<configuration>
-					<aggregate>true</aggregate>
-					<linkJavadoc>true</linkJavadoc>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>2.12.4</version>
-				<configuration>
-					<aggregate>true</aggregate>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-changelog-plugin</artifactId>
-				<version>2.2</version>
-				<reportSets>
-					<reportSet>
-						<id>dual-report</id>
-						<configuration>
-							<type>date</type>
-							<dates>
-								<date implementation="java.lang.String">${changelog.start.date}</date>
-							</dates>
-							<dateFormat>yyyy-MM-dd</dateFormat>
-						</configuration>
-						<reports>
-							<report>changelog</report>
-							<report>file-activity</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
-		</plugins>
-	</reporting>
 
 	<build>
 		<pluginManagement>
