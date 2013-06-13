@@ -132,7 +132,11 @@ onAction( "COMPLETE" ) {
 	writer = null
 }
 
-onAction( "RESET" ) { buildFileName() }
+onAction( "RESET" ) { 
+	buildFileName() 
+	tableColumns.clear()
+	refreshLayout()
+}
 
 onRelease = { writer?.close() }
 
