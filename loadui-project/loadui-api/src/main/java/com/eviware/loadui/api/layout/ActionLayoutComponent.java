@@ -60,7 +60,7 @@ public interface ActionLayoutComponent extends LayoutComponent, Labeled
 	 * 
 	 * @param listener
 	 */
-	public void registerListener( ActionEnabledListener listener );
+	public void registerListenerWithWeakReference( ActionEnabledListener listener );
 
 	/**
 	 * Unregisters a listener for enabled state changes.

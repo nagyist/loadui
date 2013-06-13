@@ -54,6 +54,7 @@ import org.tbee.javafx.scene.layout.MigPane;
 
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.layout.ActionLayoutComponent;
+import com.eviware.loadui.api.layout.ActionLayoutComponent.ActionEnabledListener;
 import com.eviware.loadui.api.layout.LabelLayoutComponent;
 import com.eviware.loadui.api.layout.LayoutComponent;
 import com.eviware.loadui.api.layout.LayoutContainer;
@@ -209,14 +210,19 @@ public class ComponentLayoutUtils
 					}
 				}
 			} );
-			action.registerListener( new ActionLayoutComponent.ActionEnabledListener()
+
+			ActionEnabledListener disableSynchListener = new ActionLayoutComponent.ActionEnabledListener()
 			{
 				@Override
 				public void stateChanged( ActionLayoutComponent source )
 				{
 					button.setDisable( !source.isEnabled() );
 				}
-			} );
+			};
+
+			action.registerListenerWithWeakReference( disableSynchListener );
+
+			button.getProperties().put( "_KEEP_STRONG_REF_TO_LISTENER_PROPERTY_", disableSynchListener );
 
 			return button;
 		}
@@ -285,11 +291,11 @@ public class ComponentLayoutUtils
 		}
 		else
 		{
-				CheckBox checkBox = new CheckBox( propLayoutComp.getLabel() );
-					javafx.beans.property.Property<Boolean> jfxProp = Properties.convert( ( Property<Boolean> )propLayoutComp
-		 				.getProperty() );
-				checkBox.selectedProperty().bindBidirectional( jfxProp );
-				return nodeWithProperty( checkBox, jfxProp );
+			CheckBox checkBox = new CheckBox( propLayoutComp.getLabel() );
+			javafx.beans.property.Property<Boolean> jfxProp = Properties.convert( ( Property<Boolean> )propLayoutComp
+					.getProperty() );
+			checkBox.selectedProperty().bindBidirectional( jfxProp );
+			return nodeWithProperty( checkBox, jfxProp );
 		}
 	}
 

@@ -77,7 +77,7 @@ public class ActionLayoutComponentImpl extends LayoutComponentImpl implements Ac
 	}
 
 	@Override
-	public void registerListener( ActionEnabledListener listener )
+	public void registerListenerWithWeakReference( ActionEnabledListener listener )
 	{
 		listeners.add( listener );
 	}
