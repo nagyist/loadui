@@ -110,8 +110,14 @@
 					<compilerVariables>
 						<property>
 							<name>builddir</name>
-							<value>../../../target/main</value> <!-- TODO this does not seem right -->
+                            <!-- Path relative to install4j config file -->
+							<value>../../../target/main</value>
 						</property>
+                        <property>
+                            <name>mediadir</name>
+                            <!-- Path relative to install4j config file -->
+                            <value>../../../target</value>
+                        </property>
 						<property>
 							<name>resourcedir</name>
 							<value>${project.build.directory}/install4j_resources</value>

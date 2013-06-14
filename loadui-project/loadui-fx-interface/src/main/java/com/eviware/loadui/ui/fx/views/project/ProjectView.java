@@ -259,7 +259,7 @@ public class ProjectView extends AnchorPane
 											.children( RegionBuilder.create().styleClass( "graphic" ).build(),
 													RegionBuilder.create().styleClass( "secondary-graphic" ).build() ).build() )
 							.build();
-					
+
 					Property<Boolean> linkedProperty = Properties.convert( scenario.followProjectProperty() );
 					linkButton.selectedProperty().bindBidirectional( linkedProperty );
 					linkButton.visibleProperty().bind( statsTab.selectedProperty().not() );
@@ -274,6 +274,11 @@ public class ProjectView extends AnchorPane
 					designTab.setDetachableContent( ProjectView.this, pane );
 
 					event.consume();
+				}
+				else if( event.getEventType() == IntentEvent.INTENT_OPEN && event.getArg() instanceof Execution )
+				{
+					Execution exec = ( Execution )event.getArg();
+					summaryButton.setDisable( exec.getLength() == 0 );
 				}
 				else if( event.getEventType() == IntentEvent.INTENT_CLOSE && event.getArg() instanceof SceneItem )
 				{
