@@ -8,7 +8,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>loadui-controller-installer</artifactId>
     <packaging>pom</packaging>
-	<name>loadUI Controller Installer</name>
+	<name>LoadUI Controller Installer</name>
 	<build>
 		<plugins>
 			<plugin>
@@ -84,6 +84,7 @@
 						</goals>
 						<configuration>
 							<configFile>"${project.basedir}/src/main/install4j/loadUI-controller.install4j"</configFile>
+                            <outputDirectory>${project.basedir}/distribution</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
