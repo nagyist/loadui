@@ -85,6 +85,7 @@
 						<configuration>
 							<configFile>"${project.basedir}/src/main/install4j/loadUI-controller.install4j"</configFile>
                             <outputDirectory>${project.basedir}/distribution</outputDirectory>
+                            <attach>false</attach>
 						</configuration>
 					</execution>
 				</executions>
