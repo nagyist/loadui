@@ -18,6 +18,7 @@ package com.eviware.loadui.ui.fx.views.analysis.linechart;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -113,34 +114,47 @@ public abstract class SegmentView<T extends Segment> extends StackPane implement
 	 */
 	protected void setMenuItemsFor( final MenuButton menuButton )
 	{
-		HasMenuItems hasMenuItems = MenuItemsProvider.createWith( this, this, Options.are().delete( "Remove", false, new Runnable()
+		final HasMenuItems hasMenuItems = MenuItemsProvider.createWith( this, this,
+				Options.are().delete( "Remove", false, new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						log.debug( "Removed SegmentView successfully" );
+						if( !StatisticsDialog.thereAreSegmentsIn( lineChartView.getChartGroup() ) )
+							lineChartView.getChartGroup().delete();
+					}
+				} ) );
+		menuButton.getItems().setAll( hasMenuItems.items() );
+
+		// this platform.runlater is here because of a bugfix related to not being able to see charts in reports when running from command line (LOADUI-781)
+		Platform.runLater( new Runnable()
 		{
+
 			@Override
 			public void run()
 			{
-				log.debug( "Removed SegmentView successfully" );
-				if( !StatisticsDialog.thereAreSegmentsIn( lineChartView.getChartGroup() ) )
-					lineChartView.getChartGroup().delete();
-			}
-		} ) );
-		menuButton.getItems().setAll( hasMenuItems.items() );
-		final ContextMenu ctxMenu = ContextMenuBuilder.create().items( hasMenuItems.items() ).build();
+				final ContextMenu ctxMenu = ContextMenuBuilder.create().items( hasMenuItems.items() ).build();
 
-		Bindings.bindContentBidirectional( ctxMenu.getItems(), menuButton.getItems() );
+				Bindings.bindContentBidirectional( ctxMenu.getItems(), menuButton.getItems() );
 
-		setOnContextMenuRequested( new EventHandler<ContextMenuEvent>()
-		{
-			@Override
-			public void handle( ContextMenuEvent event )
-			{
-				// never show contextMenu when on top of the menuButton
-				if( !NodeUtils.isMouseOn( menuButton ) )
+				setOnContextMenuRequested( new EventHandler<ContextMenuEvent>()
 				{
-					MenuItemsProvider.showContextMenu( menuButton, ctxMenu );
-					event.consume();
-				}
+					@Override
+					public void handle( ContextMenuEvent event )
+					{
+						// never show contextMenu when on top of the menuButton
+						if( !NodeUtils.isMouseOn( menuButton ) )
+						{
+							MenuItemsProvider.showContextMenu( menuButton, ctxMenu );
+							event.consume();
+						}
+					}
+				} );
+
 			}
 		} );
+
 	}
 
 	@Override
@@ -162,9 +176,10 @@ public abstract class SegmentView<T extends Segment> extends StackPane implement
 			{
 				for( Object l : invalidationListeners )
 				{
-					if (l instanceof InvalidationListener && o instanceof Observable) {
+					if( l instanceof InvalidationListener && o instanceof Observable )
+					{
 						log.debug( "REMOVING LISTENER " + l + " from " + o );
-						( ( Observable )o ).removeListener( ( InvalidationListener )l );	
+						( ( Observable )o ).removeListener( ( InvalidationListener )l );
 					}
 				}
 			}
