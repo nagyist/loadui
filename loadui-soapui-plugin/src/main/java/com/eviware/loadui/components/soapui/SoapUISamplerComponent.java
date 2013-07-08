@@ -289,7 +289,7 @@ public class SoapUISamplerComponent extends RunnerBase {
 				"awtIsHeadLess: "	+ awtIsHeadless + 
 				" OR ( Platform: " + PlatformUtil.isMac() + 
 				" AND NOT LoadUI.isHeadless: " + LoadUI.isHeadless() + 
-				"==============================================================");
+				"\n==============================================================");
 		 
 		if( !awtIsHeadless || ( PlatformUtil.isMac() && !LoadUI.isHeadless() ) )
 		{

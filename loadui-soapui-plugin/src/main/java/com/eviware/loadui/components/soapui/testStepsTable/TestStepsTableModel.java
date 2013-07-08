@@ -15,6 +15,8 @@
  */
 package com.eviware.loadui.components.soapui.testStepsTable;
 
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -34,7 +36,6 @@ import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableColumnBuilder;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableViewBuilder;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.ImageViewBuilder;
 import javafx.scene.image.WritableImage;
@@ -158,7 +159,13 @@ public class TestStepsTableModel
 		public ObservableValue<Label> call( CellDataFeatures<TestStep, Label> p )
 		{
 			TestStep step = p.getValue();
-			java.awt.Image awtImage = step.getIcon().getImage();
+			java.awt.Image awtImage = null;
+			try{
+				awtImage = step.getParent().getIcon().getImage();
+			}catch(NullPointerException e){
+				awtImage = step.getParent().getIcon().getImage();  
+			}
+			
 			BufferedImage bufferedImage = SwingFXUtils2.toBufferedImageUnchecked( awtImage );
 			WritableImage fxImage = new WritableImage( bufferedImage.getWidth(), bufferedImage.getHeight() );
 			SwingFXUtils.toFXImage( bufferedImage, fxImage );
