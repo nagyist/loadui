@@ -74,7 +74,8 @@ public class UIUtils
 
 	public static Overlay getOverlayFor( Scene scene )
 	{
-		Preconditions.checkArgument(scene.getRoot() instanceof OverlayHolder);
+		System.out.println("BLABLABLA");
+		Preconditions.checkArgument(scene.getRoot() instanceof OverlayHolder, "The root node of " + scene + " must be an OverlayHolder, but was " + scene.getRoot().getClass());
 		return ((OverlayHolder) scene.getRoot()).getOverlay();
 	}
 

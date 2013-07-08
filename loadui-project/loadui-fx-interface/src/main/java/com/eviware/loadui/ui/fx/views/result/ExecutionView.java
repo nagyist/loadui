@@ -18,8 +18,10 @@ package com.eviware.loadui.ui.fx.views.result;
 import com.eviware.loadui.api.statistics.store.Execution;
 import com.eviware.loadui.ui.fx.MenuItemsProvider;
 import com.eviware.loadui.ui.fx.MenuItemsProvider.Options;
+import com.eviware.loadui.ui.fx.api.input.Movable;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import com.eviware.loadui.ui.fx.control.DragNode;
+import com.eviware.loadui.ui.fx.input.MovableImpl;
 import com.eviware.loadui.ui.fx.util.FXMLUtils;
 import com.eviware.loadui.ui.fx.util.NodeUtils;
 import com.eviware.loadui.ui.fx.util.Properties;
@@ -87,8 +89,8 @@ public class ExecutionView extends Pane
 			log.debug( "Initializing Execution " + execution.getLabel() );
 			menuButton.textProperty().bind( Properties.forLabel( execution ) );
 
-			DragNode.install( this, new ExecutionView( execution, state, true, null ) ).setData( execution );
-
+			//MovableImpl.install( this ).setData( execution );
+			DragNode.install( this, new ExecutionView( execution, state, true, null ) ).setData(execution);
 			Options menuOptions = Options.are().open( closeWindowRunnable );
 
 			if( state == ExecutionState.RECENT )

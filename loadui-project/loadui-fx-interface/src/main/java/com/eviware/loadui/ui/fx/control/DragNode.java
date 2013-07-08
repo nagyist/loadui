@@ -85,6 +85,19 @@ public class DragNode implements Draggable
 		return nodeProperty;
 	}
 
+	private boolean hideOriginalNodeWhenDragging = false;
+
+	public DragNode hideOriginalNodeWhenDragging()
+	{
+		hideOriginalNodeWhenDragging = true;
+		return this;
+	}
+
+	public boolean isHideOriginalNodeWhenDragging()
+	{
+		return hideOriginalNodeWhenDragging;
+	}
+
 	public void setNode( Node content )
 	{
 		nodeProperty.set(content);
@@ -331,6 +344,9 @@ public class DragNode implements Draggable
 
 					UIUtils.getOverlayFor(source.getScene()).show(dragNode.getNode());
 
+					if( dragNode.isHideOriginalNodeWhenDragging() )
+						source.setVisible(false);
+
 					dragNode.setDragging(true);
 					dragNode.dragSource.fireEvent(new DraggableEvent(null, dragNode.dragSource, dragNode.getNode(),
 							DraggableEvent.DRAGGABLE_STARTED, dragNode, event.getSceneX(), event.getSceneY()));
@@ -413,6 +429,7 @@ public class DragNode implements Draggable
 				onReleased.fireInvalidation();
 
 				Node source = (Node) event.getSource();
+
 				final DragNode dragNode = (DragNode) source.getProperties().get(DRAG_NODE_PROP_KEY);
 				if( dragNode != null )
 				{
@@ -437,6 +454,7 @@ public class DragNode implements Draggable
 					dragNode.dragSource.fireEvent(new DraggableEvent(null, dragNode.dragSource, dragNode.getNode(),
 							DraggableEvent.DRAGGABLE_STOPPED, dragNode, event.getSceneX(), event.getSceneY()));
 				}
+				source.setVisible(true);
 			}
 		};
 
