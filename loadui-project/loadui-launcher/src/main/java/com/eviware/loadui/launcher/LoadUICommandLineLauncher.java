@@ -176,12 +176,10 @@ public class LoadUICommandLineLauncher extends LoadUILauncher
 			attributes.put( "reportFormat",
 					cmd.hasOption( REPORT_FORMAT_OPTION ) ? cmd.getOptionValue( REPORT_FORMAT_OPTION ) : "PDF" );
 
-			List<String> statisticPages = null;
-			if( cmd.hasOption( STATISTICS_REPORT_OPTION ) )
-			{
-				String[] optionValues = cmd.getOptionValues( STATISTICS_REPORT_OPTION );
-				statisticPages = optionValues == null ? Collections.<String> emptyList() : Arrays.asList( optionValues );
-			}
+			String[] statisticPageOptionValues = cmd.getOptionValues( STATISTICS_REPORT_OPTION );
+			List<String> statisticPages = statisticPageOptionValues == null ? Collections.<String> emptyList() : Arrays
+					.asList( statisticPageOptionValues );
+
 			attributes.put( "statisticPages", statisticPages );
 			attributes.put( "compare", cmd.getOptionValue( STATISTICS_REPORT_COMPARE_OPTION ) );
 
