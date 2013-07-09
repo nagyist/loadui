@@ -52,6 +52,7 @@ public class UIUtils
 
 	private static List<ImageResolver> imageResolvers;
 
+	// Used by the OSGi Framework to set imageResolver services. DO NOT REMOVE!
 	public void setImageResolvers( List<ImageResolver> imageResolvers )
 	{
 		UIUtils.imageResolvers = imageResolvers;
@@ -61,11 +62,13 @@ public class UIUtils
 	{
 		if( window instanceof PopupWindow )
 		{
-			window = ((PopupWindow) window).getOwnerWindow();
-		} else if( window instanceof Stage )
+			window = ( ( PopupWindow )window ).getOwnerWindow();
+		}
+		else if( window instanceof Stage )
 		{
-			window = ((Stage) window).getOwner();
-		} else
+			window = ( ( Stage )window ).getOwner();
+		}
+		else
 		{
 			window = null;
 		}
