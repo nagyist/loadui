@@ -74,8 +74,9 @@ public class UIUtils
 
 	public static Overlay getOverlayFor( Scene scene )
 	{
-		Preconditions.checkArgument(scene.getRoot() instanceof OverlayHolder);
-		return ((OverlayHolder) scene.getRoot()).getOverlay();
+		Preconditions.checkNotNull( scene );
+		Preconditions.checkArgument( scene.getRoot() instanceof OverlayHolder );
+		return ( ( OverlayHolder )scene.getRoot() ).getOverlay();
 	}
 
 	@Nonnull

@@ -24,6 +24,7 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.TimelineBuilder;
+import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
@@ -38,6 +39,9 @@ import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Window;
 import javafx.util.Duration;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Adds the ability to drag an object from a source Node, which can potentially
@@ -305,8 +309,11 @@ public class DragNode implements Draggable
 
 	private void hide()
 	{
-		UIUtils.getOverlayFor(getNode().getScene()).hide(getNode());
-		DragNode.this.setVisible(false);
+		if( getNode() != null && getNode().getScene() != null )
+		{
+			UIUtils.getOverlayFor( getNode().getScene() ).hide( getNode() );
+		}
+		DragNode.this.setVisible( false );
 	}
 
 	private static class DragNodeBehavior

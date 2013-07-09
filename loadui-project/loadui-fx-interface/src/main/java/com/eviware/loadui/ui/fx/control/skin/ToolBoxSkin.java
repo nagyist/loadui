@@ -40,6 +40,7 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.Label;
@@ -322,8 +323,8 @@ public class ToolBoxSkin<E extends Node> extends SkinBase<ToolBox<E>, BehaviorBa
 
 		private void hideModalLayer( Node modalLayer )
 		{
-			UIUtils.getOverlayFor(ToolBoxSkin.this.getScene()).hide(modalLayer, ToolBoxExpander.this);
-			expandedCategory.set(null);
+			setModalLayerVisible( modalLayer, false );
+			expandedCategory.set( null );
 		}
 
 		public void show( ToolBoxCategory category )
@@ -346,7 +347,19 @@ public class ToolBoxSkin<E extends Node> extends SkinBase<ToolBox<E>, BehaviorBa
 			setLayoutX(xPos);
 			setLayoutY(yPos);
 
-			UIUtils.getOverlayFor(ToolBoxSkin.this.getScene()).show(modalLayer, ToolBoxExpander.this);
+			setModalLayerVisible( modalLayer, true );
+		}
+
+		private void setModalLayerVisible( Node modalLayer, boolean visible )
+		{
+			Scene scene = ToolBoxSkin.this.getScene();
+			if( scene != null )
+			{
+				if ( visible )
+					UIUtils.getOverlayFor( scene ).show( modalLayer, ToolBoxExpander.this );
+				else
+					UIUtils.getOverlayFor( scene ).hide( modalLayer, ToolBoxExpander.this );
+			}
 		}
 
 		private ItemHolder createItemHolderFor( ToolBoxCategory category )
