@@ -284,13 +284,6 @@ public class SoapUISamplerComponent extends RunnerBase {
 		
 		boolean awtIsHeadless = java.awt.GraphicsEnvironment.isHeadless();
 		
-		System.out.println("\n\n" +
-				"==============================================================\n" +
-				"awtIsHeadLess: "	+ awtIsHeadless + 
-				" OR ( Platform: " + PlatformUtil.isMac() + 
-				" AND NOT LoadUI.isHeadless: " + LoadUI.isHeadless() + 
-				"\n==============================================================");
-		 
 		if( !awtIsHeadless || ( PlatformUtil.isMac() && !LoadUI.isHeadless() ) )
 		{
 			box.add( testStepsTableModel.buildLayout() );

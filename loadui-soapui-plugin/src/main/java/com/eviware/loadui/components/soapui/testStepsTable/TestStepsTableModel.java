@@ -15,9 +15,7 @@
  */
 package com.eviware.loadui.components.soapui.testStepsTable;
 
-import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -161,16 +159,21 @@ public class TestStepsTableModel
 		{
 			TestStep step = p.getValue();
 			java.awt.Image awtImage = null;
+			BufferedImage bufferedImage = null;
 
-			try{
+			try
+			{
 				awtImage = step.getIcon().getImage();
-			}catch(NullPointerException e){
-				System.setProperty("java.awt.headless", "false");
-				awtImage = step.getIcon().getImage();
-				System.setProperty("java.awt.headless", "true");
+			}
+			catch(NullPointerException e)
+			{
+				try{
+					awtImage = new ImageIcon(this.getClass().getResource("/images/teststeps/" + step.getClass().getSimpleName() + ".gif")).getImage();
+				}catch(NullPointerException e2){
+					awtImage = new ImageIcon(this.getClass().getResource("/images/teststeps/404.gif")).getImage();
+				}
 			}	
-	
-			BufferedImage bufferedImage = SwingFXUtils2.toBufferedImageUnchecked( awtImage );
+			bufferedImage = SwingFXUtils2.toBufferedImageUnchecked( awtImage );
 			WritableImage fxImage = new WritableImage( bufferedImage.getWidth(), bufferedImage.getHeight() );
 			SwingFXUtils.toFXImage( bufferedImage, fxImage );
 			ImageView icon = ImageViewBuilder.create().image( fxImage ).opacity( step.isDisabled() ? 0.4 : 1.0 ).build();
