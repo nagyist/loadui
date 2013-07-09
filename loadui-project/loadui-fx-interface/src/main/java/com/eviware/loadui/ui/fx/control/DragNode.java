@@ -320,6 +320,7 @@ public class DragNode implements Draggable
 	{
 		UIUtils.getOverlayFor(getNode().getScene()).hide(getNode());
 		DragNode.this.setVisible(false);
+		DragNode.this.getDragSource().setVisible(true);
 	}
 
 	private static class DragNodeBehavior
@@ -454,7 +455,6 @@ public class DragNode implements Draggable
 					dragNode.dragSource.fireEvent(new DraggableEvent(null, dragNode.dragSource, dragNode.getNode(),
 							DraggableEvent.DRAGGABLE_STOPPED, dragNode, event.getSceneX(), event.getSceneY()));
 				}
-				source.setVisible(true);
 			}
 		};
 
