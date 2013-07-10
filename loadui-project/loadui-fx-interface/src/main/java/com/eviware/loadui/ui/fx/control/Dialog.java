@@ -15,25 +15,20 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
-import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBoxBuilder;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.stage.Window;
-import javafx.stage.WindowEvent;
-
-import javax.annotation.Nonnull;
-
+import javafx.stage.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
+import javax.annotation.Nonnull;
+
+import static com.eviware.loadui.ui.fx.util.EventUtils.forwardIntentsFrom;
+import static javafx.beans.binding.Bindings.bindContent;
 
 public class Dialog extends Stage
 {
@@ -42,41 +37,36 @@ public class Dialog extends Stage
 	private final Pane rootPane;
 	private final Window parentWindow;
 
-	@SuppressWarnings( "unused" )
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger( Dialog.class );
 
 	public Dialog( @Nonnull final Node owner, @Nonnull String title )
 	{
-		final Scene ownerScene = owner.getScene();
-
 		rootPane = VBoxBuilder.create().styleClass( "dialog" ).minWidth( 300 ).build();
 
 		Scene scene = new Scene( rootPane );
-		Bindings.bindContent( scene.getStylesheets(), ownerScene.getStylesheets() );
 		setScene( scene );
 
+		final Scene ownerScene = owner.getScene();
+		bindContent( scene.getStylesheets(), ownerScene.getStylesheets() );
 		parentWindow = ownerScene.getWindow();
 
+		setWindowProperties( title );
+		forwardIntentsFrom( this ).to( owner );
+		centerWindow();
+	}
+
+	private void setWindowProperties( String title )
+	{
 		setResizable( false );
 		initStyle( StageStyle.UTILITY );
 		initModality( Modality.APPLICATION_MODAL );
 		initOwner( parentWindow );
 		setTitle( title );
+	}
 
-		// Set a good estimated position before the dialog is shown to avoid flickering. Might not be needed.
-		//		setX( getCenterXOfParentWindow() - getScene().getRoot().prefWidth( -1 ) / 2 );
-		//		setY( getCenterYOfParentWindow() - getScene().getRoot().prefHeight( -1 ) / 2 );
-
-		//Forward unhandled IntentEvents to the parent window.
-		addEventHandler( IntentEvent.ANY, new EventHandler<IntentEvent<?>>()
-		{
-			@Override
-			public void handle( IntentEvent<?> event )
-			{
-				owner.fireEvent( event );
-			}
-		} );
-
+	private void centerWindow()
+	{
 		addEventHandler( WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>()
 		{
 			@Override

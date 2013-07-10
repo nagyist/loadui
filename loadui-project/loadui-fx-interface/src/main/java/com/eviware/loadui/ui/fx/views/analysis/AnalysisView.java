@@ -15,11 +15,15 @@
  */
 package com.eviware.loadui.ui.fx.views.analysis;
 
-import static com.eviware.loadui.ui.fx.util.ObservableLists.appendElement;
-import static com.eviware.loadui.ui.fx.util.ObservableLists.fx;
-import static com.eviware.loadui.ui.fx.util.ObservableLists.ofCollection;
-import static com.eviware.loadui.ui.fx.util.ObservableLists.optimize;
-import static com.eviware.loadui.ui.fx.util.ObservableLists.transform;
+import com.eviware.loadui.api.model.ProjectItem;
+import com.eviware.loadui.api.statistics.model.StatisticPage;
+import com.eviware.loadui.api.statistics.model.StatisticPages;
+import com.eviware.loadui.api.statistics.store.Execution;
+import com.eviware.loadui.ui.fx.api.analysis.ExecutionsInfo;
+import com.eviware.loadui.ui.fx.api.analysis.ExecutionsInfo.Data;
+import com.eviware.loadui.ui.fx.util.FXMLUtils;
+import com.eviware.loadui.ui.fx.views.result.ResultsPopup;
+import com.google.common.base.Function;
 import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -35,21 +39,12 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
-
-import javax.annotation.Nullable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.api.statistics.model.StatisticPage;
-import com.eviware.loadui.api.statistics.model.StatisticPages;
-import com.eviware.loadui.api.statistics.store.Execution;
-import com.eviware.loadui.ui.fx.api.analysis.ExecutionsInfo;
-import com.eviware.loadui.ui.fx.api.analysis.ExecutionsInfo.Data;
-import com.eviware.loadui.ui.fx.util.FXMLUtils;
-import com.eviware.loadui.ui.fx.views.result.ResultsPopup;
-import com.google.common.base.Function;
+import javax.annotation.Nullable;
+
+import static com.eviware.loadui.ui.fx.util.ObservableLists.*;
 
 public class AnalysisView extends StackPane
 {
@@ -75,8 +70,7 @@ public class AnalysisView extends StackPane
 					{
 						int number = Integer.parseInt( label.substring( UNTITLED_PAGE_PREFIX.length() ) );
 						maxNumber = Math.max( number, maxNumber );
-					}
-					catch( NumberFormatException e )
+					} catch( NumberFormatException e )
 					{
 						// ignore
 					}
@@ -211,8 +205,7 @@ public class AnalysisView extends StackPane
 				}
 			} );
 
-		}
-		catch( Exception e )
+		} catch( Exception e )
 		{
 			log.error( "Unable to initialize line chart view for statistics analysis", e );
 		}
@@ -228,7 +221,7 @@ public class AnalysisView extends StackPane
 		return analysisToolbar;
 	}
 
-	@SuppressWarnings( "resource" )
+	@SuppressWarnings("resource")
 	// resultsPopup closeable is closed by the ResultView
 	@FXML
 	protected void openPreviousRuns()

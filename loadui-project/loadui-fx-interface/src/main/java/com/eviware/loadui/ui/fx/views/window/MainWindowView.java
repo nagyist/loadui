@@ -81,50 +81,50 @@ public class MainWindowView extends StackPane implements OverlayHolder
 	private final FxExecutionsInfo executionsInfo;
 	private final TestEventManager tem;
 
-	private static final Logger log = LoggerFactory.getLogger(MainWindowView.class);
+	private static final Logger log = LoggerFactory.getLogger( MainWindowView.class );
 
 	public MainWindowView( WorkspaceProvider workspaceProvider, FxExecutionsInfo executionsInfo, TestEventManager tem )
 	{
-		this.workspaceProvider = Preconditions.checkNotNull(workspaceProvider);
-		this.executionsInfo = Preconditions.checkNotNull(executionsInfo);
+		this.workspaceProvider = Preconditions.checkNotNull( workspaceProvider );
+		this.executionsInfo = Preconditions.checkNotNull( executionsInfo );
 		this.tem = tem;
-		FXMLUtils.load(this);
+		FXMLUtils.load( this );
 	}
 
 	@FXML
 	private void initialize()
 	{
-		notificationPanel.setVisible(false);
-		notificationPanel.setMainWindowView(this);
+		notificationPanel.setVisible( false );
+		notificationPanel.setMainWindowView( this );
 		notificationPanel.listenOnDetachedTabs();
-		tem.registerObserver(notificationPanel);
-		notificationPanel.setOnShowLog(new EventHandler<MouseEvent>()
+		tem.registerObserver( notificationPanel );
+		notificationPanel.setOnShowLog( new EventHandler<MouseEvent>()
 		{
 			@Override
 			public void handle( MouseEvent event )
 			{
-				inspectorView.ensureShowing(InspectorView.EVENT_LOG_TAB);
+				inspectorView.ensureShowing( InspectorView.EVENT_LOG_TAB );
 			}
-		});
+		} );
 
-		workspaceProvider.addEventListener(BaseEvent.class, workspaceListener);
+		workspaceProvider.addEventListener( BaseEvent.class, workspaceListener );
 
 		if( workspaceProvider.isWorkspaceLoaded() )
 		{
-			workspaceProperty.setValue(workspaceProvider.getWorkspace());
+			workspaceProperty.setValue( workspaceProvider.getWorkspace() );
 		} else
 		{
-			workspaceProperty.setValue(workspaceProvider.loadDefaultWorkspace());
+			workspaceProperty.setValue( workspaceProvider.loadDefaultWorkspace() );
 		}
 
 		try
 		{
-			mainButton.setGraphic(new ImageView(LoadUI.relativeFile("res/logo-button.png").toURI().toURL()
-					.toExternalForm()));
+			mainButton.setGraphic( new ImageView( LoadUI.relativeFile( "res/logo-button.png" ).toURI().toURL()
+					.toExternalForm() ) );
 			mainButton.effectProperty().bind(
-					Bindings.when(Bindings.or(mainButton.hoverProperty(), mainButton.showingProperty()))
-							.then(new Glow(0.4d)).otherwise(new Glow(0d)));
-			SelectableImpl.installDeleteKeyHandler(this);
+					Bindings.when( Bindings.or( mainButton.hoverProperty(), mainButton.showingProperty() ) )
+							.then( new Glow( 0.4d ) ).otherwise( new Glow( 0d ) ) );
+			SelectableImpl.installDeleteKeyHandler( this );
 
 			initIntentEventHanding();
 			initInspectorView();
@@ -144,7 +144,7 @@ public class MainWindowView extends StackPane implements OverlayHolder
 
 	private void initIntentEventHanding()
 	{
-		addEventHandler(IntentEvent.ANY, new EventHandler<IntentEvent<? extends Object>>()
+		addEventHandler( IntentEvent.ANY, new EventHandler<IntentEvent<? extends Object>>()
 		{
 			@Override
 			public void handle( IntentEvent<? extends Object> event )
@@ -164,21 +164,21 @@ public class MainWindowView extends StackPane implements OverlayHolder
 							@Override
 							protected Void call() throws Exception
 							{
-								updateMessage("Loading project: " + projectRef.getLabel());
+								updateMessage( "Loading project: " + projectRef.getLabel() );
 								try
 								{
-									projectRef.setEnabled(true);
+									projectRef.setEnabled( true );
 									final ProjectItem project = projectRef.getProject();
-									Platform.runLater(new Runnable()
+									Platform.runLater( new Runnable()
 									{
 										@Override
 										public void run()
 										{
-											ProjectView projectView = new ProjectView(project, executionsInfo);
-											container.getChildren().setAll(projectView);
-											PerspectiveEvent.fireEvent(PerspectiveEvent.PERSPECTIVE_PROJECT, projectView);
+											ProjectView projectView = new ProjectView( project, executionsInfo );
+											container.getChildren().setAll( projectView );
+											PerspectiveEvent.fireEvent( PerspectiveEvent.PERSPECTIVE_PROJECT, projectView );
 										}
-									});
+									} );
 								} catch( Exception e )
 								{
 									e.printStackTrace();
@@ -188,16 +188,16 @@ public class MainWindowView extends StackPane implements OverlayHolder
 							}
 						};
 
-						fireEvent(IntentEvent.create(IntentEvent.INTENT_RUN_BLOCKING, openProject));
+						fireEvent( IntentEvent.create( IntentEvent.INTENT_RUN_BLOCKING, openProject ) );
 					} else if( event.getArg() instanceof SceneItem )
 					{
 						if( container.getChildren().size() == 1 )
 						{
-							container.getChildren().get(0).fireEvent(event);
+							container.getChildren().get( 0 ).fireEvent( event );
 						}
 					} else
 					{
-						System.out.println("Unhandled intent: " + event);
+						System.out.println( "Unhandled intent: " + event );
 						return;
 					}
 				} else if( event.getEventType() == IntentEvent.INTENT_CLOSE )
@@ -207,7 +207,7 @@ public class MainWindowView extends StackPane implements OverlayHolder
 						final ProjectItem project = (ProjectItem) event.getArg();
 						if( project.isDirty() )
 						{
-							SaveProjectDialog saveDialog = new SaveProjectDialog(MainWindowView.this, project);
+							SaveProjectDialog saveDialog = new SaveProjectDialog( MainWindowView.this, project );
 							saveDialog.show();
 						} else
 						{
@@ -217,14 +217,14 @@ public class MainWindowView extends StackPane implements OverlayHolder
 						//TODO: Need to have the ProjectRef close the project.
 					} else
 					{
-						System.out.println("Unhandled intent: " + event);
+						System.out.println( "Unhandled intent: " + event );
 						return;
 					}
 				} else if( event.getEventType() == IntentEvent.INTENT_RENAME )
 				{
 					final Object arg = event.getArg();
-					Preconditions.checkArgument(arg instanceof Labeled.Mutable);
-					new RenameDialog((Labeled.Mutable) arg, MainWindowView.this).show();
+					Preconditions.checkArgument( arg instanceof Labeled.Mutable );
+					new RenameDialog( (Labeled.Mutable) arg, MainWindowView.this ).show();
 				} else if( event.getEventType() == IntentEvent.INTENT_RUN_BLOCKING )
 				{
 					//Handled by BlockingTask.
@@ -239,19 +239,19 @@ public class MainWindowView extends StackPane implements OverlayHolder
 					return;
 				} else
 				{
-					System.out.println("Unhandled intent: " + event);
+					System.out.println( "Unhandled intent: " + event );
 					return;
 				}
 				event.consume();
 			}
-		});
+		} );
 	}
 
 	public void showWorkspace()
 	{
-		WorkspaceView workspaceView = new WorkspaceView(workspaceProvider.getWorkspace());
-		container.getChildren().setAll(workspaceView);
-		PerspectiveEvent.fireEvent(PerspectiveEvent.PERSPECTIVE_WORKSPACE, workspaceView);
+		WorkspaceView workspaceView = new WorkspaceView( workspaceProvider.getWorkspace() );
+		container.getChildren().setAll( workspaceView );
+		PerspectiveEvent.fireEvent( PerspectiveEvent.PERSPECTIVE_WORKSPACE, workspaceView );
 	}
 
 	@SuppressWarnings("unchecked")
@@ -259,70 +259,70 @@ public class MainWindowView extends StackPane implements OverlayHolder
 	{
 		if( container != null && container.getChildren().isEmpty() == false )
 		{
-			log.debug("contains: " + container.getChildren().size() + ": " + container.getChildren());
+			log.debug( "contains: " + container.getChildren().size() + ": " + container.getChildren() );
 			for( Node childView : container.getChildren() )
 			{
-				if( expectedClass.isInstance(childView) )
+				if( expectedClass.isInstance( childView ) )
 					return (T) childView;
 			}
 		}
-		throw new IllegalStateException(MainWindowView.class.getName() + " does not hold a view of class "
-				+ expectedClass);
+		throw new IllegalStateException( MainWindowView.class.getName() + " does not hold a view of class "
+				+ expectedClass );
 	}
 
 	public void settings()
 	{
-		GlobalSettingsDialog.newInstance(mainButton, workspaceProperty.getValue()).show();
+		GlobalSettingsDialog.newInstance( mainButton, workspaceProperty.getValue() ).show();
 	}
 
 	public void systemProperties()
 	{
-		fireEvent(IntentEvent.create(IntentEvent.INTENT_RUN_BLOCKING, new Runnable()
+		fireEvent( IntentEvent.create( IntentEvent.INTENT_RUN_BLOCKING, new Runnable()
 		{
 			@Override
 			public void run()
 			{
 				SystemPropertiesDialog.initialize();
 
-				Platform.runLater(new Runnable()
+				Platform.runLater( new Runnable()
 				{
 					@Override
 					public void run()
 					{
-						new SystemPropertiesDialog(mainButton).show();
+						new SystemPropertiesDialog( mainButton ).show();
 					}
-				});
+				} );
 			}
-		}));
+		} ) );
 	}
 
 	public void feedback()
 	{
-		UIUtils.openInExternalBrowser("http://www.soapui.org/forum/viewforum.php?f=9");
+		UIUtils.openInExternalBrowser( "http://www.soapui.org/forum/viewforum.php?f=9" );
 	}
 
 	public void about()
 	{
-		new AboutDialog(mainButton).show(getScene().getWindow());
+		new AboutDialog( mainButton ).show( getScene().getWindow() );
 	}
 
 	private ObservableList<Inspector> inspectors;
 
 	private void initInspectorView()
 	{
-		inspectorView.setPerspective(PerspectiveEvent.PERSPECTIVE_WORKSPACE);
+		inspectorView.setPerspective( PerspectiveEvent.PERSPECTIVE_WORKSPACE );
 
-		PerspectiveEvent.addEventHandler(PerspectiveEvent.ANY, new EventHandler<PerspectiveEvent>()
+		PerspectiveEvent.addEventHandler( PerspectiveEvent.ANY, new EventHandler<PerspectiveEvent>()
 		{
 			@Override
 			public void handle( PerspectiveEvent event )
 			{
-				inspectorView.setPerspective(event.getEventType());
+				inspectorView.setPerspective( event.getEventType() );
 			}
-		});
+		} );
 
-		inspectors = ObservableLists.fx(ObservableLists.ofServices(Inspector.class));
-		Bindings.bindContent(inspectorView.getInspectors(), inspectors);
+		inspectors = ObservableLists.fx( ObservableLists.ofServices( Inspector.class ) );
+		Bindings.bindContent( inspectorView.getInspectors(), inspectors );
 	}
 
 	private class WorkspaceListener implements WeakEventHandler<BaseEvent>
@@ -330,9 +330,9 @@ public class MainWindowView extends StackPane implements OverlayHolder
 		@Override
 		public void handleEvent( BaseEvent event )
 		{
-			if( WorkspaceProvider.WORKSPACE_LOADED.equals(event.getKey()) )
+			if( WorkspaceProvider.WORKSPACE_LOADED.equals( event.getKey() ) )
 			{
-				workspaceProperty.setValue(workspaceProvider.getWorkspace());
+				workspaceProperty.setValue( workspaceProvider.getWorkspace() );
 			}
 		}
 	}

@@ -46,7 +46,7 @@ import java.util.List;
 
 public class UIUtils
 {
-	protected static final Logger log = LoggerFactory.getLogger(UIUtils.class);
+	protected static final Logger log = LoggerFactory.getLogger( UIUtils.class );
 
 	private final static String TOOLBOX_IMAGES_PATH = "/com/eviware/loadui/ui/fx/toolboxIcons/";
 
@@ -74,7 +74,7 @@ public class UIUtils
 
 	public static Overlay getOverlayFor( Scene scene )
 	{
-		Preconditions.checkArgument(scene.getRoot() instanceof OverlayHolder, "The root node of " + scene + " must be an OverlayHolder, but was " + scene.getRoot().getClass());
+		Preconditions.checkArgument( scene.getRoot() instanceof OverlayHolder, "The root node of " + scene + " must be an OverlayHolder, but was " + scene.getRoot().getClass() );
 		return ((OverlayHolder) scene.getRoot()).getOverlay();
 	}
 
@@ -83,11 +83,11 @@ public class UIUtils
 	{
 		try
 		{
-			return doGetImage(object);
+			return doGetImage( object );
 		} catch( Exception e )
 		{
-			log.warn("Could not get image for " + object, e);
-			return new Image(root("default-component-icon.png"));
+			log.warn( "Could not get image for " + object, e );
+			return new Image( root( "default-component-icon.png" ) );
 		}
 	}
 
@@ -95,57 +95,57 @@ public class UIUtils
 	{
 		for( ImageResolver resolver : imageResolvers )
 		{
-			Image image = resolver.getImageFor(object);
+			Image image = resolver.getImageFor( object );
 			if( image != null )
 				return image;
 		}
 
-		if( object instanceof AgentItem || AgentItem.class.equals(object) )
+		if( object instanceof AgentItem || AgentItem.class.equals( object ) )
 		{
-			return new Image(root("agent-icon.png"));
-		} else if( object instanceof ProjectItem || ProjectItem.class.equals(object) )
+			return new Image( root( "agent-icon.png" ) );
+		} else if( object instanceof ProjectItem || ProjectItem.class.equals( object ) )
 		{
-			return new Image(root("project-icon.png"));
-		} else if( object instanceof SceneItem || SceneItem.class.equals(object) )
+			return new Image( root( "project-icon.png" ) );
+		} else if( object instanceof SceneItem || SceneItem.class.equals( object ) )
 		{
-			return new Image(root("testcase-icon.png"));
+			return new Image( root( "testcase-icon.png" ) );
 		} else if( object instanceof ComponentItem )
 		{
-			return new Image(BeanInjector.getBean(ComponentRegistry.class)
-					.findDescriptor(((ComponentItem) object).getType()).getIcon().toString());
+			return new Image( BeanInjector.getBean( ComponentRegistry.class )
+					.findDescriptor( ((ComponentItem) object).getType() ).getIcon().toString() );
 		} else if( object instanceof AssertionItem )
 		{
-			return new Image(root("assertion_icon_toolbar.png"));
+			return new Image( root( "assertion_icon_toolbar.png" ) );
 		}
 
-		throw new RuntimeException("No image found for resource "
-				+ (object instanceof Class ? object : "of class " + object.getClass().getName()));
+		throw new RuntimeException( "No image found for resource "
+				+ (object instanceof Class ? object : "of class " + object.getClass().getName()) );
 	}
 
 	private static String root( String fileName )
 	{
-		return UIUtils.class.getResource(TOOLBOX_IMAGES_PATH + fileName).toExternalForm();
+		return UIUtils.class.getResource( TOOLBOX_IMAGES_PATH + fileName ).toExternalForm();
 	}
 
 	public static String toCssId( @Nonnull String label )
 	{
-		return label.toLowerCase().replace(" ", "-");
+		return label.toLowerCase().replace( " ", "-" );
 	}
 
 	public static BufferedImage scaleImage( BufferedImage image, int maxWidth, int maxHeight )
 	{
 		double imageWidth = image.getWidth();
 		double imageHeight = image.getHeight();
-		double scale = Math.min(maxWidth / imageWidth, maxHeight / imageHeight);
+		double scale = Math.min( maxWidth / imageWidth, maxHeight / imageHeight );
 
 		int width = (int) (imageWidth * scale);
 		int height = (int) (imageHeight * scale);
 
-		BufferedImage scaledImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		BufferedImage scaledImage = new BufferedImage( width, height, BufferedImage.TYPE_INT_ARGB );
 
 		Graphics2D graphics2D = scaledImage.createGraphics();
-		graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		graphics2D.drawImage(image, 0, 0, width, height, null);
+		graphics2D.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR );
+		graphics2D.drawImage( image, 0, 0, width, height, null );
 		graphics2D.dispose();
 
 		return scaledImage;
@@ -157,38 +157,38 @@ public class UIUtils
 		{
 			try
 			{
-				Desktop.getDesktop().browse(new java.net.URI(url));
+				Desktop.getDesktop().browse( new java.net.URI( url ) );
 			} catch( IOException | URISyntaxException e )
 			{
-				log.error("Unable to launch browser with url in external browser!", e);
+				log.error( "Unable to launch browser with url in external browser!", e );
 			}
 			return;
 		}
 
 		try
 		{
-			Thread t = new Thread(new Runnable()
+			Thread t = new Thread( new Runnable()
 			{
 				@Override
 				public void run()
 				{
 					try
 					{
-						Runtime.getRuntime().exec("open " + url);
+						Runtime.getRuntime().exec( "open " + url );
 					} catch( IOException e )
 					{
-						log.error("Unable to fork native browser with url in external browser!", e);
+						log.error( "Unable to fork native browser with url in external browser!", e );
 					}
 				}
-			});
+			} );
 			t.start();
 		} catch( Exception e )
 		{
-			log.error("unable to display url!", e);
+			log.error( "unable to display url!", e );
 		}
 	}
 
 	public static final String LATEST_DIRECTORY = "gui.latestDirectory";
-	public static final ExtensionFilter XML_EXTENSION_FILTER = new FileChooser.ExtensionFilter("loadUI project file",
-			"*.xml");
+	public static final ExtensionFilter XML_EXTENSION_FILTER = new FileChooser.ExtensionFilter( "loadUI project file",
+			"*.xml" );
 }
