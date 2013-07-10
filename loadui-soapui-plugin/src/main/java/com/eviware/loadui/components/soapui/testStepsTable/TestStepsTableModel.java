@@ -159,25 +159,25 @@ public class TestStepsTableModel
 		{
 			TestStep step = p.getValue();
 			java.awt.Image awtImage = null;
-			BufferedImage bufferedImage = null;
 
 			try
 			{
 				awtImage = step.getIcon().getImage();
 			}
-			catch( NullPointerException e )
+			catch( NullPointerException _ )
 			{
 				try
 				{
 					awtImage = new ImageIcon( this.getClass().getResource(
 							"/images/teststeps/" + step.getClass().getSimpleName() + ".gif" ) ).getImage();
 				}
-				catch( NullPointerException e2 )
+				catch( NullPointerException __ )
 				{
 					awtImage = new ImageIcon( this.getClass().getResource( "/images/teststeps/404.gif" ) ).getImage();
 				}
 			}
-			bufferedImage = SwingFXUtils2.toBufferedImageUnchecked( awtImage );
+			
+			BufferedImage bufferedImage = SwingFXUtils2.toBufferedImageUnchecked( awtImage );
 			WritableImage fxImage = new WritableImage( bufferedImage.getWidth(), bufferedImage.getHeight() );
 			SwingFXUtils.toFXImage( bufferedImage, fxImage );
 			ImageView icon = ImageViewBuilder.create().image( fxImage ).opacity( step.isDisabled() ? 0.4 : 1.0 ).build();
