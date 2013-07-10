@@ -85,7 +85,8 @@ public class ExecutionView extends Pane
 			log.debug( "Initializing Execution " + execution.getLabel() );
 			menuButton.textProperty().bind( Properties.forLabel( execution ) );
 
-			DragNode.install( this, new ExecutionView( execution, state, true, null ) ).hideOriginalNodeWhenDragging().setData( execution );
+			if( !execution.isArchived() )
+				DragNode.install( this, new ExecutionView( execution, state, true, null ) ).hideOriginalNodeWhenDragging().setData( execution );
 
 			initializeMenu();
 		}
