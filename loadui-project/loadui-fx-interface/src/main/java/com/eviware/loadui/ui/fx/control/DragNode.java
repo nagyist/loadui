@@ -80,6 +80,19 @@ public class DragNode implements Draggable
 
 	private final ObjectProperty<Node> nodeProperty = new SimpleObjectProperty<>();
 
+	private boolean hideOriginalNodeWhenDragging = false;
+
+	public DragNode hideOriginalNodeWhenDragging()
+	{
+		hideOriginalNodeWhenDragging = true;
+		return this;
+	}
+
+	public boolean isHideOriginalNodeWhenDragging()
+	{
+		return hideOriginalNodeWhenDragging;
+	}
+
 	public Node getNode()
 	{
 		return nodeProperty.get();
