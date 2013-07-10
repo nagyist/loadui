@@ -40,7 +40,6 @@ import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.io.IOException;
 
-import static com.eviware.loadui.ui.fx.util.EventUtils.wasDoubleClick;
 import static com.eviware.loadui.ui.fx.util.NodeUtils.isMouseOn;
 
 public class ExecutionView extends Pane
@@ -121,7 +120,7 @@ public class ExecutionView extends Pane
 	@FXML
 	protected void openExecution( MouseEvent event )
 	{
-		if( wasDoubleClick( event ) )
+		if( event == null || event.getClickCount() == 2 )
 		{
 			fireEvent( IntentEvent.create( IntentEvent.INTENT_OPEN, execution ) );
 			log.debug( "Finished open of execution: " + execution.getLabel() );

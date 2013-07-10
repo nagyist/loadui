@@ -3,15 +3,10 @@ package com.eviware.loadui.ui.fx.util;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 public class EventUtils
 {
-	public static boolean wasDoubleClick( MouseEvent event )
-	{
-		return event == null || event.getClickCount() == 2;
-	}
 
 	public static IntentForwardingBuilder forwardIntentsFrom( final Stage sourceStage )
 	{
