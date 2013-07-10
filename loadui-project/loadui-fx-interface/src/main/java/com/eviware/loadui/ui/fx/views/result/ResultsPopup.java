@@ -62,7 +62,6 @@ public class ResultsPopup extends Stage implements Callback<Data, Void>, Closeab
 	public Void call( Data data )
 	{
 		final ResultView resultView = new ResultView( data.getRecentExecutions(), data.getArchivedExecutions(), this );
-		resultView.setStyle( "-fx-padding: 0;" );
 		getScene().setRoot( resultView );
 
 		return null;
