@@ -22,8 +22,8 @@ public class LoadUiRobot
 {
 	public enum Component
 	{
-		FIXED_RATE_GENERATOR( "Generators", "Fixed Rate" ), TABLE_LOG( "Output", "Table Log" ), WEB_PAGE_RUNNER(
-				"Runners", "Web Page Runner" );
+		FIXED_RATE_GENERATOR( "generators", "Fixed Rate" ), TABLE_LOG( "output", "Table Log" ), WEB_PAGE_RUNNER(
+				"runners", "Web Page Runner" );
 
 		public final String category;
 		public final String name;
@@ -75,21 +75,10 @@ public class LoadUiRobot
 			}
 		};
 
-		int maxToolboxCategories = 50;
-		while( TestFX.findAll( "#" + component.category + ".category" ).isEmpty() )
-		{
-			if( --maxToolboxCategories < 0 )
-				throw new RuntimeException( "Could not find component category " + component.category
-						+ " in component ToolBox." );
-			controller.move( "#Runners.category" ).scroll( 10 );
-		}
+		scrollToCategory( component );
+		expandCategory( component );
 
-		if( !TestFX.findAll( "#" + component.category + ".category .expander-button" ).isEmpty() )
-		{
-			controller.click( "#" + component.category + ".category .expander-button" );
-		}
-
-		Window window = TestFX.find( "#Runners.category" ).getScene().getWindow();
+		Window window = TestFX.find( "#runners.category" ).getScene().getWindow();
 		int windowX = ( int )window.getX();
 		int windowY = ( int )window.getY();
 		controller.drag( isDescriptor ).to( windowX + targetPoint.x, windowY + targetPoint.y );
@@ -109,6 +98,26 @@ public class LoadUiRobot
 		outputs.removeAll( oldOutputs );
 
 		return new ComponentHandle( inputs, outputs, controller, this );
+	}
+
+	private void expandCategory( Component component )
+	{
+		if( !TestFX.findAll( "#" + component.category + ".category .expander-button" ).isEmpty() )
+		{
+			controller.click( "#" + component.category + ".category .expander-button" );
+		}
+	}
+
+	private void scrollToCategory( Component component )
+	{
+		int maxToolboxCategories = 50;
+		while( TestFX.findAll( "#" + component.category + ".category" ).isEmpty() )
+		{
+			if( --maxToolboxCategories < 0 )
+				throw new RuntimeException( "Could not find component category " + component.category
+						+ " in component ToolBox." );
+			controller.move( "#runners.category" ).scroll( 10 );
+		}
 	}
 
 	public void clickPlayStopButton()
