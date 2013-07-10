@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javafx.application.Platform;
 import javafx.scene.Node;
 
 import javax.annotation.CheckForNull;
@@ -40,6 +41,7 @@ import org.apache.xmlbeans.XmlException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.component.ComponentContext.Scope;
 import com.eviware.loadui.api.component.categories.RunnerCategory;
@@ -73,6 +75,7 @@ import com.eviware.loadui.impl.layout.PropertyLayoutComponentImpl;
 import com.eviware.loadui.impl.layout.SeparatorLayoutComponentImpl;
 import com.eviware.loadui.impl.layout.SettingsLayoutContainerImpl;
 import com.eviware.loadui.integration.SoapUIProjectLoader;
+import com.eviware.loadui.ui.fx.JavaFXActivator;
 import com.eviware.soapui.SoapUIExtensionClassLoader;
 import com.eviware.soapui.SoapUIExtensionClassLoader.SoapUIClassLoaderState;
 import com.eviware.soapui.config.LoadTestConfig;
@@ -112,6 +115,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.sun.javafx.PlatformUtil;
 
 public class SoapUISamplerComponent extends RunnerBase
 {
@@ -278,14 +282,13 @@ public class SoapUISamplerComponent extends RunnerBase
 
 		box = new LayoutContainerImpl( "wrap 3, ins 0", "", "align top", "" );
 
-		boolean isHeadless = GraphicsEnvironment.isHeadless();
-		if( isHeadless )
+		if( !LoadUI.isHeadless() ) 
 		{
-			log.debug( "Skipping creation of SoapUI Runner's TestStepsTable, since in headless mode." );
+			box.add( testStepsTableModel.buildLayout() );
 		}
 		else
 		{
-			box.add( testStepsTableModel.buildLayout() );
+			log.debug( "Skipping creation of SoapUI Runner's TestStepsTable, since in headless mode." );
 		}
 
 		openInSoapUIAction = MiscLayoutComponents.buildOpenInSoapUiButton( projectSelector.getProjectFileName(),
@@ -402,11 +405,13 @@ public class SoapUISamplerComponent extends RunnerBase
 	private SettingsLayoutContainer generateAdvancedTab()
 	{
 		SettingsLayoutContainer advancedSettings = new SettingsLayoutContainerImpl( "Advanced", "", "", "align top", "" );
-		advancedSettings.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object> builder() //
+		advancedSettings.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object> builder()
+		//
 				.put( PropertyLayoutComponentImpl.PROPERTY, concurrentSamplesProperty ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "Max concurrent requests" ) //
 				.build() ) );
-		advancedSettings.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object> builder() //
+		advancedSettings.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object> builder()
+		//
 				.put( PropertyLayoutComponentImpl.PROPERTY, maxQueueSizeProperty ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "Max queue size" ) //
 				.build() ) );
@@ -464,7 +469,8 @@ public class SoapUISamplerComponent extends RunnerBase
 			@Override
 			public void run()
 			{
-				// wait for openInSoapUIAction to initialize in order to take its
+				// wait for openInSoapUIAction to initialize in order to take
+				// its
 				// class loader
 				while( openInSoapUIAction == null )
 				{
@@ -600,7 +606,7 @@ public class SoapUISamplerComponent extends RunnerBase
 				}
 			}
 
-			//Copy the run context to the output message
+			// Copy the run context to the output message
 			StringToObjectMap soapUIContext = runContexts.get();
 			runContexts.remove();
 			if( soapUIContext != null )
@@ -735,7 +741,7 @@ public class SoapUISamplerComponent extends RunnerBase
 				TestCasePropertiesNode.overrideTestCaseProperties( testCase, triggerMessage );
 				testCase.addTestRunListener( testStepNotifier );
 
-				//Use existing context if available
+				// Use existing context if available
 				StringToObjectMap soapUIContext = triggerMessage.get( SOAPUI_CONTEXT_PARAM ) instanceof StringToObjectMap ? ( StringToObjectMap )triggerMessage
 						.get( SOAPUI_CONTEXT_PARAM ) : new StringToObjectMap();
 				testCaseRunner = new WsdlTestCaseRunner( testCase, soapUIContext );
@@ -1036,7 +1042,8 @@ public class SoapUISamplerComponent extends RunnerBase
 			}
 			testStepsInvocationCount.invalidateAll();
 			testStepsTableModel.updateTestCase( soapuiTestCase );
-			//			testCasePropertiesNode.putTestCaseProperties( runner.getTestCase().getPropertyList() ); //TODO
+			// testCasePropertiesNode.putTestCaseProperties(
+			// runner.getTestCase().getPropertyList() ); //TODO
 
 			for( Map.Entry<String, Value<Number>> entry : totalValues.entrySet() )
 			{
@@ -1174,7 +1181,8 @@ public class SoapUISamplerComponent extends RunnerBase
 					}
 					else
 					{
-						// update occurred on agent, not sure if this is necessary
+						// update occurred on agent, not sure if this is
+						// necessary
 						projectFileWorkingCopy.setValue( new File( file ) );
 					}
 					generalSettings.setProjectPassword( newProject.getShadowPassword() );
