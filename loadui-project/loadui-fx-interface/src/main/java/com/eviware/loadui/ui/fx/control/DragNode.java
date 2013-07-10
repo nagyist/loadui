@@ -33,6 +33,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Window;
@@ -318,6 +319,9 @@ public class DragNode implements Draggable
 
 					UIUtils.getOverlayFor( source.getScene() ).show( dragNode.getNode() );
 
+					if( dragNode.isHideOriginalNodeWhenDragging() )
+						source.setVisible( false );
+
 					dragNode.setDragging( true );
 					dragNode.dragSource.fireEvent( new DraggableEvent( null, dragNode.dragSource, dragNode.getNode(),
 							DraggableEvent.DRAGGABLE_STARTED, dragNode, event.getSceneX(), event.getSceneY() ) );
@@ -401,6 +405,7 @@ public class DragNode implements Draggable
 
 				Node source = ( Node )event.getSource();
 				final DragNode dragNode = ( DragNode )source.getProperties().get( DRAG_NODE_PROP_KEY );
+				
 				if( dragNode != null )
 				{
 					if( dragNode.currentlyHovered != null )

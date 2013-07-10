@@ -21,6 +21,8 @@ import static javafx.beans.binding.Bindings.bindContent;
 
 import java.io.Closeable;
 
+import com.eviware.loadui.ui.fx.views.window.Overlay;
+import com.eviware.loadui.ui.fx.views.window.OverlayHolder;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -36,7 +38,7 @@ import com.eviware.loadui.ui.fx.control.PageList;
 import com.eviware.loadui.ui.fx.util.FXMLUtils;
 import com.google.common.base.Function;
 
-public class ResultView extends StackPane
+public class ResultView extends StackPane implements OverlayHolder
 {
 	enum ExecutionState
 	{
@@ -78,7 +80,6 @@ public class ResultView extends StackPane
 	@FXML
 	private void initialize()
 	{
-		
 		recentExViews = createExecutionViewsFor( recentExList, ExecutionState.RECENT );
 		bindContent( resultNodeList.getItems(), recentExViews );
 
@@ -86,7 +87,15 @@ public class ResultView extends StackPane
 		bindContent( archiveNodeList.getItems(), archivedExViews );
 
 		initArchiveNodeList();
+	}
 
+	@FXML
+	private Overlay overlay;
+
+	@Override
+	public Overlay getOverlay()
+	{
+		return overlay;
 	}
 
 	private ObservableList<ExecutionView> createExecutionViewsFor( final ObservableList<Execution> executions,

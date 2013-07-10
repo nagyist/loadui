@@ -15,29 +15,55 @@
  */
 package com.eviware.loadui.ui.fx.views.result;
 
-import java.io.Closeable;
-
-import javafx.scene.Node;
-import javafx.util.Callback;
-
 import com.eviware.loadui.ui.fx.api.analysis.ExecutionsInfo;
 import com.eviware.loadui.ui.fx.api.analysis.ExecutionsInfo.Data;
-import com.eviware.loadui.ui.fx.control.Dialog;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.SceneBuilder;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.util.Callback;
 
-public class ResultsPopup extends Dialog implements Callback<Data, Void>, Closeable
+import java.io.Closeable;
+
+import static com.eviware.loadui.ui.fx.util.EventUtils.forwardIntentsFrom;
+import static javafx.beans.binding.Bindings.bindContent;
+
+public class ResultsPopup extends Stage implements Callback<Data, Void>, Closeable
 {
 	public ResultsPopup( Node owner, ExecutionsInfo executionsInfo )
 	{
-		super( owner, "Test Runs" );
-		getScene().getRoot().setStyle( "-fx-padding: 0;" );
+		setWindowProperties();
+		initOwner( owner.getScene().getWindow() );
+
+		Scene scene = SceneBuilder.create().root( new VBox() ).build();
+		setScene( scene );
+		final Scene ownerScene = owner.getScene();
+		bindContent( scene.getStylesheets(), ownerScene.getStylesheets() );
+
+		forwardIntentsFrom( this ).to( owner );
+
 		executionsInfo.runWhenReady( this );
+
+	}
+
+	private void setWindowProperties()
+	{
+		setResizable( false );
+		initStyle( StageStyle.UTILITY );
+		initModality( Modality.APPLICATION_MODAL );
+
+		setTitle( "Test Runs" );
 	}
 
 	@Override
 	public Void call( Data data )
 	{
-		ResultView resultView = new ResultView( data.getRecentExecutions(), data.getArchivedExecutions(), this );
-		getItems().setAll( resultView );
+		final ResultView resultView = new ResultView( data.getRecentExecutions(), data.getArchivedExecutions(), this );
+		getScene().setRoot( resultView );
+
 		return null;
 	}
 }

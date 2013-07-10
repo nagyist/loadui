@@ -88,8 +88,7 @@ public class UIUtils
 		try
 		{
 			return doGetImage( object );
-		}
-		catch( Exception e )
+		} catch( Exception e )
 		{
 			log.warn( "Could not get image for " + object, e );
 			return new Image( root( "default-component-icon.png" ) );
@@ -108,27 +107,23 @@ public class UIUtils
 		if( object instanceof AgentItem || AgentItem.class.equals( object ) )
 		{
 			return new Image( root( "agent-icon.png" ) );
-		}
-		else if( object instanceof ProjectItem || ProjectItem.class.equals( object ) )
+		} else if( object instanceof ProjectItem || ProjectItem.class.equals( object ) )
 		{
 			return new Image( root( "project-icon.png" ) );
-		}
-		else if( object instanceof SceneItem || SceneItem.class.equals( object ) )
+		} else if( object instanceof SceneItem || SceneItem.class.equals( object ) )
 		{
 			return new Image( root( "testcase-icon.png" ) );
-		}
-		else if( object instanceof ComponentItem )
+		} else if( object instanceof ComponentItem )
 		{
 			return new Image( BeanInjector.getBean( ComponentRegistry.class )
-					.findDescriptor( ( ( ComponentItem )object ).getType() ).getIcon().toString() );
-		}
-		else if( object instanceof AssertionItem )
+					.findDescriptor( ((ComponentItem) object).getType() ).getIcon().toString() );
+		} else if( object instanceof AssertionItem )
 		{
 			return new Image( root( "assertion_icon_toolbar.png" ) );
 		}
 
 		throw new RuntimeException( "No image found for resource "
-				+ ( object instanceof Class ? object : "of class " + object.getClass().getName() ) );
+				+ (object instanceof Class ? object : "of class " + object.getClass().getName()) );
 	}
 
 	private static String root( String fileName )
@@ -167,8 +162,7 @@ public class UIUtils
 			try
 			{
 				Desktop.getDesktop().browse( new java.net.URI( url ) );
-			}
-			catch( IOException | URISyntaxException e )
+			} catch( IOException | URISyntaxException e )
 			{
 				log.error( "Unable to launch browser with url in external browser!", e );
 			}
@@ -185,16 +179,14 @@ public class UIUtils
 					try
 					{
 						Runtime.getRuntime().exec( "open " + url );
-					}
-					catch( IOException e )
+					} catch( IOException e )
 					{
 						log.error( "Unable to fork native browser with url in external browser!", e );
 					}
 				}
 			} );
 			t.start();
-		}
-		catch( Exception e )
+		} catch( Exception e )
 		{
 			log.error( "unable to display url!", e );
 		}

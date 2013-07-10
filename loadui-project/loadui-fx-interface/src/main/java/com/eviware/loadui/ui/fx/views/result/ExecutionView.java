@@ -21,7 +21,6 @@ import com.eviware.loadui.ui.fx.MenuItemsProvider.Options;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import com.eviware.loadui.ui.fx.control.DragNode;
 import com.eviware.loadui.ui.fx.util.FXMLUtils;
-import com.eviware.loadui.ui.fx.util.NodeUtils;
 import com.eviware.loadui.ui.fx.util.Properties;
 import com.eviware.loadui.ui.fx.views.result.ResultView.ExecutionState;
 import javafx.application.Platform;
@@ -41,18 +40,15 @@ import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.io.IOException;
 
+import static com.eviware.loadui.ui.fx.util.NodeUtils.isMouseOn;
+
 public class ExecutionView extends Pane
 {
 	protected static final Logger log = LoggerFactory.getLogger( ExecutionView.class );
-
-	@FXML
-	private MenuButton menuButton;
-
 	private final boolean isDragIcon;
 	private final Execution execution;
 	private final ExecutionState state;
 	private final Closeable toClose;
-
 	private final Runnable closeWindowRunnable = new Runnable()
 	{
 
@@ -62,6 +58,8 @@ public class ExecutionView extends Pane
 			closeWindow();
 		}
 	};
+	@FXML
+	private MenuButton menuButton;
 
 	public ExecutionView( final Execution execution, ExecutionState state, @Nullable Closeable toClose )
 	{
@@ -87,32 +85,36 @@ public class ExecutionView extends Pane
 			log.debug( "Initializing Execution " + execution.getLabel() );
 			menuButton.textProperty().bind( Properties.forLabel( execution ) );
 
-			DragNode.install( this, new ExecutionView( execution, state, true, null ) ).setData( execution );
+			DragNode.install( this, new ExecutionView( execution, state, true, null ) ).hideOriginalNodeWhenDragging().setData( execution );
 
-			Options menuOptions = Options.are().open( closeWindowRunnable );
-
-			if( state == ExecutionState.RECENT )
-				menuOptions.noRename();
-
-			MenuItem[] menuItems = MenuItemsProvider.createWith( this, execution, menuOptions ).items();
-			menuButton.getItems().setAll( menuItems );
-			final ContextMenu ctxMenu = ContextMenuBuilder.create().items( menuItems ).build();
-
-			setOnContextMenuRequested( new EventHandler<ContextMenuEvent>()
-			{
-				@Override
-				public void handle( ContextMenuEvent event )
-				{
-					// never show contextMenu when on top of the menuButton
-					if( !NodeUtils.isMouseOn( menuButton ) )
-					{
-						MenuItemsProvider.showContextMenu( menuButton, ctxMenu );
-						event.consume();
-					}
-				}
-			} );
-
+			initializeMenu();
 		}
+	}
+
+	private void initializeMenu()
+	{
+		Options menuOptions = Options.are().open( closeWindowRunnable );
+
+		if( state == ExecutionState.RECENT )
+			menuOptions.noRename();
+
+		MenuItem[] menuItems = MenuItemsProvider.createWith( this, execution, menuOptions ).items();
+		menuButton.getItems().setAll( menuItems );
+		final ContextMenu ctxMenu = ContextMenuBuilder.create().items( menuItems ).build();
+
+		setOnContextMenuRequested( new EventHandler<ContextMenuEvent>()
+		{
+			@Override
+			public void handle( ContextMenuEvent event )
+			{
+				// never show contextMenu when on top of the menuButton
+				if( !isMouseOn( menuButton ) )
+				{
+					MenuItemsProvider.showContextMenu( menuButton, ctxMenu );
+					event.consume();
+				}
+			}
+		} );
 	}
 
 	@FXML
@@ -141,8 +143,7 @@ public class ExecutionView extends Pane
 					try
 					{
 						toClose.close();
-					}
-					catch( IOException e )
+					} catch( IOException e )
 					{
 						log.warn( "Problem closing ResultsPopup", e );
 					}
