@@ -165,14 +165,18 @@ public class TestStepsTableModel
 			{
 				awtImage = step.getIcon().getImage();
 			}
-			catch(NullPointerException e)
+			catch( NullPointerException e )
 			{
-				try{
-					awtImage = new ImageIcon(this.getClass().getResource("/images/teststeps/" + step.getClass().getSimpleName() + ".gif")).getImage();
-				}catch(NullPointerException e2){
-					awtImage = new ImageIcon(this.getClass().getResource("/images/teststeps/404.gif")).getImage();
+				try
+				{
+					awtImage = new ImageIcon( this.getClass().getResource(
+							"/images/teststeps/" + step.getClass().getSimpleName() + ".gif" ) ).getImage();
 				}
-			}	
+				catch( NullPointerException e2 )
+				{
+					awtImage = new ImageIcon( this.getClass().getResource( "/images/teststeps/404.gif" ) ).getImage();
+				}
+			}
 			bufferedImage = SwingFXUtils2.toBufferedImageUnchecked( awtImage );
 			WritableImage fxImage = new WritableImage( bufferedImage.getWidth(), bufferedImage.getHeight() );
 			SwingFXUtils.toFXImage( bufferedImage, fxImage );
