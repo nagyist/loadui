@@ -3,5 +3,5 @@
 
 <?import javafx.scene.shape.Rectangle?>
 <fx:root type="com.eviware.loadui.ui.fx.views.window.Overlay" xmlns:fx="http://javafx.com/fxml">
-    <Rectangle fx:id="rectangle" mouseTransparent="true" fill="transparent"/>
+    <Rectangle fx:id="overlayRectangle" mouseTransparent="true" fill="transparent"/>
 </fx:root>

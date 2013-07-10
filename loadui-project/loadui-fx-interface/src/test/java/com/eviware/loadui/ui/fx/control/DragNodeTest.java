@@ -58,83 +58,84 @@ public class DragNodeTest
 		@Override
 		public void start( Stage primaryStage ) throws Exception
 		{
-			Rectangle dragRect = RectangleBuilder.create().id("dragrect").width(25).height(25).layoutX(80)
-					.fill(Color.BLUE).build();
+			Rectangle dragRect = RectangleBuilder.create().id( "dragrect" ).width( 25 ).height( 25 ).layoutX( 80 )
+					.fill( Color.BLUE ).build();
 
-			dragNode = DragNode.install(dragRect, RectangleBuilder.create().id("dragnode").width(25).height(25)
-					.fill(Color.GREEN).build());
+			dragNode = DragNode.install( dragRect, RectangleBuilder.create().id( "dragnode" ).width( 25 ).height( 25 )
+					.fill( Color.GREEN ).build() );
 
-			Rectangle dropRect = RectangleBuilder.create().id("droprect").width(50).height(50).layoutX(100)
-					.layoutY(100).build();
+			Rectangle dropRect = RectangleBuilder.create().id( "droprect" ).width( 50 ).height( 50 ).layoutX( 100 )
+					.layoutY( 100 ).build();
 			dropRect.fillProperty()
-					.bind(when(dragNode.acceptableProperty()).then(Color.GREEN).otherwise(Color.RED));
+					.bind( when( dragNode.acceptableProperty() ).then( Color.GREEN ).otherwise( Color.RED ) );
 
-			Group root = GroupBuilder.create().children(dropRect, dragRect).build();
-			final RootNode s = new RootNode(root);
-			primaryStage.setScene(SceneBuilder.create().width(300).height(200).root(s).build());
+			Group root = GroupBuilder.create().children( dropRect, dragRect ).build();
+			final RootNode s = new RootNode( root );
+			primaryStage.setScene( SceneBuilder.create().width( 300 ).height( 200 ).root( s ).build() );
 
 			primaryStage.show();
 
-			stageFuture.set(primaryStage);
+			stageFuture.set( primaryStage );
 		}
 	}
 
 	@BeforeClass
 	public static void createWindow() throws Throwable
 	{
-		controller = TestFX.wrap(new FXScreenController());
-		FXTestUtils.launchApp(DragNodeTestApp.class);
-		stage = stageFuture.get(5, TimeUnit.SECONDS);
-		TestFX.targetWindow(stage);
-		FXTestUtils.bringToFront(stage);
+		controller = TestFX.wrap( new FXScreenController() );
+		FXTestUtils.launchApp( DragNodeTestApp.class );
+		stage = stageFuture.get( 5, TimeUnit.SECONDS );
+		TestFX.targetWindow( stage );
+		FXTestUtils.bringToFront( stage );
 	}
 
 	@Test
 	public void shouldDragAndRelease()
 	{
-		assertFalse(dragNode.isDragging());
+		assertFalse( dragNode.isDragging() );
 
-		MouseMotion dragging = controller.drag(dragNode.getDragSource()).by(200, 50);
+		MouseMotion dragging = controller.drag( dragNode.getDragSource() ).by( 200, 50 );
 
-		assertTrue(dragNode.isDragging());
+		assertTrue( dragNode.isDragging() );
 
 		dragging.drop();
 
-		assertFalse(dragNode.isDragging());
+		assertFalse( dragNode.isDragging() );
 	}
 
 	@Test
 	public void shouldAcceptAndDrop() throws InterruptedException
 	{
-		Node dropArea = stage.getScene().lookup("#droprect");
-		final CountDownLatch dropLatch = new CountDownLatch(1);
+		Node dropArea = stage.getScene().lookup( "#droprect" );
+		final CountDownLatch dropLatch = new CountDownLatch( 1 );
 
-		dropArea.addEventHandler(DraggableEvent.ANY, new EventHandler<DraggableEvent>()
+		dropArea.addEventHandler( DraggableEvent.ANY, new EventHandler<DraggableEvent>()
 		{
 			@Override
 			public void handle( DraggableEvent event )
 			{
-				System.out.println("RECEIVING EVENT");
+				System.out.println( "RECEIVING EVENT" );
 				if( event.getEventType() == DraggableEvent.DRAGGABLE_ENTERED )
 				{
 					event.accept();
-				} else if( event.getEventType() == DraggableEvent.DRAGGABLE_DROPPED )
+				}
+				else if( event.getEventType() == DraggableEvent.DRAGGABLE_DROPPED )
 				{
 					dropLatch.countDown();
 				}
 				event.consume();
 			}
-		});
+		} );
 
-		assertFalse(dragNode.isAcceptable());
+		assertFalse( dragNode.isAcceptable() );
 
-		MouseMotion dragging = controller.drag(dragNode.getDragSource()).via(dropArea);
+		MouseMotion dragging = controller.drag( dragNode.getDragSource() ).via( dropArea );
 
-		assertTrue(dragNode.isAcceptable());
+		assertTrue( dragNode.isAcceptable() );
 
 		dragging.drop();
 
-		dropLatch.await(2, TimeUnit.SECONDS);
+		dropLatch.await( 2, TimeUnit.SECONDS );
 	}
 
 	static class RootNode extends Group implements OverlayHolder
@@ -143,7 +144,7 @@ public class DragNodeTest
 
 		RootNode( Node child )
 		{
-			getChildren().addAll(child, overlay);
+			getChildren().addAll( child, overlay );
 		}
 
 		@Override
