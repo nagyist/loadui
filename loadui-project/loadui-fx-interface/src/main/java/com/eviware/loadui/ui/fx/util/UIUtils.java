@@ -52,6 +52,7 @@ public class UIUtils
 
 	private static List<ImageResolver> imageResolvers;
 
+	// Used by the OSGi Framework to set imageResolver services. DO NOT REMOVE!
 	public void setImageResolvers( List<ImageResolver> imageResolvers )
 	{
 		UIUtils.imageResolvers = imageResolvers;
@@ -61,11 +62,13 @@ public class UIUtils
 	{
 		if( window instanceof PopupWindow )
 		{
-			window = ((PopupWindow) window).getOwnerWindow();
-		} else if( window instanceof Stage )
+			window = ( ( PopupWindow )window ).getOwnerWindow();
+		}
+		else if( window instanceof Stage )
 		{
-			window = ((Stage) window).getOwner();
-		} else
+			window = ( ( Stage )window ).getOwner();
+		}
+		else
 		{
 			window = null;
 		}
@@ -74,8 +77,11 @@ public class UIUtils
 
 	public static Overlay getOverlayFor( Scene scene )
 	{
-		Preconditions.checkArgument( scene.getRoot() instanceof OverlayHolder, "The root node of " + scene + " must be an OverlayHolder, but was " + scene.getRoot().getClass() );
-		return ((OverlayHolder) scene.getRoot()).getOverlay();
+		Preconditions.checkNotNull( scene );
+		if( scene.getRoot() instanceof OverlayHolder )
+			return ( ( OverlayHolder )scene.getRoot() ).getOverlay();
+		else
+			return new Overlay.NoOpOverlay();
 	}
 
 	@Nonnull
@@ -138,8 +144,8 @@ public class UIUtils
 		double imageHeight = image.getHeight();
 		double scale = Math.min( maxWidth / imageWidth, maxHeight / imageHeight );
 
-		int width = (int) (imageWidth * scale);
-		int height = (int) (imageHeight * scale);
+		int width = ( int )( imageWidth * scale );
+		int height = ( int )( imageHeight * scale );
 
 		BufferedImage scaledImage = new BufferedImage( width, height, BufferedImage.TYPE_INT_ARGB );
 

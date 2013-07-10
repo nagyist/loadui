@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import com.eviware.loadui.ui.fx.views.window.PaneOverlayHolder;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -38,10 +39,7 @@ import javafx.scene.Node;
 import javafx.scene.SceneBuilder;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.PopupControl;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.PaneBuilder;
-import javafx.scene.layout.StackPaneBuilder;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
@@ -62,7 +60,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.util.concurrent.SettableFuture;
 
-@Category( GUITest.class )
+@Category(GUITest.class)
 public class ToolBoxTest
 {
 	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();
@@ -83,13 +81,18 @@ public class ToolBoxTest
 		{
 			toolbox = new ToolBox<>( "ToolBox" );
 			toolbox.setMaxWidth( 120 );
+			toolbox.setMaxHeight( 400 );
 			List<Rectangle> everything = new ArrayList<Rectangle>( allRects );
 			everything.addAll( rectsToAdd );
 			toolbox.setComparator( Ordering.explicit( everything ) );
 			toolbox.setCategoryComparator( Ordering.explicit( Color.RED.toString(), Color.BLUE.toString(),
 					Color.GREEN.toString(), Color.YELLOW.toString(), Color.ORANGE.toString(), "Renamed" ) );
+
+			PaneOverlayHolder root = new PaneOverlayHolder();
+			root.add( toolbox );
+
 			primaryStage.setScene( SceneBuilder.create().stylesheets( "/com/eviware/loadui/ui/fx/loadui-style.css" )
-					.width( 600 ).height( 350 ).root( PaneBuilder.create().children( toolbox ).build() ).build() );
+					.width( 600 ).height( 750 ).root( root ).build() );
 
 			primaryStage.show();
 
@@ -154,20 +157,21 @@ public class ToolBoxTest
 	public void shouldScrollUsingButtons() throws Exception
 	{
 		testScrolling( new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				controller.click( ".nav.up" );
-			}
-		}, new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				controller.click( ".nav.down" );
-			}
-		} );
+							{
+								@Override
+								public void run()
+								{
+									controller.click( ".nav.up" );
+								}
+							}, new Runnable()
+							{
+								@Override
+								public void run()
+								{
+									controller.click( ".nav.down" );
+								}
+							}
+		);
 	}
 
 	@Test
@@ -176,20 +180,21 @@ public class ToolBoxTest
 		Button prevButton = find( ".nav.up" );
 		controller.click( prevButton ).click( prevButton ).click( prevButton );
 		testScrolling( new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				controller.move( ".tool-box" ).scroll( -1 );
-			}
-		}, new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				controller.move( ".tool-box" ).scroll( 1 );
-			}
-		} );
+							{
+								@Override
+								public void run()
+								{
+									controller.move( ".tool-box" ).scroll( -1 );
+								}
+							}, new Runnable()
+							{
+								@Override
+								public void run()
+								{
+									controller.move( ".tool-box" ).scroll( 1 );
+								}
+							}
+		);
 	}
 
 	private static void testScrolling( Runnable prev, Runnable next ) throws Exception
@@ -384,14 +389,30 @@ public class ToolBoxTest
 				catch( Exception e )
 				{
 					future.set( e );
+					runnableDone.set( false );
 				}
 			}
 		} );
 
-		runnableDone.get( 5, TimeUnit.SECONDS );
-		Thread.sleep( 500 ); // really necessary, JavaFX seems to delay to update the graphics sometimes!!
-		future.set( TestFX.findAll( "Rectangle" ) );
-		System.out.println( "Set the future rectangles" );
+		boolean doneOk = runnableDone.get( 5, TimeUnit.SECONDS );
+		if( doneOk )
+		{
+			System.out.println( "DoneOK so we can set the rectangles now" );
+			controller.sleep( 250 );
+			Platform.runLater( new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					future.set( TestFX.findAll( "ToolBox Rectangle" ) );
+					System.out.println( "Set the future rectangles" );
+				}
+			} );
+		}
+		else
+		{
+			System.out.println( "Did not set rectangles, there was an Exception" );
+		}
 
 	}
 
