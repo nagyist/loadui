@@ -58,6 +58,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
+import com.sun.javafx.PlatformUtil;
 
 public class TestStepsTableModel
 {
@@ -158,25 +159,27 @@ public class TestStepsTableModel
 		public ObservableValue<Label> call( CellDataFeatures<TestStep, Label> p )
 		{
 			TestStep step = p.getValue();
-			java.awt.Image awtImage = null;
 
-			try
+			ImageIcon testStepIcon = null;
+
+			//TODO MAC this check can be reverted after Java8 when Mac OS X is no longer in headless mode. 
+			if( PlatformUtil.isMac() )
 			{
-				awtImage = step.getIcon().getImage();
+				testStepIcon = new ImageIcon( this.getClass().getResource(
+						"/images/teststeps/" + step.getClass().getSimpleName() + ".gif" ) );
 			}
-			catch( NullPointerException _ )
+			else
 			{
-				try
-				{
-					awtImage = new ImageIcon( this.getClass().getResource(
-							"/images/teststeps/" + step.getClass().getSimpleName() + ".gif" ) ).getImage();
-				}
-				catch( NullPointerException __ )
-				{
-					awtImage = new ImageIcon( this.getClass().getResource( "/images/teststeps/404.gif" ) ).getImage();
-				}
+				testStepIcon = step.getIcon();
 			}
-			
+
+			if( testStepIcon == null )
+			{
+				log.error( "Cannot find icon for teststep: " + step.getClass().getSimpleName() );
+				testStepIcon = new ImageIcon( this.getClass().getResource( "/images/teststeps/404.gif" ) );
+			}
+
+			java.awt.Image awtImage = testStepIcon.getImage();
 			BufferedImage bufferedImage = SwingFXUtils2.toBufferedImageUnchecked( awtImage );
 			WritableImage fxImage = new WritableImage( bufferedImage.getWidth(), bufferedImage.getHeight() );
 			SwingFXUtils.toFXImage( bufferedImage, fxImage );
