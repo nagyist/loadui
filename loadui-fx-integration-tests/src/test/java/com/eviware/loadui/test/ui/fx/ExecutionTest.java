@@ -15,129 +15,118 @@
  */
 package com.eviware.loadui.test.ui.fx;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
-import javafx.scene.Node;
-import javafx.stage.Stage;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-
 import com.eviware.loadui.api.model.ProjectItem;
+import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import com.eviware.loadui.ui.fx.util.test.TestFX;
-import com.eviware.loadui.util.test.TestUtils;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import org.hamcrest.Matchers;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
+import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
+import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.WEB_PAGE_RUNNER;
+import static com.eviware.loadui.ui.fx.util.test.TestFX.find;
+import static com.eviware.loadui.ui.fx.util.test.TestFX.findAll;
+import static com.google.common.collect.Collections2.filter;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.Assert.*;
 
 /**
- * 
  * @author renato
- * 
  */
-@Category( IntegrationTest.class )
-public class ExecutionTest
+@Category(IntegrationTest.class)
+public class ExecutionTest extends FxIntegrationTestBase
 {
 
-	private static TestFX controller;
+	static final String NON_RESPONDING_VALID_IP_ADDRESS = "111.111.111.1";
 
-	private static final Predicate<Node> FIXED_RATE = new Predicate<Node>()
+	@Override
+	public TestState getStartingState()
 	{
-		@Override
-		public boolean apply( Node input )
-		{
-			if( input.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
-			{
-				return input.toString().equals( "Fixed Rate" );
-			}
-			return false;
-		}
-	};
-
-	private static final Predicate<Node> WEB_PAGE_RUNNER = new Predicate<Node>()
-	{
-		@Override
-		public boolean apply( Node input )
-		{
-			if( input.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
-			{
-				return input.toString().equals( "Web Page Runner" );
-			}
-			return false;
-		}
-	};
-
-	@BeforeClass
-	public static void enterState() throws Exception
-	{
-		ProjectLoadedWithoutAgentsState.STATE.enter();
-		controller = GUI.getController();
-	}
-
-	@AfterClass
-	public static void leaveState() throws Exception {
-		ProjectLoadedWithoutAgentsState.STATE.getParent().enter();
+		return ProjectLoadedWithoutAgentsState.STATE;
 	}
 
 	@Test
 	public void canRunWebRunnerAndAbortExecution() throws Exception
 	{
 
+		// GIVEN
 		ProjectItem project = ProjectLoadedWithoutAgentsState.STATE.getProject();
 
-		controller.click( "#Generators" ).drag( FIXED_RATE ).by( 150, -50 ).drop();
-		TestUtils.awaitCondition( new Callable<Boolean>()
+		connect( FIXED_RATE_GENERATOR ).to( WEB_PAGE_RUNNER );
+
+		controller.click( webPageRunnerInput() ).type( NON_RESPONDING_VALID_IP_ADDRESS );
+
+		// WHEN
+		runTestFor( 2, SECONDS );
+
+		// THEN
+		assertTrue( project.isRunning() );
+		assertEquals( 1, extraStages().size() );
+
+		// WHEN
+		clickOnAbortButton();
+
+		// THEN
+		assertFalse( project.isRunning() );
+		assertThat( numberOfAbortedRequests(), greaterThan( 1 ) );
+
+	}
+
+	private Node webPageRunnerInput()
+	{
+		return find( ".text-input", robot.getComponentNode( WEB_PAGE_RUNNER ) );
+	}
+
+	private void clickOnAbortButton()
+	{
+		Node abortButton = extraStages().get( 0 ).getScene().lookup( "#abort-requests" );
+		controller.click( abortButton ).sleep( 500 );
+	}
+
+	private List<Stage> extraStages()
+	{
+		return ( List<Stage> )TestFX.find( ".canvas-object-view" ).getScene().getRoot().getProperties()
+				.get( "OTHER_STAGES" );
+	}
+
+	private int numberOfAbortedRequests()
+	{
+		Set<Node> allVBoxes = findAll( "VBox", robot.getComponentNode( WEB_PAGE_RUNNER ) );
+		Collection<Node> discardedBoxes = filter( allVBoxes, new Predicate<Node>()
 		{
 			@Override
-			public Boolean call() throws Exception
+			public boolean apply( @Nullable Node input )
 			{
-				return TestFX.findAll( ".canvas-object-view" ).size() == 1;
+				if( input != null && input instanceof VBox && ( ( VBox )input ).getChildren().size() == 2 )
+				{
+					Node firstChild = ( ( VBox )input ).getChildren().get( 0 );
+					return ( firstChild instanceof Label ) &&
+							( ( Label )firstChild ).getText().equals( "Discarded" );
+				}
+				return false;
 			}
 		} );
 
-		controller.click( "#Runners .expander-button" ).sleep( 500 ).drag( WEB_PAGE_RUNNER ).by( 150, 150 ).drop();
-		TestUtils.awaitCondition( new Callable<Boolean>()
+		if( discardedBoxes.size() != 1 )
+			throw new RuntimeException( "Could not find the Discarded box in the Web Page Runner" );
+		else
 		{
-			@Override
-			public Boolean call() throws Exception
-			{
-				return TestFX.findAll( ".canvas-object-view" ).size() == 2;
-			}
-		}, 30 );
-
-		Set<Node> outputs = TestFX.findAll( ".canvas-object-view .terminal-view.output-terminal" );
-		Set<Node> inputs = TestFX.findAll( ".canvas-object-view .terminal-view.input-terminal" );
-
-		System.out.println( "Outputs: " + outputs.size() );
-		System.out.println( "Inputs: " + inputs.size() );
-
-		controller.drag( Iterables.get( outputs, 0 ) ).to( Iterables.get( inputs, 1 ) )
-				.click( ".canvas-object-view .text-input" ).type( "132.134.110.6" )
-				.click( ".project-playback-panel .play-button" ).sleep( 2000 );
-
-		assertTrue( project.isRunning() );
-
-		controller.click( ".project-playback-panel .play-button" ).sleep( 500 );
-
-		@SuppressWarnings( "unchecked" )
-		List<Stage> stages = ( List<Stage> )TestFX.find( ".canvas-object-view" ).getScene().getRoot().getProperties()
-				.get( "OTHER_STAGES" );
-		assertEquals( 1, stages.size() );
-
-		Node abortButton = stages.get( 0 ).getScene().lookup( "#abort-requests" );
-		controller.click( abortButton ).sleep( 500 );
-
-		assertFalse( project.isRunning() );
-
+			Node discardedTextNode = ( ( VBox )discardedBoxes.iterator().next() ).getChildren().get( 1 );
+			return Integer.parseInt( ( ( Label )discardedTextNode ).getText() );
+		}
 	}
 
 }
