@@ -1,29 +1,30 @@
 package com.eviware.loadui.ui.fx.util.test;
 
-import static com.eviware.loadui.ui.fx.util.test.TestFX.findAll;
-
-import java.awt.Point;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
-import javafx.scene.Node;
-import javafx.stage.Window;
-import javafx.util.Duration;
-
 import com.eviware.loadui.util.test.TestUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import javafx.scene.Node;
+import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.stage.Window;
+
+import java.awt.*;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
+import static com.eviware.loadui.ui.fx.util.test.TestFX.find;
+import static com.eviware.loadui.ui.fx.util.test.TestFX.findAll;
 
 public class LoadUiRobot
 {
 	public enum Component
 	{
 		FIXED_RATE_GENERATOR( "generators", "Fixed Rate" ), TABLE_LOG( "output", "Table Log" ), WEB_PAGE_RUNNER(
-				"runners", "Web Page Runner" );
+			"runners", "Web Page Runner" );
 
 		public final String category;
 		public final String name;
@@ -62,26 +63,13 @@ public class LoadUiRobot
 		Set<Node> oldOutputs = findAll( ".canvas-object-view .terminal-view.output-terminal" );
 		Set<Node> oldInputs = findAll( ".canvas-object-view .terminal-view.input-terminal" );
 
-		final Predicate<Node> isDescriptor = new Predicate<Node>()
-		{
-			@Override
-			public boolean apply( Node input )
-			{
-				if( input.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
-				{
-					return input.toString().equals( component.name );
-				}
-				return false;
-			}
-		};
+		expandCategoryOf( component );
 
-		scrollToCategory( component );
-		expandCategory( component );
-
-		Window window = TestFX.find( "#runners.category" ).getScene().getWindow();
+		Window window = find( "#runners.category" ).getScene().getWindow();
 		int windowX = ( int )window.getX();
 		int windowY = ( int )window.getY();
-		controller.drag( isDescriptor ).to( windowX + targetPoint.x, windowY + targetPoint.y );
+		controller.drag( predicateForIconOf( component ) )
+				.to( windowX + targetPoint.x, windowY + targetPoint.y );
 
 		TestUtils.awaitCondition( new Callable<Boolean>()
 		{
@@ -100,15 +88,32 @@ public class LoadUiRobot
 		return new ComponentHandle( inputs, outputs, controller, this );
 	}
 
-	private void expandCategory( Component component )
+	public Predicate<Node> predicateForIconOf( final Component component )
 	{
-		if( !TestFX.findAll( "#" + component.category + ".category .expander-button" ).isEmpty() )
+		return new Predicate<Node>()
 		{
-			controller.click( "#" + component.category + ".category .expander-button" );
-		}
+			@Override
+			public boolean apply( Node input )
+			{
+				if( input.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
+				{
+					return input.toString().equals( component.name );
+				}
+				return false;
+			}
+		};
 	}
 
-	private void scrollToCategory( Component component )
+	public void expandCategoryOf( Component component )
+	{
+		if( TestFX.findAll( "#" + component.category + ".category .expander-button" ).isEmpty() )
+		{
+			scrollToCategoryOf( component );
+		}
+		controller.click( "#" + component.category + ".category .expander-button" );
+	}
+
+	public void scrollToCategoryOf( Component component )
 	{
 		int maxToolboxCategories = 50;
 		while( TestFX.findAll( "#" + component.category + ".category" ).isEmpty() )
@@ -118,6 +123,32 @@ public class LoadUiRobot
 						+ " in component ToolBox." );
 			controller.move( "#runners.category" ).scroll( 10 );
 		}
+	}
+
+	public Node getComponentNode( Component component, String... optionalName )
+	{
+		if( optionalName.length > 0 )
+		{
+			return findComponentByName( optionalName[0] );
+		} else {
+			return findComponentByName( component.name );
+		}
+	}
+
+	private Node findComponentByName( String name )
+	{
+		for( Node compNode : findAll( ".canvas-object-view" ) )
+		{
+			Set<Node> textLabels = findAll( "Label", find( "#topBar", compNode ) );
+			for( Node label : textLabels )
+			{
+				if( ( ( Label )label ).getText().equals( name ) )
+				{
+					return compNode;
+				}
+			}
+		}
+		return null;
 	}
 
 	public void clickPlayStopButton()
