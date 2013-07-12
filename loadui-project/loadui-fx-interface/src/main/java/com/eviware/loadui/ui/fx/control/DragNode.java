@@ -33,7 +33,6 @@ import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Window;
@@ -308,6 +307,7 @@ public class DragNode implements Draggable
 			UIUtils.getOverlayFor( getNode().getScene() ).hide( getNode() );
 		}
 		DragNode.this.setVisible( false );
+		DragNode.this.getDragSource().setVisible( true );
 	}
 
 	private static class DragNodeBehavior
@@ -317,8 +317,8 @@ public class DragNode implements Draggable
 			@Override
 			public void handle( MouseEvent event )
 			{
-				Node source = ( Node )event.getSource();
-				DragNode dragNode = ( DragNode )source.getProperties().get( DRAG_NODE_PROP_KEY );
+				Node source = (Node) event.getSource();
+				DragNode dragNode = (DragNode) source.getProperties().get( DRAG_NODE_PROP_KEY );
 				if( dragNode != null )
 				{
 					double xOffset = dragNode.getNode().getLayoutBounds().getMinX();
@@ -347,8 +347,8 @@ public class DragNode implements Draggable
 			@Override
 			public void handle( MouseEvent event )
 			{
-				Node source = ( Node )event.getSource();
-				final DragNode dragNode = ( DragNode )source.getProperties().get( DRAG_NODE_PROP_KEY );
+				Node source = (Node) event.getSource();
+				final DragNode dragNode = (DragNode) source.getProperties().get( DRAG_NODE_PROP_KEY );
 				if( dragNode != null )
 				{
 					positionNodeAtMouseEvent( event, dragNode );
@@ -416,9 +416,9 @@ public class DragNode implements Draggable
 			{
 				onReleased.fireInvalidation();
 
-				Node source = ( Node )event.getSource();
-				final DragNode dragNode = ( DragNode )source.getProperties().get( DRAG_NODE_PROP_KEY );
-				
+				Node source = (Node) event.getSource();
+				final DragNode dragNode = (DragNode) source.getProperties().get( DRAG_NODE_PROP_KEY );
+
 				if( dragNode != null )
 				{
 					if( dragNode.currentlyHovered != null )

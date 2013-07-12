@@ -15,6 +15,10 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
+import com.eviware.loadui.ui.fx.api.LoaduiFXConstants;
+import com.eviware.loadui.ui.fx.api.intent.AbortableBlockingTask;
+import com.eviware.loadui.ui.fx.api.intent.BlockingTask;
+import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -31,19 +35,10 @@ import javafx.scene.SceneBuilder;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.Tab;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.PaneBuilder;
-import javafx.scene.layout.RegionBuilder;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.StackPaneBuilder;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.stage.StageBuilder;
 import javafx.stage.WindowEvent;
-
-import com.eviware.loadui.ui.fx.api.LoaduiFXConstants;
-import com.eviware.loadui.ui.fx.api.intent.AbortableBlockingTask;
-import com.eviware.loadui.ui.fx.api.intent.BlockingTask;
-import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 
 public class DetachableTab extends Tab
 {
@@ -103,7 +98,7 @@ public class DetachableTab extends Tab
 		contentProperty().bind(
 				Bindings
 						.when( detachedProperty )
-						.<Pane> then(
+						.<Pane>then(
 								PaneBuilder.create().id( "placeholder" ).style( "-fx-background-color: darkgrey;" ).build() )
 						.otherwise( detachableContentProperty ) );
 
@@ -129,8 +124,10 @@ public class DetachableTab extends Tab
 						setDetached( !isDetached() );
 					}
 				} ).build();
-		
-		detachButton.visibleProperty().bind( selectedProperty() );
+
+		//detachButton.visibleProperty().bind( selectedProperty() );
+		detachButton.setVisible( false ); /* For now, detachable tabs have too many problems. See LOADUI-869. */
+
 		setGraphic( detachButton );
 	}
 
@@ -140,7 +137,7 @@ public class DetachableTab extends Tab
 		final Node detachableContent = getDetachableContent();
 		detachedStage = StageBuilder
 				.create()
-				.icons( ( ( Stage )getTabPane().getScene().getWindow() ).getIcons() )
+				.icons( ((Stage) getTabPane().getScene().getWindow()).getIcons() )
 				.title( getText() )
 				.width( getTabPane().getWidth() )
 				.height( getTabPane().getHeight() )

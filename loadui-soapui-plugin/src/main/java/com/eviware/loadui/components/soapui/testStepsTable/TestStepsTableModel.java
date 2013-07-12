@@ -34,7 +34,6 @@ import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableColumnBuilder;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableViewBuilder;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.ImageViewBuilder;
 import javafx.scene.image.WritableImage;
@@ -42,6 +41,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 
 import javax.annotation.Nonnull;
+import javax.swing.ImageIcon;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +58,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
+import com.sun.javafx.PlatformUtil;
 
 public class TestStepsTableModel
 {
@@ -158,7 +159,27 @@ public class TestStepsTableModel
 		public ObservableValue<Label> call( CellDataFeatures<TestStep, Label> p )
 		{
 			TestStep step = p.getValue();
-			java.awt.Image awtImage = step.getIcon().getImage();
+
+			ImageIcon testStepIcon = null;
+
+			//TODO MAC this check can be reverted after Java8 when Mac OS X is no longer in headless mode. 
+			if( PlatformUtil.isMac() )
+			{
+				testStepIcon = new ImageIcon( this.getClass().getResource(
+						"/images/teststeps/" + step.getClass().getSimpleName() + ".gif" ) );
+			}
+			else
+			{
+				testStepIcon = step.getIcon();
+			}
+
+			if( testStepIcon == null )
+			{
+				log.error( "Cannot find icon for teststep: " + step.getClass().getSimpleName() );
+				testStepIcon = new ImageIcon( this.getClass().getResource( "/images/teststeps/404.gif" ) );
+			}
+
+			java.awt.Image awtImage = testStepIcon.getImage();
 			BufferedImage bufferedImage = SwingFXUtils2.toBufferedImageUnchecked( awtImage );
 			WritableImage fxImage = new WritableImage( bufferedImage.getWidth(), bufferedImage.getHeight() );
 			SwingFXUtils.toFXImage( bufferedImage, fxImage );

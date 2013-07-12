@@ -62,7 +62,7 @@
 }
 
 .detachable-tab #detachButton {
-	-fx-border-color: transparent; 
+	-fx-border-color: transparent;
 	-color-button-gradient: transparent;
 	-color-button-border: transparent;
 	-color-arrow: -fx-body-color;
