@@ -5,7 +5,11 @@ set LOADUI_HOME=%~dp0
 cd /d %~dp0 
 echo %CD%
 
-set JAVA=jre/bin/java
+set JAVA=java
+
+if exist jre/bin/java.exe (
+    set JAVA=jre/bin/java.exe
+)
 
 :SET_CLASSPATH
 
