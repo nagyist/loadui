@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans   
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd                      
        http://www.springframework.org/schema/osgi  
        http://www.springframework.org/schema/osgi/spring-osgi.xsd">
-       
-    <osgi:reference id="executionManager"  interface="com.eviware.loadui.api.statistics.store.ExecutionManager" />
-    <osgi:reference id="testEventManager"  interface="com.eviware.loadui.api.testevents.TestEventManager" />
-    <osgi:reference id="statisticsManager" interface="com.eviware.loadui.api.statistics.StatisticsManager" />
-    <osgi:reference id="workspaceProvider" interface="com.eviware.loadui.api.model.WorkspaceProvider" />
-    
-    <osgi:list id="imageResolvers" interface="com.eviware.loadui.ui.fx.api.ImageResolver" cardinality="0..N" />
-    
-    <osgi:service ref="eventLogInspector"  interface="com.eviware.loadui.ui.fx.api.Inspector" />
-	<!-- <osgi:service ref="systemLogInspector" interface="com.eviware.loadui.ui.fx.api.Inspector" /> -->
-	<osgi:service ref="assertionInspector" interface="com.eviware.loadui.ui.fx.api.Inspector" />
-	<osgi:service ref="executionsInfo" interface="com.eviware.loadui.ui.fx.api.analysis.ExecutionsInfo"/>
-	
+
+    <osgi:reference id="executionManager" interface="com.eviware.loadui.api.statistics.store.ExecutionManager"/>
+    <osgi:reference id="testEventManager" interface="com.eviware.loadui.api.testevents.TestEventManager"/>
+    <osgi:reference id="statisticsManager" interface="com.eviware.loadui.api.statistics.StatisticsManager"/>
+    <osgi:reference id="workspaceProvider" interface="com.eviware.loadui.api.model.WorkspaceProvider"/>
+
+    <osgi:list id="imageResolvers" interface="com.eviware.loadui.ui.fx.api.ImageResolver" cardinality="0..N"/>
+
+    <osgi:service ref="eventLogInspector" interface="com.eviware.loadui.ui.fx.api.Inspector"/>
+    <osgi:service ref="systemLogInspector" interface="com.eviware.loadui.ui.fx.api.Inspector"/>
+    <osgi:service ref="assertionInspector" interface="com.eviware.loadui.ui.fx.api.Inspector"/>
+    <osgi:service ref="executionsInfo" interface="com.eviware.loadui.ui.fx.api.analysis.ExecutionsInfo"/>
+
 </beans>

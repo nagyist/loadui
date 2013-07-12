@@ -15,20 +15,58 @@
  */
 package com.eviware.loadui.ui.fx.views.syslog;
 
+import com.eviware.loadui.ui.fx.api.Inspector;
 import javafx.beans.property.ReadOnlyProperty;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.layout.RegionBuilder;
-
-import com.eviware.loadui.ui.fx.api.Inspector;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBuilder;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.AnchorPaneBuilder;
+import javafx.scene.layout.HBoxBuilder;
+import javafx.scene.layout.Pane;
 
 public class SystemLogInspector implements Inspector
 {
+	private final AnchorPane panel;
+	private final SystemLogView systemLog = new SystemLogView();
+
+	public SystemLogInspector()
+	{
+		Button copyButton = ButtonBuilder.create().text( "Copy All" ).onAction( new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle( ActionEvent actionEvent )
+			{
+				systemLog.copyAllRowsToClipboard();
+			}
+		} ).build();
+		Button clearButton = ButtonBuilder.create().text( "Clear" ).onAction( new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle( ActionEvent actionEvent )
+			{
+				systemLog.clear();
+			}
+		} ).build();
+		Pane buttonPane = HBoxBuilder.create().children( copyButton, clearButton ).spacing( 6 ).build();
+		panel = AnchorPaneBuilder.create().padding( new Insets( 9 ) ).styleClass( "inspector" ).children( systemLog, buttonPane )
+				.build();
+		AnchorPane.setTopAnchor( systemLog, 0.0 );
+		AnchorPane.setRightAnchor( systemLog, 0.0 );
+		AnchorPane.setBottomAnchor( systemLog, 31.0 );
+		AnchorPane.setLeftAnchor( systemLog, 0.0 );
+		AnchorPane.setBottomAnchor( buttonPane, 0.0 );
+		AnchorPane.setRightAnchor( buttonPane, 0.0 );
+	}
+
 	@Override
 	public void initialize( ReadOnlyProperty<Scene> sceneProperty )
 	{
-		// TODO Auto-generated method stub
-
+		systemLog.initialize();
 	}
 
 	@Override
@@ -46,7 +84,7 @@ public class SystemLogInspector implements Inspector
 	@Override
 	public Node getPanel()
 	{
-		return RegionBuilder.create().style( "-fx-background-color: yellow;" ).build();
+		return panel;
 	}
 
 	@Override

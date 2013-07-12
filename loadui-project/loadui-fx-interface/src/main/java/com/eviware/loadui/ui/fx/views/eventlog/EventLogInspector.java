@@ -15,6 +15,15 @@
  */
 package com.eviware.loadui.ui.fx.views.eventlog;
 
+import com.eviware.loadui.api.statistics.store.Execution;
+import com.eviware.loadui.api.statistics.store.ExecutionManager;
+import com.eviware.loadui.api.testevents.TestEvent;
+import com.eviware.loadui.api.testevents.TestEventManager;
+import com.eviware.loadui.ui.fx.api.Inspector;
+import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
+import com.eviware.loadui.ui.fx.api.perspective.PerspectiveEvent;
+import com.eviware.loadui.util.statistics.ExecutionListenerAdapter;
+import com.google.common.collect.Lists;
 import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -29,19 +38,8 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.StackPaneBuilder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.eviware.loadui.api.statistics.store.Execution;
-import com.eviware.loadui.api.statistics.store.ExecutionManager;
-import com.eviware.loadui.api.testevents.TestEvent;
-import com.eviware.loadui.api.testevents.TestEventManager;
-import com.eviware.loadui.ui.fx.api.Inspector;
-import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
-import com.eviware.loadui.ui.fx.api.perspective.PerspectiveEvent;
-import com.eviware.loadui.util.statistics.ExecutionListenerAdapter;
-import com.google.common.collect.Lists;
 
 public class EventLogInspector implements Inspector
 {
@@ -69,17 +67,15 @@ public class EventLogInspector implements Inspector
 		{
 			@Override
 			public void changed( ObservableValue<? extends Execution> arg0, Execution oldExecution,
-					final Execution newExecution )
+								 final Execution newExecution )
 			{
 				if( newExecution == null )
 				{
 					eventLog.getItems().clear();
-				}
-				else
+				} else
 				{
 					Platform.runLater( new Runnable()
 					{
-
 						@Override
 						public void run()
 						{
@@ -131,7 +127,7 @@ public class EventLogInspector implements Inspector
 				{
 					if( event.getArg() instanceof Execution && !execution.isBound() )
 					{
-						execution.setValue( ( Execution )event.getArg() );
+						execution.setValue( (Execution) event.getArg() );
 					}
 				}
 			} );
