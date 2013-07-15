@@ -26,6 +26,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.AnchorPaneBuilder;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBoxBuilder;
 
 public class SystemLogInspector implements Inspector
 {
@@ -34,7 +36,7 @@ public class SystemLogInspector implements Inspector
 
 	public SystemLogInspector()
 	{
-		Button copyButton = ButtonBuilder.create().text( "Copy to clipboard" ).rotate( 270 ).translateX( -25 ).translateY( 50 ).onAction( new EventHandler<ActionEvent>()
+		Button copyButton = ButtonBuilder.create().text( "Copy to clipboard" ).onAction( new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle( ActionEvent actionEvent )
@@ -42,13 +44,23 @@ public class SystemLogInspector implements Inspector
 				systemLog.copyToClipboard();
 			}
 		} ).build();
-		panel = AnchorPaneBuilder.create().padding( new Insets( 10 ) ).styleClass( "inspector" ).children( copyButton, systemLog )
+		Button clearButton = ButtonBuilder.create().text( "Clear" ).onAction( new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle( ActionEvent actionEvent )
+			{
+				systemLog.clear();
+			}
+		} ).build();
+		Pane buttonPane = VBoxBuilder.create().children( copyButton, clearButton ).build();
+		panel = AnchorPaneBuilder.create().padding( new Insets( 10 ) ).styleClass( "inspector" ).children( buttonPane, systemLog )
 				.build();
 		AnchorPane.setTopAnchor( systemLog, 0.0 );
 		AnchorPane.setRightAnchor( systemLog, 0.0 );
 		AnchorPane.setBottomAnchor( systemLog, 0.0 );
-		AnchorPane.setLeftAnchor( systemLog, 50.0 );
-		AnchorPane.setTopAnchor( copyButton, 0.0 );
+		AnchorPane.setLeftAnchor( systemLog, 150.0 );
+		AnchorPane.setTopAnchor( buttonPane, 0.0 );
+		AnchorPane.setLeftAnchor( buttonPane, 0.0 );
 	}
 
 	@Override

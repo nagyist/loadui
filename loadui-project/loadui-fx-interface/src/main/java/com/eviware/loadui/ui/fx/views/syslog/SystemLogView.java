@@ -44,6 +44,11 @@ public class SystemLogView extends ListView<LoggingEventWrapper>
 		return sb.toString();
 	}
 
+	public void clear()
+	{
+		getItems().clear();
+	}
+
 	class SystemLogAppender extends AppenderSkeleton
 	{
 		SystemLogAppender()
@@ -70,7 +75,7 @@ public class SystemLogView extends ListView<LoggingEventWrapper>
 						t.printStackTrace( pw );
 						StringTokenizer st = new StringTokenizer( sw.toString(), "\r\n" );
 						while( st.hasMoreElements() )
-							stackTrace.append( "   {st.nextElement()}" );
+							stackTrace.append( "   " ).append( st.nextElement() );
 
 						loggingEventWrapper.addAdditionalInfo( sw.toString() );
 					}
@@ -79,7 +84,7 @@ public class SystemLogView extends ListView<LoggingEventWrapper>
 
 					limitNumberOfRows();
 
-					getSelectionModel().selectLast();
+					scrollTo( getItems().size() - 1 );
 				}
 			} );
 		}
