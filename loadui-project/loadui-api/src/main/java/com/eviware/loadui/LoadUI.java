@@ -16,14 +16,18 @@
 package com.eviware.loadui;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.Properties;
 
 public class LoadUI
 {
+
 	/**
 	 * The main version number of loadUI.
 	 */
-	public static final String VERSION = System.getProperty( "loadui.version", "2.5.0" );
+	private static String loadUiVersion;
 
 	/**
 	 * Internal version number used to determine controller/agent compatibility.
@@ -55,6 +59,32 @@ public class LoadUI
 	public static final String KEY_STORE_PASSWORD = "loadui.ssl.keyStorePassword";
 	public static final String TRUST_STORE_PASSWORD = "loadui.ssl.trustStorePassword";
 
+	public static synchronized String version()
+	{
+		if( loadUiVersion == null )
+		{
+			Properties systemProperties = new Properties();
+			File sysPropsFile = Paths.get( getWorkingDir().getAbsolutePath(), "conf", "system.properties" ).toFile();
+			try(FileInputStream fis = new FileInputStream( sysPropsFile ))
+			{
+				System.out.println( "Loading LoadUI system.properties from " + sysPropsFile.getAbsolutePath() );
+				systemProperties.load( fis );
+				loadUiVersion = systemProperties.getProperty( "loadui.version" );
+				if( loadUiVersion == null )
+				{
+					throw new RuntimeException( "LoadUI version is unknown, it should be declared in " +
+							sysPropsFile.getAbsolutePath() );
+				}
+			}
+			catch( IOException e )
+			{
+				throw new RuntimeException( "LoadUI version is unknown, cannot read file " +
+						sysPropsFile.getAbsolutePath(), e );
+			}
+		}
+		return loadUiVersion;
+	}
+
 	public static boolean isController()
 	{
 		return CONTROLLER.equals( System.getProperty( INSTANCE ) );
@@ -68,12 +98,11 @@ public class LoadUI
 	public static boolean isPro()
 	{
 		return Boolean.parseBoolean( System.getProperty( "loadui.pro" ) );
-
 	}
 
 	/**
 	 * Gets the directory from where all relative paths should be resolved.
-	 * 
+	 *
 	 * @return
 	 */
 	public static File getWorkingDir()

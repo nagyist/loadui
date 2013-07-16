@@ -68,7 +68,7 @@ public class ExecutionDataSource extends JRAbstractBeanDataSource
 		switch( field.getName() )
 		{
 		case "loaduiVersion" :
-			return LoadUI.VERSION;
+			return LoadUI.version();
 		case "currentTime" :
 			return date.toString();
 		case "projectName" :

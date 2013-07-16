@@ -15,15 +15,23 @@
  */
 package com.eviware.loadui.launcher;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.io.RandomAccessFile;
+import com.eviware.loadui.launcher.LoadUICommandLineLauncher.CommandApplication;
+import com.eviware.loadui.launcher.LoadUIFXLauncher.FXApplication;
+import com.eviware.loadui.launcher.api.OSGiUtils;
+import com.eviware.loadui.launcher.util.BndUtils;
+import com.eviware.loadui.launcher.util.ErrorHandler;
+import javafx.application.Application;
+import org.apache.commons.cli.*;
+import org.apache.felix.framework.FrameworkFactory;
+import org.apache.felix.main.AutoProcessor;
+import org.apache.felix.main.Main;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.launch.Framework;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
 import java.math.BigInteger;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
@@ -34,33 +42,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.logging.Logger;
-
-import javafx.application.Application;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
-import org.apache.felix.framework.FrameworkFactory;
-import org.apache.felix.main.AutoProcessor;
-import org.apache.felix.main.Main;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.launch.Framework;
-
-import com.eviware.loadui.launcher.LoadUICommandLineLauncher.CommandApplication;
-import com.eviware.loadui.launcher.LoadUIFXLauncher.FXApplication;
-import com.eviware.loadui.launcher.api.OSGiUtils;
-import com.eviware.loadui.launcher.util.BndUtils;
-import com.eviware.loadui.launcher.util.ErrorHandler;
 
 /**
  * Starts an embedded OSGi Runtime (Felix) with all the required JavaFX packages
  * exposed, enabling JavaFX bundles to run.
- * 
+ *
  * @author dain.nilsson
  */
 public abstract class LoadUILauncher
@@ -76,7 +62,7 @@ public abstract class LoadUILauncher
 	protected static final String HELP_OPTION = "h";
 	protected static final String IGNORE_CURRENTLY_RUNNING_OPTION = "nolock";
 
-	protected final static Logger log = Logger.getLogger( LauncherWatchdog.class.getName() );
+	private final static Logger log = LoggerFactory.getLogger( LoadUILauncher.class );
 
 	protected final static File WORKING_DIR = new File( System.getProperty( "loadui.working", "." ) ).getAbsoluteFile();
 
@@ -95,21 +81,6 @@ public abstract class LoadUILauncher
 		}
 
 		Application.launch( FXApplication.class, args );
-	}
-
-	public static void loadPropertiesFile()
-	{
-		Properties systemProperties = new Properties();
-		try (FileInputStream fis = new FileInputStream( "conf" + File.separator + "system.properties" ))
-		{
-			systemProperties.load( fis );
-			for( Entry<Object, Object> entry : systemProperties.entrySet() )
-				System.setProperty( ( String )entry.getKey(), ( String )entry.getValue() );
-		}
-		catch( IOException e )
-		{
-			// Ignore
-		}
 	}
 
 	protected static Framework framework;
@@ -153,7 +124,7 @@ public abstract class LoadUILauncher
 
 		if( externalFile.exists() )
 		{
-			try (InputStream is = new FileInputStream( externalFile ))
+			try(InputStream is = new FileInputStream( externalFile ))
 			{
 				Properties buildinfo = new Properties();
 				buildinfo.load( is );
@@ -336,7 +307,7 @@ public abstract class LoadUILauncher
 
 			try
 			{
-				@SuppressWarnings( "resource" )
+				@SuppressWarnings("resource")
 				RandomAccessFile randomAccessFile = new RandomAccessFile( lockFile, "rw" );
 				FileLock lock = randomAccessFile.getChannel().tryLock();
 				if( lock == null )
@@ -414,7 +385,7 @@ public abstract class LoadUILauncher
 	/**
 	 * Allows sub-classes to check the installed bundles before they are started.
 	 * Default action does nothing.
-	 * 
+	 *
 	 * @param bundles
 	 */
 	protected void beforeBundlesStart( Bundle[] bundles )
@@ -424,8 +395,6 @@ public abstract class LoadUILauncher
 
 	protected final void initSystemProperties()
 	{
-		loadPropertiesFile();
-
 		setDefaultSystemProperty( LOADUI_HOME, System.getProperty( "user.home", "." ) + File.separator + ".loadui" );
 		setDefaultSystemProperty( "groovy.root", System.getProperty( LOADUI_HOME ) + File.separator + ".groovy" );
 
@@ -449,7 +418,7 @@ public abstract class LoadUILauncher
 		//Remove the old expired keystore, if it exists
 		if( keystore.exists() )
 		{
-			try (FileInputStream kis = new FileInputStream( keystore ))
+			try(FileInputStream kis = new FileInputStream( keystore ))
 			{
 				MessageDigest digest = MessageDigest.getInstance( "MD5" );
 				byte[] buffer = new byte[8192];
@@ -485,8 +454,8 @@ public abstract class LoadUILauncher
 
 	private void createKeyStore( File keystore )
 	{
-		try (FileOutputStream fos = new FileOutputStream( keystore );
-				InputStream is = getClass().getResourceAsStream( "/keystore.jks" ))
+		try(FileOutputStream fos = new FileOutputStream( keystore );
+			 InputStream is = getClass().getResourceAsStream( "/keystore.jks" ))
 		{
 			byte buf[] = new byte[1024];
 			int len;
@@ -502,8 +471,8 @@ public abstract class LoadUILauncher
 
 	private void createTrustStore( File truststore )
 	{
-		try (FileOutputStream fos = new FileOutputStream( truststore );
-				InputStream is = getClass().getResourceAsStream( "/certificate.pem" ))
+		try(FileOutputStream fos = new FileOutputStream( truststore );
+			 InputStream is = getClass().getResourceAsStream( "/certificate.pem" ))
 		{
 			byte buf[] = new byte[1024];
 			int len;

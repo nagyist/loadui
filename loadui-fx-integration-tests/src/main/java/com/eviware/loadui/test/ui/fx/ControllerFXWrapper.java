@@ -27,14 +27,18 @@ import org.osgi.framework.BundleException;
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.test.IntegrationTestUtils;
 import com.eviware.loadui.util.test.TestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An loadUI Controller which can be used for testing.
- * 
+ *
  * @author dain.nilsson
  */
 public class ControllerFXWrapper
 {
+	private static final Logger log = LoggerFactory.getLogger( ControllerFXWrapper.class );
+
 	private final File baseDir = new File( "target/controllerTest" );
 	private final File homeDir = new File( baseDir, ".loadui" );
 	private final OSGiFXLauncher launcher;
@@ -43,9 +47,9 @@ public class ControllerFXWrapper
 	public ControllerFXWrapper() throws Exception
 	{
 		if( baseDir.exists() && !IntegrationTestUtils.deleteRecursive( baseDir ) )
-			throw new RuntimeException( "Test directory already exists and cannot be deleted! "+ baseDir.getAbsolutePath() );
+			throw new RuntimeException( "Test directory already exists and cannot be deleted! " + baseDir.getAbsolutePath() );
 
-        System.out.println("basedir: "+baseDir.getAbsolutePath());
+		log.info( "Test Basedir: " + baseDir.getAbsolutePath() );
 		if( !baseDir.mkdir() )
 			throw new RuntimeException( "Could not create test directory!" );
 
@@ -60,6 +64,7 @@ public class ControllerFXWrapper
 			@Override
 			public void run()
 			{
+				log.info( "Calling OSGiFXLauncher.main(..) to start LoadUI bundles" );
 				OSGiFXLauncher.main( baseDir, new String[] { "-nolock", "--nofx=false" } );
 			}
 		} ).start();
@@ -88,8 +93,7 @@ public class ControllerFXWrapper
 		try
 		{
 			launcher.stop();
-		}
-		finally
+		} finally
 		{
 			IntegrationTestUtils.deleteRecursive( baseDir );
 		}

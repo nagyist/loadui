@@ -27,7 +27,7 @@
 					text="LoadUI" />
 				<Label fx:id="versionLabel" style="-fx-text-fill: white;" />
 				<fx:script>
-					versionLabel.text = java.lang.System.getProperty( "loadui.version" );
+					versionLabel.text = com.eviware.loadui.LoadUI.version();
 				</fx:script>
 			</HBox>
 			<Label style="-fx-text-fill: white; -fx-text-alignment: right" text="Copyright SmartBear Software&#10;&#10;www.loadui.org&#10;www.smartbear.com" />
