@@ -1,4 +1,4 @@
-/*
+package com.eviware.loadui.test;/*
  * Copyright 2013 SmartBear Software
  *
  * Licensed under the EUPL, Version 1.1 or - as soon they will be approved by the European Commission - subsequent
@@ -15,13 +15,14 @@
  */
 
 
-import com.eviware.loadui.test.CommandLineLauncherUtils;
+import com.eviware.loadui.test.CommandLineLauncherTestUtils;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.transform.Source;
 import java.io.File;
@@ -31,8 +32,8 @@ import java.util.Collection;
 import static com.eviware.loadui.util.test.matchers.StringLengthMatcher.lenghtGreaterThan;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.junit.Assert.assertThat;
 import static org.xmlmatchers.transform.XmlConverters.the;
 import static org.xmlmatchers.xpath.HasXPath.hasXPath;
 
@@ -41,20 +42,14 @@ import static org.xmlmatchers.xpath.HasXPath.hasXPath;
  * Date: 2013-07-04
  * Time: 10:59
  */
-@Category( IntegrationTest.class )
-public class commandLineRunnerReportTest
+@Category(IntegrationTest.class)
+public class CommandLineRunnerReportTest
 {
-	private static String pathToRunner;
+	protected static final Logger log = LoggerFactory.getLogger( CommandLineRunnerReportTest.class );
+
 	private static final String OUTPUT_FOLDER_NAME = "test-out-put";
-	private static final String GET_IMAGE_XPATH = "//jasperPrint[1]/page[1]/image[1]/imageSource[1]";
-
-
-	@BeforeClass
-	public static void findPath()
-	{
-		pathToRunner = CommandLineLauncherUtils.findPathToCommandLineBat();
-	}
-
+	private static final String GET_FIRST_CHART_IMAGE_XPATH = "//jasperPrint[1]/page[1]/image[1]/imageSource[1]";
+	private static final int MINIMUM_REASONABLE_CHARACTER_LENGTH_OF_CHART_IMAGE = 2000;
 
 	@After
 	public void deleteOutputFiles()
@@ -67,8 +62,7 @@ public class commandLineRunnerReportTest
 		}
 		catch( IOException e )
 		{
-			System.err.println( "Failed to delete output directory" );
-			e.printStackTrace();
+			log.warn( "Failed to delete output directory", e );
 		}
 	}
 
@@ -76,7 +70,8 @@ public class commandLineRunnerReportTest
 	public void reportCreatedTest()
 	{
 		//Given
-		int exitValue = launchCommandLineRunnerWithCommands( "-p", getProjectFilePath( "basictest.xml" ), "-L", "1:0:0", "-F", "XML", "-r", OUTPUT_FOLDER_NAME );
+		int exitValue = CommandLineLauncherTestUtils.launchCommandLineRunnerWithCommands(
+				"-p", getProjectFilePath( "basictest.xml" ), "-L", "1:0:0", "-F", "XML", "-r", OUTPUT_FOLDER_NAME );
 
 		//Then
 		assertThat( "Command line runner did not quit gracefully, exit value not as expected", exitValue, is( 0 ) );
@@ -85,18 +80,19 @@ public class commandLineRunnerReportTest
 		assertThat( outputFiles(), is( not( empty() ) ) );
 
 		//Then
-		assertThat( statisticsXMLFile(), hasXPath( GET_IMAGE_XPATH, lenghtGreaterThan( 2000 ) ) );
+		assertThat( statisticsXMLFile(), hasXPath( GET_FIRST_CHART_IMAGE_XPATH,
+				lenghtGreaterThan( MINIMUM_REASONABLE_CHARACTER_LENGTH_OF_CHART_IMAGE ) ) );
 
 	}
 
 	private Source statisticsXMLFile()
 	{
-		return the( CommandLineLauncherUtils.getXMLFrom( findFileWithNameContaining( outputFiles(), "statistics" ) ) );
+		return the( CommandLineLauncherTestUtils.getXMLFrom( findFileWithNameContaining( outputFiles(), "statistics" ) ) );
 	}
 
 	private Collection<File> outputFiles()
 	{
-		return CommandLineLauncherUtils.getFilesAt( getOutPutFolderPath() );
+		return CommandLineLauncherTestUtils.getFilesAt( getOutPutFolderPath() );
 	}
 
 	private File findFileWithNameContaining( Collection<File> outputFiles, String partOfName )
@@ -110,14 +106,9 @@ public class commandLineRunnerReportTest
 		throw new RuntimeException( "Could not find file with a name that contains \"" + partOfName + "\"" );
 	}
 
-	private int launchCommandLineRunnerWithCommands( String... Commands )
-	{
-		return CommandLineLauncherUtils.launchCommandLineRunner( pathToRunner, Commands );
-	}
-
 	private String getOutPutFolderPath()
 	{
-		return pathToRunner + File.separator + OUTPUT_FOLDER_NAME;
+		return CommandLineLauncherTestUtils.getPathToCommandLineRunnerFile() + File.separator + OUTPUT_FOLDER_NAME;
 	}
 
 	private String getProjectFilePath( String name )
