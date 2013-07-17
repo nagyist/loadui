@@ -15,7 +15,7 @@
  */
 
 
-import com.eviware.loadui.test.CommandLineLauncherUtils;
+import com.eviware.loadui.test.CommandLineLauncherTestUtils;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -42,7 +42,7 @@ import static org.xmlmatchers.xpath.HasXPath.hasXPath;
  * Date: 2013-07-04
  * Time: 10:59
  */
-@Category( IntegrationTest.class )
+@Category(IntegrationTest.class)
 public class CommandLineRunnerReportTest
 {
 	protected static final Logger log = LoggerFactory.getLogger( CommandLineRunnerReportTest.class );
@@ -70,7 +70,7 @@ public class CommandLineRunnerReportTest
 	public void reportCreatedTest()
 	{
 		//Given
-		int exitValue = CommandLineLauncherUtils.launchCommandLineRunnerWithCommands(
+		int exitValue = CommandLineLauncherTestUtils.launchCommandLineRunnerWithCommands(
 				"-p", getProjectFilePath( "basictest.xml" ), "-L", "1:0:0", "-F", "XML", "-r", OUTPUT_FOLDER_NAME );
 
 		//Then
@@ -81,18 +81,18 @@ public class CommandLineRunnerReportTest
 
 		//Then
 		assertThat( statisticsXMLFile(), hasXPath( GET_FIRST_CHART_IMAGE_XPATH,
-						lenghtGreaterThan( MINIMUM_REASONABLE_CHARACTER_LENGTH_OF_CHART_IMAGE ) ) );
+				lenghtGreaterThan( MINIMUM_REASONABLE_CHARACTER_LENGTH_OF_CHART_IMAGE ) ) );
 
 	}
 
 	private Source statisticsXMLFile()
 	{
-		return the( CommandLineLauncherUtils.getXMLFrom( findFileWithNameContaining( outputFiles(), "statistics" ) ) );
+		return the( CommandLineLauncherTestUtils.getXMLFrom( findFileWithNameContaining( outputFiles(), "statistics" ) ) );
 	}
 
 	private Collection<File> outputFiles()
 	{
-		return CommandLineLauncherUtils.getFilesAt( getOutPutFolderPath() );
+		return CommandLineLauncherTestUtils.getFilesAt( getOutPutFolderPath() );
 	}
 
 	private File findFileWithNameContaining( Collection<File> outputFiles, String partOfName )
@@ -108,7 +108,7 @@ public class CommandLineRunnerReportTest
 
 	private String getOutPutFolderPath()
 	{
-		return CommandLineLauncherUtils.findPathToCommandLineRunnerFile() + File.separator + OUTPUT_FOLDER_NAME;
+		return CommandLineLauncherTestUtils.getPathToCommandLineRunnerFile() + File.separator + OUTPUT_FOLDER_NAME;
 	}
 
 	private String getProjectFilePath( String name )

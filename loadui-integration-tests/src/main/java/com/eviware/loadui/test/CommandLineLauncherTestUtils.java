@@ -33,9 +33,9 @@ import static com.google.common.base.Preconditions.checkArgument;
  * Date: 2013-07-04
  * Time: 11:08
  */
-public class CommandLineLauncherUtils
+public class CommandLineLauncherTestUtils
 {
-	protected static final Logger log = LoggerFactory.getLogger( CommandLineLauncherUtils.class );
+	protected static final Logger log = LoggerFactory.getLogger( CommandLineLauncherTestUtils.class );
 	public static final String CMD_RUNNER_NAME_WINDOWS = "loadUI-cmd.bat";
 	public static final String CMD_RUNNER_NAME_OSX = "loadUI-cmd.command";
 	public static final String CMD_RUNNER_NAME_UNIX = "loadUI-cmd.sh";
@@ -44,10 +44,16 @@ public class CommandLineLauncherUtils
 	{
 		int exitValue = -1;
 
+		ProcessBuilder procBuilder = new ProcessBuilder( commands );
+
 		Process proc = null;
+
 		try
 		{
-			proc = Runtime.getRuntime().exec( commands );
+			proc = procBuilder
+					.inheritIO()
+					.directory( new File( getPathToCommandLineRunnerFile() ) )
+					.start();
 
 			attachStreamPrinter( proc );
 
@@ -156,14 +162,14 @@ public class CommandLineLauncherUtils
 		}
 		else // linux, mac, whatever
 		{
-			return new String[] {"cd",findPathToCommandLineRunnerFile() ,"&&","chmod", "+x", getLauncherPath(), "&&", "sh", getLauncherPath() };
+			return new String[] { "sh", getLauncherPath() };
 		}
 
 	}
 
 	private static String getLauncherPath()
 	{
-		return findPathToCommandLineRunnerFile() + File.separator + getCmdRunnerFileName();
+		return getPathToCommandLineRunnerFile() + File.separator + getCmdRunnerFileName();
 	}
 
 	static class StreamPrinter extends Thread
@@ -192,7 +198,7 @@ public class CommandLineLauncherUtils
 		}
 	}
 
-	public static String findPathToCommandLineRunnerFile()
+	public static String getPathToCommandLineRunnerFile()
 	{
 		Path pathA = Paths.get( "", "loadui-installers", "loadui-controller-installer", "target", "main", getCmdRunnerFileName() );
 		Path pathB = Paths.get( "", "..", "loadui-installers", "loadui-controller-installer", "target", "main", getCmdRunnerFileName() );
@@ -207,7 +213,7 @@ public class CommandLineLauncherUtils
 			return pathB.getParent().toFile().getAbsolutePath();
 		}
 
-		throw new RuntimeException( "Could not find path to the command line runner.  File at: " + pathA.toAbsolutePath().toString() + " or " + pathB.toAbsolutePath().toString() + " does not exist!" );
+		throw new RuntimeException( "Could not find path to the command line runner (" + getCmdRunnerFileName() + ").  File at: " + pathA.toAbsolutePath().toString() + " or " + pathB.toAbsolutePath().toString() + " does not exist!" );
 	}
 
 	private static String[] concat( String[] first, String[] second )
