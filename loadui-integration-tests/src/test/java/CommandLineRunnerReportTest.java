@@ -108,7 +108,7 @@ public class CommandLineRunnerReportTest
 
 	private String getOutPutFolderPath()
 	{
-		return CommandLineLauncherUtils.findPathToCommandLineBat() + File.separator + OUTPUT_FOLDER_NAME;
+		return CommandLineLauncherUtils.findPathToCommandLineRunnerFile() + File.separator + OUTPUT_FOLDER_NAME;
 	}
 
 	private String getProjectFilePath( String name )

@@ -156,14 +156,14 @@ public class CommandLineLauncherUtils
 		}
 		else // linux, mac, whatever
 		{
-			return new String[] { "chmod", "+x", getLauncherPath(), "&&", "sh", getLauncherPath() };
+			return new String[] {"cd",findPathToCommandLineRunnerFile() ,"&&","chmod", "+x", getLauncherPath(), "&&", "sh", getLauncherPath() };
 		}
 
 	}
 
 	private static String getLauncherPath()
 	{
-		return findPathToCommandLineBat() + File.separator + getCmdRunnerFileName();
+		return findPathToCommandLineRunnerFile() + File.separator + getCmdRunnerFileName();
 	}
 
 	static class StreamPrinter extends Thread
@@ -192,7 +192,7 @@ public class CommandLineLauncherUtils
 		}
 	}
 
-	public static String findPathToCommandLineBat()
+	public static String findPathToCommandLineRunnerFile()
 	{
 		Path pathA = Paths.get( "", "loadui-installers", "loadui-controller-installer", "target", "main", getCmdRunnerFileName() );
 		Path pathB = Paths.get( "", "..", "loadui-installers", "loadui-controller-installer", "target", "main", getCmdRunnerFileName() );
