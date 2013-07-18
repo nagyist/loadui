@@ -98,16 +98,16 @@ public class PlayButton extends StackPane
 		@Override
 		public void changed( ObservableValue<? extends Boolean> observable, Boolean wasPlaying, Boolean isPlaying )
 		{
-			log.debug( "Play Button state changed, isPlaying? " + isPlaying + ", isCanvasRunning? " + canvas.isRunning() );
+            log.debug( "Play Button state changed, isPlaying? " + isPlaying + ", isCanvasRunning? " + canvas.isRunning() );
 			if( isPlaying && !canvas.isRunning() )
 			{
-				canvas.triggerAction( CanvasItem.COUNTER_RESET_ACTION );
+                canvas.triggerAction( CanvasItem.COUNTER_RESET_ACTION );
 				canvas.triggerAction( CanvasItem.START_ACTION );
 				TestExecutionUtils.startCanvas( canvas );
 			}
 			else if( canvas.isRunning() && !isPlaying )
 			{
-				canvas.triggerAction( CanvasItem.STOP_ACTION );
+                canvas.triggerAction( CanvasItem.STOP_ACTION );
 				TestExecutionUtils.stopCanvas( canvas );
 			}
 		}
@@ -121,9 +121,10 @@ public class PlayButton extends StackPane
 		maxWidth( 27 );
 
 		playingProperty.addListener( playCanvas );
-		playingProperty.bindBidirectional( toggleButton.selectedProperty() );
+        playingProperty.setValue( canvas.isRunning() );
+        toggleButton.selectedProperty().bindBidirectional( playingProperty );
 
-		Circle border = CircleBuilder.create().styleClass( "play-button-border" ).radius( 14 ).build();
+        Circle border = CircleBuilder.create().styleClass( "play-button-border" ).radius( 14 ).build();
 		Region inner = RegionBuilder.create().styleClass( "inner-spinner-overlay" ).build();
 		Region outer = RegionBuilder.create().styleClass( "outer-spinner-overlay" ).build();
 		ProgressIndicator indicator = ProgressIndicatorBuilder.create().build();
