@@ -183,7 +183,7 @@ public class WorkspaceView extends StackPane
 				return popupWebEngine;
 			}
 		} );
-		webView.getEngine().load( props.getProperty( "starter.page.url" ) + "?version=" + LoadUI.VERSION );
+		webView.getEngine().load( props.getProperty( "starter.page.url" ) + "?version=" + LoadUI.version() );
 
 		initGettingStartedWizard();
 	}

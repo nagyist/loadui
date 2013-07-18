@@ -15,11 +15,7 @@
  */
 package com.eviware.loadui.launcher;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Hashtable;
-
+import com.eviware.loadui.LoadUI;
 import javafx.application.Application;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
@@ -29,16 +25,19 @@ import javafx.scene.SceneBuilder;
 import javafx.scene.control.LabelBuilder;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageBuilder;
-import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
-
+import javafx.stage.*;
 import org.apache.commons.cli.CommandLine;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Hashtable;
+import java.util.logging.Logger;
 
 public class LoadUIFXLauncher extends LoadUILauncher
 {
+	private final static Logger log = Logger.getLogger( LoadUIFXLauncher.class.getName() );
+
 	public static void main( String[] args )
 	{
 		Application.launch( FXApplication.class, args );
@@ -52,7 +51,7 @@ public class LoadUIFXLauncher extends LoadUILauncher
 	@Override
 	protected void processCommandLine( CommandLine cmdLine )
 	{
-		try (InputStream is = getClass().getResourceAsStream( "/packages-extra.txt" ))
+		try(InputStream is = getClass().getResourceAsStream( "/packages-extra.txt" ))
 		{
 			if( is != null )
 			{
@@ -81,7 +80,9 @@ public class LoadUIFXLauncher extends LoadUILauncher
 		@Override
 		public void start( final Stage stage ) throws Exception
 		{
-			File workingDir = new File( System.getProperty( "loadui.working", "." ) ).getAbsoluteFile();
+			log.info( "Starting FXApplication, LoadUI Version: " + LoadUI.version() );
+			File workingDir = LoadUI.getWorkingDir();
+			log.info( "LoadUI Working directory: " + workingDir );
 			Scene splashScene;
 
 			final String noFx = getParameters().getNamed().get( NOFX_OPTION );
@@ -89,8 +90,6 @@ public class LoadUIFXLauncher extends LoadUILauncher
 
 			if( "true".equals( agent ) )
 				setDefaultSystemProperty( "loadui.instance", "agent" );
-
-			loadPropertiesFile();
 
 			if( "false".equals( noFx ) )
 			{
@@ -113,7 +112,7 @@ public class LoadUIFXLauncher extends LoadUILauncher
 				}
 				catch( Exception e )
 				{
-					//e.printStackTrace();
+					log.warning( e.toString() );
 				}
 
 				setDefaultSystemProperty( "loadui.headless", "false" );

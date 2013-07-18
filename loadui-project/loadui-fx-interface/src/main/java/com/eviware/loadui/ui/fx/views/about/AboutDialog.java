@@ -64,7 +64,7 @@ public class AboutDialog extends PopupControl
 		FXMLLoader loader = new FXMLLoader( AboutDialog.class.getResource( AboutDialog.class.getSimpleName() + ".fxml" ) );
 		loader.setClassLoader( FXMLUtils.class.getClassLoader() );
 		loader.getNamespace().putAll(
-				ImmutableMap.of( "name", System.getProperty( LoadUI.NAME ), "version", LoadUI.VERSION, "buildDate",
+				ImmutableMap.of( "name", System.getProperty( LoadUI.NAME ), "version", LoadUI.version(), "buildDate",
 						System.getProperty( LoadUI.BUILD_DATE ), "buildVersion", System.getProperty( LoadUI.BUILD_NUMBER ) ) );
 		loader.setController( this );
 
@@ -100,7 +100,7 @@ public class AboutDialog extends PopupControl
 
 		logo.setImage( new Image( "res/about-logo.png" ) );
 
-		title.setText( String.format( "%s Version %s", System.getProperty( LoadUI.NAME, "LoadUI" ), LoadUI.VERSION ) );
+		title.setText( String.format( "%s Version %s", System.getProperty( LoadUI.NAME, "LoadUI" ), LoadUI.version() ) );
 		buildVersion
 				.setText( String.format( "Build version: %s", System.getProperty( LoadUI.BUILD_NUMBER, "[internal]" ) ) );
 		buildDate.setText( String.format( "Build version: %s", System.getProperty( LoadUI.BUILD_DATE, "unknown" ) ) );

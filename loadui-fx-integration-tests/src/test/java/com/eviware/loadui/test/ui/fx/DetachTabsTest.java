@@ -22,6 +22,7 @@ import java.util.concurrent.Callable;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -36,6 +37,7 @@ import com.eviware.loadui.util.test.TestUtils;
  * 
  */
 @Category( IntegrationTest.class )
+@Ignore(value = "Feature disabled until further notice. See LOADUI-869 and LOADUI-871")
 public class DetachTabsTest
 {
 

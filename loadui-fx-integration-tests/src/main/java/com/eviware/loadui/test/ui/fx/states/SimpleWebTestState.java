@@ -45,6 +45,8 @@ public class SimpleWebTestState extends FxTestState
 	@Override
 	protected void enterFromParent() throws Exception
 	{
+		//TODO this state is not yet implemented
+
 		controller.click( ".component-view .text-field" ).type( "www.google.com" );
 	}
 
