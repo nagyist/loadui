@@ -26,8 +26,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.AnchorPaneBuilder;
+import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBoxBuilder;
 
 public class SystemLogInspector implements Inspector
 {
@@ -36,12 +36,12 @@ public class SystemLogInspector implements Inspector
 
 	public SystemLogInspector()
 	{
-		Button copyButton = ButtonBuilder.create().text( "Copy to clipboard" ).onAction( new EventHandler<ActionEvent>()
+		Button copyButton = ButtonBuilder.create().text( "Copy All" ).onAction( new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle( ActionEvent actionEvent )
 			{
-				systemLog.copyToClipboard();
+				systemLog.copyAllRowsToClipboard();
 			}
 		} ).build();
 		Button clearButton = ButtonBuilder.create().text( "Clear" ).onAction( new EventHandler<ActionEvent>()
@@ -52,21 +52,21 @@ public class SystemLogInspector implements Inspector
 				systemLog.clear();
 			}
 		} ).build();
-		Pane buttonPane = VBoxBuilder.create().children( copyButton, clearButton ).build();
-		panel = AnchorPaneBuilder.create().padding( new Insets( 10 ) ).styleClass( "inspector" ).children( buttonPane, systemLog )
+		Pane buttonPane = HBoxBuilder.create().children( copyButton, clearButton ).spacing( 6 ).build();
+		panel = AnchorPaneBuilder.create().padding( new Insets( 9 ) ).styleClass( "inspector" ).children( systemLog, buttonPane )
 				.build();
 		AnchorPane.setTopAnchor( systemLog, 0.0 );
 		AnchorPane.setRightAnchor( systemLog, 0.0 );
-		AnchorPane.setBottomAnchor( systemLog, 0.0 );
-		AnchorPane.setLeftAnchor( systemLog, 150.0 );
-		AnchorPane.setTopAnchor( buttonPane, 0.0 );
-		AnchorPane.setLeftAnchor( buttonPane, 0.0 );
+		AnchorPane.setBottomAnchor( systemLog, 31.0 );
+		AnchorPane.setLeftAnchor( systemLog, 0.0 );
+		AnchorPane.setBottomAnchor( buttonPane, 0.0 );
+		AnchorPane.setRightAnchor( buttonPane, 0.0 );
 	}
 
 	@Override
 	public void initialize( ReadOnlyProperty<Scene> sceneProperty )
 	{
-		// TODO Auto-generated method stub
+		systemLog.initialize();
 	}
 
 	@Override

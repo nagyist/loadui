@@ -1,7 +1,11 @@
 package com.eviware.loadui.ui.fx.views.syslog;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.control.ContextMenuBuilder;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import org.apache.log4j.AppenderSkeleton;
@@ -15,7 +19,6 @@ import java.util.StringTokenizer;
 
 public class SystemLogView extends ListView<LoggingEventWrapper>
 {
-
 	public static final int MAX_NUMBER_OF_ROWS = 250;
 
 	public SystemLogView()
@@ -24,13 +27,17 @@ public class SystemLogView extends ListView<LoggingEventWrapper>
 		Logger.getLogger( "com.eviware.loadui" ).addAppender( appender );
 	}
 
-	public void copyToClipboard()
+	public void copyAllRowsToClipboard()
 	{
 		String allRowsAsText = extractContentToString();
+		copyToClipboard( allRowsAsText );
+	}
 
+	private void copyToClipboard( String text )
+	{
 		final Clipboard clipboard = Clipboard.getSystemClipboard();
 		final ClipboardContent content = new ClipboardContent();
-		content.putString( allRowsAsText );
+		content.putString( text );
 		clipboard.setContent( content );
 	}
 
@@ -47,6 +54,41 @@ public class SystemLogView extends ListView<LoggingEventWrapper>
 	public void clear()
 	{
 		getItems().clear();
+	}
+
+	public void initialize()
+	{
+		MenuItem copyItem = new MenuItem( "Copy Selected" );
+		copyItem.setOnAction( new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle( ActionEvent _ )
+			{
+				copyToClipboard( getSelectionModel().getSelectedItem().toString() );
+			}
+		}
+		);
+		MenuItem copyAllItem = new MenuItem( "Copy All" );
+		copyAllItem.setOnAction( new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle( ActionEvent _ )
+			{
+				copyAllRowsToClipboard();
+			}
+		}
+		);
+		MenuItem clearItem = new MenuItem( "Clear" );
+		clearItem.setOnAction( new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle( ActionEvent _ )
+			{
+				clear();
+			}
+		}
+		);
+		setContextMenu( ContextMenuBuilder.create().items( copyItem, copyAllItem, clearItem ).build() );
 	}
 
 	class SystemLogAppender extends AppenderSkeleton
@@ -80,11 +122,9 @@ public class SystemLogView extends ListView<LoggingEventWrapper>
 						loggingEventWrapper.addAdditionalInfo( sw.toString() );
 					}
 
-					getItems().add( loggingEventWrapper );
+					getItems().add( 0, loggingEventWrapper );
 
 					limitNumberOfRows();
-
-					scrollTo( getItems().size() - 1 );
 				}
 			} );
 		}
@@ -92,7 +132,7 @@ public class SystemLogView extends ListView<LoggingEventWrapper>
 		private void limitNumberOfRows()
 		{
 			while( getItems().size() > MAX_NUMBER_OF_ROWS )
-				getItems().remove( 0 );
+				getItems().remove( getItems().size() - 1 );
 		}
 
 		@Override
