@@ -62,6 +62,9 @@ public class ControllerWrapper
 		File bundleDir = new File( baseDir, "bundle" );
 		IntegrationTestUtils.copyDirectory( new File( "../loadui-project/loadui-controller-deps/target/bundle" ), bundleDir );
 		IntegrationTestUtils.copyDirectory( new File( "target/bundle" ), bundleDir );
+		IntegrationTestUtils.copyDirectory( new File( "target/conf" ), new File( baseDir, "conf" ) );
+
+		System.setProperty( LoadUI.LOADUI_WORKING, baseDir.getAbsolutePath() );
 
 		// Remove bundles depending on JavaFX and the API bundle.
 		for( File bundle : bundleDir.listFiles() )
@@ -106,7 +109,6 @@ public class ControllerWrapper
 		}
 
 		config.setProperty( "felix.auto.deploy.dir", bundleDir.getAbsolutePath() );
-		System.setProperty( LoadUI.LOADUI_WORKING, baseDir.getAbsolutePath() );
 
 		launcher.init();
 		launcher.start();
