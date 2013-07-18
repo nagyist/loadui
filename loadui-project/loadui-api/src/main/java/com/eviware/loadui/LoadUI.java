@@ -47,7 +47,7 @@ public class LoadUI
 	public static final String BUILD_DATE = "loadui.build.date";
 
 	public static final String LOADUI_HOME = "loadui.home";
-	public static final String WORKING_DIR = "loadui.working";
+	public static final String LOADUI_WORKING = "loadui.working";
 
 	public static final String HTTPS_PORT = "loadui.https.port";
 
@@ -107,7 +107,7 @@ public class LoadUI
 	 */
 	public static File getWorkingDir()
 	{
-		return new File( System.getProperty( WORKING_DIR, "." ) ).getAbsoluteFile();
+		return new File( System.getProperty( LOADUI_WORKING, "." ) ).getAbsoluteFile();
 	}
 
 	public static File relativeFile( String path )
@@ -127,4 +127,5 @@ public class LoadUI
 		}
 		System.exit( 0 );
 	}
+
 }

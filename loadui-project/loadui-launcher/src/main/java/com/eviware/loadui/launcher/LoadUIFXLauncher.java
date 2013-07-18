@@ -81,8 +81,8 @@ public class LoadUIFXLauncher extends LoadUILauncher
 		public void start( final Stage stage ) throws Exception
 		{
 			log.info( "Starting FXApplication, LoadUI Version: " + LoadUI.version() );
-			log.info( "LoadUI Working directory: " + System.getProperty( LoadUI.WORKING_DIR, "Using default" ) );
-			File workingDir = new File( System.getProperty( LoadUI.WORKING_DIR, "." ) ).getAbsoluteFile();
+			File workingDir = LoadUI.getWorkingDir();
+			log.info( "LoadUI Working directory: " + workingDir );
 			Scene splashScene;
 
 			final String noFx = getParameters().getNamed().get( NOFX_OPTION );

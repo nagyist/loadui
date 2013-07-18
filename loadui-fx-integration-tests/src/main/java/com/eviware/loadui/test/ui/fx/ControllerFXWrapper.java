@@ -56,8 +56,8 @@ public class ControllerFXWrapper
 		if( !homeDir.mkdir() )
 			throw new RuntimeException( "Could not create home directory!" );
 
-		System.setProperty( LoadUI.WORKING_DIR, baseDir.getAbsolutePath() );
 		System.setProperty( LoadUI.LOADUI_HOME, homeDir.getAbsolutePath() );
+		System.setProperty( LoadUI.LOADUI_WORKING, baseDir.getAbsolutePath() );
 
 		new Thread( new Runnable()
 		{

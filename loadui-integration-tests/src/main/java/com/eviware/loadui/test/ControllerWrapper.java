@@ -106,6 +106,7 @@ public class ControllerWrapper
 		}
 
 		config.setProperty( "felix.auto.deploy.dir", bundleDir.getAbsolutePath() );
+		System.setProperty( LoadUI.LOADUI_WORKING, baseDir.getAbsolutePath() );
 
 		launcher.init();
 		launcher.start();
