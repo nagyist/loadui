@@ -88,6 +88,8 @@
             <groupId>com.eviware.loadui</groupId>
             <artifactId>loadui-api</artifactId>
             <version>${project.version}</version>
+            <classifier>loadui-class-only</classifier>
+            <scope>compile</scope>
         </dependency>
 		<dependency>
 			<groupId>commons-cli</groupId>

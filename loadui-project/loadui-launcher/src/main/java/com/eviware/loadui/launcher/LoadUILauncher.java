@@ -15,6 +15,7 @@
  */
 package com.eviware.loadui.launcher;
 
+import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.launcher.LoadUICommandLineLauncher.CommandApplication;
 import com.eviware.loadui.launcher.LoadUIFXLauncher.FXApplication;
 import com.eviware.loadui.launcher.api.OSGiUtils;
@@ -28,8 +29,6 @@ import org.apache.felix.main.Main;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.launch.Framework;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -40,8 +39,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * Starts an embedded OSGi Runtime (Felix) with all the required JavaFX packages
@@ -62,9 +61,9 @@ public abstract class LoadUILauncher
 	protected static final String HELP_OPTION = "h";
 	protected static final String IGNORE_CURRENTLY_RUNNING_OPTION = "nolock";
 
-	private final static Logger log = LoggerFactory.getLogger( LoadUILauncher.class );
+	private final static Logger log = Logger.getLogger( LoadUILauncher.class.getName() );
 
-	protected final static File WORKING_DIR = new File( System.getProperty( "loadui.working", "." ) ).getAbsoluteFile();
+	protected final static File WORKING_DIR = new File( System.getProperty( LoadUI.WORKING_DIR, "." ) ).getAbsoluteFile();
 
 	public static void main( String[] args )
 	{
@@ -97,6 +96,7 @@ public abstract class LoadUILauncher
 		argv = args;
 
 		//Fix for Protection!
+		//FIXME this fix is probably not needed after the license-manager was created!
 		String username = System.getProperty( "user.name" );
 		System.setProperty( "user.name.original", username );
 		System.setProperty( "user.name", username.toLowerCase() );

@@ -27,17 +27,16 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.stage.*;
 import org.apache.commons.cli.CommandLine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
+import java.util.logging.Logger;
 
 public class LoadUIFXLauncher extends LoadUILauncher
 {
-	private static final Logger log = LoggerFactory.getLogger( LoadUIFXLauncher.class );
+	private final static Logger log = Logger.getLogger( LoadUIFXLauncher.class.getName() );
 
 	public static void main( String[] args )
 	{
@@ -82,7 +81,8 @@ public class LoadUIFXLauncher extends LoadUILauncher
 		public void start( final Stage stage ) throws Exception
 		{
 			log.info( "Starting FXApplication, LoadUI Version: " + LoadUI.version() );
-			File workingDir = new File( System.getProperty( "loadui.working", "." ) ).getAbsoluteFile();
+			log.info( "LoadUI Working directory: " + System.getProperty( LoadUI.WORKING_DIR, "Using default" ) );
+			File workingDir = new File( System.getProperty( LoadUI.WORKING_DIR, "." ) ).getAbsoluteFile();
 			Scene splashScene;
 
 			final String noFx = getParameters().getNamed().get( NOFX_OPTION );
@@ -112,7 +112,7 @@ public class LoadUIFXLauncher extends LoadUILauncher
 				}
 				catch( Exception e )
 				{
-					log.info( "", e );
+					log.warning( e.toString() );
 				}
 
 				setDefaultSystemProperty( "loadui.headless", "false" );
