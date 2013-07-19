@@ -98,7 +98,5 @@
 }
 
 .project-view #link-scenario.toggle-button{
-	-fx-translate-x: -25;
-	-fx-translate-y: -20;
-	-fx-translate-z: 1; 
+
 }

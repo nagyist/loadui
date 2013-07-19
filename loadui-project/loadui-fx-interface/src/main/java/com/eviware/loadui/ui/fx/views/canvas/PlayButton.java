@@ -17,6 +17,7 @@ package com.eviware.loadui.ui.fx.views.canvas;
 
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -139,4 +140,8 @@ public class PlayButton extends StackPane
 
 		setMaxSize( 27, 27 );
 	}
+
+    public Property<Boolean> selectedProperty(){
+        return toggleButton.selectedProperty();
+    }
 }

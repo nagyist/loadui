@@ -20,6 +20,8 @@ import java.lang.ref.WeakReference;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.Property;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
@@ -65,6 +67,7 @@ public abstract class PlaybackPanel<T extends CounterDisplay, C extends CanvasIt
 		setAlignment( Pos.CENTER );
 		setMaxHeight( 27 );
 		playButton = new PlayButton( canvas );
+
 		time = timeCounter();
 		requests = timeRequests();
 		failures = timeFailures();
@@ -111,9 +114,9 @@ public abstract class PlaybackPanel<T extends CounterDisplay, C extends CanvasIt
 		return new Image( getClass().getResourceAsStream( name ) );
 	}
 
-	protected ToggleButton linkScenarioButton( SceneItem scenario )
+	protected ToggleButton linkScenarioButton( final SceneItem scenario )
 	{
-		ToggleButton linkButton = ToggleButtonBuilder
+		final ToggleButton linkButton = ToggleButtonBuilder
 				.create()
 				.id( "link-scenario" )
 				.graphic(
@@ -122,8 +125,23 @@ public abstract class PlaybackPanel<T extends CounterDisplay, C extends CanvasIt
 								.children( RegionBuilder.create().styleClass( "graphic" ).build(),
 										RegionBuilder.create().styleClass( "secondary-graphic" ).build() ).build() ).build();
 
-		Property<Boolean> linkedProperty = Properties.convert( scenario.followProjectProperty() );
-		linkButton.selectedProperty().bindBidirectional( linkedProperty );
+        final Property<Boolean> linkedProperty = Properties.convert( scenario.followProjectProperty() );
+		linkButton.setSelected( linkedProperty.getValue() );
+
+        linkButton.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observableValue, Boolean aBoolean, Boolean aBoolean2) {
+                //System.out.println("\n\n ---> LINK BUTTON CHANGED <---");
+                //System.out.println(scenario.getLabel() +" :>> scenario.followProperty: " + scenario.followProjectProperty() + ", linkedProperty: " + linkedProperty.getValue() + " <--> linkedButton.isSelected: " + linkButton.isSelected());
+            }
+        });
+
+        scenario.isRunning();
+
+        linkedProperty.bindBidirectional(linkButton.selectedProperty());
+        //System.out.println("\n\n ---> VIEW WITH NEW LINK-BUTTON <---");
+        //System.out.println(scenario.getLabel() +" :>> scenario.followProperty: " + scenario.followProjectProperty() + ", linkedProperty: " + linkedProperty.getValue() + " <--> linkedButton.isSelected: " + linkButton.isSelected());
+
 		return linkButton;
 	}
 

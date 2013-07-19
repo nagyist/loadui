@@ -109,8 +109,6 @@ public class ProjectView extends AnchorPane
 
 	private ProjectPlaybackPanel playbackPanel;
 
-	private ToggleButton linkButton;
-
 	private final FxExecutionsInfo executionsInfo;
 
 	private final ProjectItem project;
@@ -250,22 +248,8 @@ public class ProjectView extends AnchorPane
 
 					ScenarioToolbar toolbar = new ScenarioToolbar( scenario );
 
-					linkButton = ToggleButtonBuilder
-							.create()
-							.id( "link-scenario" )
-							.graphic(
-									HBoxBuilder
-											.create()
-											.children( RegionBuilder.create().styleClass( "graphic" ).build(),
-													RegionBuilder.create().styleClass( "secondary-graphic" ).build() ).build() )
-							.build();
-
-					Property<Boolean> linkedProperty = Properties.convert( scenario.followProjectProperty() );
-					linkButton.selectedProperty().bindBidirectional( linkedProperty );
-					linkButton.visibleProperty().bind( statsTab.selectedProperty().not() );
-					AnchorPane.setLeftAnchor( linkButton, 473d );
-					AnchorPane.setTopAnchor( linkButton, 55d );
-					ProjectView.this.getChildren().add( linkButton );
+					ToggleButton linkButton = playbackPanel.addLinkButton( scenario );
+				    linkButton.visibleProperty().bind( designTab.selectedProperty() );
 
 					StackPane.setAlignment( toolbar, Pos.TOP_CENTER );
 					CanvasView canvas = new CanvasView( scenario );
@@ -283,7 +267,8 @@ public class ProjectView extends AnchorPane
 				else if( event.getEventType() == IntentEvent.INTENT_CLOSE && event.getArg() instanceof SceneItem )
 				{
 					( ( ToolBar )lookup( ".tool-bar" ) ).setStyle( TOOLBAR_STYLE_WITHOUT_SCENARIO );
-					ProjectView.this.getChildren().remove( linkButton );
+
+                    playbackPanel.removeLinkButton();
 
 					javafx.scene.layout.Pane canvas = ( javafx.scene.layout.Pane )lookup( ".pane" );
 					javafx.scene.layout.Region grid = ( javafx.scene.layout.Region )lookup( ".grid" );

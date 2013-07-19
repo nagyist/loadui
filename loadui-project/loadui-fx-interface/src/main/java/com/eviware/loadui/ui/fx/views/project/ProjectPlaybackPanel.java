@@ -16,17 +16,65 @@
 package com.eviware.loadui.ui.fx.views.project;
 
 import com.eviware.loadui.api.model.ProjectItem;
+import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.ui.fx.views.canvas.ToolbarPlaybackPanel;
+import javafx.geometry.Pos;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleButtonBuilder;
+import javafx.scene.layout.HBoxBuilder;
+import javafx.scene.layout.RegionBuilder;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.VBoxBuilder;
 
 final public class ProjectPlaybackPanel extends ToolbarPlaybackPanel<ProjectItem>
 {
+    private VBox playButtonContainer;
 	public ProjectPlaybackPanel( ProjectItem canvas )
 	{
-		super( canvas );
+        super(canvas);
 
-		getStyleClass().add( "project-playback-panel" );
+        playButtonContainer = VBoxBuilder.create().children(
+                HBoxBuilder.create().alignment( Pos.CENTER ).spacing( 9 ).children(
+                        separator(),
+                        playButton,
+                        separator(),
+                        time,
+                        requests,
+                        failures,
+                        resetButton(),
+                        limitsButton()
+                ).build()
+        ) .build();
+
+        getStyleClass().add( "project-playback-panel" );
 		setMaxWidth( 750 );
-		getChildren().setAll( separator(), playButton, separator(), time, requests, failures, resetButton(),
-				limitsButton() );
+
+        getChildren().setAll(
+            playButtonContainer
+        );
 	}
+
+    public ToggleButton addLinkButton( SceneItem scenario ){
+
+        if( playButtonContainer.getChildren().size() > 1 )
+        {
+            playButtonContainer.getChildren().remove(1);
+        }
+
+        ToggleButton linkButton = linkScenarioButton( scenario );
+        linkButton.disableProperty().bind( playButton.selectedProperty() );
+
+        playButtonContainer.getChildren().add(1, linkButton);
+        return linkButton;
+    }
+
+    public boolean removeLinkButton(){
+
+        if(playButtonContainer.getChildren().size() > 1){
+            playButtonContainer.getChildren().remove( 1 );
+            return true;
+        }else{
+            return false;
+        }
+    }
 }

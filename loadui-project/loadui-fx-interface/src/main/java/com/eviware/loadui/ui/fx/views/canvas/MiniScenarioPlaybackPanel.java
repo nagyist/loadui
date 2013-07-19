@@ -18,6 +18,12 @@ package com.eviware.loadui.ui.fx.views.canvas;
 import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.ui.fx.views.canvas.CounterDisplay.Formatting;
 import com.eviware.loadui.ui.fx.views.canvas.scenario.ScenarioCounterDisplay;
+import javafx.geometry.*;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.layout.HBoxBuilder;
+
+import java.awt.*;
+import javafx.geometry.Insets;
 
 public class MiniScenarioPlaybackPanel extends PlaybackPanel<CounterDisplay, SceneItem>
 {
@@ -25,10 +31,24 @@ public class MiniScenarioPlaybackPanel extends PlaybackPanel<CounterDisplay, Sce
 	{
 		super( canvas );
 
-		getStyleClass().setAll( "mini-playback-panel" );
+        ToggleButton linkButton = linkScenarioButton( canvas );
+
+        linkButton.disableProperty().bind( playButton.selectedProperty() );
+
+        getStyleClass().setAll( "mini-playback-panel" );
 		setSpacing( 6 );
 		setPrefWidth( 310 );
-		getChildren().setAll( separator(), playButton, separator(), linkScenarioButton( canvas ), time, requests,
+		getChildren().setAll(
+                separator(),
+                playButton,
+                separator(),
+                HBoxBuilder.create()
+                        .alignment( Pos.CENTER )
+                        .padding( new Insets(6, 6, 6, 0) )
+                        .children( linkButton )
+                        .build(),
+                time,
+                requests,
 				failures );
 	}
 
