@@ -1,22 +1,22 @@
-// 
+//
 // Copyright 2013 SmartBear Software
-// 
+//
 // Licensed under the EUPL, Version 1.1 or - as soon they will be approved by the European Commission - subsequent
 // versions of the EUPL (the "Licence");
 // You may not use this work except in compliance with the Licence.
 // You may obtain a copy of the Licence at:
-// 
+//
 // http://ec.europa.eu/idabc/eupl
-// 
+//
 // Unless required by applicable law or agreed to in writing, software distributed under the Licence is
 // distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
 // express or implied. See the Licence for the specific language governing permissions and limitations
 // under the Licence.
-// 
+//
 
 /**
- * Tabulates incoming messages and creates a csv output 
- * 
+ * Tabulates incoming messages and creates a csv output
+ *
  * @id com.eviware.TableLog
  * @help http://www.loadui.org/Output/table-log-component.html
  * @name Table Log
@@ -39,11 +39,12 @@ import javafx.scene.control.TableColumn
 import javafx.util.Callback
 import javafx.beans.value.ObservableValue
 import javafx.beans.value.ChangeListener
+import java.util.concurrent.TimeUnit
 
 inputTerminal.description = 'Messages sent here will be displayed in the table.'
 likes( inputTerminal ) { true }
 
-createProperty( 'maxRows', Long, 1000 )
+createProperty( 'maxRows', Long, 250 )
 createProperty( 'logFilePath', String )
 createProperty( 'saveFile', Boolean, false )
 createProperty( 'follow', Boolean, false )
@@ -54,9 +55,14 @@ createProperty( 'formatTimestamps', Boolean, true )
 createProperty( 'addHeaders', Boolean, false )
 
 table = null
+tableWriterFuture = null
+tableWriterDelay = 1000
+final messageQueue = [] as LinkedList
+
 cellFactory = { val -> { it -> val.value[val.tableColumn.text] } as ObservableValue } as Callback
 rebuildTable = { table = new TableView( prefHeight: 200, minWidth: 500 ) }
-tableColumns = [] as CopyOnWriteArraySet
+final tableColumns = [] as CopyOnWriteArraySet
+final addedColumns = []
 def latestHeader
 String saveFileName = null
 writer = null
@@ -73,7 +79,10 @@ onMessage = { o, i, m ->
 output = { message ->
 	def writeLog = saveFile.value && saveFileName
 	if( controller || writeLog ) {
-		def addedColumns = message.keySet().findAll { tableColumns.add( it ) }
+		synchronized( addedColumns ) {
+			addedColumns += message.keySet() - tableColumns
+			tableColumns += addedColumns
+		}
 		
 		if ( formatTimestamps.value ) {
 			message.each() { key, value ->
@@ -86,23 +95,14 @@ output = { message ->
 				}
 			}
 		}
-		
+
 		if( controller ) {
-			Platform.runLater {
-				addedColumns.each {
-					def column = new TableColumn( cellValueFactory: cellFactory, text: it, sortable: false )
-					column.widthProperty().addListener( { obs, oldVal, width -> setAttribute( "width_$it", "$width" ) } as ChangeListener )
-					try {
-						column.width = Double.parseDouble( getAttribute( "width_$it", null ) )
-					} catch( e ) {
-					}
-					table.columns.add( column )
-				}
-				table.items.add( message )
-				while( table.items.size() > maxRows.value ) table.items.remove(0)
+			synchronized( messageQueue ) {
+				messageQueue << message
+				while( messageQueue.size() > maxRows.value ) messageQueue.remove( 0 )
 			}
 		}
-		
+
 		if( writeLog ) {
 			if( !writer ) writer = new CSVWriter( new FileWriter( saveFileName, appendSaveFile.value ), (char) ',' )
 			try {
@@ -118,22 +118,24 @@ output = { message ->
 			}
 		}
 	}
-	
+
 	if( ! controller && enabledInDistMode.value ) {
 		// on agent and enabled, so send message to controller
 		send( controllerTerminal, message )
 	}
 }
 
-onAction( "START" ) { buildFileName() }
+onAction( "START" ) { buildFileName(); startTableWriter() }
+
+onAction( "STOP" ) { stopTableWriter() }
 
 onAction( "COMPLETE" ) {
 	writer?.close()
 	writer = null
 }
 
-onAction( "RESET" ) { 
-	buildFileName() 
+onAction( "RESET" ) {
+	buildFileName()
 	tableColumns.clear()
 	refreshLayout()
 }
@@ -166,12 +168,61 @@ buildFileName = {
 	saveFileName = filePath
 }
 
+synchronized startTableWriter() {
+	println "Starting the table writer !!!!!!"
+	if ( !tableWriterFuture )
+		tableWriterFuture = scheduleAtFixedRate( tableWriter, tableWriterDelay, tableWriterDelay, TimeUnit.MILLISECONDS )
+}
+
+void stopTableWriter() {
+	tableWriterFuture?.cancel( false )
+	tableWriterFuture = null
+}
+
+tableWriter = {
+	log.info 'Table Writer running'
+	def newColumns = []
+	synchronized( addedColumns ) {
+		for ( iter = addedColumns.iterator(); iter.hasNext();) {
+			def added = iter.next()
+			iter.remove()
+			log.info "Adding column: $added"
+			def column = new TableColumn( cellValueFactory: cellFactory, text: added, sortable: false )
+			column.widthProperty().addListener( { obs, oldVal, width -> setAttribute( "width_$added", "$width" ) } as ChangeListener )
+			newColumns << column
+			try {
+				column.width = Double.parseDouble( getAttribute( "width_$added", null ) )
+			} catch( e ) {
+			}
+		}	
+	}
+	
+	def newMessages = []
+	def excessItems =  0
+	synchronized( messageQueue ) {
+		log.info "Writing ${messageQueue.size()} messages to the table log"
+		excessItems = ( table.items.size() + messageQueue.size() - maxRows.value ) as int
+		newMessages += messageQueue
+		messageQueue.clear()
+	}
+	
+	if ( newMessages || excessItems || newColumns ) {
+		Platform.runLater {
+			table.columns.addAll newColumns
+			if ( excessItems > 0 ) table.items.remove( 0, excessItems )
+			table.items.addAll newMessages
+		}
+	}
+	log.info "Number of rows in the table: ${table.items.size()}"
+	
+}
+
 getBaseLogDir = { System.getProperty( 'loadui.home', '.' ) }
 getDefaultLogFileName = { getLabel().replaceAll( ' ','' ) }
-				
+
 validateLogFilePath = { filePath ->
 	try {
-		// the only good way to check if file path 
+		// the only good way to check if file path
 		// is correct is to try read and writing
 		def temp = new File( filePath )
 		temp.parentFile.mkdirs()
@@ -188,7 +239,7 @@ validateLogFilePath = { filePath ->
 		return true
 	} catch( e ) {
 		return false
-	}	
+	}
 }
 
 addTimestampToFileName = { it.replaceAll('^(.*?)(\\.\\w+)?$', '$1-'+System.currentTimeMillis()+'$2') }
@@ -235,7 +286,7 @@ settings( label: "General" ) {
 	}
 	box {
 		property( property: summaryRows, label: 'Max Rows in Summary' )
-	}	
+	}
 }
 
 settings( label:'Logging' ) {
