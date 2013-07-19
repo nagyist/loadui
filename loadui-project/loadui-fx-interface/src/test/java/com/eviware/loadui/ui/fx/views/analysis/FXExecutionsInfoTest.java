@@ -40,7 +40,6 @@ import org.junit.experimental.categories.Category;
 @Category( GUITest.class )
 public class FXExecutionsInfoTest
 {
-
 	@Test
 	public void testNormalCase()
 	{

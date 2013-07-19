@@ -20,6 +20,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.TimeUnit;
 
+import com.eviware.loadui.ui.fx.util.test.FXScreenController;
+import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
+import com.eviware.loadui.ui.fx.util.test.TestFX;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -35,9 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.eviware.loadui.test.categories.GUITest;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
 import com.google.common.util.concurrent.SettableFuture;
 
 @Category( GUITest.class )

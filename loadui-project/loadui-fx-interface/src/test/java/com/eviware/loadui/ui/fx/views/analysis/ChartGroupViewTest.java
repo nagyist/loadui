@@ -20,36 +20,27 @@ import static com.eviware.loadui.ui.fx.util.test.TestFX.wrap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.eviware.loadui.test.categories.GUITest;
+import com.eviware.loadui.ui.fx.util.test.FXScreenController;
+import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
+import com.eviware.loadui.ui.fx.util.test.TestFX;
 import javafx.application.Application;
 import javafx.beans.Observable;
-import javafx.beans.value.ObservableValue;
-import javafx.scene.SceneBuilder;
 import javafx.stage.Stage;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.eviware.loadui.api.addressable.Addressable;
 import com.eviware.loadui.api.addressable.AddressableRegistry;
-import com.eviware.loadui.api.statistics.model.Chart;
 import com.eviware.loadui.api.statistics.model.Chart.Owner;
-import com.eviware.loadui.api.statistics.model.ChartGroup;
-import com.eviware.loadui.api.statistics.store.Execution;
 import com.eviware.loadui.config.PropertyConfig;
 import com.eviware.loadui.config.PropertyListConfig;
 import com.eviware.loadui.config.impl.ChartConfigImpl;
 import com.eviware.loadui.impl.statistics.model.ChartGroupImpl;
-import com.eviware.loadui.impl.statistics.model.ChartImpl;
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
 import com.eviware.loadui.util.test.BeanInjectorMocker;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.SettableFuture;

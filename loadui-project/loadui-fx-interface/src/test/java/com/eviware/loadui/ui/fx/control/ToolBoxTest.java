@@ -31,6 +31,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import com.eviware.loadui.ui.fx.util.test.FXScreenController;
+import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
+import com.eviware.loadui.ui.fx.util.test.TestFX;
 import com.eviware.loadui.ui.fx.views.window.PaneOverlayHolder;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -51,9 +54,6 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import com.eviware.loadui.test.categories.GUITest;
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;

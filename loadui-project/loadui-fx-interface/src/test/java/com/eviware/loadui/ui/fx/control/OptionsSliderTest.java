@@ -19,6 +19,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.TimeUnit;
 
+import com.eviware.loadui.ui.fx.util.test.FXScreenController;
+import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
+import com.eviware.loadui.ui.fx.util.test.TestFX;
 import javafx.application.Application;
 import javafx.scene.SceneBuilder;
 import javafx.scene.control.Label;
@@ -32,9 +35,6 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import com.eviware.loadui.test.categories.GUITest;
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
 import com.eviware.loadui.ui.fx.views.canvas.component.ComponentLayoutUtils;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.SettableFuture;

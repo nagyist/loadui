@@ -21,16 +21,17 @@ import static org.junit.Assert.assertFalse;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import com.eviware.loadui.ui.fx.util.test.FXScreenController;
+import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
+import com.eviware.loadui.ui.fx.util.test.TestFX;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.GroupBuilder;
-import javafx.scene.Node;
 import javafx.scene.SceneBuilder;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
@@ -45,10 +46,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import static org.hamcrest.MatcherAssert.assertThat;
-import org.mockito.Matchers;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.NullValueInNestedPathException;
 
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.impl.layout.ActionLayoutComponentImpl;
@@ -56,9 +56,6 @@ import com.eviware.loadui.test.categories.GUITest;
 import com.eviware.loadui.ui.fx.control.SettingsTab.Builder;
 import com.eviware.loadui.ui.fx.util.StylingUtils;
 import com.eviware.loadui.ui.fx.util.TestingProperty;
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.SettableFuture;
