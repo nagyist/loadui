@@ -44,6 +44,13 @@ import java.util.concurrent.TimeUnit
 inputTerminal.description = 'Messages sent here will be displayed in the table.'
 likes( inputTerminal ) { true }
 
+table = null
+tableWriterFuture = null
+tableWriterDelay = 1000
+final messageQueue = [] as LinkedList
+writer = null
+writerLock = new Object()
+
 createProperty( 'maxRows', Long, 250 )
 createProperty( 'logFilePath', String )
 createProperty( 'saveFile', Boolean, false )
@@ -54,18 +61,12 @@ createProperty( 'appendSaveFile', Boolean, false )
 createProperty( 'formatTimestamps', Boolean, true )
 createProperty( 'addHeaders', Boolean, false )
 
-table = null
-tableWriterFuture = null
-tableWriterDelay = 1000
-final messageQueue = [] as LinkedList
-
 cellFactory = { val -> { it -> val.value[val.tableColumn.text] } as ObservableValue } as Callback
 rebuildTable = { table = new TableView( prefHeight: 200, minWidth: 500 ) }
 final tableColumns = [] as CopyOnWriteArraySet
 final addedColumns = []
 def latestHeader
-String saveFileName = null
-writer = null
+saveFileName = null
 def format = new SimpleDateFormat( "HH:mm:ss:SSS" )
 
 onMessage = { o, i, m ->
@@ -104,17 +105,18 @@ output = { message ->
 		}
 
 		if( writeLog ) {
-			if( !writer ) writer = new CSVWriter( new FileWriter( saveFileName, appendSaveFile.value ), (char) ',' )
-			try {
-				def header = tableColumns as String[]
-				if( addHeaders.value && !Arrays.equals( latestHeader, header ) ) {
-					writer.writeNext( header )
-					latestHeader = header
+			withFileWriter { w ->
+				try {
+					def header = tableColumns as String[]
+					if( addHeaders.value && !Arrays.equals( latestHeader, header ) ) {
+						w.writeNext( header )
+						latestHeader = header
+					}
+					def entries = header.collect { message[it] ?: "" } as String[]
+					w.writeNext( entries )
+				} catch ( e ) {
+					log.error( "Error writing to log file", e )
 				}
-				entries = header.collect { message[it] ?: "" } as String[]
-				writer.writeNext( entries )
-			} catch ( Exception e ) {
-				log.error( "Error writing to log file", e )
 			}
 		}
 	}
@@ -129,10 +131,7 @@ onAction( "START" ) { buildFileName(); startTableWriter() }
 
 onAction( "STOP" ) { stopTableWriter() }
 
-onAction( "COMPLETE" ) {
-	writer?.close()
-	writer = null
-}
+onAction( "COMPLETE" ) { closeWriter() }
 
 onAction( "RESET" ) {
 	buildFileName()
@@ -140,16 +139,25 @@ onAction( "RESET" ) {
 	refreshLayout()
 }
 
-onRelease = { writer?.close() }
+onRelease = { closeWriter() }
+
+closeWriter = {
+	withFileWriter( false ) {
+		writer?.close()
+		writer = null
+	}
+}
 
 buildFileName = {
 	if( !saveFile.value ) {
-		writer?.close()
-		writer = null
+		closeWriter()
 		return
 	}
-	if( writer ) return
-
+	
+	synchronized( writerLock ) {
+		if( writer ) return
+	}
+	
 	def filePath = "${getBaseLogDir()}${File.separator}${logFilePath.value}"
 	if( !validateLogFilePath( filePath ) ) {
 		filePath = "${getBaseLogDir()}${File.separator}logs${File.separator}table-log${File.separator}${getDefaultLogFileName()}"
@@ -169,7 +177,6 @@ buildFileName = {
 }
 
 synchronized startTableWriter() {
-	println "Starting the table writer !!!!!!"
 	if ( !tableWriterFuture )
 		tableWriterFuture = scheduleAtFixedRate( tableWriter, tableWriterDelay, tableWriterDelay, TimeUnit.MILLISECONDS )
 }
@@ -180,13 +187,12 @@ void stopTableWriter() {
 }
 
 tableWriter = {
-	log.info 'Table Writer running'
 	def newColumns = []
 	synchronized( addedColumns ) {
 		for ( iter = addedColumns.iterator(); iter.hasNext();) {
 			def added = iter.next()
 			iter.remove()
-			log.info "Adding column: $added"
+			log.info "Adding column to Table Log: $added"
 			def column = new TableColumn( cellValueFactory: cellFactory, text: added, sortable: false )
 			column.widthProperty().addListener( { obs, oldVal, width -> setAttribute( "width_$added", "$width" ) } as ChangeListener )
 			newColumns << column
@@ -200,7 +206,6 @@ tableWriter = {
 	def newMessages = []
 	def excessItems =  0
 	synchronized( messageQueue ) {
-		log.info "Writing ${messageQueue.size()} messages to the table log"
 		excessItems = ( table.items.size() + messageQueue.size() - maxRows.value ) as int
 		newMessages += messageQueue
 		messageQueue.clear()
@@ -208,13 +213,11 @@ tableWriter = {
 	
 	if ( newMessages || excessItems || newColumns ) {
 		Platform.runLater {
-			table.columns.addAll newColumns
+			if ( newColumns ) table.columns.addAll newColumns
 			if ( excessItems > 0 ) table.items.remove( 0, excessItems )
-			table.items.addAll newMessages
+			if ( newMessages ) table.items.addAll newMessages
 		}
 	}
-	log.info "Number of rows in the table: ${table.items.size()}"
-	
 }
 
 getBaseLogDir = { System.getProperty( 'loadui.home', '.' ) }
@@ -258,13 +261,15 @@ refreshLayout = {
 			fileChooser.extensionFilters.add( new FileChooser.ExtensionFilter( 'CSV', '*.csv' ) )
 			def saveFile = fileChooser.showSaveDialog( table.scene.window )
 			if( saveFile ) {
+				def flushWriter = null
 				try {
-					def writer = new CSVWriter( new FileWriter( saveFile, false ), (char) ',' )
-					writer.writeNext( tableColumns as String[] )
-					table.items.each { message -> writer.writeNext( tableColumns.collect { message[it] ?: "" } as String[] ) }
-					writer.close()
+					flushWriter = new CSVWriter( new FileWriter( saveFile, false ), (char) ',' )
+					flushWriter.writeNext( tableColumns as String[] )
+					table.items.each { message -> flushWriter.writeNext( tableColumns.collect { message[it] ?: "" } as String[] ) }
 				} catch ( e ) {
 					log.error( 'Failed writing log to file!', e )
+				} finally {
+					flushWriter?.close()
 				}
 			}
 		} )
@@ -279,14 +284,25 @@ refreshLayout = {
 }
 if( controller ) refreshLayout()
 
+void withFileWriter( createIfNull = true, closure ) {
+	synchronized( writerLock ) {
+		if( createIfNull && !writer ) {
+			log.info "Creating new CSVWriter writing to $saveFileName"
+			writer = new CSVWriter( new FileWriter( saveFileName, appendSaveFile.value ), ',' as char )
+		}
+		closure( writer )
+	}
+}
+
 
 settings( label: "General" ) {
 	box {
 		property( property: maxRows, label: 'Max Rows in Table' )
 	}
-	box {
-		property( property: summaryRows, label: 'Max Rows in Summary' )
-	}
+	//FIXME summary report not working, see generateSummary below
+	//box {
+	//	property( property: summaryRows, label: 'Max Rows in Summary' )
+	//}
 }
 
 settings( label:'Logging' ) {
@@ -301,6 +317,7 @@ settings( label:'Logging' ) {
 }
 
 generateSummary = { chapter ->
+	//FIXME this is not working... the method is called by the report creator, but the table model below is no longer working
 	if( summaryRows.value > 0 ) {
 		int nRows = summaryRows.value
 		def rows = table.items.subList( table.items.size() - nRows, table.items.size() )
