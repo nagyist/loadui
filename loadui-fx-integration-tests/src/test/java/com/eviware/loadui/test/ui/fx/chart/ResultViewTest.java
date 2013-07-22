@@ -72,6 +72,10 @@ public class ResultViewTest extends FxIntegrationTestBase
 
 		assertThat( RECENT, contains( 0, TEST_RUNS ) );
 		assertThat( ARCHIVE, contains( 2, TEST_RUNS ) );
+
+		controller.click( "#archive-0 #menuButton" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
+		controller.click( "#archive-0 #menuButton" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
+		assertThat( ARCHIVE, contains( 0, TEST_RUNS ) );
 	}
 
 
