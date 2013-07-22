@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.eviware.loadui.ui.fx.util.test.FXScreenController;
 import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
+import com.eviware.loadui.ui.fx.util.test.ScreenController;
 import com.eviware.loadui.ui.fx.util.test.TestFX;
 import javafx.application.Application;
 import javafx.scene.SceneBuilder;
@@ -40,14 +41,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.SettableFuture;
 
 @Category( GUITest.class )
-public class OptionsSliderTest
+public class OptionsSliderTest extends TestFX
 {
 	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();
 
 	private static OptionsSlider optionsSlider;
 	private static OptionsSlider imageOptionsSlider;
 	private static Stage stage;
-	private static TestFX controller;
 	private static Label label;
 
 	public static class OptionsSliderTestApp extends Application
@@ -79,7 +79,6 @@ public class OptionsSliderTest
 	@BeforeClass
 	public static void createWindow() throws Throwable
 	{
-		controller = TestFX.wrap( new FXScreenController() );
 		FXTestUtils.launchApp( OptionsSliderTestApp.class );
 		stage = stageFuture.get( 5, TimeUnit.SECONDS );
 		FXTestUtils.bringToFront( stage );
@@ -88,22 +87,22 @@ public class OptionsSliderTest
 	@Test
 	public void property_should_updateOnClick()
 	{
-		controller.click( "#two" );
+		click( "#two" );
 		assertTrue( "two".equals( stage.getTitle() ) );
-		controller.click( "#three" );
+		click( "#three" );
 		assertTrue( "three".equals( stage.getTitle() ) );
-		controller.click( "#two" );
+		click( "#two" );
 		assertTrue( "two".equals( stage.getTitle() ) );
-		controller.click( "#one" );
+		click( "#one" );
 		assertTrue( "one".equals( stage.getTitle() ) );
 	}
 
 	@Test
 	public void images_should_work()
 	{
-		controller.click( "#gauss" );
+		click( "#gauss" );
 		assertTrue( "gauss".equals( label.getText() ) );
-		controller.click( "#sine" );
+		click( "#sine" );
 		assertTrue( "sine".equals( label.getText() ) );
 	}
 
