@@ -76,10 +76,8 @@ final public class ProjectPlaybackPanel extends ToolbarPlaybackPanel<ProjectItem
 
 	public boolean removeLinkButton()
 	{
-
 		if( playButtonContainer.getChildren().size() > 1 )
 		{
-
 			linkButton.selectedProperty().unbindBidirectional( linkedProperty );
 			linkButton.disableProperty().unbind();
 

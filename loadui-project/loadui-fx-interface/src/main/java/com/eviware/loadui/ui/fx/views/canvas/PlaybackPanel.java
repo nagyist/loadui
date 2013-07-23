@@ -120,23 +120,13 @@ public abstract class PlaybackPanel<T extends CounterDisplay, C extends CanvasIt
 										RegionBuilder.create().styleClass( "secondary-graphic" ).build() ).build() ).build();
 
 		linkButton.setSelected( linkedProperty.getValue() );
-
-		linkButton.selectedProperty().addListener( new ChangeListener<Boolean>()
-		{
-			@Override
-			public void changed( ObservableValue<? extends Boolean> observableValue, Boolean aBoolean, Boolean aBoolean2 )
-			{
-				System.out.println( "\n\n ---> LINK BUTTON CHANGED <---" );
-			}
-		} );
-
-		return linkButton;
+      return linkButton;
 	}
 
 	protected Property<Boolean> getLinkedProperty( SceneItem scenario )
 	{
 		Property<Boolean> linkedProperty = Properties.convert( scenario.followProjectProperty() );
-		return linkedProperty;
+      return linkedProperty;
 	}
 
 	private static class UpdateDisplays implements EventHandler<ActionEvent>

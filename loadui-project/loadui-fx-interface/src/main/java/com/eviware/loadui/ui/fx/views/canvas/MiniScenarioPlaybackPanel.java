@@ -26,12 +26,15 @@ import javafx.scene.layout.HBoxBuilder;
 
 public class MiniScenarioPlaybackPanel extends PlaybackPanel<CounterDisplay, SceneItem>
 {
-	public MiniScenarioPlaybackPanel( SceneItem canvas )
-	{
-		super( canvas );
+	private ToggleButton linkButton;
+	private Property<Boolean> linkedProperty;
 
-		Property<Boolean> linkedProperty = getLinkedProperty( canvas );
-		ToggleButton linkButton = linkScenarioButton( linkedProperty );
+	public MiniScenarioPlaybackPanel( SceneItem scenario )
+	{
+		super( scenario );
+
+		linkedProperty = getLinkedProperty( scenario );
+		linkButton = linkScenarioButton( linkedProperty );
 
 		linkButton.selectedProperty().bindBidirectional( linkedProperty );
 		linkButton.disableProperty().bind( playButton.selectedProperty() );
@@ -39,6 +42,7 @@ public class MiniScenarioPlaybackPanel extends PlaybackPanel<CounterDisplay, Sce
 		getStyleClass().setAll( "mini-playback-panel" );
 		setSpacing( 6 );
 		setPrefWidth( 310 );
+
 		getChildren().setAll(
 				separator(),
 				playButton,
