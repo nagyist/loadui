@@ -18,63 +18,77 @@ package com.eviware.loadui.ui.fx.views.project;
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.ui.fx.views.canvas.ToolbarPlaybackPanel;
+import javafx.beans.property.Property;
 import javafx.geometry.Pos;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleButtonBuilder;
 import javafx.scene.layout.HBoxBuilder;
-import javafx.scene.layout.RegionBuilder;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
 
 final public class ProjectPlaybackPanel extends ToolbarPlaybackPanel<ProjectItem>
 {
-    private VBox playButtonContainer;
+	private VBox playButtonContainer;
+	private ToggleButton linkButton;
+	private Property<Boolean> linkedProperty;
+
 	public ProjectPlaybackPanel( ProjectItem canvas )
 	{
-        super(canvas);
+		super( canvas );
 
-        playButtonContainer = VBoxBuilder.create().children(
-                HBoxBuilder.create().alignment( Pos.CENTER ).spacing( 9 ).children(
-                        separator(),
-                        playButton,
-                        separator(),
-                        time,
-                        requests,
-                        failures,
-                        resetButton(),
-                        limitsButton()
-                ).build()
-        ) .build();
+		playButtonContainer = VBoxBuilder.create().children(
+				HBoxBuilder.create().alignment( Pos.CENTER ).spacing( 9 ).children(
+						separator(),
+						playButton,
+						separator(),
+						time,
+						requests,
+						failures,
+						resetButton(),
+						limitsButton()
+				).build()
+		).build();
 
-        getStyleClass().add( "project-playback-panel" );
+		getStyleClass().add( "project-playback-panel" );
 		setMaxWidth( 750 );
 
-        getChildren().setAll(
-            playButtonContainer
-        );
+		getChildren().setAll(
+				playButtonContainer
+		);
 	}
 
-    public ToggleButton addLinkButton( SceneItem scenario ){
+	public ToggleButton addLinkButton( SceneItem scenario )
+	{
 
-        if( playButtonContainer.getChildren().size() > 1 )
-        {
-            playButtonContainer.getChildren().remove(1);
-        }
+		if( playButtonContainer.getChildren().size() > 1 )
+		{
+			playButtonContainer.getChildren().remove( 1 );
+		}
 
-        ToggleButton linkButton = linkScenarioButton( scenario );
-        linkButton.disableProperty().bind( playButton.selectedProperty() );
+		linkedProperty = getLinkedProperty( scenario );
+		linkButton = linkScenarioButton( linkedProperty );
 
-        playButtonContainer.getChildren().add(1, linkButton);
-        return linkButton;
-    }
+		linkButton.selectedProperty().bindBidirectional( linkedProperty );
+		linkButton.disableProperty().bind( playButton.selectedProperty() );
 
-    public boolean removeLinkButton(){
+		playButtonContainer.getChildren().add( 1, linkButton );
+		return linkButton;
+	}
 
-        if(playButtonContainer.getChildren().size() > 1){
-            playButtonContainer.getChildren().remove( 1 );
-            return true;
-        }else{
-            return false;
-        }
-    }
+	public boolean removeLinkButton()
+	{
+
+		if( playButtonContainer.getChildren().size() > 1 )
+		{
+
+			linkButton.selectedProperty().unbindBidirectional( linkedProperty );
+			linkButton.disableProperty().unbind();
+
+			playButtonContainer.getChildren().remove( linkButton );
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 }

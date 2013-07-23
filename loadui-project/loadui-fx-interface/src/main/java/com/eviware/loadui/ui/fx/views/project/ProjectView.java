@@ -15,44 +15,6 @@
  */
 package com.eviware.loadui.ui.fx.views.project;
 
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
-import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
-import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
-import javafx.embed.swing.SwingFXUtils;
-import javafx.event.EventHandler;
-import javafx.fxml.FXML;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.SceneBuilder;
-import javafx.scene.control.Button;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleButtonBuilder;
-import javafx.scene.control.ToolBar;
-import javafx.scene.image.WritableImage;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBoxBuilder;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.RegionBuilder;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.StackPaneBuilder;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.execution.Phase;
 import com.eviware.loadui.api.execution.TestExecution;
 import com.eviware.loadui.api.execution.TestExecutionTask;
@@ -85,6 +47,35 @@ import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.projects.ProjectUtils;
 import com.google.common.base.Preconditions;
 import com.sun.javafx.PlatformUtil;
+import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.event.EventHandler;
+import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.SceneBuilder;
+import javafx.scene.control.Button;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToolBar;
+import javafx.scene.image.WritableImage;
+import javafx.scene.layout.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class ProjectView extends AnchorPane
 {
@@ -249,7 +240,7 @@ public class ProjectView extends AnchorPane
 					ScenarioToolbar toolbar = new ScenarioToolbar( scenario );
 
 					ToggleButton linkButton = playbackPanel.addLinkButton( scenario );
-				    linkButton.visibleProperty().bind( designTab.selectedProperty() );
+					linkButton.visibleProperty().bind( designTab.selectedProperty() );
 
 					StackPane.setAlignment( toolbar, Pos.TOP_CENTER );
 					CanvasView canvas = new CanvasView( scenario );
@@ -268,7 +259,7 @@ public class ProjectView extends AnchorPane
 				{
 					( ( ToolBar )lookup( ".tool-bar" ) ).setStyle( TOOLBAR_STYLE_WITHOUT_SCENARIO );
 
-                    playbackPanel.removeLinkButton();
+					playbackPanel.removeLinkButton();
 
 					javafx.scene.layout.Pane canvas = ( javafx.scene.layout.Pane )lookup( ".pane" );
 					javafx.scene.layout.Region grid = ( javafx.scene.layout.Region )lookup( ".grid" );
@@ -278,6 +269,7 @@ public class ProjectView extends AnchorPane
 
 					Region gridRegion = RegionBuilder.create().styleClass( "grid" ).style( "-fx-background-repeat: repeat;" )
 							.build();
+
 					//Hack for setting CSS resources within an OSGi framework
 					String gridUrl = CanvasView.class.getResource( "grid-box.png" ).toExternalForm();
 					gridRegion.setStyle( "-fx-background-image: url('" + gridUrl + "');" );
@@ -456,7 +448,7 @@ public class ProjectView extends AnchorPane
 
 		Map<ChartView, Image> images = LineChartUtils.createImages( pages, executionProp, null );
 
-		// Remove the Mac special case when we have switched to JavaFX 8.
+		//Remove the Mac special case when we have switched to JavaFX 8.
 		if( PlatformUtil.isMac() )
 		{
 			File reportFile = new File( "LoadUI_report.pdf" );

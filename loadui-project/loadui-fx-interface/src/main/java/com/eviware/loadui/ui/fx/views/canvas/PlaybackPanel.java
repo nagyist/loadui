@@ -15,8 +15,10 @@
  */
 package com.eviware.loadui.ui.fx.views.canvas;
 
-import java.lang.ref.WeakReference;
-
+import com.eviware.loadui.api.counter.CounterHolder;
+import com.eviware.loadui.api.model.CanvasItem;
+import com.eviware.loadui.api.model.SceneItem;
+import com.eviware.loadui.ui.fx.util.Properties;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.Property;
@@ -26,11 +28,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBuilder;
-import javafx.scene.control.Separator;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleButtonBuilder;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
@@ -38,11 +36,7 @@ import javafx.scene.layout.RegionBuilder;
 import javafx.util.Duration;
 
 import javax.annotation.Nonnull;
-
-import com.eviware.loadui.api.counter.CounterHolder;
-import com.eviware.loadui.api.model.CanvasItem;
-import com.eviware.loadui.api.model.SceneItem;
-import com.eviware.loadui.ui.fx.util.Properties;
+import java.lang.ref.WeakReference;
 
 public abstract class PlaybackPanel<T extends CounterDisplay, C extends CanvasItem> extends HBox
 {
@@ -114,7 +108,7 @@ public abstract class PlaybackPanel<T extends CounterDisplay, C extends CanvasIt
 		return new Image( getClass().getResourceAsStream( name ) );
 	}
 
-	protected ToggleButton linkScenarioButton( final SceneItem scenario )
+	protected ToggleButton linkScenarioButton( Property<Boolean> linkedProperty )
 	{
 		final ToggleButton linkButton = ToggleButtonBuilder
 				.create()
@@ -125,24 +119,24 @@ public abstract class PlaybackPanel<T extends CounterDisplay, C extends CanvasIt
 								.children( RegionBuilder.create().styleClass( "graphic" ).build(),
 										RegionBuilder.create().styleClass( "secondary-graphic" ).build() ).build() ).build();
 
-        final Property<Boolean> linkedProperty = Properties.convert( scenario.followProjectProperty() );
 		linkButton.setSelected( linkedProperty.getValue() );
 
-        linkButton.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observableValue, Boolean aBoolean, Boolean aBoolean2) {
-                //System.out.println("\n\n ---> LINK BUTTON CHANGED <---");
-                //System.out.println(scenario.getLabel() +" :>> scenario.followProperty: " + scenario.followProjectProperty() + ", linkedProperty: " + linkedProperty.getValue() + " <--> linkedButton.isSelected: " + linkButton.isSelected());
-            }
-        });
-
-        scenario.isRunning();
-
-        linkedProperty.bindBidirectional(linkButton.selectedProperty());
-        //System.out.println("\n\n ---> VIEW WITH NEW LINK-BUTTON <---");
-        //System.out.println(scenario.getLabel() +" :>> scenario.followProperty: " + scenario.followProjectProperty() + ", linkedProperty: " + linkedProperty.getValue() + " <--> linkedButton.isSelected: " + linkButton.isSelected());
+		linkButton.selectedProperty().addListener( new ChangeListener<Boolean>()
+		{
+			@Override
+			public void changed( ObservableValue<? extends Boolean> observableValue, Boolean aBoolean, Boolean aBoolean2 )
+			{
+				System.out.println( "\n\n ---> LINK BUTTON CHANGED <---" );
+			}
+		} );
 
 		return linkButton;
+	}
+
+	protected Property<Boolean> getLinkedProperty( SceneItem scenario )
+	{
+		Property<Boolean> linkedProperty = Properties.convert( scenario.followProjectProperty() );
+		return linkedProperty;
 	}
 
 	private static class UpdateDisplays implements EventHandler<ActionEvent>
