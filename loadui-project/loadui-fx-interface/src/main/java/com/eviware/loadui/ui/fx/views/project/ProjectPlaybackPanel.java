@@ -19,6 +19,7 @@ import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.ui.fx.views.canvas.ToolbarPlaybackPanel;
 import javafx.beans.property.Property;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.HBoxBuilder;
@@ -35,7 +36,7 @@ final public class ProjectPlaybackPanel extends ToolbarPlaybackPanel<ProjectItem
 	{
 		super( canvas );
 
-		playButtonContainer = VBoxBuilder.create().children(
+		playButtonContainer = VBoxBuilder.create().spacing( 0 ).children(
 				HBoxBuilder.create().alignment( Pos.CENTER ).spacing( 9 ).children(
 						separator(),
 						playButton,
@@ -48,6 +49,7 @@ final public class ProjectPlaybackPanel extends ToolbarPlaybackPanel<ProjectItem
 				).build()
 		).build();
 
+		setPadding( new Insets( 7, 0, 0, 0 ) );
 		getStyleClass().add( "project-playback-panel" );
 		setMaxWidth( 750 );
 

@@ -174,7 +174,7 @@ public class ProjectView extends AnchorPane
 	{
 		log.info( "Initializing ProjectView" );
 		playbackPanel = new ProjectPlaybackPanel( project );
-		AnchorPane.setTopAnchor( playbackPanel, 7d );
+		AnchorPane.setTopAnchor( playbackPanel, 0.0 );
 		AnchorPane.setLeftAnchor( playbackPanel, 440.0 );
 		getChildren().add( playbackPanel );
 
