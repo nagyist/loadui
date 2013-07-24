@@ -18,17 +18,42 @@ package com.eviware.loadui.ui.fx.views.canvas;
 import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.ui.fx.views.canvas.CounterDisplay.Formatting;
 import com.eviware.loadui.ui.fx.views.canvas.scenario.ScenarioCounterDisplay;
+import javafx.beans.property.Property;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.layout.HBoxBuilder;
 
 public class MiniScenarioPlaybackPanel extends PlaybackPanel<CounterDisplay, SceneItem>
 {
-	public MiniScenarioPlaybackPanel( SceneItem canvas )
+	private ToggleButton linkButton;
+	private Property<Boolean> linkedProperty;
+
+	public MiniScenarioPlaybackPanel( SceneItem scenario )
 	{
-		super( canvas );
+		super( scenario );
+
+		linkedProperty = getLinkedProperty( scenario );
+		linkButton = linkScenarioButton( linkedProperty );
+
+		linkButton.selectedProperty().bindBidirectional( linkedProperty );
+		linkButton.disableProperty().bind( playButton.selectedProperty() );
 
 		getStyleClass().setAll( "mini-playback-panel" );
 		setSpacing( 6 );
 		setPrefWidth( 310 );
-		getChildren().setAll( separator(), playButton, separator(), linkScenarioButton( canvas ), time, requests,
+
+		getChildren().setAll(
+				separator(),
+				playButton,
+				separator(),
+				HBoxBuilder.create()
+						.alignment( Pos.CENTER )
+						.padding( new Insets( 6, 6, 6, 0 ) )
+						.children( linkButton )
+						.build(),
+				time,
+				requests,
 				failures );
 	}
 

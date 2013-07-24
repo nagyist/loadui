@@ -376,17 +376,14 @@
 	-fx-background-radius: 25.0;
  }
 
- 
  /*
   * Linking Buttons
   */
 #link-scenario.toggle-button{
 	-fx-background-color: linear-gradient(to bottom, #E1E1E1 0.0%, #767676 100.0%);
 	-fx-padding: 0.0; 
-	-fx-background-insets: 3.0 17.0 3.0 7.0; 
-	-fx-translate-x: 10.0;
-	-fx-translate-y: 0.0; 
-	-fx-translate-z: 1.0; 
+	-fx-background-insets: 3.0 17.0 3.0 7.0;
+	-fx-translate-x: 9.0;
 }
 
 #link-scenario.toggle-button:hover{
@@ -394,7 +391,7 @@
 }
 
 #link-scenario.toggle-button:focused{
-	-fx-background-insets: 3.0 17.0 3.0 7.0; 
+	-fx-background-insets: 3.0 17.0 3.0 7.0;
 }
 
 #link-scenario.toggle-button:selected{
@@ -410,7 +407,7 @@
 	-fx-background-insets: 5.0 2.0 5.0 1.0; 
 	-fx-background-color: #636363; 
 	-fx-padding: 0.0 10.0 0.0 10.0;
-	-fx-translate-x: 7.0;  
+	-fx-translate-x: 7.0;
 }
 
 #link-scenario.toggle-button .secondary-graphic{
@@ -420,7 +417,7 @@
 	-fx-border-radius: 4.0; 
 	-fx-scale-x: 0.9;
 	-fx-scale-y: 0.7;
-	-fx-translate-x: -15.0; 
+	-fx-translate-x: -15.0;
 }
 
 #link-scenario.toggle-button:selected .graphic{

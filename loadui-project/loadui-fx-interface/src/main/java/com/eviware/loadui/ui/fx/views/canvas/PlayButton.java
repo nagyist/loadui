@@ -15,8 +15,16 @@
  */
 package com.eviware.loadui.ui.fx.views.canvas;
 
+import com.eviware.loadui.api.execution.Phase;
+import com.eviware.loadui.api.execution.TestExecution;
+import com.eviware.loadui.api.execution.TestExecutionTask;
+import com.eviware.loadui.api.model.CanvasItem;
+import com.eviware.loadui.api.model.ProjectItem;
+import com.eviware.loadui.api.model.SceneItem;
+import com.eviware.loadui.util.execution.TestExecutionUtils;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -30,19 +38,10 @@ import javafx.scene.layout.RegionBuilder;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.CircleBuilder;
-
-import javax.annotation.Nonnull;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eviware.loadui.api.execution.Phase;
-import com.eviware.loadui.api.execution.TestExecution;
-import com.eviware.loadui.api.execution.TestExecutionTask;
-import com.eviware.loadui.api.model.CanvasItem;
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.api.model.SceneItem;
-import com.eviware.loadui.util.execution.TestExecutionUtils;
+import javax.annotation.Nonnull;
 
 public class PlayButton extends StackPane
 {
@@ -54,7 +53,7 @@ public class PlayButton extends StackPane
 							.create()
 							.children( RegionBuilder.create().styleClass( "graphic" ).build(),
 									RegionBuilder.create().styleClass( "secondary-graphic" ).build() ).build() ).build();
-	
+
 	private final CanvasItem canvas;
 	private final BooleanProperty playingProperty = new SimpleBooleanProperty();
 
@@ -121,7 +120,8 @@ public class PlayButton extends StackPane
 		maxWidth( 27 );
 
 		playingProperty.addListener( playCanvas );
-		playingProperty.bindBidirectional( toggleButton.selectedProperty() );
+		playingProperty.setValue( canvas.isRunning() );
+		toggleButton.selectedProperty().bindBidirectional( playingProperty );
 
 		Circle border = CircleBuilder.create().styleClass( "play-button-border" ).radius( 14 ).build();
 		Region inner = RegionBuilder.create().styleClass( "inner-spinner-overlay" ).build();
@@ -137,5 +137,10 @@ public class PlayButton extends StackPane
 		getChildren().setAll( outer, indicator, inner, border, toggleButton );
 
 		setMaxSize( 27, 27 );
+	}
+
+	public Property<Boolean> selectedProperty()
+	{
+		return toggleButton.selectedProperty();
 	}
 }
