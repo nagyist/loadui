@@ -22,48 +22,46 @@ import javafx.beans.property.Property;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.layout.HBoxBuilder;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.VBoxBuilder;
+import javafx.scene.layout.*;
 
 final public class ProjectPlaybackPanel extends ToolbarPlaybackPanel<ProjectItem>
 {
-	private VBox playButtonContainer;
 	private ToggleButton linkButton;
+	private HBox linkButtonContainer;
 	private Property<Boolean> linkedProperty;
+	private HBox playbackContainer;
 
 	public ProjectPlaybackPanel( ProjectItem canvas )
 	{
 		super( canvas );
-
-		playButtonContainer = VBoxBuilder.create().spacing( 0 ).children(
-				HBoxBuilder.create().alignment( Pos.CENTER ).spacing( 9 ).children(
-						separator(),
-						playButton,
-						separator(),
-						time,
-						requests,
-						failures,
-						resetButton(),
-						limitsButton()
-				).build()
+		linkButtonContainer = HBoxBuilder.create().build();
+		playbackContainer = HBoxBuilder.create().alignment( Pos.CENTER ).spacing( 9 ).children(
+				separator(),
+				playButton,
+				separator(),
+				time,
+				requests,
+				failures,
+				resetButton(),
+				limitsButton()
 		).build();
+
+		getChildren().setAll( VBoxBuilder.create().spacing( 0 ).children(
+				playbackContainer,
+				linkButtonContainer
+		).build() );
 
 		setPadding( new Insets( 7, 0, 0, 0 ) );
 		getStyleClass().add( "project-playback-panel" );
 		setMaxWidth( 750 );
-
-		getChildren().setAll(
-				playButtonContainer
-		);
 	}
 
 	public ToggleButton addLinkButton( SceneItem scenario )
 	{
 
-		if( playButtonContainer.getChildren().size() > 1 )
+		if( !linkButtonContainer.getChildren().isEmpty() )
 		{
-			playButtonContainer.getChildren().remove( 1 );
+			linkButtonContainer.getChildren().clear();
 		}
 
 		linkedProperty = getLinkedProperty( scenario );
@@ -72,23 +70,26 @@ final public class ProjectPlaybackPanel extends ToolbarPlaybackPanel<ProjectItem
 		linkButton.selectedProperty().bindBidirectional( linkedProperty );
 		linkButton.disableProperty().bind( playButton.selectedProperty() );
 
-		playButtonContainer.getChildren().add( 1, linkButton );
+		linkButtonContainer.getChildren().add( linkButton );
 		return linkButton;
 	}
 
 	public boolean removeLinkButton()
 	{
-		if( playButtonContainer.getChildren().size() > 1 )
+		if( !linkButtonContainer.getChildren().isEmpty() )
 		{
 			linkButton.selectedProperty().unbindBidirectional( linkedProperty );
 			linkButton.disableProperty().unbind();
-
-			playButtonContainer.getChildren().remove( linkButton );
+			linkButtonContainer.getChildren().clear();
 			return true;
 		}
 		else
 		{
 			return false;
 		}
+	}
+
+	public HBox getPlaybackContainer(){
+		return playbackContainer;
 	}
 }

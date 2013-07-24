@@ -22,8 +22,6 @@ import com.eviware.loadui.ui.fx.util.Properties;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.Property;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
@@ -110,23 +108,27 @@ public abstract class PlaybackPanel<T extends CounterDisplay, C extends CanvasIt
 
 	protected ToggleButton linkScenarioButton( Property<Boolean> linkedProperty )
 	{
-		final ToggleButton linkButton = ToggleButtonBuilder
+		ToggleButton linkButton = ToggleButtonBuilder
 				.create()
 				.id( "link-scenario" )
 				.graphic(
 						HBoxBuilder
 								.create()
-								.children( RegionBuilder.create().styleClass( "graphic" ).build(),
-										RegionBuilder.create().styleClass( "secondary-graphic" ).build() ).build() ).build();
+								.children(
+										RegionBuilder.create().styleClass( "graphic" ).build(),
+										RegionBuilder.create().styleClass( "secondary-graphic" )
+												.build() )
+								.build() )
+				.build();
 
 		linkButton.setSelected( linkedProperty.getValue() );
-      return linkButton;
+		return linkButton;
 	}
 
 	protected Property<Boolean> getLinkedProperty( SceneItem scenario )
 	{
 		Property<Boolean> linkedProperty = Properties.convert( scenario.followProjectProperty() );
-      return linkedProperty;
+		return linkedProperty;
 	}
 
 	private static class UpdateDisplays implements EventHandler<ActionEvent>
