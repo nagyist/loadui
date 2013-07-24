@@ -36,6 +36,10 @@ fi
 
 JAVA="jre/bin/java"
 
+if [ ! -d "$JAVA" ]; then
+  JAVA="java"
+fi
+
 JAVA_OPTS="-Xms128m -Xmx768m -XX:MaxPermSize=128m"
 
 $JAVA $JAVA_OPTS -cp "$LOADUI_CLASSPATH" com.javafx.main.Main --cmd=true --nofx=true -nofx -Dlog4j.configuration=log4j_headless.xml "$@"
