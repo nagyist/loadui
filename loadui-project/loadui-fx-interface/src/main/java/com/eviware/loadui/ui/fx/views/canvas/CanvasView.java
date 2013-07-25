@@ -15,16 +15,36 @@
  */
 package com.eviware.loadui.ui.fx.views.canvas;
 
-import static com.eviware.loadui.ui.fx.util.ObservableLists.bindContentUnordered;
-import static com.eviware.loadui.ui.fx.util.ObservableLists.filter;
-import static com.eviware.loadui.ui.fx.util.ObservableLists.fx;
-import static com.eviware.loadui.ui.fx.util.ObservableLists.ofCollection;
-import static com.eviware.loadui.ui.fx.util.ObservableLists.ofServices;
-import static com.eviware.loadui.ui.fx.util.ObservableLists.transform;
-
-import java.util.Arrays;
-import java.util.concurrent.Callable;
-
+import com.eviware.loadui.api.component.ComponentDescriptor;
+import com.eviware.loadui.api.component.categories.*;
+import com.eviware.loadui.api.model.CanvasItem;
+import com.eviware.loadui.api.model.CanvasObjectItem;
+import com.eviware.loadui.api.model.ComponentItem;
+import com.eviware.loadui.api.terminal.Connection;
+import com.eviware.loadui.api.terminal.InputTerminal;
+import com.eviware.loadui.api.terminal.OutputTerminal;
+import com.eviware.loadui.api.terminal.Terminal;
+import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
+import com.eviware.loadui.ui.fx.api.input.Selectable;
+import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
+import com.eviware.loadui.ui.fx.control.DragNode;
+import com.eviware.loadui.ui.fx.control.ToolBox;
+import com.eviware.loadui.ui.fx.input.MovableImpl;
+import com.eviware.loadui.ui.fx.input.MultiMovable;
+import com.eviware.loadui.ui.fx.input.SelectableImpl;
+import com.eviware.loadui.ui.fx.util.FXMLUtils;
+import com.eviware.loadui.ui.fx.util.ObservableLists;
+import com.eviware.loadui.ui.fx.views.canvas.component.ComponentView;
+import com.eviware.loadui.ui.fx.views.canvas.terminal.ConnectionView;
+import com.eviware.loadui.ui.fx.views.canvas.terminal.TerminalView;
+import com.eviware.loadui.ui.fx.views.canvas.terminal.Wire;
+import com.eviware.loadui.util.CanvasItemNameGenerator;
+import com.eviware.loadui.util.collections.SafeExplicitOrdering;
+import com.google.common.base.Function;
+import com.google.common.base.Functions;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Ordering;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -49,54 +69,17 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.Effect;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.PaneBuilder;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.RegionBuilder;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.StackPaneBuilder;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eviware.loadui.api.component.ComponentDescriptor;
-import com.eviware.loadui.api.component.categories.AnalysisCategory;
-import com.eviware.loadui.api.component.categories.FlowCategory;
-import com.eviware.loadui.api.component.categories.GeneratorCategory;
-import com.eviware.loadui.api.component.categories.MiscCategory;
-import com.eviware.loadui.api.component.categories.OutputCategory;
-import com.eviware.loadui.api.component.categories.RunnerCategory;
-import com.eviware.loadui.api.component.categories.SchedulerCategory;
-import com.eviware.loadui.api.model.CanvasItem;
-import com.eviware.loadui.api.model.CanvasObjectItem;
-import com.eviware.loadui.api.model.ComponentItem;
-import com.eviware.loadui.api.terminal.Connection;
-import com.eviware.loadui.api.terminal.InputTerminal;
-import com.eviware.loadui.api.terminal.OutputTerminal;
-import com.eviware.loadui.api.terminal.Terminal;
-import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
-import com.eviware.loadui.ui.fx.api.input.Selectable;
-import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
-import com.eviware.loadui.ui.fx.control.DragNode;
-import com.eviware.loadui.ui.fx.control.ToolBox;
-import com.eviware.loadui.ui.fx.input.MovableImpl;
-import com.eviware.loadui.ui.fx.input.MultiMovable;
-import com.eviware.loadui.ui.fx.input.SelectableImpl;
-import com.eviware.loadui.ui.fx.util.FXMLUtils;
-import com.eviware.loadui.ui.fx.util.ObservableLists;
-import com.eviware.loadui.ui.fx.views.canvas.component.ComponentView;
-import com.eviware.loadui.ui.fx.views.canvas.terminal.ConnectionView;
-import com.eviware.loadui.ui.fx.views.canvas.terminal.TerminalView;
-import com.eviware.loadui.ui.fx.views.canvas.terminal.Wire;
-import com.eviware.loadui.util.collections.SafeExplicitOrdering;
-import com.google.common.base.Function;
-import com.google.common.base.Functions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Ordering;
+import java.util.Arrays;
+import java.util.concurrent.Callable;
+
+import static com.eviware.loadui.ui.fx.util.ObservableLists.*;
+import static com.google.common.collect.Lists.transform;
 
 public class CanvasView extends StackPane
 {
@@ -118,20 +101,20 @@ public class CanvasView extends StackPane
 	};
 
 	private static final Ordering<String> CATEGORY_COMPARATOR = Ordering.compound(
-			Arrays.asList( SafeExplicitOrdering.of( Lists.transform( Arrays.asList( "VU Scenario",
+			Arrays.asList( SafeExplicitOrdering.of( transform( Arrays.asList( "VU Scenario",
 					GeneratorCategory.CATEGORY, RunnerCategory.CATEGORY, FlowCategory.CATEGORY, SchedulerCategory.CATEGORY,
 					OutputCategory.CATEGORY, AnalysisCategory.CATEGORY, MiscCategory.CATEGORY ), TO_LOWER ) ), Ordering
-					.<String> natural() ) ).onResultOf( TO_LOWER );
+					.<String>natural() ) ).onResultOf( TO_LOWER );
 
 	private final Function<ComponentItem, ComponentView> COMPONENT_TO_VIEW = Functions.compose(
 			new InitializeCanvasObjectView<ComponentView>(), new Function<ComponentItem, ComponentView>()
-			{
-				@Override
-				public ComponentView apply( ComponentItem input )
-				{
-					return ComponentView.newInstance( input );
-				}
-			} );
+	{
+		@Override
+		public ComponentView apply( ComponentItem input )
+		{
+			return ComponentView.newInstance( input );
+		}
+	} );
 
 	private final Function<Connection, ConnectionView> CONNECTION_TO_VIEW = new Function<Connection, ConnectionView>()
 	{
@@ -165,7 +148,7 @@ public class CanvasView extends StackPane
 			connectionView.fillProperty().bind(
 					Bindings.when( selectedProperty ).then( Color.web( "#00ADEE" ) ).otherwise( Color.GRAY ) );
 			connectionView.effectProperty().bind(
-					Bindings.when( selectedProperty ).then( selectedEffect ).otherwise( ( Effect )null ) );
+					Bindings.when( selectedProperty ).then( selectedEffect ).otherwise( (Effect) null ) );
 			selectedProperty.addListener( new ChangeListener<Boolean>()
 			{
 				@Override
@@ -219,7 +202,7 @@ public class CanvasView extends StackPane
 		canvasObjects = createCanvasObjects();
 		canvasObjects.addListener( uninstallCanvasObject );
 
-		connections = transform(
+		connections = ObservableLists.transform(
 				fx( ofCollection( canvas, CanvasItem.CONNECTIONS, Connection.class, canvas.getConnections() ) ),
 				CONNECTION_TO_VIEW );
 
@@ -228,12 +211,12 @@ public class CanvasView extends StackPane
 
 	protected ObservableList<? extends Labeled> createToolBoxContent()
 	{
-		return transform( fx( filter( ofServices( ComponentDescriptor.class ), NOT_DEPRECATED ) ), DESCRIPTOR_TO_VIEW );
+		return ObservableLists.transform( fx( filter( ofServices( ComponentDescriptor.class ), NOT_DEPRECATED ) ), DESCRIPTOR_TO_VIEW );
 	}
 
 	protected ObservableList<? extends CanvasObjectView> createCanvasObjects()
 	{
-		return transform(
+		return ObservableLists.transform(
 				fx( ofCollection( canvas, CanvasItem.COMPONENTS, ComponentItem.class, canvas.getComponents() ) ),
 				COMPONENT_TO_VIEW );
 	}
@@ -256,8 +239,7 @@ public class CanvasView extends StackPane
 			{
 				event.accept();
 				event.consume();
-			}
-			else if( event.getEventType() == DraggableEvent.DRAGGABLE_DROPPED )
+			} else if( event.getEventType() == DraggableEvent.DRAGGABLE_DROPPED )
 			{
 				handleDrop( event );
 				event.consume();
@@ -267,7 +249,7 @@ public class CanvasView extends StackPane
 
 	protected void createComponent( final DraggableEvent event )
 	{
-		final ComponentDescriptor descriptor = ( ComponentDescriptor )event.getData();
+		final ComponentDescriptor descriptor = (ComponentDescriptor) event.getData();
 
 		final Task<ComponentItem> createComponent = new Task<ComponentItem>()
 		{
@@ -276,10 +258,10 @@ public class CanvasView extends StackPane
 			{
 				updateMessage( "Creating component: " + descriptor.getLabel() );
 
-				ComponentItem component = CanvasView.this.canvas.createComponent( descriptor.getLabel(), descriptor );
+				ComponentItem component = CanvasView.this.canvas.createComponent( CanvasItemNameGenerator.generateComponentName( canvas, descriptor.getLabel() ), descriptor );
 				Point2D position = canvasLayer.sceneToLocal( event.getSceneX(), event.getSceneY() );
-				component.setAttribute( "gui.layoutX", String.valueOf( ( int )position.getX() ) );
-				component.setAttribute( "gui.layoutY", String.valueOf( ( int )position.getY() ) );
+				component.setAttribute( "gui.layoutX", String.valueOf( (int) position.getX() ) );
+				component.setAttribute( "gui.layoutY", String.valueOf( (int) position.getY() ) );
 
 				return component;
 			}
@@ -451,19 +433,16 @@ public class CanvasView extends StackPane
 			if( layoutX > minX )
 			{
 				canvasLayer.setLayoutX( minX );
-			}
-			else if( layoutX < maxX )
+			} else if( layoutX < maxX )
 			{
 				canvasLayer.setLayoutX( maxX );
 			}
-		}
-		else
+		} else
 		{
 			if( layoutX < minX )
 			{
 				canvasLayer.setLayoutX( minX );
-			}
-			else if( layoutX > maxX )
+			} else if( layoutX > maxX )
 			{
 				canvasLayer.setLayoutX( maxX );
 			}
@@ -474,19 +453,16 @@ public class CanvasView extends StackPane
 			if( layoutY > minY )
 			{
 				canvasLayer.setLayoutY( minY );
-			}
-			else if( layoutY < maxY )
+			} else if( layoutY < maxY )
 			{
 				canvasLayer.setLayoutY( maxY );
 			}
-		}
-		else
+		} else
 		{
 			if( layoutY < minY )
 			{
 				canvasLayer.setLayoutY( minY );
-			}
-			else if( layoutY > maxY )
+			} else if( layoutY > maxY )
 			{
 				canvasLayer.setLayoutY( maxY );
 			}
@@ -510,7 +486,7 @@ public class CanvasView extends StackPane
 
 	private static Ordering<Labeled> order( String... labels )
 	{
-		return Ordering.compound( Arrays.asList( SafeExplicitOrdering.of( labels ), Ordering.<String> natural() ) )
+		return Ordering.compound( Arrays.asList( SafeExplicitOrdering.of( labels ), Ordering.<String>natural() ) )
 				.onResultOf( LABELED_TEXT );
 	}
 
@@ -569,15 +545,15 @@ public class CanvasView extends StackPane
 				{
 					if( !newValue )
 					{
-						item.setAttribute( "gui.layoutX", String.valueOf( ( int )view.getLayoutX() ) );
-						item.setAttribute( "gui.layoutY", String.valueOf( ( int )view.getLayoutY() ) );
+						item.setAttribute( "gui.layoutX", String.valueOf( (int) view.getLayoutX() ) );
+						item.setAttribute( "gui.layoutY", String.valueOf( (int) view.getLayoutY() ) );
 						enforceCanvasBounds();
 					}
 				}
 			} );
 			Selectable selectable = SelectableImpl.installSelectable( view );
 			view.effectProperty().bind(
-					Bindings.when( selectable.selectedProperty() ).then( selectedEffect ).otherwise( ( Effect )null ) );
+					Bindings.when( selectable.selectedProperty() ).then( selectedEffect ).otherwise( (Effect) null ) );
 
 			MultiMovable.install( CanvasView.this, view );
 
@@ -612,11 +588,11 @@ public class CanvasView extends StackPane
 		{
 			if( event.getData() instanceof Terminal )
 			{
-				DragNode dragNode = ( DragNode )event.getDraggable();
+				DragNode dragNode = (DragNode) event.getDraggable();
 
 				if( event.getEventType() == DraggableEvent.DRAGGABLE_STARTED )
 				{
-					final Terminal draggedTerminal = ( Terminal )event.getData();
+					final Terminal draggedTerminal = (Terminal) event.getData();
 					connectionView = Iterables.find( connections, new Predicate<ConnectionView>()
 					{
 						@Override
@@ -638,19 +614,18 @@ public class CanvasView extends StackPane
 						Bounds startBounds = canvasLayer.sceneToLocal( otherTerminalView.localToScene( otherTerminalView
 								.getBoundsInLocal() ) );
 
-						startPoint = new Point2D( ( startBounds.getMinX() + startBounds.getMaxX() ) / 2,
-								( startBounds.getMinY() + startBounds.getMaxY() ) / 2 );
+						startPoint = new Point2D( (startBounds.getMinX() + startBounds.getMaxX()) / 2,
+								(startBounds.getMinY() + startBounds.getMaxY()) / 2 );
 
 						originalData = draggedTerminal;
 						dragNode.setData( otherTerminalView.getTerminal() );
-					}
-					else
+					} else
 					{
-						Node source = ( ( DragNode )event.getDraggable() ).getDragSource();
+						Node source = ((DragNode) event.getDraggable()).getDragSource();
 						Bounds startBounds = canvasLayer.sceneToLocal( source.localToScene( source.getBoundsInLocal() ) );
 
-						startPoint = new Point2D( ( startBounds.getMinX() + startBounds.getMaxX() ) / 2,
-								( startBounds.getMinY() + startBounds.getMaxY() ) / 2 );
+						startPoint = new Point2D( (startBounds.getMinX() + startBounds.getMaxX()) / 2,
+								(startBounds.getMinY() + startBounds.getMaxY()) / 2 );
 
 						originalData = null;
 						connectionView = null;
@@ -661,13 +636,11 @@ public class CanvasView extends StackPane
 					wire.updatePosition( startPoint.getX(), startPoint.getY(), endPoint.getX(), endPoint.getY() );
 					wire.setReversed( event.getData() instanceof InputTerminal );
 					wire.setVisible( true );
-				}
-				else if( event.getEventType() == DraggableEvent.DRAGGABLE_DRAGGED )
+				} else if( event.getEventType() == DraggableEvent.DRAGGABLE_DRAGGED )
 				{
 					Point2D endPoint = canvasLayer.sceneToLocal( event.getSceneX(), event.getSceneY() );
 					wire.updatePosition( startPoint.getX(), startPoint.getY(), endPoint.getX(), endPoint.getY() );
-				}
-				else if( event.getEventType() == DraggableEvent.DRAGGABLE_STOPPED )
+				} else if( event.getEventType() == DraggableEvent.DRAGGABLE_STOPPED )
 				{
 					wire.setVisible( false );
 					if( originalData != null )
@@ -677,18 +650,17 @@ public class CanvasView extends StackPane
 					if( connectionView != null )
 					{
 						//If dropped on (or near enough) the original TerminalView, do not delete the Connection:
-						Node source = ( ( DragNode )event.getDraggable() ).getDragSource();
+						Node source = ((DragNode) event.getDraggable()).getDragSource();
 						Bounds startBounds = source.localToScene( source.getBoundsInLocal() );
 						Point2D endPoint = new Point2D( event.getSceneX(), event.getSceneY() );
 						double distance = endPoint.distance( new Point2D(
-								( startBounds.getMinX() + startBounds.getMaxX() ) / 2, ( startBounds.getMinY() + startBounds
-										.getMaxY() ) / 2 ) );
+								(startBounds.getMinX() + startBounds.getMaxX()) / 2, (startBounds.getMinY() + startBounds
+								.getMaxY()) / 2 ) );
 
 						if( distance > 10 )
 						{
 							connectionView.delete();
-						}
-						else
+						} else
 						{
 							connectionView.setVisible( true );
 						}
