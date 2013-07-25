@@ -46,7 +46,7 @@ likes( inputTerminal ) { true }
 
 table = null
 tableWriterFuture = null
-tableWriterDelay = 1000
+tableWriterDelay = 250
 final messageQueue = [] as LinkedList
 writer = null
 writerLock = new Object()
@@ -182,7 +182,8 @@ synchronized startTableWriter() {
 }
 
 void stopTableWriter() {
-	tableWriterFuture?.cancel( false )
+	tableWriterFuture?.cancel( true )
+	tableWriter.run()
 	tableWriterFuture = null
 }
 
