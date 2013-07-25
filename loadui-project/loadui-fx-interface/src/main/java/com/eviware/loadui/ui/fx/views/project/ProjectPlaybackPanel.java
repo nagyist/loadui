@@ -16,17 +16,80 @@
 package com.eviware.loadui.ui.fx.views.project;
 
 import com.eviware.loadui.api.model.ProjectItem;
+import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.ui.fx.views.canvas.ToolbarPlaybackPanel;
+import javafx.beans.property.Property;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.layout.*;
 
 final public class ProjectPlaybackPanel extends ToolbarPlaybackPanel<ProjectItem>
 {
+	private ToggleButton linkButton;
+	private HBox linkButtonContainer;
+	private Property<Boolean> linkedProperty;
+	private HBox playbackContainer;
+
 	public ProjectPlaybackPanel( ProjectItem canvas )
 	{
 		super( canvas );
+		linkButtonContainer = HBoxBuilder.create().build();
+		playbackContainer = HBoxBuilder.create().alignment( Pos.CENTER ).spacing( 9 ).children(
+				separator(),
+				playButton,
+				separator(),
+				time,
+				requests,
+				failures,
+				resetButton(),
+				limitsButton()
+		).build();
 
+		getChildren().setAll( VBoxBuilder.create().spacing( 0 ).children(
+				playbackContainer,
+				linkButtonContainer
+		).build() );
+
+		setPadding( new Insets( 7, 0, 0, 0 ) );
 		getStyleClass().add( "project-playback-panel" );
 		setMaxWidth( 750 );
-		getChildren().setAll( separator(), playButton, separator(), time, requests, failures, resetButton(),
-				limitsButton() );
+	}
+
+	public ToggleButton addLinkButton( SceneItem scenario )
+	{
+
+		if( !linkButtonContainer.getChildren().isEmpty() )
+		{
+			linkButtonContainer.getChildren().clear();
+		}
+
+		linkedProperty = getLinkedProperty( scenario );
+		linkButton = linkScenarioButton( linkedProperty );
+
+		linkButton.selectedProperty().bindBidirectional( linkedProperty );
+		linkButton.disableProperty().bind( playButton.selectedProperty() );
+
+		linkButtonContainer.getChildren().add( linkButton );
+		return linkButton;
+	}
+
+	public boolean removeLinkButton()
+	{
+		if( !linkButtonContainer.getChildren().isEmpty() )
+		{
+			linkButton.selectedProperty().unbindBidirectional( linkedProperty );
+			linkButton.disableProperty().unbind();
+			linkButtonContainer.getChildren().clear();
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	public HBox getPlaybackContainer(){
+		return playbackContainer;
 	}
 }

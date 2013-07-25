@@ -34,7 +34,7 @@ public abstract class CounterDisplay extends VBox
 
 	public static Label label( String name )
 	{
-		return LabelBuilder.create().text( name ).minWidth(25).style( "-fx-font-size: 10px;" ).build();
+		return LabelBuilder.create().text( name ).minWidth(25).style( "-fx-font-size: 9px; -fx-label-padding: 0 0 0 0;" ).build();
 	}
 
 	public static Label numberDisplay()
