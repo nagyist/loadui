@@ -4,7 +4,6 @@ import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.FxIntegrationTestBase;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -29,7 +28,6 @@ public class TableLogTest extends FxIntegrationTestBase
 	}
 
 	@Test
-	@Ignore
 	public void should_haveNoRows_whenCreated()
 	{
 		// GIVEN
@@ -40,7 +38,6 @@ public class TableLogTest extends FxIntegrationTestBase
 	}
 
 	@Test
-	@Ignore
 	public void should_displayRows_whenGettingInput()
 	{
 		// GIVEN
@@ -60,17 +57,20 @@ public class TableLogTest extends FxIntegrationTestBase
 		connect( FIXED_RATE_GENERATOR ).to( TABLE_LOG );
 
 		// AND
-		int veryHighLoad = 2000;
+		long veryHighLoad = 20_000;
 		turnKnobIn( FIXED_RATE_GENERATOR ).to( veryHighLoad );
 
-		long startT = System.currentTimeMillis();
-
 		// WHEN
+		robot.pointAtPlayStopButton();
+
+		long startT = System.currentTimeMillis();
 		runTestFor( 2, SECONDS );
 
 		// THEN
-		testRunStopsWithinLimit( startT, Math.round( veryHighLoad * 1.15 ) );
+		testRunStopsWithinLimit( startT, 5000 );
 
 	}
+
+	//TODO test log files work when the user chooses to use them
 
 }

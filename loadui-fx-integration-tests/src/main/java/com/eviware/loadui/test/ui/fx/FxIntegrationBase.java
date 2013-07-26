@@ -84,9 +84,9 @@ public class FxIntegrationBase
 			this.knob = knob;
 		}
 
-		public KnobHandle to( int value )
+		public KnobHandle to( long value )
 		{
-			controller.doubleClick( knob ).type( Integer.toString( value ) ).type( KeyCode.ENTER );
+			controller.doubleClick( knob ).type( Long.toString( value ) ).type( KeyCode.ENTER );
 			return this;
 		}
 

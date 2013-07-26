@@ -17,6 +17,9 @@ class TableLogTestSupport
 
 	static void testRunStopsWithinLimit( long startT, long limit )
 	{
-		assertTrue( System.currentTimeMillis() - startT < limit );
+		long now = System.currentTimeMillis();
+		long expectedStopTime = startT + limit;
+		assertTrue( "Stop occurred " + (now - expectedStopTime) + " ms too late",
+				now < expectedStopTime );
 	}
 }

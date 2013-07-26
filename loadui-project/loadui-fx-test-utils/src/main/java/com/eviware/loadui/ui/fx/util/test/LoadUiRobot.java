@@ -156,6 +156,11 @@ public class LoadUiRobot
 		controller.click( ".project-playback-panel .play-button" );
 	}
 
+	public void pointAtPlayStopButton()
+	{
+		controller.move( ".project-playback-panel .play-button" );
+	}
+
 	public void runTestFor( int number, TimeUnit unit )
 	{
 		clickPlayStopButton();
