@@ -68,6 +68,10 @@
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
+                    <!-- Memory management -->
+                    <fork>true</fork>
+                    <meminitial>128m</meminitial>
+                    <maxmem>512m</maxmem>
 				</configuration>
 			</plugin>
 			<plugin>

@@ -55,7 +55,8 @@ public class ChartsTest extends FxIntegrationTestBase
 		runTestFor( 5, SECONDS );
 
 		controller.click( "#statsTab" );
-		controller.drag( WEB_RUNNER ).by( 150, 150 ).drop().click( "#default" );
+		controller.drag( WEB_RUNNER ).by( 150, 150 ).drop().sleep( 1000 );
+		controller.click( "#default" );
 
 		assertThat( allChartLines().size(), is( 2 ) );
 	}

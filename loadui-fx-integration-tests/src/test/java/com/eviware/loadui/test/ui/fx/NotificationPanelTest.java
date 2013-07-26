@@ -26,10 +26,7 @@ import com.eviware.loadui.util.test.TestUtils;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Region;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.experimental.categories.Category;
 
 import java.util.Set;
@@ -175,6 +172,7 @@ public class NotificationPanelTest
 	}
 
 	@Test
+	@Ignore(value = "Feature disabled until further notice. See LOADUI-869 and LOADUI-871")
 	public void notificationShowsUpInDetachedTab() throws Exception
 	{
 		ProjectLoadedWithoutAgentsState.STATE.enter();

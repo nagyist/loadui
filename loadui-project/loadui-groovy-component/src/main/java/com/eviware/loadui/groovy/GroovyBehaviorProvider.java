@@ -123,6 +123,7 @@ public class GroovyBehaviorProvider implements BehaviorProvider, EventFirer, Rel
 		// registry.registerDescriptor( emptyDescriptor, this );
 		registry.registerType( TYPE, this );
 
+		//TODO replace this with the java.nio directory watcher
 		future = scheduler.scheduleWithFixedDelay( new DirWatcher(), 0, UPDATE_FREQUENCY, TimeUnit.SECONDS );
 	}
 
@@ -288,24 +289,14 @@ public class GroovyBehaviorProvider implements BehaviorProvider, EventFirer, Rel
 			ParsedGroovyScript headers = new ParsedGroovyScript( getFileContent( script ) );
 
 			File icon = new File( script.getParentFile(), headers.getHeader( "icon", baseName + ".png" ) );
-			FileInputStream fis = null;
 			String digest = null;
-			try
+			try (FileInputStream fis = new FileInputStream( script ))
 			{
-				fis = new FileInputStream( script );
 				digest = DigestUtils.md5Hex( fis );
-			}
-			catch( FileNotFoundException e )
-			{
-				e.printStackTrace();
 			}
 			catch( IOException e )
 			{
 				e.printStackTrace();
-			}
-			finally
-			{
-				Closeables.closeQuietly( fis );
 			}
 
 			return new ScriptDescriptor( headers.getHeader( "id", baseName ), headers.getHeader( "classloader",
