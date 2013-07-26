@@ -88,7 +88,7 @@ public class EventsHandlingTest
 	@Test
 	public void testKnobExists() throws Exception
 	{
-		controller.click( "#Generators" ).drag( CONDITION_COMPONENT ).by( 150, -50 ).drop();
+		controller.click( "#generators" ).drag( CONDITION_COMPONENT ).by( 150, -50 ).drop();
 		TestUtils.awaitCondition( new Callable<Boolean>()
 		{
 			@Override

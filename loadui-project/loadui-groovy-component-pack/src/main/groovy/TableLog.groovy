@@ -1,22 +1,22 @@
-// 
+//
 // Copyright 2013 SmartBear Software
-// 
+//
 // Licensed under the EUPL, Version 1.1 or - as soon they will be approved by the European Commission - subsequent
 // versions of the EUPL (the "Licence");
 // You may not use this work except in compliance with the Licence.
 // You may obtain a copy of the Licence at:
-// 
+//
 // http://ec.europa.eu/idabc/eupl
-// 
+//
 // Unless required by applicable law or agreed to in writing, software distributed under the Licence is
 // distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
 // express or implied. See the Licence for the specific language governing permissions and limitations
 // under the Licence.
-// 
+//
 
 /**
- * Tabulates incoming messages and creates a csv output 
- * 
+ * Tabulates incoming messages and creates a csv output
+ *
  * @id com.eviware.TableLog
  * @help http://www.loadui.org/Output/table-log-component.html
  * @name Table Log
@@ -39,11 +39,19 @@ import javafx.scene.control.TableColumn
 import javafx.util.Callback
 import javafx.beans.value.ObservableValue
 import javafx.beans.value.ChangeListener
+import java.util.concurrent.TimeUnit
 
 inputTerminal.description = 'Messages sent here will be displayed in the table.'
 likes( inputTerminal ) { true }
 
-createProperty( 'maxRows', Long, 1000 )
+table = null
+tableWriterFuture = null
+tableWriterDelay = 250
+final messageQueue = [] as LinkedList
+writer = null
+writerLock = new Object()
+
+createProperty( 'maxRows', Long, 250 )
 createProperty( 'logFilePath', String )
 createProperty( 'saveFile', Boolean, false )
 createProperty( 'follow', Boolean, false )
@@ -53,13 +61,12 @@ createProperty( 'appendSaveFile', Boolean, false )
 createProperty( 'formatTimestamps', Boolean, true )
 createProperty( 'addHeaders', Boolean, false )
 
-table = null
 cellFactory = { val -> { it -> val.value[val.tableColumn.text] } as ObservableValue } as Callback
 rebuildTable = { table = new TableView( prefHeight: 200, minWidth: 500 ) }
-tableColumns = [] as CopyOnWriteArraySet
+final tableColumns = [] as CopyOnWriteArraySet
+final addedColumns = []
 def latestHeader
-String saveFileName = null
-writer = null
+saveFileName = null
 def format = new SimpleDateFormat( "HH:mm:ss:SSS" )
 
 onMessage = { o, i, m ->
@@ -73,7 +80,10 @@ onMessage = { o, i, m ->
 output = { message ->
 	def writeLog = saveFile.value && saveFileName
 	if( controller || writeLog ) {
-		def addedColumns = message.keySet().findAll { tableColumns.add( it ) }
+		synchronized( addedColumns ) {
+			addedColumns += message.keySet() - tableColumns
+			tableColumns += addedColumns
+		}
 		
 		if ( formatTimestamps.value ) {
 			message.each() { key, value ->
@@ -86,68 +96,68 @@ output = { message ->
 				}
 			}
 		}
-		
+
 		if( controller ) {
-			Platform.runLater {
-				addedColumns.each {
-					def column = new TableColumn( cellValueFactory: cellFactory, text: it, sortable: false )
-					column.widthProperty().addListener( { obs, oldVal, width -> setAttribute( "width_$it", "$width" ) } as ChangeListener )
-					try {
-						column.width = Double.parseDouble( getAttribute( "width_$it", null ) )
-					} catch( e ) {
-					}
-					table.columns.add( column )
-				}
-				table.items.add( message )
-				while( table.items.size() > maxRows.value ) table.items.remove(0)
+			synchronized( messageQueue ) {
+				messageQueue << message
+				while( messageQueue.size() > maxRows.value ) messageQueue.remove( 0 )
 			}
 		}
-		
+
 		if( writeLog ) {
-			if( !writer ) writer = new CSVWriter( new FileWriter( saveFileName, appendSaveFile.value ), (char) ',' )
-			try {
-				def header = tableColumns as String[]
-				if( addHeaders.value && !Arrays.equals( latestHeader, header ) ) {
-					writer.writeNext( header )
-					latestHeader = header
+			withFileWriter { w ->
+				try {
+					def header = tableColumns as String[]
+					if( addHeaders.value && !Arrays.equals( latestHeader, header ) ) {
+						w.writeNext( header )
+						latestHeader = header
+					}
+					def entries = header.collect { message[it] ?: "" } as String[]
+					w.writeNext( entries )
+				} catch ( e ) {
+					log.error( "Error writing to log file", e )
 				}
-				entries = header.collect { message[it] ?: "" } as String[]
-				writer.writeNext( entries )
-			} catch ( Exception e ) {
-				log.error( "Error writing to log file", e )
 			}
 		}
 	}
-	
+
 	if( ! controller && enabledInDistMode.value ) {
 		// on agent and enabled, so send message to controller
 		send( controllerTerminal, message )
 	}
 }
 
-onAction( "START" ) { buildFileName() }
+onAction( "START" ) { buildFileName(); startTableWriter() }
 
-onAction( "COMPLETE" ) {
-	writer?.close()
-	writer = null
-}
+onAction( "STOP" ) { stopTableWriter() }
 
-onAction( "RESET" ) { 
-	buildFileName() 
+onAction( "COMPLETE" ) { closeWriter() }
+
+onAction( "RESET" ) {
+	buildFileName()
 	tableColumns.clear()
 	refreshLayout()
 }
 
-onRelease = { writer?.close() }
+onRelease = { closeWriter() }
+
+closeWriter = {
+	withFileWriter( false ) {
+		writer?.close()
+		writer = null
+	}
+}
 
 buildFileName = {
 	if( !saveFile.value ) {
-		writer?.close()
-		writer = null
+		closeWriter()
 		return
 	}
-	if( writer ) return
-
+	
+	synchronized( writerLock ) {
+		if( writer ) return
+	}
+	
 	def filePath = "${getBaseLogDir()}${File.separator}${logFilePath.value}"
 	if( !validateLogFilePath( filePath ) ) {
 		filePath = "${getBaseLogDir()}${File.separator}logs${File.separator}table-log${File.separator}${getDefaultLogFileName()}"
@@ -166,12 +176,57 @@ buildFileName = {
 	saveFileName = filePath
 }
 
+synchronized startTableWriter() {
+	if ( !tableWriterFuture )
+		tableWriterFuture = scheduleAtFixedRate( tableWriter, tableWriterDelay, tableWriterDelay, TimeUnit.MILLISECONDS )
+}
+
+void stopTableWriter() {
+	tableWriterFuture?.cancel( true )
+	tableWriter.run()
+	tableWriterFuture = null
+}
+
+tableWriter = {
+	def newColumns = []
+	synchronized( addedColumns ) {
+		for ( iter = addedColumns.iterator(); iter.hasNext();) {
+			def added = iter.next()
+			iter.remove()
+			log.info "Adding column to Table Log: $added"
+			def column = new TableColumn( cellValueFactory: cellFactory, text: added, sortable: false )
+			column.widthProperty().addListener( { obs, oldVal, width -> setAttribute( "width_$added", "$width" ) } as ChangeListener )
+			newColumns << column
+			try {
+				column.width = Double.parseDouble( getAttribute( "width_$added", null ) )
+			} catch( e ) {
+			}
+		}	
+	}
+	
+	def newMessages = []
+	def excessItems =  0
+	synchronized( messageQueue ) {
+		excessItems = ( table.items.size() + messageQueue.size() - maxRows.value ) as int
+		newMessages += messageQueue
+		messageQueue.clear()
+	}
+	
+	if ( newMessages || excessItems || newColumns ) {
+		Platform.runLater {
+			if ( newColumns ) table.columns.addAll newColumns
+			if ( excessItems > 0 ) table.items.remove( 0, excessItems )
+			if ( newMessages ) table.items.addAll newMessages
+		}
+	}
+}
+
 getBaseLogDir = { System.getProperty( 'loadui.home', '.' ) }
 getDefaultLogFileName = { getLabel().replaceAll( ' ','' ) }
-				
+
 validateLogFilePath = { filePath ->
 	try {
-		// the only good way to check if file path 
+		// the only good way to check if file path
 		// is correct is to try read and writing
 		def temp = new File( filePath )
 		temp.parentFile.mkdirs()
@@ -188,7 +243,7 @@ validateLogFilePath = { filePath ->
 		return true
 	} catch( e ) {
 		return false
-	}	
+	}
 }
 
 addTimestampToFileName = { it.replaceAll('^(.*?)(\\.\\w+)?$', '$1-'+System.currentTimeMillis()+'$2') }
@@ -207,13 +262,15 @@ refreshLayout = {
 			fileChooser.extensionFilters.add( new FileChooser.ExtensionFilter( 'CSV', '*.csv' ) )
 			def saveFile = fileChooser.showSaveDialog( table.scene.window )
 			if( saveFile ) {
+				def flushWriter = null
 				try {
-					def writer = new CSVWriter( new FileWriter( saveFile, false ), (char) ',' )
-					writer.writeNext( tableColumns as String[] )
-					table.items.each { message -> writer.writeNext( tableColumns.collect { message[it] ?: "" } as String[] ) }
-					writer.close()
+					flushWriter = new CSVWriter( new FileWriter( saveFile, false ), (char) ',' )
+					flushWriter.writeNext( tableColumns as String[] )
+					table.items.each { message -> flushWriter.writeNext( tableColumns.collect { message[it] ?: "" } as String[] ) }
 				} catch ( e ) {
 					log.error( 'Failed writing log to file!', e )
+				} finally {
+					flushWriter?.close()
 				}
 			}
 		} )
@@ -228,14 +285,25 @@ refreshLayout = {
 }
 if( controller ) refreshLayout()
 
+void withFileWriter( createIfNull = true, closure ) {
+	synchronized( writerLock ) {
+		if( createIfNull && !writer ) {
+			log.info "Creating new CSVWriter writing to $saveFileName"
+			writer = new CSVWriter( new FileWriter( saveFileName, appendSaveFile.value ), ',' as char )
+		}
+		closure( writer )
+	}
+}
+
 
 settings( label: "General" ) {
 	box {
 		property( property: maxRows, label: 'Max Rows in Table' )
 	}
-	box {
-		property( property: summaryRows, label: 'Max Rows in Summary' )
-	}	
+	//FIXME summary report not working, see generateSummary below
+	//box {
+	//	property( property: summaryRows, label: 'Max Rows in Summary' )
+	//}
 }
 
 settings( label:'Logging' ) {
@@ -250,6 +318,7 @@ settings( label:'Logging' ) {
 }
 
 generateSummary = { chapter ->
+	//FIXME this is not working... the method is called by the report creator, but the table model below is no longer working
 	if( summaryRows.value > 0 ) {
 		int nRows = summaryRows.value
 		def rows = table.items.subList( table.items.size() - nRows, table.items.size() )

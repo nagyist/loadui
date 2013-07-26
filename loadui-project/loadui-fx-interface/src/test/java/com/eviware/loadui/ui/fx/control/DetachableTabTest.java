@@ -40,6 +40,7 @@ import javafx.scene.layout.PaneBuilder;
 import javafx.stage.Stage;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -52,6 +53,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.SettableFuture;
 
 @Category( GUITest.class )
+@Ignore(value = "Feature disabled until further notice. See LOADUI-869 and LOADUI-871")
 public class DetachableTabTest
 {
 	private final static SettableFuture<Stage> stageFuture = SettableFuture.create();
