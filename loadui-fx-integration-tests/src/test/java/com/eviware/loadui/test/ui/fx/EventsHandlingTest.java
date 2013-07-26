@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
+import com.eviware.loadui.ui.fx.util.test.GuiTest;
 import javafx.scene.Node;
 
 import org.junit.AfterClass;
@@ -36,9 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import com.eviware.loadui.api.model.ComponentItem;
 import com.eviware.loadui.test.categories.IntegrationTest;
-import com.eviware.loadui.test.ui.fx.GUI;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
 import com.eviware.loadui.util.test.TestUtils;
 import com.google.common.base.Predicate;
 
@@ -66,7 +65,7 @@ public class EventsHandlingTest
 		}
 	};
 
-	private static TestFX controller;
+	private static GuiTest controller;
 
 	@BeforeClass
 	public static void enterState() throws Exception
@@ -88,13 +87,13 @@ public class EventsHandlingTest
 	@Test
 	public void testKnobExists() throws Exception
 	{
-		controller.click( "#Generators" ).drag( CONDITION_COMPONENT ).by( 150, -50 ).drop();
+		controller.click( "#generators" ).drag( CONDITION_COMPONENT ).by( 150, -50 ).drop();
 		TestUtils.awaitCondition( new Callable<Boolean>()
 		{
 			@Override
 			public Boolean call() throws Exception
 			{
-				return TestFX.findAll( ".canvas-object-view" ).size() == 1;
+				return GuiTest.findAll( ".canvas-object-view" ).size() == 1;
 			}
 		} );
 
@@ -102,10 +101,10 @@ public class EventsHandlingTest
 		System.gc();
 		System.gc();
 
-		Node component = TestFX.find( ".component-view" );
+		Node component = GuiTest.find( ".component-view" );
 		assertNotNull( component );
 
-		ArrayList<Node> knobs = new ArrayList<>( TestFX.findAll( ".knob", component ) );
+		ArrayList<Node> knobs = new ArrayList<>( GuiTest.findAll( ".knob", component ) );
 
 		assertFalse( knobs.isEmpty() );
 

@@ -15,8 +15,10 @@
  */
 package com.eviware.loadui.ui.fx.views.canvas;
 
-import java.lang.ref.WeakReference;
-
+import com.eviware.loadui.api.counter.CounterHolder;
+import com.eviware.loadui.api.model.CanvasItem;
+import com.eviware.loadui.api.model.SceneItem;
+import com.eviware.loadui.ui.fx.util.Properties;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.Property;
@@ -24,11 +26,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBuilder;
-import javafx.scene.control.Separator;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleButtonBuilder;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
@@ -36,11 +34,7 @@ import javafx.scene.layout.RegionBuilder;
 import javafx.util.Duration;
 
 import javax.annotation.Nonnull;
-
-import com.eviware.loadui.api.counter.CounterHolder;
-import com.eviware.loadui.api.model.CanvasItem;
-import com.eviware.loadui.api.model.SceneItem;
-import com.eviware.loadui.ui.fx.util.Properties;
+import java.lang.ref.WeakReference;
 
 public abstract class PlaybackPanel<T extends CounterDisplay, C extends CanvasItem> extends HBox
 {
@@ -65,6 +59,7 @@ public abstract class PlaybackPanel<T extends CounterDisplay, C extends CanvasIt
 		setAlignment( Pos.CENTER );
 		setMaxHeight( 27 );
 		playButton = new PlayButton( canvas );
+
 		time = timeCounter();
 		requests = timeRequests();
 		failures = timeFailures();
@@ -111,7 +106,7 @@ public abstract class PlaybackPanel<T extends CounterDisplay, C extends CanvasIt
 		return new Image( getClass().getResourceAsStream( name ) );
 	}
 
-	protected ToggleButton linkScenarioButton( SceneItem scenario )
+	protected ToggleButton linkScenarioButton( Property<Boolean> linkedProperty )
 	{
 		ToggleButton linkButton = ToggleButtonBuilder
 				.create()
@@ -119,12 +114,21 @@ public abstract class PlaybackPanel<T extends CounterDisplay, C extends CanvasIt
 				.graphic(
 						HBoxBuilder
 								.create()
-								.children( RegionBuilder.create().styleClass( "graphic" ).build(),
-										RegionBuilder.create().styleClass( "secondary-graphic" ).build() ).build() ).build();
+								.children(
+										RegionBuilder.create().styleClass( "graphic" ).build(),
+										RegionBuilder.create().styleClass( "secondary-graphic" )
+												.build() )
+								.build() )
+				.build();
 
-		Property<Boolean> linkedProperty = Properties.convert( scenario.followProjectProperty() );
-		linkButton.selectedProperty().bindBidirectional( linkedProperty );
+		linkButton.setSelected( linkedProperty.getValue() );
 		return linkButton;
+	}
+
+	protected Property<Boolean> getLinkedProperty( SceneItem scenario )
+	{
+		Property<Boolean> linkedProperty = Properties.convert( scenario.followProjectProperty() );
+		return linkedProperty;
 	}
 
 	private static class UpdateDisplays implements EventHandler<ActionEvent>

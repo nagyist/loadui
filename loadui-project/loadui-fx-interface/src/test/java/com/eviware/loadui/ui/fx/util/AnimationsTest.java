@@ -15,7 +15,7 @@
  */
 package com.eviware.loadui.ui.fx.util;
 
-import static com.eviware.loadui.ui.fx.util.test.TestFX.targetWindow;
+import static com.eviware.loadui.ui.fx.util.test.GuiTest.targetWindow;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
+import com.eviware.loadui.ui.fx.util.test.GuiTest;
 import javafx.application.Application;
 import javafx.geometry.Bounds;
 import javafx.scene.SceneBuilder;
@@ -116,7 +116,7 @@ public class AnimationsTest
 		assertEquals( 0, bounds.getMinY(), 0.1 );
 		assertTrue( rectangle.isVisible() );
 
-		assertEquals( 1, TestFX.findAll( "#rec" ).size() );
+		assertEquals( 1, GuiTest.findAll( "#rec" ).size() );
 	}
 
 	@Test
@@ -154,7 +154,8 @@ public class AnimationsTest
 		assertEquals( rectangle.getHeight(), bounds.getMaxY(), 0.1 );
 		assertFalse( rectangle.isVisible() );
 
-		assertEquals( 1, TestFX.findAll( "#rec" ).size() );
+
+		assertEquals( 1, GuiTest.findAll( "#rec" ).size() );
 	}
 
 	@Test
@@ -193,7 +194,7 @@ public class AnimationsTest
 		assertEquals( 1.0, opacity, 0.01 );
 		assertFalse( rectangle.isVisible() );
 
-		assertEquals( 1, TestFX.findAll( "#rec" ).size() );
+		assertEquals( 1, GuiTest.findAll( "#rec" ).size() );
 	}
 
 	@Test
@@ -230,7 +231,7 @@ public class AnimationsTest
 		assertEquals( 1.0, opacity, 0.01 );
 		assertTrue( rectangle.isVisible() );
 
-		assertEquals( 1, TestFX.findAll( "#rec" ).size() );
+		assertEquals( 1, GuiTest.findAll( "#rec" ).size() );
 	}
 
 	@Test
@@ -425,7 +426,7 @@ public class AnimationsTest
 		assertEquals( 0, bounds.getMinY(), 0.1 );
 		assertTrue( rectangle.isVisible() );
 
-		assertEquals( 1, TestFX.findAll( "#rec" ).size() );
+		assertEquals( 1, GuiTest.findAll( "#rec" ).size() );
 
 		// Repeating normal slideUp test as well!
 
@@ -445,7 +446,7 @@ public class AnimationsTest
 		assertEquals( rectangle.getHeight(), bounds.getMaxY(), 0.1 );
 		assertFalse( rectangle.isVisible() );
 
-		assertEquals( 1, TestFX.findAll( "#rec" ).size() );
+		assertEquals( 1, GuiTest.findAll( "#rec" ).size() );
 
 	}
 

@@ -20,14 +20,15 @@ import static org.junit.Assert.assertThat;
 
 import java.util.concurrent.Callable;
 
+import com.eviware.loadui.ui.fx.util.test.GuiTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
 import com.eviware.loadui.util.test.TestUtils;
 
 /**
@@ -36,10 +37,11 @@ import com.eviware.loadui.util.test.TestUtils;
  * 
  */
 @Category( IntegrationTest.class )
+@Ignore(value = "Feature disabled until further notice. See LOADUI-869 and LOADUI-871")
 public class DetachTabsTest
 {
 
-	private static TestFX controller;
+	private static GuiTest controller;
 
 	@BeforeClass
 	public static void enterState() throws Exception
@@ -52,7 +54,7 @@ public class DetachTabsTest
 			@Override
 			public Boolean call() throws Exception
 			{
-				return TestFX.findAll( ".detachable-tab" ).size() > 1;
+				return GuiTest.findAll( ".detachable-tab" ).size() > 1;
 			}
 		} );
 	}
@@ -68,11 +70,11 @@ public class DetachTabsTest
 			@Override
 			public Boolean call() throws Exception
 			{
-				return TestFX.findAll( ".detached-content .project-canvas-view" ).size() == 1;
+				return GuiTest.findAll( ".detached-content .project-canvas-view" ).size() == 1;
 			}
 		}, 2 );
 		//Check so that 
-		assertThat( TestFX.findAll( ".detached-content .project-canvas-view" ).size(), is( 1 ) );
+		assertThat( GuiTest.findAll( ".detached-content .project-canvas-view" ).size(), is( 1 ) );
 
 		controller.closeCurrentWindow();
 	}
@@ -88,12 +90,12 @@ public class DetachTabsTest
 			@Override
 			public Boolean call() throws Exception
 			{
-				return TestFX.findAll( ".detached-content .analysis-view" ).size() == 1;
+				return GuiTest.findAll( ".detached-content .analysis-view" ).size() == 1;
 			}
 		}, 2 );
 
 		//Check so that 
-		assertThat( TestFX.findAll( ".detached-content .analysis-view" ).size(), is( 1 ) );
+		assertThat( GuiTest.findAll( ".detached-content .analysis-view" ).size(), is( 1 ) );
 
 		controller.closeCurrentWindow();
 	}

@@ -16,6 +16,8 @@
 package com.eviware.loadui.test.ui.fx;
 
 import static org.junit.Assert.assertTrue;
+
+import com.eviware.loadui.ui.fx.util.test.GuiTest;
 import javafx.scene.input.KeyCode;
 
 import org.junit.After;
@@ -28,12 +30,11 @@ import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import com.eviware.loadui.test.ui.fx.states.ScenarioCreatedState;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
 
 @Category( IntegrationTest.class )
 public class ScenarioLinkedPlaybackTest
 {
-	private static TestFX controller;
+	private static GuiTest controller;
 
 	@Before
 	public void enterState() throws Exception

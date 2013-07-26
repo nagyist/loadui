@@ -18,11 +18,11 @@ package com.eviware.loadui.test.ui.fx;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import com.eviware.loadui.ui.fx.util.test.GuiTest;
 import javafx.stage.Stage;
 
 import org.osgi.framework.BundleContext;
 
-import com.eviware.loadui.ui.fx.util.test.TestFX;
 import com.eviware.loadui.ui.fx.util.test.FXScreenController;
 import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
 import com.eviware.loadui.util.BeanInjector;
@@ -30,7 +30,7 @@ import com.eviware.loadui.util.test.TestUtils;
 
 public class GUI
 {
-	public static TestFX getController()
+	public static GuiTest getController()
 	{
 		return getInstance().robot.target( getStage() );
 	}
@@ -59,7 +59,7 @@ public class GUI
 	{
 		private final ControllerFXWrapper controller;
 		private final Stage stage;
-		private final TestFX robot;
+		private final GuiTest robot;
 		private final Exception error;
 
 		private static final Holder instance = new Holder();
@@ -68,7 +68,7 @@ public class GUI
 		{
 			ControllerFXWrapper localController = null;
 			Stage localStage = null;
-			TestFX localRobot = null;
+			GuiTest localRobot = null;
 			Exception localError = null;
 
 			try
@@ -92,8 +92,8 @@ public class GUI
 				Thread.sleep( 1000 );
 
 				FXTestUtils.bringToFront( localStage );
-				localRobot = TestFX.wrap( new FXScreenController() );
-				TestFX.targetWindow( localStage );
+				localRobot = GuiTest.wrap( new FXScreenController() );
+				GuiTest.targetWindow( localStage );
 			}
 			catch( Exception e )
 			{

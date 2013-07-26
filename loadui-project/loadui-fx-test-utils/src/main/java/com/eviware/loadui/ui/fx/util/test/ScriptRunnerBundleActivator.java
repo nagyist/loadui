@@ -77,7 +77,7 @@ public class ScriptRunnerBundleActivator implements BundleActivator
 
 					binding.setVariable( "workspace", workspaceProvider.getWorkspace() );
 					binding.setVariable( "stage", stage );
-					binding.setVariable( "controller", TestFX.wrap( new FXScreenController() ).target( stage ) );
+					binding.setVariable( "controller", GuiTest.wrap( new FXScreenController() ).target( stage ) );
 
 					Thread.sleep( 3000 );
 

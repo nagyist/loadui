@@ -94,7 +94,7 @@ public class MainWindow
 		if( stage == null || tem == null )
 			throw new IllegalStateException( "Stage or TestEventManager have not been set" );
 
-		stage.setTitle( System.getProperty( LoadUI.NAME, "LoadUI" ) + " " + LoadUI.VERSION );
+		stage.setTitle( System.getProperty( LoadUI.NAME, "LoadUI" ) + " " + LoadUI.version() );
 
 		Platform.runLater( new Runnable()
 		{

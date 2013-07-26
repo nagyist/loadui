@@ -15,7 +15,7 @@
  */
 package com.eviware.loadui.test.ui.fx.states;
 
-import static com.eviware.loadui.ui.fx.util.test.TestFX.findAll;
+import static com.eviware.loadui.ui.fx.util.test.GuiTest.findAll;
 
 import java.util.concurrent.Callable;
 

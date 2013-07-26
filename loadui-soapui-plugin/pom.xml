@@ -62,46 +62,47 @@
                     <excludedGroups>com.eviware.loadui.test.categories.GUITest</excludedGroups>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.1</version>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <version>2.3.4</version>
-                <configuration>
-                    <instructions>
-                        <Bundle-Activator>com.eviware.loadui.components.soapui.SoapUIComponentActivator
-                        </Bundle-Activator>
-                        <Embed-Dependency>*;scope=provided</Embed-Dependency>
-                        <Import-Package>
-                            !com.eviware.loadui.api.charting.line,!com.eviware.loadui.api.reporting,!org.tbee.javafx.scene.layout,!org.apache.commons.httpclient.*,!org.apache.tools.*,!org.fusesource.*,!org.apache.log,!org.apache.ivy.*,!org.apache.bsf.*,!org.apache.batik.*,!javax.xml.rpc.*,!jline,!org.apache.xml.resolver.*,!org.apache.axis.*,!org.apache.crimson.*;!org.mozilla.*,!com.sun.javadoc,!com.sun.tools.javadoc,!com.teamdev.jxbrowser*,!com.teamdev.xpcom.*,!javax.servlet.jsp,!groovyjarjarasm.asm.util,!groovyjarjarasm.asm.tree.analysis,!org.dom4j.*,!org.apache.avalon.framework.logger,!org.apache.oro.text.regex,!com.sun.jdmk.comm,!com.sun.org.apache.xerces.internal.*,!com.sun.net.ssl.*,!com.sun.crypto.provider,!com.sun.java.swing.plaf.windows.*,!sun.io,!sun.misc,!sun.reflect.generics.reflectiveObjects,!org.jgroups*,!com.adbs*,!hermes*,!com.eviware.soapui.coverage*,!com.toedter.calendar*,!net.infonode.docking*,!net.infonode.properties.gui.util*,!net.infonode.tabbedpanel*,!net.infonode.util*,!*net.sf.jasperreports*,!org.jfree.util*,!com.jniwrapper*,!net.sf.cglib.proxy*,!org.codehaus.jettison*,!org.jdom*,!org.xmlpull.mxp1*,!org.xmlpull.v1*,!sun.reflect*,!net.sf.saxon.xpath,!org.apache.http*,!com.jp.protection*,!net.jcip.annotations*,!com.werken.xpath*,!org.apache.log.*,!org.apache.oro*,!org.owasp.*,*
-                        </Import-Package>
-                    </instructions>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
-                <executions>
-                    <execution>
-                        <phase>compile</phase>
-                        <configuration>
-                            <target xmlns:fx="javafx:com.sun.javafx.tools.ant">
-                                <taskdef resource="com/sun/javafx/tools/ant/antlib.xml"
-                                         uri="javafx:com.sun.javafx.tools.ant">
-                                    <classpath>
-                                        <pathelement location="${env.JAVA_HOME}/lib/ant-javafx.jar"/>
-                                        <pathelement location="${env.JAVA_HOME}/jre/lib/jfxrt.jar"/>
-                                    </classpath>
-                                </taskdef>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.1</version>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+                    <!-- Memory management -->
+                    <fork>true</fork>
+                    <meminitial>128m</meminitial>
+                    <maxmem>512m</maxmem>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<version>2.3.4</version>
+				<configuration>
+					<instructions>
+						<Bundle-Activator>com.eviware.loadui.components.soapui.SoapUIComponentActivator</Bundle-Activator>
+						<Embed-Dependency>*;scope=provided</Embed-Dependency>
+						<Import-Package>!com.eviware.loadui.api.charting.line,!com.eviware.loadui.api.reporting,!org.tbee.javafx.scene.layout,!org.apache.commons.httpclient.*,!org.apache.tools.*,!org.fusesource.*,!org.apache.log,!org.apache.ivy.*,!org.apache.bsf.*,!org.apache.batik.*,!javax.xml.rpc.*,!jline,!org.apache.xml.resolver.*,!org.apache.axis.*,!org.apache.crimson.*;!org.mozilla.*,!com.sun.javadoc,!com.sun.tools.javadoc,!com.teamdev.jxbrowser*,!com.teamdev.xpcom.*,!javax.servlet.jsp,!groovyjarjarasm.asm.util,!groovyjarjarasm.asm.tree.analysis,!org.dom4j.*,!org.apache.avalon.framework.logger,!org.apache.oro.text.regex,!com.sun.jdmk.comm,!com.sun.org.apache.xerces.internal.*,!com.sun.net.ssl.*,!com.sun.crypto.provider,!com.sun.java.swing.plaf.windows.*,!sun.io,!sun.misc,!sun.reflect.generics.reflectiveObjects,!org.jgroups*,!com.adbs*,!hermes*,!com.eviware.soapui.coverage*,!com.toedter.calendar*,!net.infonode.docking*,!net.infonode.properties.gui.util*,!net.infonode.tabbedpanel*,!net.infonode.util*,!*net.sf.jasperreports*,!org.jfree.util*,!com.jniwrapper*,!net.sf.cglib.proxy*,!org.codehaus.jettison*,!org.jdom*,!org.xmlpull.mxp1*,!org.xmlpull.v1*,!sun.reflect*,!net.sf.saxon.xpath,!org.apache.http*,!com.jp.protection*,!net.jcip.annotations*,!com.werken.xpath*,!org.apache.log.*,!org.apache.oro*,!org.owasp.*,*</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<configuration>
+							<target xmlns:fx="javafx:com.sun.javafx.tools.ant">
+								<taskdef resource="com/sun/javafx/tools/ant/antlib.xml"
+									uri="javafx:com.sun.javafx.tools.ant">
+									<classpath>
+										<pathelement location="${env.JAVA_HOME}/lib/ant-javafx.jar" />
+										<pathelement location="${env.JAVA_HOME}/jre/lib/jfxrt.jar" />
+									</classpath>
+								</taskdef>
 
                                 <fx:csstobin outdir="${basedir}/target/classes">
                                     <fileset dir="src/main/java" includes="**/*.css"/>
@@ -815,6 +816,11 @@
             <artifactId>jniwrap</artifactId>
             <version>3.8.4</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.loadui</groupId>
+            <artifactId>testFx</artifactId>
+            <version>2.6.2</version>
         </dependency>
     </dependencies>
 </project>

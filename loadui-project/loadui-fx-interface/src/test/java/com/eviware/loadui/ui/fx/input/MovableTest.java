@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.eviware.loadui.ui.fx.util.test.FXScreenController;
 import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
+import com.eviware.loadui.ui.fx.util.test.GuiTest;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -47,7 +47,7 @@ import org.junit.experimental.categories.Category;
 
 import com.eviware.loadui.test.categories.GUITest;
 import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
-import com.eviware.loadui.ui.fx.util.test.TestFX.MouseMotion;
+import com.eviware.loadui.ui.fx.util.test.GuiTest.MouseMotion;
 import com.google.common.util.concurrent.SettableFuture;
 
 @Category( GUITest.class )
@@ -56,7 +56,7 @@ public class MovableTest
 	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();
 	private static MovableImpl movable;
 	private static Stage stage;
-	private static TestFX controller;
+	private static GuiTest controller;
 	private static Group group;
 
 	public static class MovableTestApp extends Application
@@ -85,10 +85,10 @@ public class MovableTest
 	@BeforeClass
 	public static void createWindow() throws Throwable
 	{
-		controller = TestFX.wrap( new FXScreenController() );
+		controller = GuiTest.wrap( new FXScreenController() );
 		FXTestUtils.launchApp( MovableTestApp.class );
 		stage = stageFuture.get( 5, TimeUnit.SECONDS );
-		TestFX.targetWindow( stage );
+		GuiTest.targetWindow( stage );
 		FXTestUtils.bringToFront( stage );
 	}
 

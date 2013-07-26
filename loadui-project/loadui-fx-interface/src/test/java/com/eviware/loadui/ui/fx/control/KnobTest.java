@@ -15,9 +15,9 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
-import static com.eviware.loadui.ui.fx.util.test.TestFX.find;
-import static com.eviware.loadui.ui.fx.util.test.TestFX.targetWindow;
-import static com.eviware.loadui.ui.fx.util.test.TestFX.wrap;
+import static com.eviware.loadui.ui.fx.util.test.GuiTest.find;
+import static com.eviware.loadui.ui.fx.util.test.GuiTest.targetWindow;
+import static com.eviware.loadui.ui.fx.util.test.GuiTest.wrap;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.greaterThan;
@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.eviware.loadui.ui.fx.util.test.FXScreenController;
 import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
+import com.eviware.loadui.ui.fx.util.test.GuiTest;
 import javafx.application.Application;
 import javafx.scene.GroupBuilder;
 import javafx.scene.SceneBuilder;
@@ -50,7 +50,7 @@ public class KnobTest
 {
 	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();
 	private static Stage stage;
-	private static TestFX controller;
+	private static GuiTest controller;
 
 	public static class KnobTestApp extends Application
 	{

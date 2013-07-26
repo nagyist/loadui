@@ -15,7 +15,7 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
-import static com.eviware.loadui.ui.fx.util.test.TestFX.find;
+import static com.eviware.loadui.ui.fx.util.test.GuiTest.find;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
@@ -26,9 +26,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.TimeUnit;
 
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
 import javafx.application.Application;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -43,15 +40,20 @@ import javafx.scene.layout.PaneBuilder;
 import javafx.stage.Stage;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import com.eviware.loadui.test.categories.GUITest;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
+import com.eviware.loadui.ui.fx.util.test.FXScreenController;
+import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
+import com.eviware.loadui.ui.fx.util.test.GuiTest;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.SettableFuture;
 
 @Category( GUITest.class )
+@Ignore(value = "Feature disabled until further notice. See LOADUI-869 and LOADUI-871")
 public class DetachableTabTest
 {
 	private final static SettableFuture<Stage> stageFuture = SettableFuture.create();
@@ -85,7 +87,7 @@ public class DetachableTabTest
 	{
 		FXTestUtils.launchApp( DetachableTabTestApp.class );
 		stage = stageFuture.get( 5, TimeUnit.SECONDS );
-		TestFX.targetWindow( stage );
+		GuiTest.targetWindow( stage );
 		FXTestUtils.bringToFront( stage );
 	}
 
@@ -149,7 +151,7 @@ public class DetachableTabTest
 		assertThat( ( Stage )tab.getDetachableContent().getScene().getWindow(), is( stage ) );
 		assertThat( tab.getContent(), is( ( Node )tab.getDetachableContent() ) );
 
-		TestFX controller = TestFX.wrap( new FXScreenController() ).click( detachButton );
+		GuiTest controller = GuiTest.wrap( new FXScreenController() ).click( detachButton );
 
 		FXTestUtils.invokeAndWait( new Runnable()
 		{

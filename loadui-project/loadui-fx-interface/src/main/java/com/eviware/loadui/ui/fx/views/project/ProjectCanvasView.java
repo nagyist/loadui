@@ -15,15 +15,6 @@
  */
 package com.eviware.loadui.ui.fx.views.project;
 
-import static com.eviware.loadui.ui.fx.util.ObservableLists.fx;
-import static com.eviware.loadui.ui.fx.util.ObservableLists.ofCollection;
-import static com.eviware.loadui.ui.fx.util.ObservableLists.transform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
-import javafx.geometry.Point2D;
-import javafx.scene.control.Labeled;
-
 import com.eviware.loadui.api.model.CanvasItem;
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.model.SceneItem;
@@ -34,9 +25,17 @@ import com.eviware.loadui.ui.fx.views.canvas.CanvasObjectView;
 import com.eviware.loadui.ui.fx.views.canvas.CanvasView;
 import com.eviware.loadui.ui.fx.views.canvas.scenario.ScenarioView;
 import com.eviware.loadui.ui.fx.views.scenario.NewScenarioIcon;
+import com.eviware.loadui.util.CanvasItemNameGenerator;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableList;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+import javafx.geometry.Point2D;
+import javafx.scene.control.Labeled;
+
+import static com.eviware.loadui.ui.fx.util.ObservableLists.*;
 
 public class ProjectCanvasView extends CanvasView
 {
@@ -87,15 +86,14 @@ public class ProjectCanvasView extends CanvasView
 
 			fireEvent( IntentEvent.create( IntentEvent.INTENT_RUN_BLOCKING, new CreateScenarioTask( position ) ) );
 			event.consume();
-		}
-		else
+		} else
 			super.handleDrop( event );
 	}
 
 	@Override
 	public ProjectItem getCanvas()
 	{
-		return ( ProjectItem )super.getCanvas();
+		return (ProjectItem) super.getCanvas();
 	}
 
 	public class CreateScenarioTask extends Task<Void>
@@ -110,11 +108,11 @@ public class ProjectCanvasView extends CanvasView
 		@Override
 		protected Void call() throws Exception
 		{
-			String name = "Scenario";
+			String name = CanvasItemNameGenerator.generateScenarioName( getCanvas() );
 			log.debug( "About to create scenario: " + name );
 			SceneItem scenario = getCanvas().createScene( name );
-			scenario.setAttribute( "gui.layoutX", String.valueOf( ( int )position.getX() ) );
-			scenario.setAttribute( "gui.layoutY", String.valueOf( ( int )position.getY() ) );
+			scenario.setAttribute( "gui.layoutX", String.valueOf( (int) position.getX() ) );
+			scenario.setAttribute( "gui.layoutY", String.valueOf( (int) position.getY() ) );
 			return null;
 		}
 	}

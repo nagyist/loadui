@@ -20,16 +20,13 @@ import com.eviware.loadui.api.testevents.TestEventManager;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.FXAppLoadedState;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
+import com.eviware.loadui.ui.fx.util.test.GuiTest;
 import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.test.TestUtils;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Region;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.experimental.categories.Category;
 
 import java.util.Set;
@@ -44,7 +41,7 @@ import static org.junit.Assert.*;
 public class NotificationPanelTest
 {
 
-	private static TestFX controller;
+	private static GuiTest controller;
 
 	@BeforeClass
 	public static void enterState() throws Exception
@@ -87,7 +84,7 @@ public class NotificationPanelTest
 		waitUntilVisible( panelNode );
 
 		assertTrue( panelNode.isVisible() );
-		Set<Node> textNodes = TestFX.findAll( "#notification-text", panelNode );
+		Set<Node> textNodes = GuiTest.findAll( "#notification-text", panelNode );
 
 		assertFalse( textNodes.isEmpty() );
 		assertTrue( textNodes.iterator().next() instanceof Label );
@@ -115,8 +112,8 @@ public class NotificationPanelTest
 		waitUntilVisible( panelNode );
 
 		assertTrue( panelNode.isVisible() );
-		Set<Node> textNodes = TestFX.findAll( "#notification-text", panelNode );
-		Set<Node> msgCountNodes = TestFX.findAll( "#msgCount", panelNode );
+		Set<Node> textNodes = GuiTest.findAll( "#notification-text", panelNode );
+		Set<Node> msgCountNodes = GuiTest.findAll( "#msgCount", panelNode );
 
 		assertFalse( textNodes.isEmpty() );
 		assertTrue( textNodes.iterator().next() instanceof Label );
@@ -160,7 +157,7 @@ public class NotificationPanelTest
 		waitUntilVisible( panelNode );
 
 		assertTrue( panelNode.isVisible() );
-		Set<Node> textNodes = TestFX.findAll( "#notification-text", panelNode );
+		Set<Node> textNodes = GuiTest.findAll( "#notification-text", panelNode );
 
 		assertFalse( textNodes.isEmpty() );
 		assertTrue( textNodes.iterator().next() instanceof Label );
@@ -175,6 +172,7 @@ public class NotificationPanelTest
 	}
 
 	@Test
+	@Ignore(value = "Feature disabled until further notice. See LOADUI-869 and LOADUI-871")
 	public void notificationShowsUpInDetachedTab() throws Exception
 	{
 		ProjectLoadedWithoutAgentsState.STATE.enter();
@@ -193,7 +191,7 @@ public class NotificationPanelTest
 			@Override
 			public Boolean call() throws Exception
 			{
-				Set<Node> nodes = TestFX.findAll( ".detached-content" );
+				Set<Node> nodes = GuiTest.findAll( ".detached-content" );
 				boolean ok = nodes.size() == 1;
 				if( ok )
 					detachedHolder.content = nodes.iterator().next();
@@ -216,14 +214,14 @@ public class NotificationPanelTest
 		waitUntilVisible( panelNode );
 
 		assertTrue( panelNode.isVisible() );
-		Set<Node> textNodes = TestFX.findAll( "#notification-text", panelNode );
+		Set<Node> textNodes = GuiTest.findAll( "#notification-text", panelNode );
 
 		assertFalse( textNodes.isEmpty() );
 		assertTrue( textNodes.iterator().next() instanceof Label );
 		assertEquals( "A message", ( ( Label )textNodes.iterator().next() ).getText() );
 
 		assertTrue( clonedPanelNode.isVisible() );
-		textNodes = TestFX.findAll( "#notification-text", clonedPanelNode );
+		textNodes = GuiTest.findAll( "#notification-text", clonedPanelNode );
 
 		assertFalse( textNodes.isEmpty() );
 		assertTrue( textNodes.iterator().next() instanceof Label );

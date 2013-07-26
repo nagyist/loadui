@@ -19,8 +19,7 @@ import com.eviware.loadui.test.categories.GUITest;
 import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
 import com.eviware.loadui.ui.fx.util.test.FXScreenController;
 import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
-import com.eviware.loadui.ui.fx.util.test.TestFX.MouseMotion;
+import com.eviware.loadui.ui.fx.util.test.GuiTest;
 import com.eviware.loadui.ui.fx.views.window.Overlay;
 import com.eviware.loadui.ui.fx.views.window.OverlayHolder;
 import com.google.common.util.concurrent.SettableFuture;
@@ -51,7 +50,7 @@ public class DragNodeTest
 	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();
 	private static DragNode dragNode;
 	private static Stage stage;
-	private static TestFX controller;
+	private static GuiTest controller;
 
 	public static class DragNodeTestApp extends Application
 	{
@@ -82,10 +81,10 @@ public class DragNodeTest
 	@BeforeClass
 	public static void createWindow() throws Throwable
 	{
-		controller = TestFX.wrap( new FXScreenController() );
+		controller = GuiTest.wrap( new FXScreenController() );
 		FXTestUtils.launchApp( DragNodeTestApp.class );
 		stage = stageFuture.get( 5, TimeUnit.SECONDS );
-		TestFX.targetWindow( stage );
+		GuiTest.targetWindow( stage );
 		FXTestUtils.bringToFront( stage );
 	}
 
@@ -94,7 +93,7 @@ public class DragNodeTest
 	{
 		assertFalse( dragNode.isDragging() );
 
-		MouseMotion dragging = controller.drag( dragNode.getDragSource() ).by( 200, 50 );
+		GuiTest.MouseMotion dragging = controller.drag( dragNode.getDragSource() ).by( 200, 50 );
 
 		assertTrue( dragNode.isDragging() );
 
@@ -129,7 +128,7 @@ public class DragNodeTest
 
 		assertFalse( dragNode.isAcceptable() );
 
-		MouseMotion dragging = controller.drag( dragNode.getDragSource() ).via( dropArea );
+		GuiTest.MouseMotion dragging = controller.drag( dragNode.getDragSource() ).via( dropArea );
 
 		assertTrue( dragNode.isAcceptable() );
 

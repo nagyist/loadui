@@ -19,6 +19,7 @@ import com.eviware.loadui.api.statistics.model.StatisticPages;
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.FxIntegrationTestBase;
+import com.eviware.loadui.test.ui.fx.states.LastResultOpenedState;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -42,36 +43,36 @@ public class StatisticTabsTest extends FxIntegrationTestBase
 	public void testTabs()
 	{
 		pages = ProjectLoadedWithoutAgentsState.STATE.getProject().getStatisticPages();
-		assertThat(pageCount(), is(1));
+		assertThat( pageCount(), is( 1 ) );
 
-		controller.click("#plus-button").click("#untitled-page-2").click("#untitled-page-1").click("#plus-button");
-		assertThat(pageCount(), is(3));
+		controller.click( "#plus-button" ).click( "Untitled Page 2" ).click( "#untitled-page-1" ).click( "#plus-button" );
+		assertThat( pageCount(), is( 3 ) );
 
-		controller.click("#untitled-page-2").click("#untitled-page-2 .tab-close-button").click("#plus-button")
-				.click("#untitled-page-1").click("#untitled-page-1 .tab-close-button");
-		assertThat(pageCount(), is(2));
-		assertEquals("Untitled Page 3", pages.getChildAt(0).getLabel());
-		assertEquals("Untitled Page 4", pages.getChildAt(1).getLabel());
+		controller.click( "#untitled-page-2" ).click( "#untitled-page-2 .tab-close-button" ).click( "#plus-button" )
+				.click( "#untitled-page-1" ).click( "#untitled-page-1 .tab-close-button" );
+		assertThat( pageCount(), is( 2 ) );
+		assertEquals( "Untitled Page 3", pages.getChildAt( 0 ).getLabel() );
+		assertEquals( "Untitled Page 4", pages.getChildAt( 1 ).getLabel() );
 
 		// the tests below are placed here to avoid having to find out the ID of the tabs currently being shown,
 		// which could change depending on which tests have run first
 
 		// test tab can be renamed
-		controller.click("#untitled-page-3", MouseButton.SECONDARY).click("#tab-rename").type("tabnewname")
-				.type(KeyCode.ENTER).sleep(250);
+		controller.click( "#untitled-page-3", MouseButton.SECONDARY ).click( "#tab-rename" ).type( "tabnewname" )
+				.type( KeyCode.ENTER ).sleep( 250 );
 
 		// tab ID cannot be changed
-		Node tabPaneHeaderSkin = getOrFail("#untitled-page-3");
-		Label label = (Label) tabPaneHeaderSkin.lookup("Label");
-		assertEquals("tabnewname", label.getText());
-		assertEquals("tabnewname", pages.getChildAt(0).getLabel());
+		Node tabPaneHeaderSkin = getOrFail( "#untitled-page-3" );
+		Label label = (Label) tabPaneHeaderSkin.lookup( "Label" );
+		assertEquals( "tabnewname", label.getText() );
+		assertEquals( "tabnewname", pages.getChildAt( 0 ).getLabel() );
 
 		// test tab can be closed through the menu
-		controller.click("#untitled-page-4", MouseButton.SECONDARY).click("#tab-delete").sleep(500);
-		failIfExists("#untitled-page-4");
-		getOrFail("#untitled-page-3");
-		assertEquals(1, pageCount());
-		assertEquals("tabnewname", pages.getChildAt(0).getLabel());
+		controller.click( "#untitled-page-4", MouseButton.SECONDARY ).click( "#tab-delete" ).sleep( 500 );
+		failIfExists( "#untitled-page-4" );
+		getOrFail( "#untitled-page-3" );
+		assertEquals( 1, pageCount() );
+		assertEquals( "tabnewname", pages.getChildAt( 0 ).getLabel() );
 	}
 
 	private int pageCount()
@@ -82,6 +83,6 @@ public class StatisticTabsTest extends FxIntegrationTestBase
 	@Override
 	public TestState getStartingState()
 	{
-		return ProjectLoadedWithoutAgentsState.STATE;
+		return LastResultOpenedState.STATE;
 	}
 }

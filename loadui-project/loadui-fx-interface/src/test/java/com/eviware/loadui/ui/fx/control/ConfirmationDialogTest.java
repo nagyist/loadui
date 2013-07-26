@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.eviware.loadui.ui.fx.util.test.FXScreenController;
 import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
+import com.eviware.loadui.ui.fx.util.test.GuiTest;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -45,7 +45,7 @@ public class ConfirmationDialogTest
 {
 	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();
 	private static Stage stage;
-	private static TestFX controller;
+	private static GuiTest controller;
 	private static Dialog dialog;
 	private static Button openDialogButton;
 	protected static final Logger log = LoggerFactory.getLogger( ConfirmationDialogTest.class );
@@ -80,10 +80,10 @@ public class ConfirmationDialogTest
 	@BeforeClass
 	public static void createWindow() throws Throwable
 	{
-		controller = TestFX.wrap( new FXScreenController() );
+		controller = GuiTest.wrap( new FXScreenController() );
 		FXTestUtils.launchApp( ConfirmationDialogTestApp.class );
 		stage = stageFuture.get( 5, TimeUnit.SECONDS );
-		TestFX.targetWindow( stage );
+		GuiTest.targetWindow( stage );
 		FXTestUtils.bringToFront( stage );
 	}
 

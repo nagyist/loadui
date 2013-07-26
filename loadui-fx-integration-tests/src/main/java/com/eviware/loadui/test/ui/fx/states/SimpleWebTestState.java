@@ -15,18 +15,17 @@
  */
 package com.eviware.loadui.test.ui.fx.states;
 
-import static com.eviware.loadui.ui.fx.util.test.TestFX.findAll;
-
-import java.util.concurrent.Callable;
-
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.ui.fx.FxTestState;
 import com.eviware.loadui.test.ui.fx.GUI;
-import com.eviware.loadui.ui.fx.util.test.ComponentHandle;
-import com.eviware.loadui.ui.fx.util.test.LoadUiRobot;
-import com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
+import com.eviware.loadui.ui.fx.util.test.GuiTest;
 import com.eviware.loadui.util.test.TestUtils;
+
+import java.util.concurrent.Callable;
+
+import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
+import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.WEB_PAGE_RUNNER;
+import static com.eviware.loadui.ui.fx.util.test.GuiTest.findAll;
 
 public class SimpleWebTestState extends FxTestState
 {
@@ -45,6 +44,8 @@ public class SimpleWebTestState extends FxTestState
 	@Override
 	protected void enterFromParent() throws Exception
 	{
+		connect( FIXED_RATE_GENERATOR ).to( WEB_PAGE_RUNNER );
+
 		controller.click( ".component-view .text-field" ).type( "www.google.com" );
 	}
 
@@ -55,7 +56,7 @@ public class SimpleWebTestState extends FxTestState
 		//If there is a save dialog, do not save:
 		try
 		{
-			GUI.getController().click( "#no" ).target( TestFX.getWindowByIndex( 0 ) );
+			GUI.getController().click( "#no" ).target( GuiTest.getWindowByIndex( 0 ) );
 		}
 		catch( Exception e )
 		{

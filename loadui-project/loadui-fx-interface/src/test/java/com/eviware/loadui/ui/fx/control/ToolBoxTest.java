@@ -15,9 +15,9 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
-import static com.eviware.loadui.ui.fx.util.test.TestFX.find;
-import static com.eviware.loadui.ui.fx.util.test.TestFX.targetWindow;
-import static com.eviware.loadui.ui.fx.util.test.TestFX.wrap;
+import static com.eviware.loadui.ui.fx.util.test.GuiTest.find;
+import static com.eviware.loadui.ui.fx.util.test.GuiTest.targetWindow;
+import static com.eviware.loadui.ui.fx.util.test.GuiTest.wrap;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.eviware.loadui.ui.fx.util.test.FXScreenController;
 import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
+import com.eviware.loadui.ui.fx.util.test.GuiTest;
 import com.eviware.loadui.ui.fx.views.window.PaneOverlayHolder;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -67,7 +67,7 @@ public class ToolBoxTest
 	private static final Multimap<Color, Rectangle> rectangles = LinkedListMultimap.create();
 	private static final List<Rectangle> clicked = new ArrayList<>();
 	private static Stage stage;
-	private static TestFX controller;
+	private static GuiTest controller;
 	static ToolBox<Rectangle> toolbox;
 	static final List<Rectangle> allRects = Arrays.asList( buildRect( Color.RED ), buildRect( Color.RED ),
 			buildRect( Color.BLUE ), buildRect( Color.GREEN ), buildRect( Color.RED ), buildRect( Color.YELLOW ),
@@ -147,10 +147,10 @@ public class ToolBoxTest
 
 		assertThat( clicked, is( Arrays.asList( rectangle2, rectangle0, rectangle1 ) ) );
 
-		assertTrue( TestFX.findAll( ".tool-box-expander" ).size() == 1 );
+		assertTrue( GuiTest.findAll( ".tool-box-expander" ).size() == 1 );
 
 		controller.target( stage ).click( ".tool-box .title" );
-		assertTrue( TestFX.findAll( ".tool-box-expander" ).size() == 0 );
+		assertTrue( GuiTest.findAll( ".tool-box-expander" ).size() == 0 );
 	}
 
 	@Test
@@ -358,7 +358,7 @@ public class ToolBoxTest
 		controller.sleep( 500 ).click( nextButton );
 
 		boolean foundRenamed = false;
-		for( Node holder : TestFX.findAll( "Label" ) )
+		for( Node holder : GuiTest.findAll( "Label" ) )
 		{
 			if( ( ( Label )holder ).getText().equals( "Renamed" ) )
 			{
@@ -404,7 +404,7 @@ public class ToolBoxTest
 				@Override
 				public void run()
 				{
-					future.set( TestFX.findAll( "ToolBox Rectangle" ) );
+					future.set( GuiTest.findAll( "ToolBox Rectangle" ) );
 					System.out.println( "Set the future rectangles" );
 				}
 			} );

@@ -47,7 +47,7 @@ public class NewVersionChecker
 
 	private static boolean isVersionDesired( @Nonnull String latestVersion )
 	{
-		String currentLoaduiVersion = LoadUI.VERSION;
+		String currentLoaduiVersion = LoadUI.version();
 		int snapshotIndex = currentLoaduiVersion.indexOf( "SNAPSHOT" );
 		boolean isSnapshot = snapshotIndex > 0;
 		//if version is snapshot strip SNAPSHOT
@@ -140,7 +140,7 @@ public class NewVersionChecker
 		}
 
 		log.debug( "Latest version is: {}", versionName );
-		log.debug( "Current version is: {}", LoadUI.VERSION );
+		log.debug( "Current version is: {}", LoadUI.version() );
 
 		if( versionName != null && isVersionDesired( versionName )
 				&& !shouldThisVersionBeSkipped( versionName, workspace ) )

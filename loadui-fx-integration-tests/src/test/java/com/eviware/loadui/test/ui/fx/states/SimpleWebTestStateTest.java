@@ -17,6 +17,7 @@ package com.eviware.loadui.test.ui.fx.states;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -25,6 +26,7 @@ import com.eviware.loadui.test.categories.IntegrationTest;
 /**
  * @author henrik.olsson
  */
+@Ignore(value = "This state still has to be implemented and tested")
 @Category( IntegrationTest.class )
 public class SimpleWebTestStateTest
 {

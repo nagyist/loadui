@@ -25,15 +25,12 @@
 
 import com.eviware.loadui.impl.component.categories.RunnerBase.SampleCancelledException
 
-import java.util.HashSet
-import java.util.Collections
-
 //Properties
-createProperty( 'command', String, '' ) {
-	runButton?.enabled = it
+createProperty('command', String, '') {
+    runButton?.enabled = it
 }
 
-runningSamples = Collections.synchronizedSet( new HashSet() )
+runningSamples = Collections.synchronizedSet(new HashSet())
 
 requestResetValue = 0
 sampleResetValue = 0
@@ -42,89 +39,91 @@ failedResetValue = 0
 runButton = null
 
 sample = { message, sampleId ->
-	try
-	{
-		runningSamples.add( Thread.currentThread() )
-	
-		// start a process and wait for it to finish
-		def proc = command.value.execute()
-		proc.waitFor()                              
+    try {
+        runningSamples.add(Thread.currentThread())
 
-		// add result properties
-		message["ExitValue"] = proc.exitValue()
-		message["Stdout"] = proc.in.text
-		message["Errout"] = proc.err.text
+        // start a process and wait for it to finish
+        def proc = command.value.execute()
+        proc.waitFor()
 
-		// fail if process failed
-		if( proc.exitValue() != 0 )
-		   failureCounter.increment()
-	}
-	catch( e )
-	{
-		if( e instanceof InterruptedException )
-			throw new SampleCancelledException()
-		// add error properties
-		message["ExitValue"] = -1
-		message["Errout"] = e.message
+        // add result properties
+        message["ExitValue"] = proc.exitValue()
+        message["Stdout"] = proc.in.text
+        message["Errout"] = proc.err.text
 
-		failureCounter.increment()
-	} finally {
-		runningSamples.remove( Thread.currentThread() )
-	}
+        // fail if process failed
+        if (proc.exitValue() != 0)
+            failureCounter.increment()
+    }
+    catch (e) {
+        if (e instanceof InterruptedException)
+            throw new SampleCancelledException()
+        // add error properties
+        message["ExitValue"] = -1
+        message["Errout"] = e.message
 
-	return message
+        failureCounter.increment()
+    } finally {
+        runningSamples.remove(Thread.currentThread())
+    }
+
+    return message
 }
 
 onCancel = {
-	synchronized( runningSamples ) {
-		def threads = runningSamples.toArray()
-		runningSamples.clear()
-		threads.each { it.interrupt() }
-	}
+    synchronized (runningSamples) {
+        def threads = runningSamples.toArray()
+        runningSamples.clear()
+        threads.each { it.interrupt() }
+    }
 }
 
-onAction( "RESET" ) { 
-	requestResetValue = 0
-	sampleResetValue = 0
-	discardResetValue = 0
-	failedResetValue = 0
+onAction("RESET") {
+    requestResetValue = 0
+    sampleResetValue = 0
+    discardResetValue = 0
+    failedResetValue = 0
 }
 
 //Layout
 layout {
-	box( layout: 'wrap 2, ins 0' ) {
-		property( property:command, label:"Command", constraints: 'growx, span 2' )
-		separator()
-		runButton = action( label: 'Run Once', action: { triggerAction('SAMPLE') }, enabled: ( command.value ) )
-		action( label: 'Abort Running Commands', action: { triggerAction('CANCEL') } )
-	}
-	separator( vertical: true )
-	box( layout: 'wrap, ins 0' ){
-		box( widget: 'display', layout: 'wrap 3, align right', column: '[50|50|60]' ) {
-			 node( label: 'Requests', content: { requestCounter.get() - requestResetValue } )
-			 node( label: 'Running', content: { currentlyRunning } )
-			 node( label: 'Completed', content: { sampleCounter.get() - sampleResetValue } )
-			 node( label: 'Queued', content: { queueSize } )
-			 node( label: 'Discarded', content: { discardCounter.get() - discardResetValue } )
-			 node( label: 'Failed', content: { failureCounter.get() - failedResetValue } )
-		}
-		action( label: 'Reset', action: {
-			 requestResetValue = requestCounter.get()
-			 sampleResetValue = sampleCounter.get()
-			 discardResetValue = discardCounter.get()
-			 failedResetValue = failureCounter.get()
-			 triggerAction('CANCEL')
-		}, constraints:'align right' )
-	}
+    box(layout: 'wrap 2, ins 0') {
+        property(property: command, label: "Command", constraints: 'growx, span 2')
+        separator()
+        runButton = action(label: 'Run Once', action: { triggerAction('SAMPLE') }, enabled: (command.value))
+        action(label: 'Abort Running Commands', action: { triggerAction('CANCEL') })
+    }
+    separator(vertical: true)
+    box(layout: 'wrap, ins 0') {
+        box(widget: 'display', layout: 'wrap 3, align right', column: '[50|50|60]') {
+            node(label: 'Requests', content: { requestCounter.get() - requestResetValue })
+            node(label: 'Running', content: { currentlyRunning })
+            node(label: 'Completed', content: { sampleCounter.get() - sampleResetValue })
+            node(label: 'Queued', content: { queueSize })
+            node(label: 'Discarded', content: { discardCounter.get() - discardResetValue })
+            node(label: 'Failed', content: { failureCounter.get() - failedResetValue })
+        }
+        action(label: 'Reset', action: {
+            requestResetValue = requestCounter.get()
+            sampleResetValue = sampleCounter.get()
+            discardResetValue = discardCounter.get()
+            failedResetValue = failureCounter.get()
+            triggerAction('CANCEL')
+        }, constraints: 'align right')
+    }
 }
 
 compactLayout {
-	box( widget: 'display', layout: 'wrap 3, align right', column: '[50|50|60]' ) {
-		node( label: 'Requests', content: { requestCounter.get() - requestResetValue } )
-		node( label: 'Running', content: { currentlyRunning } )
-		node( label: 'Completed', content: { sampleCounter.get() - sampleResetValue } )
-		node( label: 'Queued', content: { queueSize } )
-		node( label: 'Discarded', content: { discardCounter.get() - discardResetValue } )
-		node( label: 'Failed', content: { failureCounter.get() - failedResetValue } )
-	}
+    box(widget: 'display', layout: 'wrap 3, align right', column: '[50|50|60]') {
+        node(label: 'Requests', content: { requestCounter.get() - requestResetValue })
+        node(label: 'Running', content: { currentlyRunning })
+        node(label: 'Completed', content: { sampleCounter.get() - sampleResetValue })
+        node(label: 'Queued', content: { queueSize })
+        node(label: 'Discarded', content: { discardCounter.get() - discardResetValue })
+        node(label: 'Failed', content: { failureCounter.get() - failedResetValue })
+    }
+}
+
+settings(label: "Basic") {
+    property(property: concurrentSamplesProperty, label: 'Max concurrently running')
 }

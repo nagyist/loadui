@@ -62,6 +62,9 @@ public class ControllerWrapper
 		File bundleDir = new File( baseDir, "bundle" );
 		IntegrationTestUtils.copyDirectory( new File( "../loadui-project/loadui-controller-deps/target/bundle" ), bundleDir );
 		IntegrationTestUtils.copyDirectory( new File( "target/bundle" ), bundleDir );
+		IntegrationTestUtils.copyDirectory( new File( "target/conf" ), new File( baseDir, "conf" ) );
+
+		System.setProperty( LoadUI.LOADUI_WORKING, baseDir.getAbsolutePath() );
 
 		// Remove bundles depending on JavaFX and the API bundle.
 		for( File bundle : bundleDir.listFiles() )
@@ -92,8 +95,8 @@ public class ControllerWrapper
 					StringBuilder apiPackages = new StringBuilder(
 							"com.sun.crypto.provider,com.sun.net.ssl,com.sun.net.ssl.internal.ssl,org.w3c.dom.traversal,javax.transaction.xa;version=1.1.0,sun.io,org.antlr.runtime,org.antlr.runtime.tree" );
 
-					int dashIndex = LoadUI.VERSION.indexOf( "-" );
-					String version = dashIndex < 0 ? LoadUI.VERSION : LoadUI.VERSION.substring( 0, dashIndex );
+					int dashIndex = LoadUI.version().indexOf( "-" );
+					String version = dashIndex < 0 ? LoadUI.version() : LoadUI.version().substring( 0, dashIndex );
 					for( String pkg : packages )
 						apiPackages.append( ", " ).append( pkg ).append( "; version=\"" ).append( version ).append( '"' );
 

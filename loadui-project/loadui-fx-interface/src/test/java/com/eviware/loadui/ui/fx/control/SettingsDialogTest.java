@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.eviware.loadui.ui.fx.util.test.FXScreenController;
 import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
+import com.eviware.loadui.ui.fx.util.test.GuiTest;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -70,7 +70,7 @@ public class SettingsDialogTest
 
 	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();
 	private static Stage stage;
-	private static TestFX controller;
+	private static GuiTest controller;
 	private static SettingsDialog settingsDialog;
 	private static Button openDialogButton;
 	private static final Property<String> stringProperty = new TestingProperty<>( String.class,
@@ -89,11 +89,11 @@ public class SettingsDialogTest
 	@BeforeClass
 	public static void createWindow() throws Throwable
 	{
-		controller = TestFX.wrap( new FXScreenController() );
+		controller = GuiTest.wrap( new FXScreenController() );
 		FXTestUtils.launchApp( SettingsDialogTestApp.class );
 
 		stage = stageFuture.get( 5, TimeUnit.SECONDS );
-		TestFX.targetWindow( stage );
+		GuiTest.targetWindow( stage );
 		FXTestUtils.bringToFront( stage );
 
 	}

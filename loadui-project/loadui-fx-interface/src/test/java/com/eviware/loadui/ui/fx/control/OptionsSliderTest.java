@@ -15,14 +15,12 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.concurrent.TimeUnit;
-
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
+import com.eviware.loadui.test.categories.GUITest;
 import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.ScreenController;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
+import com.eviware.loadui.ui.fx.util.test.GuiTest;
+import com.eviware.loadui.ui.fx.views.canvas.component.ComponentLayoutUtils;
+import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.SettableFuture;
 import javafx.application.Application;
 import javafx.scene.SceneBuilder;
 import javafx.scene.control.Label;
@@ -30,18 +28,16 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.stage.Stage;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.eviware.loadui.test.categories.GUITest;
-import com.eviware.loadui.ui.fx.views.canvas.component.ComponentLayoutUtils;
-import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.SettableFuture;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.assertTrue;
 
 @Category( GUITest.class )
-public class OptionsSliderTest extends TestFX
+public class OptionsSliderTest extends GuiTest
 {
 	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();
 

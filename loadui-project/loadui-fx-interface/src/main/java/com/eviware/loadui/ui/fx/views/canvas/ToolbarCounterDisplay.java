@@ -56,14 +56,15 @@ public class ToolbarCounterDisplay extends CounterDisplay
 				.create()
 				.prefWidth( 100 )
 				.maxWidth( 160 )
-				.center( HBoxBuilder.create().spacing( 2 ).children( numberDisplay, separationSlash ).build() )
+				.center( HBoxBuilder.create().children( numberDisplay, separationSlash ).build() )
 				.right( limitDisplay )
 				.style(
-						"-fx-background-color: linear-gradient(to bottom, #545454 0%, #000000 50%, #000000 100%); -fx-padding: 1 6 1 6; -fx-background-radius: 5; -fx-border-width: 1; -fx-border-color: #333333; -fx-border-radius: 4; " )
+						"-fx-background-color: linear-gradient(to bottom, #545454 0%, #000000 50%, #000000 100%); -fx-padding: 0 6 0 6; -fx-background-radius: 5; -fx-border-width: 1; -fx-border-color: #333333; -fx-border-radius: 4; " )
 				.build();
 
 		progress = progressBar();
-		Label label = label( name );
+
+		Label label = label ( name );
 
 		HBox labelAndProgress = HBoxBuilder.create().children( label, progress ).spacing( 3 ).alignment( Pos.BOTTOM_LEFT )
 				.build();
@@ -72,7 +73,7 @@ public class ToolbarCounterDisplay extends CounterDisplay
 		HBox.setHgrow( progress, Priority.ALWAYS );
 
 		getChildren().setAll( numberAndLimitDisplay, labelAndProgress );
-		setSpacing( 0 );
+		setSpacing( 1 );
 		setAlignment( Pos.CENTER );
 		setLimit( limit );
 	}

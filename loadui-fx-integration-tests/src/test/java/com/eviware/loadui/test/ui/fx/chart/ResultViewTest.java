@@ -19,7 +19,7 @@ import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.FxIntegrationTestBase;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
+import com.eviware.loadui.ui.fx.util.test.GuiTest;
 import javafx.scene.Node;
 import javafx.scene.control.MenuButton;
 import javafx.scene.input.KeyCode;
@@ -72,6 +72,10 @@ public class ResultViewTest extends FxIntegrationTestBase
 
 		assertThat( RECENT, contains( 0, TEST_RUNS ) );
 		assertThat( ARCHIVE, contains( 2, TEST_RUNS ) );
+
+		controller.click( "#archive-0 #menuButton" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
+		controller.click( "#archive-0 #menuButton" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
+		assertThat( ARCHIVE, contains( 0, TEST_RUNS ) );
 	}
 
 
@@ -140,7 +144,7 @@ public class ResultViewTest extends FxIntegrationTestBase
 
 	private boolean resultsViewWindowIsOpen()
 	{
-		return !TestFX.findAll( ".analysis-view" ).isEmpty();
+		return !GuiTest.findAll( ".analysis-view" ).isEmpty();
 	}
 
 }
