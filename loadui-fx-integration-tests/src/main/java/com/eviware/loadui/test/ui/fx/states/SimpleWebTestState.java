@@ -27,6 +27,12 @@ import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RAT
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.WEB_PAGE_RUNNER;
 import static com.eviware.loadui.ui.fx.util.test.GuiTest.findAll;
 
+import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
+import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.WEB_PAGE_RUNNER;
+import static com.eviware.loadui.ui.fx.util.test.GuiTest.findAll;
+import static com.eviware.loadui.ui.fx.util.test.matchers.ContainsNodesMatcher.contains;
+import static org.junit.Assert.assertThat;
+
 public class SimpleWebTestState extends FxTestState
 {
 	public static final SimpleWebTestState STATE = new SimpleWebTestState();
@@ -52,24 +58,13 @@ public class SimpleWebTestState extends FxTestState
 	@Override
 	protected void exitToParent() throws Exception
 	{
-		GUI.getController().click( "#closeProjectButton" );
-		//If there is a save dialog, do not save:
-		try
-		{
-			GUI.getController().click( "#no" ).target( GuiTest.getWindowByIndex( 0 ) );
-		}
-		catch( Exception e )
-		{
-			//Ignore
-		}
+		controller.click( "#designTab" );
 
-		TestUtils.awaitCondition( new Callable<Boolean>()
-		{
-			@Override
-			public Boolean call() throws Exception
-			{
-				return !findAll( ".workspace-view" ).isEmpty();
-			}
-		} );
+		int maxTries = 2;
+		int tries = 0;
+		while( tries++ < maxTries && !findAll( ".component-view" ).isEmpty() )
+			controller.click( ".component-view #menu" ).click( "#delete-item" ).click( "#default" );
+
+		assertThat( ".component-layer", contains( 0, ".component-view" ) );
 	}
 }
