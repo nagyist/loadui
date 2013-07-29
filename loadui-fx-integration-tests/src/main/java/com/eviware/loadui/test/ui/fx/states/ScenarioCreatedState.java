@@ -25,13 +25,13 @@ import com.eviware.loadui.test.ui.fx.GUI;
 public class ScenarioCreatedState extends FxTestState
 {
 	public static final ScenarioCreatedState STATE = new ScenarioCreatedState();
-	public static final String SCENARIO_NAME = "Scenario";
+	public static final String SCENARIO_NAME = "Scenario 1";
 
 	private SceneItem scenario = null;
 
 	private ScenarioCreatedState()
 	{
-		super( "Scenario Created", ProjectLoadedWithoutAgentsState.STATE );
+		super( "Scenario 1 Created", ProjectLoadedWithoutAgentsState.STATE );
 	}
 
 	public SceneItem getScenario()

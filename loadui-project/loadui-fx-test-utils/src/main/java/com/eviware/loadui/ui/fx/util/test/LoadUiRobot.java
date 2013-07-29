@@ -23,8 +23,8 @@ public class LoadUiRobot
 {
 	public enum Component
 	{
-		FIXED_RATE_GENERATOR( "generators", "Fixed Rate" ), TABLE_LOG( "output", "Table Log" ), WEB_PAGE_RUNNER(
-			"runners", "Web Page Runner" );
+		FIXED_RATE_GENERATOR( "generators", "Fixed Rate 1" ), TABLE_LOG( "output", "Table Log 1" ), WEB_PAGE_RUNNER(
+			"runners", "Web Page Runner 1" );
 
 		public final String category;
 		public final String name;

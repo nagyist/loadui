@@ -43,7 +43,7 @@ public class ChartsTest extends FxIntegrationTestBase
 		{
 			if( input.getClass().getSimpleName().equals( "StatisticHolderToolboxItem" ) )
 			{
-				return input.toString().equals( "Web Page Runner" );
+				return input.toString().equals( "Web Page Runner 1" );
 			}
 			return false;
 		}
