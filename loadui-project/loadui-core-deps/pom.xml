@@ -39,12 +39,12 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>com.springsource.slf4j.org.apache.commons.logging</artifactId>
-            <version>1.6.1</version>
+            <version>${slf4jVersion}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>com.springsource.slf4j.log4j</artifactId>
-            <version>1.6.1</version>
+            <version>${log4jVersion}</version>
         </dependency>
         <dependency>
             <groupId>org.aopalliance</groupId>

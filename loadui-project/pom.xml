@@ -212,12 +212,12 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>com.springsource.slf4j.api</artifactId>
-            <version>1.6.1</version>
+            <version>${slf4jVersion}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>com.springsource.slf4j.simple</artifactId>
-            <version>1.6.1</version>
+            <version>${slf4jVersion}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
