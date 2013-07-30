@@ -113,7 +113,7 @@ public class EventsHandlingTest
 
 		assertThat( knob.getClass().getSimpleName(), is( "Knob" ) );
 
-		ComponentItem cItem = ProjectLoadedWithoutAgentsState.STATE.getProject().getComponentByLabel( "Fixed Rate" );
+		ComponentItem cItem = ProjectLoadedWithoutAgentsState.STATE.getProject().getComponentByLabel( "Fixed Rate 1" );
 
 		// using reflection to get value of a knob because dependency problems are making impossible
 		// to add loadui-fx-interface as a dependency and consequently get access to the knob class

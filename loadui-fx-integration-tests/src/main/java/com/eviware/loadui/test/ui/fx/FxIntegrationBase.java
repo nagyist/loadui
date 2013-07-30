@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import static com.eviware.loadui.ui.fx.util.test.TestFX.find;
 import static com.eviware.loadui.ui.fx.util.test.TestFX.findAll;
 
 /**
@@ -69,10 +70,10 @@ public class FxIntegrationBase
 
 	public KnobHandle turnKnobIn( LoadUiRobot.Component component )
 	{
-		Node componentNode = robot.getComponentNode( component );
-		Set<Node> knobs = findAll( ".knob", componentNode );
-		System.out.println( "Found " + knobs.size() + " knobs: " + knobs );
-		return new KnobHandle( knobs.iterator().next() );
+		final Node componentNode = robot.getComponentNode( component );
+		System.out.println( "Component node: " + componentNode );
+		Node knob = find( ".knob", componentNode );
+		return new KnobHandle( knob );
 	}
 
 	public class KnobHandle

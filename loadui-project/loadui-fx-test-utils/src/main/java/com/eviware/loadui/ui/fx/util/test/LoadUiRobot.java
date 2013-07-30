@@ -23,8 +23,8 @@ public class LoadUiRobot
 {
 	public enum Component
 	{
-		FIXED_RATE_GENERATOR( "generators", "Fixed Rate 1" ), TABLE_LOG( "output", "Table Log 1" ), WEB_PAGE_RUNNER(
-			"runners", "Web Page Runner 1" );
+		FIXED_RATE_GENERATOR( "generators", "Fixed Rate" ), TABLE_LOG( "output", "Table Log" ), WEB_PAGE_RUNNER(
+			"runners", "Web Page Runner" );
 
 		public final String category;
 		public final String name;
@@ -129,20 +129,24 @@ public class LoadUiRobot
 	{
 		if( optionalName.length > 0 )
 		{
-			return findComponentByName( optionalName[0] );
-		} else {
-			return findComponentByName( component.name );
+			return findComponentByName( optionalName[0], true );
+		}
+		else
+		{
+			return findComponentByName( component.name, false );
 		}
 	}
 
-	private Node findComponentByName( String name )
+	private Node findComponentByName( String name, boolean exactMatch )
 	{
 		for( Node compNode : findAll( ".canvas-object-view" ) )
 		{
 			Set<Node> textLabels = findAll( "Label", find( "#topBar", compNode ) );
 			for( Node label : textLabels )
 			{
-				if( ( ( Label )label ).getText().equals( name ) )
+				String componentLabel = ( ( Label )label ).getText();
+				boolean foundMatch = exactMatch ? componentLabel.equals( name ) : componentLabel.startsWith( name );
+				if( foundMatch )
 				{
 					return compNode;
 				}

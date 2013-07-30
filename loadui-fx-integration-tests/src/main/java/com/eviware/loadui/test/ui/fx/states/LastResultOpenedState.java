@@ -47,5 +47,6 @@ public class LastResultOpenedState extends TestState
 		{
 			GUI.getController().closeCurrentWindow();
 		}
+		GUI.getController().click( "#designTab" );
 	}
 }

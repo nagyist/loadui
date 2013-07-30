@@ -17,6 +17,7 @@ package com.eviware.loadui.test.ui.fx;
 
 import com.eviware.loadui.api.testevents.MessageLevel;
 import com.eviware.loadui.api.testevents.TestEventManager;
+import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.FXAppLoadedState;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
@@ -38,28 +39,20 @@ import static com.eviware.loadui.ui.fx.util.test.FXTestUtils.getOrFail;
 import static org.junit.Assert.*;
 
 @Category( IntegrationTest.class )
-public class NotificationPanelTest
+public class NotificationPanelTest extends FxIntegrationTestBase
 {
 
-	private static TestFX controller;
-
-	@BeforeClass
-	public static void enterState() throws Exception
+	@Override
+	public TestState getStartingState()
 	{
-		ProjectLoadedWithoutAgentsState.STATE.enter();
-		controller = GUI.getController();
-	}
-
-	@AfterClass
-	public static void cleanup()
-	{
-		controller = null;
-		ProjectLoadedWithoutAgentsState.STATE.getParent().enter();
+		return ProjectLoadedWithoutAgentsState.STATE;
 	}
 
 	@Before
 	public void onStart() throws Exception
 	{
+		// we must re-enter this state every time because some tests will go to another state
+		ProjectLoadedWithoutAgentsState.STATE.enter();
 		try
 		{
 			waitUntilNotVisible( notificationPanel() );
@@ -268,7 +261,7 @@ public class NotificationPanelTest
 		assertTrue( ( ( Region )inspectorView ).getHeight() > 150 );
 
 		// hide the inspector view so it won't break other tests
-		controller.move( "#Assertions" ).moveBy( 400, 0 ).doubleClick();
+		controller.move( "#Assertions" ).moveBy( 400, 0 ).drag( "#Assertions" ).by( 0, 400 ).drop();
 
 		controller.click( hideNotificationPanelButton() );
 
