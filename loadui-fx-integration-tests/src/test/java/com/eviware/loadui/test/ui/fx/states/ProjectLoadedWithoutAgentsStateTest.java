@@ -15,7 +15,7 @@
  */
 package com.eviware.loadui.test.ui.fx.states;
 
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
+import org.loadui.testfx.GuiTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

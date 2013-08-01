@@ -17,7 +17,7 @@ package com.eviware.loadui.test.ui.fx;
 
 import static org.junit.Assert.assertTrue;
 
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
+import org.loadui.testfx.GuiTest;
 import javafx.scene.input.KeyCode;
 
 import org.junit.After;

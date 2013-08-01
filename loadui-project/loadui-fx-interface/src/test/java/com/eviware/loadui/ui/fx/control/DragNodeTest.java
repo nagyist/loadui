@@ -15,11 +15,11 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
-import com.eviware.loadui.test.categories.GUITest;
+import org.loadui.testfx.categories.TestFX;
 import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
+import org.loadui.testfx.FXScreenController;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
 import com.eviware.loadui.ui.fx.views.window.Overlay;
 import com.eviware.loadui.ui.fx.views.window.OverlayHolder;
 import com.google.common.util.concurrent.SettableFuture;
@@ -44,7 +44,7 @@ import static javafx.beans.binding.Bindings.when;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@Category(GUITest.class)
+@Category(TestFX.class)
 public class DragNodeTest
 {
 	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();

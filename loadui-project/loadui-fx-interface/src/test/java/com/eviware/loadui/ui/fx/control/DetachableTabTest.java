@@ -15,7 +15,7 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.find;
+import static org.loadui.testfx.GuiTest.find;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
@@ -26,6 +26,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.TimeUnit;
 
+import org.loadui.testfx.categories.TestFX;
 import javafx.application.Application;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -44,15 +45,14 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.eviware.loadui.test.categories.GUITest;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
+import org.loadui.testfx.FXScreenController;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.SettableFuture;
 
-@Category( GUITest.class )
+@Category( TestFX.class )
 @Ignore(value = "Feature disabled until further notice. See LOADUI-869 and LOADUI-871")
 public class DetachableTabTest
 {

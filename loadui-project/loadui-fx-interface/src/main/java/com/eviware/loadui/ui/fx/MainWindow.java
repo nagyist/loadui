@@ -15,7 +15,11 @@
  */
 package com.eviware.loadui.ui.fx;
 
+import com.eviware.loadui.ui.fx.views.workspace.NewVersionDialog;
+import com.eviware.loadui.util.NewVersionChecker;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.event.EventHandler;
 import javafx.scene.SceneBuilder;
 import javafx.stage.Stage;
@@ -34,9 +38,7 @@ import com.eviware.loadui.ui.fx.views.window.MainWindowView;
 
 public class MainWindow
 {
-
-	// Fullscreen doesn't seem to work, the property never changes.
-	private static final String FULLSCREEN = MainWindow.class.getName() + "@fullscreen";
+	private static final String FULLSCREEN = MainWindow.class.getName() + "@fullscreen"; // This is the OS X definition of fullscreen.
 	private static final String WINDOW_WIDTH = MainWindow.class.getName() + "@width";
 	private static final String WINDOW_HEIGHT = MainWindow.class.getName() + "@height";
 
@@ -105,11 +107,31 @@ public class MainWindow
 
 				stage.setScene( SceneBuilder.create().stylesheets( LoaduiFXConstants.getLoaduiStylesheets() )
 						.root( mainView ).build() );
+
+				installNewVersionChecker();
+
+				stage.show();
+
 				BlockingTask.install( stage.getScene() );
 				AbortableBlockingTask.install( stage.getScene() );
 				DeleteTask.install( stage.getScene() );
+			}
 
-				stage.show();
+
+		} );
+	}
+
+	private void installNewVersionChecker()
+	{
+		stage.showingProperty().addListener( new InvalidationListener()
+		{
+			@Override
+			public void invalidated( Observable observable )
+			{
+				final NewVersionChecker.VersionInfo newVersion = NewVersionChecker.checkForNewVersion( workspaceProvider.getWorkspace() );
+				if( newVersion != null )
+					new NewVersionDialog(stage.getScene().getRoot(), newVersion).show();
+				stage.showingProperty().removeListener( this );
 			}
 		} );
 	}

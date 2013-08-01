@@ -17,7 +17,7 @@ package com.eviware.loadui.test.ui.fx;
 
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
+import org.loadui.testfx.GuiTest;
 import com.eviware.loadui.util.test.TestUtils;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -33,7 +33,7 @@ import org.junit.experimental.categories.Category;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.findAll;
+import static org.loadui.testfx.GuiTest.findAll;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -66,6 +66,9 @@ public class WireTest extends GuiTest
 
 		System.out.println( "Create Component 1" );
 		controller.click( "#flow.category .expander-button" ).drag( CONDITION_COMPONENT ).by( 100, -400 ).drop();
+
+		waitUntil( numberOf( ".canvas-object-view" ), is(1) );
+
 		TestUtils.awaitCondition( new Callable<Boolean>()
 		{
 			@Override

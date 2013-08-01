@@ -18,13 +18,13 @@ package com.eviware.loadui.test.ui.fx;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
 import javafx.stage.Stage;
 
+import org.loadui.testfx.FXScreenController;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
 import org.osgi.framework.BundleContext;
 
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
 import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.test.TestUtils;
 

@@ -15,13 +15,17 @@
  */
 package com.eviware.loadui.ui.fx.util.test;
 
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.find;
+import static org.loadui.testfx.GuiTest.find;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.loadui.testfx.FXScreenController;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
+import org.loadui.testfx.categories.TestFX;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -37,10 +41,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.eviware.loadui.test.categories.GUITest;
 import com.google.common.util.concurrent.SettableFuture;
 
-@Category( GUITest.class )
+@Category( TestFX.class )
 public class ControllerApiTest
 {
 	private static final GuiTest controller = GuiTest.wrap( new FXScreenController() );

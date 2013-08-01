@@ -6,7 +6,6 @@
     <version>2.6.0-SNAPSHOT</version>
     <name>loadUI Project</name>
     <url>http://www.loadui.org</url>
-
     <parent>
         <groupId>com.eviware.loadui</groupId>
         <artifactId>loadui-parent</artifactId>

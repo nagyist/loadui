@@ -15,9 +15,9 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.find;
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.targetWindow;
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.wrap;
+import static org.loadui.testfx.GuiTest.find;
+import static org.loadui.testfx.GuiTest.targetWindow;
+import static org.loadui.testfx.GuiTest.wrap;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -29,9 +29,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
+import org.loadui.testfx.categories.TestFX;
+import org.loadui.testfx.FXScreenController;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
 import javafx.application.Application;
 import javafx.scene.SceneBuilder;
 import javafx.scene.control.Button;
@@ -45,10 +46,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.eviware.loadui.test.categories.GUITest;
 import com.google.common.util.concurrent.SettableFuture;
 
-@Category( GUITest.class )
+@Category( TestFX.class )
 public class CarouselTest
 {
 	private static Carousel<Rectangle> carousel;

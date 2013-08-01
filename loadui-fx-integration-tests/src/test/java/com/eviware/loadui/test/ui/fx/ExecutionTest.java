@@ -19,7 +19,7 @@ import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
+import org.loadui.testfx.GuiTest;
 import com.google.common.base.Predicate;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -35,8 +35,8 @@ import java.util.Set;
 
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.WEB_PAGE_RUNNER;
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.find;
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.findAll;
+import static org.loadui.testfx.GuiTest.find;
+import static org.loadui.testfx.GuiTest.findAll;
 import static com.google.common.collect.Collections2.filter;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.Matchers.greaterThan;
@@ -66,7 +66,7 @@ public class ExecutionTest extends FxIntegrationTestBase
 
 		connect( FIXED_RATE_GENERATOR ).to( WEB_PAGE_RUNNER );
 
-		controller.click( webPageRunnerInput() ).type( NON_RESPONDING_VALID_IP_ADDRESS );
+		click( webPageRunnerInput() ).type( NON_RESPONDING_VALID_IP_ADDRESS );
 
 		// WHEN
 		runTestFor( 2, SECONDS );
@@ -92,7 +92,7 @@ public class ExecutionTest extends FxIntegrationTestBase
 	private void clickOnAbortButton()
 	{
 		Node abortButton = extraStages().get( 0 ).getScene().lookup( "#abort-requests" );
-		controller.click( abortButton ).sleep( 500 );
+		click( abortButton ).sleep( 500 );
 	}
 
 	private List<Stage> extraStages()

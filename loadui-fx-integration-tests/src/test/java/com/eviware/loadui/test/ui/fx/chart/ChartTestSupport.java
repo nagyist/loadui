@@ -1,6 +1,6 @@
 package com.eviware.loadui.test.ui.fx.chart;
 
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
+import org.loadui.testfx.GuiTest;
 import javafx.scene.Node;
 
 import java.util.Set;

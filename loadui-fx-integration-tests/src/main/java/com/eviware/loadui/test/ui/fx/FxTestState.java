@@ -2,8 +2,8 @@ package com.eviware.loadui.test.ui.fx;
 
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.ui.fx.util.test.ComponentHandle;
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
 import com.eviware.loadui.ui.fx.util.test.LoadUiRobot;
+import org.loadui.testfx.GuiTest;
 
 import java.util.concurrent.TimeUnit;
 
@@ -16,7 +16,7 @@ public abstract class FxTestState extends TestState
 	private final FxIntegrationBase fxTestSupport = new FxIntegrationBase();
 
 	protected LoadUiRobot robot = fxTestSupport.robot;
-	protected GuiTest controller = fxTestSupport.controller;
+	protected GuiTest controller = fxTestSupport;
 
 	protected FxTestState( String name, TestState parent )
 	{

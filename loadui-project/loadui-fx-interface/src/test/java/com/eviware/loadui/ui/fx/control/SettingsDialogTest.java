@@ -24,9 +24,10 @@ import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
+import org.loadui.testfx.categories.TestFX;
+import org.loadui.testfx.FXScreenController;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -52,7 +53,6 @@ import org.slf4j.LoggerFactory;
 
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.impl.layout.ActionLayoutComponentImpl;
-import com.eviware.loadui.test.categories.GUITest;
 import com.eviware.loadui.ui.fx.control.SettingsTab.Builder;
 import com.eviware.loadui.ui.fx.util.StylingUtils;
 import com.eviware.loadui.ui.fx.util.TestingProperty;
@@ -60,7 +60,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.SettableFuture;
 
-@Category( GUITest.class )
+@Category( TestFX.class )
 public class SettingsDialogTest
 {
 	private static final long INIT_LONG = 123L;

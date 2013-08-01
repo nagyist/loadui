@@ -17,7 +17,7 @@ package com.eviware.loadui.test.ui.fx.states;
 
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.ui.fx.GUI;
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
+import org.loadui.testfx.GuiTest;
 import javafx.scene.Node;
 
 import java.util.Set;

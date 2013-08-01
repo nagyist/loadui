@@ -19,7 +19,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
+import org.loadui.testfx.GuiTest;
 import javafx.scene.input.KeyCode;
 
 import org.junit.AfterClass;

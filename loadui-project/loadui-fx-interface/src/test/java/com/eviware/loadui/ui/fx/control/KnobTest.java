@@ -15,82 +15,47 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.find;
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.targetWindow;
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.wrap;
+import static org.loadui.testfx.GuiTest.find;
+import static javafx.geometry.VerticalDirection.DOWN;
+import static javafx.geometry.VerticalDirection.UP;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
 
-import java.util.concurrent.TimeUnit;
-
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
-import javafx.application.Application;
-import javafx.scene.GroupBuilder;
-import javafx.scene.SceneBuilder;
+import org.loadui.testfx.categories.TestFX;
+import org.loadui.testfx.GuiTest;
+import javafx.scene.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBoxBuilder;
-import javafx.stage.Stage;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.eviware.loadui.test.categories.GUITest;
-import com.eviware.loadui.ui.fx.util.StylingUtils;
-import com.google.common.util.concurrent.SettableFuture;
-
-@Category( GUITest.class )
-public class KnobTest
+@Category( TestFX.class )
+public class KnobTest extends GuiTest
 {
-	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();
-	private static Stage stage;
-	private static GuiTest controller;
-
-	public static class KnobTestApp extends Application
+	@BeforeClass
+	public static void createStage() throws Throwable
 	{
-		@Override
-		public void start( Stage primaryStage ) throws Exception
-		{
-			Knob boundedKnob = new Knob( "Bounded", 0, 10, 0 );
-			boundedKnob.setId( "bounded" );
-			Knob minKnob = new Knob( "Min" );
-			minKnob.setMin( 0 );
-			minKnob.setId( "min" );
-			Knob maxKnob = new Knob( "Max" );
-			maxKnob.setMax( 0 );
-			maxKnob.setId( "max" );
-
-			primaryStage.setScene( SceneBuilder
-					.create()
-					.stylesheets( "/com/eviware/loadui/ui/fx/loadui-style.css" )
-					.width( 200 )
-					.height( 100 )
-					.root(
-							GroupBuilder.create()
-									.children( HBoxBuilder.create().children( boundedKnob, minKnob, maxKnob ).build() ).build() )
-					.build() );
-
-			primaryStage.show();
-
-			StylingUtils.applyLoaduiStyling( primaryStage.getScene() );
-
-			stageFuture.set( primaryStage );
-		}
+		showNodeInStage( setupRootNode(), "/com/eviware/loadui/ui/fx/loadui-style.css" );
 	}
 
-	@BeforeClass
-	public static void createWindow() throws Throwable
+	private static Parent setupRootNode()
 	{
-		controller = wrap( new FXScreenController() );
-		FXTestUtils.launchApp( KnobTestApp.class );
-		stage = targetWindow( stageFuture.get( 5, TimeUnit.SECONDS ) );
-		FXTestUtils.bringToFront( stage );
+		Knob boundedKnob = new Knob( "Bounded", 0, 10, 0 );
+		boundedKnob.setId( "bounded" );
+		Knob minKnob = new Knob( "Min" );
+		minKnob.setMin( 0 );
+		minKnob.setId( "min" );
+		Knob maxKnob = new Knob( "Max" );
+		maxKnob.setMax( 0 );
+		maxKnob.setId( "max" );
+		return GroupBuilder.create()
+				.children( HBoxBuilder.create().children( boundedKnob, minKnob, maxKnob ).build() ).build();
 	}
 
 	@Before
@@ -114,7 +79,7 @@ public class KnobTest
 	{
 		Knob bounded = find( "#bounded" );
 		//Drag down first to initiate dragging.
-		controller.drag( bounded ).by( 0, 10 ).by( 0, -5 ).drop();
+		drag( bounded ).by( 0, 10 ).by( 0, -5 ).drop();
 		assertThat( bounded.getValue(), closeTo( 5.0, 0.01 ) );
 	}
 
@@ -122,7 +87,7 @@ public class KnobTest
 	public void shouldBeModifiableByManualEntry()
 	{
 		Knob bounded = find( "#bounded" );
-		controller.click( bounded ).click( bounded ).sleep( 100 ).type( "5" ).press( KeyCode.ENTER );
+		click( bounded ).click( bounded ).sleep( 100 ).type( "5" ).press( KeyCode.ENTER );
 		assertThat( bounded.getValue(), closeTo( 5.0, 0.01 ) );
 	}
 
@@ -130,45 +95,27 @@ public class KnobTest
 	public void shouldBeModifiableByScrolling()
 	{
 		Knob bounded = find( "#bounded" );
-		controller.move( bounded );
-		for( int x = 0; x < 10; x++ )
-		{
-			controller.scroll( 1 );
-		}
+		move( bounded );
+		scroll( 10, DOWN );
 		assertThat( bounded.getValue(), closeTo( 0.0, 0.01 ) );
 
-		for( int x = 0; x < 10; x++ )
-		{
-			controller.scroll( -1 );
-		}
+		scroll( 10, UP );
 		assertThat( bounded.getValue(), closeTo( 10.0, 0.01 ) );
 
 		Knob minKnob = find( "#min" );
-		controller.move( minKnob );
-		for( int x = 0; x < 10; x++ )
-		{
-			controller.scroll( 1 );
-		}
+		move( minKnob );
+		scroll( 10, DOWN );
 		assertThat( minKnob.getValue(), closeTo( 0.0, 0.01 ) );
 
-		for( int x = 0; x < 11; x++ )
-		{
-			controller.scroll( -1 );
-		}
+		scroll( 11, UP );
 		assertThat( minKnob.getValue(), greaterThan( 10.0 ) );
 
 		Knob maxKnob = find( "#max" );
-		controller.move( maxKnob );
-		for( int x = 0; x < 10; x++ )
-		{
-			controller.scroll( -1 );
-		}
+		move( maxKnob );
+		scroll( 10, UP );
 		assertThat( maxKnob.getValue(), closeTo( 0.0, 0.01 ) );
 
-		for( int x = 0; x < 11; x++ )
-		{
-			controller.scroll( 1 );
-		}
+		scroll( 11, DOWN );
 		assertThat( maxKnob.getValue(), lessThan( -10.0 ) );
 	}
 }

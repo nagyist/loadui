@@ -15,18 +15,18 @@
  */
 package com.eviware.loadui.ui.fx.views.analysis;
 
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.targetWindow;
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.wrap;
+import static org.loadui.testfx.GuiTest.targetWindow;
+import static org.loadui.testfx.GuiTest.wrap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import com.eviware.loadui.test.categories.GUITest;
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
+import org.loadui.testfx.categories.TestFX;
+import org.loadui.testfx.FXScreenController;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
 import javafx.application.Application;
 import javafx.beans.Observable;
 import javafx.stage.Stage;
@@ -47,7 +47,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import org.junit.experimental.categories.Category;
 
 @Ignore
-@Category( GUITest.class )
+@Category( TestFX.class )
 public class ChartGroupViewTest
 {
 

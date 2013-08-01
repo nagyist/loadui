@@ -15,9 +15,9 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
-import com.eviware.loadui.test.categories.GUITest;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
+import org.loadui.testfx.categories.TestFX;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
 import com.eviware.loadui.ui.fx.views.canvas.component.ComponentLayoutUtils;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.SettableFuture;
@@ -34,9 +34,11 @@ import org.junit.experimental.categories.Category;
 
 import java.util.concurrent.TimeUnit;
 
+import static org.loadui.testfx.Matchers.hasLabel;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-@Category( GUITest.class )
+@Category( TestFX.class )
 public class OptionsSliderTest extends GuiTest
 {
 	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();
@@ -97,9 +99,10 @@ public class OptionsSliderTest extends GuiTest
 	public void images_should_work()
 	{
 		click( "#gauss" );
-		assertTrue( "gauss".equals( label.getText() ) );
+		assertThat( label, hasLabel( "gauss" ) );
+
 		click( "#sine" );
-		assertTrue( "sine".equals( label.getText() ) );
+		assertThat( label, hasLabel( "sine" ) );
 	}
 
 	private static ImageView createImage( String imageName )

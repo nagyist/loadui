@@ -20,7 +20,7 @@ import static org.junit.Assert.assertThat;
 
 import java.util.concurrent.Callable;
 
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
+import org.loadui.testfx.GuiTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;

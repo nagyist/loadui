@@ -17,17 +17,13 @@ package com.eviware.loadui.ui.fx.views.result;
 
 import com.eviware.loadui.api.statistics.store.Execution;
 import com.eviware.loadui.api.statistics.store.ExecutionManager;
-import com.eviware.loadui.test.categories.GUITest;
-import com.eviware.loadui.ui.fx.control.PageList;
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
-import com.eviware.loadui.ui.fx.util.test.matchers.ContainsNodesMatcher;
+import org.loadui.testfx.categories.TestFX;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
 import com.google.common.base.Predicate;
 import com.google.common.util.concurrent.SettableFuture;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
-import javafx.scene.Node;
 import javafx.scene.SceneBuilder;
 import javafx.stage.Stage;
 import org.junit.Before;
@@ -40,13 +36,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.eviware.loadui.ui.fx.util.ObservableLists.*;
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.targetWindow;
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.wrap;
-import static com.eviware.loadui.ui.fx.util.test.matchers.ContainsNodesMatcher.contains;
+import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-@Category( GUITest.class )
+@Category( TestFX.class )
 public class ResultViewTest extends GuiTest
 {
 	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();

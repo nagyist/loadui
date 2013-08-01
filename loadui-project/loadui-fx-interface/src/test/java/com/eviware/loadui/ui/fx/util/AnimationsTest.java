@@ -15,7 +15,7 @@
  */
 package com.eviware.loadui.ui.fx.util;
 
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.targetWindow;
+import static org.loadui.testfx.GuiTest.targetWindow;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
@@ -25,8 +25,9 @@ import static org.junit.Assert.fail;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
+import org.loadui.testfx.categories.TestFX;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
 import javafx.application.Application;
 import javafx.geometry.Bounds;
 import javafx.scene.SceneBuilder;
@@ -41,10 +42,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.eviware.loadui.test.categories.GUITest;
 import com.google.common.util.concurrent.SettableFuture;
 
-@Category( GUITest.class )
+@Category( TestFX.class )
 public class AnimationsTest
 {
 

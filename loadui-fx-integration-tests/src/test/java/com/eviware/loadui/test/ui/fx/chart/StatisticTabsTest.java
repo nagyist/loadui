@@ -23,14 +23,16 @@ import com.eviware.loadui.test.ui.fx.states.LastResultOpenedState;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseButton;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import static com.eviware.loadui.ui.fx.util.test.FXTestUtils.failIfExists;
-import static com.eviware.loadui.ui.fx.util.test.FXTestUtils.getOrFail;
+import static org.loadui.testfx.Assertions.assertNodeExists;
+import static org.loadui.testfx.FXTestUtils.getOrFail;
+import static org.loadui.testfx.Matchers.hasLabel;
+import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
+import static javafx.scene.input.KeyCode.ENTER;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -45,12 +47,13 @@ public class StatisticTabsTest extends FxIntegrationTestBase
 		pages = ProjectLoadedWithoutAgentsState.STATE.getProject().getStatisticPages();
 		assertThat( pageCount(), is( 1 ) );
 
-		controller.click( "#plus-button" ).click( "Untitled Page 2" ).click( "#untitled-page-1" ).click( "#plus-button" );
+		click( "#plus-button" ).click( "Untitled Page 2" ).click( "#untitled-page-1" ).click( "#plus-button" );
 		assertThat( pageCount(), is( 3 ) );
 
-		controller.click( "#untitled-page-2" ).click( "#untitled-page-2 .tab-close-button" ).click( "#plus-button" )
+		click( "#untitled-page-2" ).click( "#untitled-page-2 .tab-close-button" ).click( "#plus-button" )
 				.click( "#untitled-page-1" ).click( "#untitled-page-1 .tab-close-button" );
 		assertThat( pageCount(), is( 2 ) );
+
 		assertEquals( "Untitled Page 3", pages.getChildAt( 0 ).getLabel() );
 		assertEquals( "Untitled Page 4", pages.getChildAt( 1 ).getLabel() );
 
@@ -58,20 +61,22 @@ public class StatisticTabsTest extends FxIntegrationTestBase
 		// which could change depending on which tests have run first
 
 		// test tab can be renamed
-		controller.click( "#untitled-page-3", MouseButton.SECONDARY ).click( "#tab-rename" ).type( "tabnewname" )
-				.type( KeyCode.ENTER ).sleep( 250 );
+		rightClick( "#untitled-page-3" ).click( "#tab-rename" ).type( "tabnewname" )
+				.type( ENTER ).sleep( 250 );
 
 		// tab ID cannot be changed
 		Node tabPaneHeaderSkin = getOrFail( "#untitled-page-3" );
 		Label label = (Label) tabPaneHeaderSkin.lookup( "Label" );
-		assertEquals( "tabnewname", label.getText() );
+		assertThat( label, hasLabel("tabnewname") );
 		assertEquals( "tabnewname", pages.getChildAt( 0 ).getLabel() );
 
 		// test tab can be closed through the menu
-		controller.click( "#untitled-page-4", MouseButton.SECONDARY ).click( "#tab-delete" ).sleep( 500 );
-		failIfExists( "#untitled-page-4" );
-		getOrFail( "#untitled-page-3" );
-		assertEquals( 1, pageCount() );
+		rightClick( "#untitled-page-4" ).click( "#tab-delete" );
+		waitUntil( "#untitled-page-4", is( not( visible() )) );
+
+		assertNodeExists( "#untitled-page-3" );
+		assertThat( pageCount(), is( 1 ) );
+
 		assertEquals( "tabnewname", pages.getChildAt( 0 ).getLabel() );
 	}
 

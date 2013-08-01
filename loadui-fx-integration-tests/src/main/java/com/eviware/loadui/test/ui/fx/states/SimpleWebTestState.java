@@ -17,20 +17,11 @@ package com.eviware.loadui.test.ui.fx.states;
 
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.ui.fx.FxTestState;
-import com.eviware.loadui.test.ui.fx.GUI;
-import com.eviware.loadui.ui.fx.util.test.GuiTest;
-import com.eviware.loadui.util.test.TestUtils;
 
-import java.util.concurrent.Callable;
-
+import static org.loadui.testfx.GuiTest.findAll;
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.WEB_PAGE_RUNNER;
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.findAll;
-
-import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
-import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.WEB_PAGE_RUNNER;
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.findAll;
-import static com.eviware.loadui.ui.fx.util.test.matchers.ContainsNodesMatcher.contains;
+import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
 import static org.junit.Assert.assertThat;
 
 public class SimpleWebTestState extends FxTestState

@@ -12,6 +12,7 @@ import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
+import org.slf4j.LoggerFactory;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -21,16 +22,20 @@ public class SystemLogView extends ListView<LoggingEventWrapper>
 {
 	public static final int MAX_NUMBER_OF_ROWS = 250;
 
+	protected static final org.slf4j.Logger log = LoggerFactory.getLogger( SystemLogView.class );
+
 	public SystemLogView()
 	{
 		SystemLogAppender appender = new SystemLogAppender();
 		Logger.getLogger( "com.eviware.loadui" ).addAppender( appender );
+		getStyleClass().add( "system-log" );
 	}
 
 	public void copyAllRowsToClipboard()
 	{
 		String allRowsAsText = extractContentToString();
 		copyToClipboard( allRowsAsText );
+		log.warn( "Copied all rows to system clipboard" );
 	}
 
 	private void copyToClipboard( String text )

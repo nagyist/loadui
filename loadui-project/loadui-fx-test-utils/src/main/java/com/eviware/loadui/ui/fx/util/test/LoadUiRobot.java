@@ -6,9 +6,13 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import javafx.scene.Node;
-import javafx.scene.control.*;
 import javafx.scene.control.Label;
 import javafx.stage.Window;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.junit.internal.matchers.TypeSafeMatcher;
+import org.loadui.testfx.GuiTest;
 
 import java.awt.*;
 import java.util.Queue;
@@ -16,15 +20,15 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.find;
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.findAll;
+import static org.loadui.testfx.GuiTest.find;
+import static org.loadui.testfx.GuiTest.findAll;
 
 public class LoadUiRobot
 {
 	public enum Component
 	{
-		FIXED_RATE_GENERATOR( "generators", "Fixed Rate 1" ), TABLE_LOG( "output", "Table Log 1" ), WEB_PAGE_RUNNER(
-			"runners", "Web Page Runner 1" );
+		FIXED_RATE_GENERATOR( "generators", "Fixed Rate" ), TABLE_LOG( "output", "Table Log" ), WEB_PAGE_RUNNER(
+			"runners", "Web Page Runner" );
 
 		public final String category;
 		public final String name;
@@ -68,7 +72,7 @@ public class LoadUiRobot
 		Window window = find( "#runners.category" ).getScene().getWindow();
 		int windowX = ( int )window.getX();
 		int windowY = ( int )window.getY();
-		controller.drag( predicateForIconOf( component ) )
+		controller.drag( matcherForIconOf( component ) )
 				.to( windowX + targetPoint.x, windowY + targetPoint.y );
 
 		TestUtils.awaitCondition( new Callable<Boolean>()
@@ -88,20 +92,26 @@ public class LoadUiRobot
 		return new ComponentHandle( inputs, outputs, controller, this );
 	}
 
-	public Predicate<Node> predicateForIconOf( final Component component )
+	public Matcher<Node> matcherForIconOf( final Component component )
 	{
-		return new Predicate<Node>()
-		{
-			@Override
-			public boolean apply( Node input )
-			{
-				if( input.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
-				{
-					return input.toString().equals( component.name );
-				}
-				return false;
-			}
-		};
+		 return new TypeSafeMatcher<Node>()
+		 {
+			 @Override
+			 public boolean matchesSafely( Node node )
+			 {
+				 if( node.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
+				 {
+					 return node.toString().equals( component.name );
+				 }
+				 return false;
+			 }
+
+			 @Override
+			 public void describeTo( Description description )
+			 {
+				 //To change body of implemented methods use File | Settings | File Templates.
+			 }
+		 };
 	}
 
 	public void expandCategoryOf( Component component )

@@ -4,7 +4,7 @@ import javafx.scene.Node;
 
 import java.util.Set;
 
-import static com.eviware.loadui.ui.fx.util.test.GuiTest.findAll;
+import static org.loadui.testfx.GuiTest.findAll;
 import static org.junit.Assert.assertTrue;
 
 class TableLogTestSupport

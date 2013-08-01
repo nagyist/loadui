@@ -28,6 +28,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.AnchorPaneBuilder;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Pane;
+import org.slf4j.LoggerFactory;
+
+import java.util.logging.Logger;
 
 public class SystemLogInspector implements Inspector
 {
@@ -44,7 +47,7 @@ public class SystemLogInspector implements Inspector
 				systemLog.copyAllRowsToClipboard();
 			}
 		} ).build();
-		Button clearButton = ButtonBuilder.create().text( "Clear" ).onAction( new EventHandler<ActionEvent>()
+		Button clearButton = ButtonBuilder.create().text( "Clear" ).id( "clear-system-log" ).onAction( new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle( ActionEvent actionEvent )

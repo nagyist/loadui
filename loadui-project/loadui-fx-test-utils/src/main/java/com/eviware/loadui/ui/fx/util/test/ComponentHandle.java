@@ -7,6 +7,7 @@ import java.util.Collection;
 import com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component;
 
 import javafx.scene.Node;
+import org.loadui.testfx.GuiTest;
 
 public class ComponentHandle
 {
