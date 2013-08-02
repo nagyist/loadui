@@ -17,6 +17,7 @@ package com.eviware.loadui.test.ui.fx;
 
 import com.eviware.loadui.api.testevents.MessageLevel;
 import com.eviware.loadui.api.testevents.TestEventManager;
+import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.FXAppLoadedState;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
@@ -41,34 +42,26 @@ import static org.loadui.testfx.Matchers.hasLabel;
 import static org.junit.Assert.*;
 
 @Category( IntegrationTest.class )
-public class NotificationPanelTest
+public class NotificationPanelTest extends FxIntegrationTestBase
 {
-	private static GuiTest controller;
-
-	@BeforeClass
-	public static void enterState() throws Exception
+	@Override
+	public TestState getStartingState()
 	{
-		ProjectLoadedWithoutAgentsState.STATE.enter();
-		controller = GUI.getController();
-	}
-
-	@AfterClass
-	public static void cleanup()
-	{
-		controller = null;
-		ProjectLoadedWithoutAgentsState.STATE.getParent().enter();
+		return ProjectLoadedWithoutAgentsState.STATE;
 	}
 
 	@Before
 	public void onStart() throws Exception
 	{
+		// we must re-enter this state every time because some tests will go to another state
+		ProjectLoadedWithoutAgentsState.STATE.enter();
 		try
 		{
 			waitUntilNotVisible( notificationPanel() );
 		}
 		catch( TimeoutException te )
 		{
-			controller.click( "#hide-notification-panel" );
+			click( "#hide-notification-panel" );
 			waitUntilNotVisible( notificationPanel() );
 		}
 	}
@@ -88,7 +81,7 @@ public class NotificationPanelTest
 		assertNodeExists( "#notification-text" );
 		assertNodeExists( hasLabel( "A message" ) );
 
-		controller.click( "#hide-notification-panel" );
+		click( "#hide-notification-panel" );
 
 		waitUntilNotVisible( panelNode );
 	}
@@ -101,7 +94,7 @@ public class NotificationPanelTest
 
 		sendMsgToNotificationPanel( "A message" );
 
-		controller.sleep( 500 );
+		sleep( 500 );
 
 		sendMsgToNotificationPanel( "Second message" );
 
@@ -127,7 +120,7 @@ public class NotificationPanelTest
 
 		assertEquals( "A message", msgLabel.getText() );
 		assertEquals( "2", msgCountLabel.getText() );
-		controller.click( "#hide-notification-panel" );
+		click( "#hide-notification-panel" );
 
 	}
 
@@ -150,7 +143,7 @@ public class NotificationPanelTest
 		assertTrue( textNodes.iterator().next() instanceof Label );
 		assertEquals( "A message", ( ( Label )textNodes.iterator().next() ).getText() );
 
-		controller.click( "#hide-notification-panel" );
+		click( "#hide-notification-panel" );
 
 		waitUntilNotVisible( panelNode );
 
@@ -166,7 +159,7 @@ public class NotificationPanelTest
 
 		Node panelNode = notificationPanel();
 
-		controller.click( "#statsTab" ).click( "#statsTab .graphic" );
+		click( "#statsTab" ).click( "#statsTab .graphic" );
 
 		class DetachedAnalysisViewHolder
 		{
@@ -194,7 +187,7 @@ public class NotificationPanelTest
 		assertFalse( panelNode.isVisible() );
 		assertFalse( clonedPanelNode.isVisible() );
 
-		controller.move( 200, 200 );
+		move( 200, 200 );
 
 		sendMsgToNotificationPanel( "A message" );
 
@@ -213,13 +206,13 @@ public class NotificationPanelTest
 		assertTrue( textNodes.iterator().next() instanceof Label );
 		assertEquals( "A message", ( ( Label )textNodes.iterator().next() ).getText() );
 
-		controller.click( "#hide-notification-panel" );
+		click( "#hide-notification-panel" );
 
 		waitUntilNotVisible( panelNode );
 
 		assertFalse( panelNode.isVisible() );
 		assertFalse( clonedPanelNode.isVisible() );
-		controller.closeCurrentWindow();
+		closeCurrentWindow();
 
 	}
 
@@ -239,7 +232,7 @@ public class NotificationPanelTest
 
 		waitUntilVisible( panelNode );
 
-		controller.click( getOrFail( "#show-system-log" ) );
+		click( getOrFail( "#show-system-log" ) );
 
 		TestUtils.awaitCondition( new Callable<Boolean>()
 		{
@@ -254,9 +247,9 @@ public class NotificationPanelTest
 		assertTrue( ( ( Region )inspectorView ).getHeight() > 150 );
 
 		// hide the inspector view so it won't break other tests
-		controller.move( "#Assertions" ).moveBy( 400, 0 ).doubleClick();
+		move( "#Assertions" ).moveBy( 400, 0 ).drag( "#Assertions" ).by( 0, 400 ).drop();
 
-		controller.click( "#hide-notification-panel" );
+		click( "#hide-notification-panel" );
 
 		waitUntilNotVisible( panelNode );
 
@@ -275,7 +268,7 @@ public class NotificationPanelTest
 		waitUntilVisible( panelNode );
 
 		// find position of notification panel, close it, then put mouse just below it
-		controller.move( "#hide-notification-panel" ).click().moveBy( 0, 150 );
+		move( "#hide-notification-panel" ).click().moveBy( 0, 150 );
 
 		waitUntilNotVisible( panelNode );
 
@@ -284,15 +277,15 @@ public class NotificationPanelTest
 		waitUntilVisible( panelNode );
 
 		// put mouse on notification panel and stay there for a while
-		controller.move( "#hide-notification-panel" ).sleep( 5000 );
+		move( "#hide-notification-panel" ).sleep( 5000 );
 		assertTrue( panelNode.isVisible() );
 
 		// if moving out and going back quickly, panel should still be visible
-		controller.moveBy( 0, 150 ).moveBy( 0, -150 ).sleep( 1000 );
+		moveBy( 0, 150 ).moveBy( 0, -150 ).sleep( 1000 );
 		assertTrue( panelNode.isVisible() );
 
 		// now go away and let the panel vanish
-		controller.moveBy( 0, 150 );
+		moveBy( 0, 150 );
 
 		waitUntilNotVisible( panelNode );
 

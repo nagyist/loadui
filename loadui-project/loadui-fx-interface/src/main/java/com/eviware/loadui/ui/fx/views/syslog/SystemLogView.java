@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.slf4j.LoggerFactory;
 
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.StringTokenizer;
@@ -28,6 +29,7 @@ public class SystemLogView extends ListView<LoggingEventWrapper>
 	{
 		SystemLogAppender appender = new SystemLogAppender();
 		Logger.getLogger( "com.eviware.loadui" ).addAppender( appender );
+		System.setErr(new PrintStream(new LoggingOutputStream( Logger.getLogger( "com.eviware.loadui" ) ,Level.ERROR),true));
 		getStyleClass().add( "system-log" );
 	}
 

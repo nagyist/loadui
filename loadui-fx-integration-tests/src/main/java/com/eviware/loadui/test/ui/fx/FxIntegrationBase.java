@@ -2,16 +2,13 @@ package com.eviware.loadui.test.ui.fx;
 
 import com.eviware.loadui.ui.fx.util.test.ComponentHandle;
 import com.eviware.loadui.ui.fx.util.test.LoadUiRobot;
-import org.loadui.testfx.GuiTest;
 import com.eviware.loadui.util.test.TestUtils;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
+import org.loadui.testfx.GuiTest;
 
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-
-import static org.loadui.testfx.GuiTest.findAll;
 
 /**
  * @Author Henrik
@@ -66,10 +63,10 @@ public class FxIntegrationBase extends GuiTest
 
 	public KnobHandle turnKnobIn( LoadUiRobot.Component component )
 	{
-		Node componentNode = robot.getComponentNode( component );
-		Set<Node> knobs = findAll( ".knob", componentNode );
-		System.out.println( "Found " + knobs.size() + " knobs: " + knobs );
-		return new KnobHandle( knobs.iterator().next() );
+		final Node componentNode = robot.getComponentNode( component );
+		System.out.println( "Component node: " + componentNode );
+		Node knob = find( ".knob", componentNode );
+		return new KnobHandle( knob );
 	}
 
 	public class KnobHandle

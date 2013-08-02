@@ -139,20 +139,24 @@ public class LoadUiRobot
 	{
 		if( optionalName.length > 0 )
 		{
-			return findComponentByName( optionalName[0] );
-		} else {
-			return findComponentByName( component.name );
+			return findComponentByName( optionalName[0], true );
+		}
+		else
+		{
+			return findComponentByName( component.name, false );
 		}
 	}
 
-	private Node findComponentByName( String name )
+	private Node findComponentByName( String name, boolean exactMatch )
 	{
 		for( Node compNode : findAll( ".canvas-object-view" ) )
 		{
 			Set<Node> textLabels = findAll( "Label", find( "#topBar", compNode ) );
 			for( Node label : textLabels )
 			{
-				if( ( ( Label )label ).getText().equals( name ) )
+				String componentLabel = ( ( Label )label ).getText();
+				boolean foundMatch = exactMatch ? componentLabel.equals( name ) : componentLabel.startsWith( name );
+				if( foundMatch )
 				{
 					return compNode;
 				}
