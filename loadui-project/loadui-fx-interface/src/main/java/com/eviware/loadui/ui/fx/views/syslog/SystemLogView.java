@@ -1,5 +1,6 @@
 package com.eviware.loadui.ui.fx.views.syslog;
 
+import com.google.common.base.Strings;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -11,6 +12,7 @@ import javafx.scene.input.ClipboardContent;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 import org.apache.log4j.spi.LoggingEvent;
 import org.slf4j.LoggerFactory;
 
@@ -21,15 +23,15 @@ import java.util.StringTokenizer;
 
 public class SystemLogView extends ListView<LoggingEventWrapper>
 {
-	public static final int MAX_NUMBER_OF_ROWS = 250;
+	public static final int MAX_NUMBER_OF_ROWS = 200;
 
 	protected static final org.slf4j.Logger log = LoggerFactory.getLogger( SystemLogView.class );
 
 	public SystemLogView()
 	{
-		SystemLogAppender appender = new SystemLogAppender();
-		Logger.getLogger( "com.eviware.loadui" ).addAppender( appender );
-		System.setErr(new PrintStream(new LoggingOutputStream( Logger.getLogger( "com.eviware.loadui" ) ,Level.ERROR),true));
+		Logger.getLogger( "com.eviware.loadui" ).addAppender( new SystemLogAppender() );
+		Logger.getLogger( "sys.err" ).addAppender( new SysErrorAppender() );
+		System.setErr(new PrintStream(new LoggingOutputStream( Logger.getLogger( "sys.err" ) ,Level.ERROR),true));
 		getStyleClass().add( "system-log" );
 	}
 
@@ -53,7 +55,7 @@ public class SystemLogView extends ListView<LoggingEventWrapper>
 		StringBuilder sb = new StringBuilder();
 		for( LoggingEventWrapper eventWrapper : getItems() )
 		{
-			sb.append( eventWrapper.toString() );
+			sb.append( eventWrapper.toString() ).append( System.getProperty("line.separator") );
 		}
 		return sb.toString();
 	}
@@ -98,6 +100,12 @@ public class SystemLogView extends ListView<LoggingEventWrapper>
 		setContextMenu( ContextMenuBuilder.create().items( copyItem, copyAllItem, clearItem ).build() );
 	}
 
+	private void limitNumberOfRows()
+	{
+		while( getItems().size() > MAX_NUMBER_OF_ROWS )
+			getItems().remove( 0 );
+	}
+
 	class SystemLogAppender extends AppenderSkeleton
 	{
 		SystemLogAppender()
@@ -113,6 +121,7 @@ public class SystemLogView extends ListView<LoggingEventWrapper>
 				@Override
 				public void run()
 				{
+
 					LoggingEventWrapper loggingEventWrapper = new LoggingEventWrapper( event );
 
 					if( event.getThrowableInformation() != null )
@@ -129,17 +138,47 @@ public class SystemLogView extends ListView<LoggingEventWrapper>
 						loggingEventWrapper.addAdditionalInfo( sw.toString() );
 					}
 
-					getItems().add( 0, loggingEventWrapper );
+					getItems().add( loggingEventWrapper );
 
 					limitNumberOfRows();
 				}
 			} );
 		}
 
-		private void limitNumberOfRows()
+		@Override
+		public void close()
 		{
-			while( getItems().size() > MAX_NUMBER_OF_ROWS )
-				getItems().remove( getItems().size() - 1 );
+			// Nothing to do.
+		}
+
+		@Override
+		public boolean requiresLayout()
+		{
+			return false;
+		}
+	}
+
+	class SysErrorAppender extends AppenderSkeleton
+	{
+		@Override
+		protected void append( final LoggingEvent event )
+		{
+			if( event.getMessage().toString().replace( "\r\n", "" ).equals( "" ) )
+			{
+				return;
+			}
+
+			Platform.runLater( new Runnable()
+			{
+				@Override
+				public void run()
+				{
+
+					LoggingEventWrapper loggingEventWrapper = new LoggingEventWrapper( event );
+					getItems().add( loggingEventWrapper );
+					limitNumberOfRows();
+				}
+			} );
 		}
 
 		@Override

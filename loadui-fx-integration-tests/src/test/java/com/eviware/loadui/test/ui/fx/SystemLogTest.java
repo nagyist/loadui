@@ -28,7 +28,7 @@ public class SystemLogTest extends GuiTest
 	{
 		doubleClick( "System Log" );
 
-		click( "Copy All" );
+		click( "Clear").click( "Copy All" );
 
 		assertNodeExists( hasLabel( containsString( "Copied all rows to system clipboard" ) ) );
 
@@ -43,14 +43,14 @@ public class SystemLogTest extends GuiTest
 		generateALotOfMessages();
 
 		ListView<?> systemLog = find( ".system-log" );
-		assertThat( systemLog.getItems().size(), is(250) );
+		assertThat( systemLog.getItems().size(), is(200) );
 
 		doubleClick( "System Log" );
 	}
 
 	private void generateALotOfMessages()
 	{
-		for( int i=0; i<300; i++ )
+		for( int i=0; i<210; i++ )
 		{
 			click( "Copy All" );
 		}
