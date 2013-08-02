@@ -27,7 +27,6 @@ import com.eviware.loadui.ui.fx.views.analysis.FxExecutionsInfo;
 import com.eviware.loadui.ui.fx.views.window.MainWindowView;
 import com.eviware.loadui.ui.fx.views.workspace.GettingStartedDialog;
 import com.eviware.loadui.ui.fx.views.workspace.NewVersionDialog;
-import com.eviware.loadui.util.NewVersionChecker;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -113,7 +112,7 @@ public class MainWindow
 				stage.setScene( SceneBuilder.create().stylesheets( LoaduiFXConstants.getLoaduiStylesheets() )
 						.root( mainView ).build() );
 
-				installNewVersionChecker();
+				installOnStartupPopupDialogs();
 
 				stage.show();
 
@@ -126,7 +125,7 @@ public class MainWindow
 		} );
 	}
 
-	private void installNewVersionChecker()
+	private void installOnStartupPopupDialogs()
 	{
 		stage.showingProperty().addListener( new InvalidationListener()
 		{
