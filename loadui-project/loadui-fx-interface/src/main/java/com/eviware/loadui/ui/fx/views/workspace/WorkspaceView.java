@@ -184,51 +184,6 @@ public class WorkspaceView extends StackPane
 			}
 		} );
 		webView.getEngine().load( props.getProperty( "starter.page.url" ) + "?version=" + LoadUI.version() );
-
-		initGettingStartedWizard();
-	}
-
-	private void initGettingStartedWizard()
-	{
-		if( workspace.getAttribute( GettingStartedDialog.SHOW_GETTING_STARTED, "true" ).equals( "true" ) )
-		{
-			sceneProperty().addListener( new ChangeListener<Scene>()
-			{
-				@Override
-				public void changed( ObservableValue<? extends Scene> sceneProperty, Scene oldScene, Scene newScene )
-				{
-					if( newScene != null )
-					{
-						sceneProperty.removeListener( this );
-						newScene.windowProperty().addListener( new ChangeListener<Window>()
-						{
-							@Override
-							public void changed( ObservableValue<? extends Window> windowProperty, Window oldWindow,
-									final Window newWindow )
-							{
-								windowProperty.removeListener( this );
-								newWindow.addEventHandler( WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>()
-								{
-									@Override
-									public void handle( WindowEvent event )
-									{
-										newWindow.removeEventHandler( WindowEvent.WINDOW_SHOWN, this );
-										Platform.runLater( new Runnable()
-										{
-											@Override
-											public void run()
-											{
-												gettingStarted();
-											}
-										} );
-									}
-								} );
-							}
-						} );
-					}
-				}
-			} );
-		}
 	}
 
 	public ToolBox<Label> getToolbox()
@@ -333,6 +288,7 @@ public class WorkspaceView extends StackPane
 		UIUtils.openInExternalBrowser( HELPER_PAGE_URL );
 	}
 
+	@FXML
 	public void gettingStarted()
 	{
 		new GettingStartedDialog( workspace, WorkspaceView.this ).show();

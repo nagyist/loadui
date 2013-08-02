@@ -15,16 +15,6 @@
  */
 package com.eviware.loadui.ui.fx;
 
-import com.eviware.loadui.ui.fx.views.workspace.NewVersionDialog;
-import com.eviware.loadui.util.NewVersionChecker;
-import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
-import javafx.event.EventHandler;
-import javafx.scene.SceneBuilder;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.model.WorkspaceItem;
 import com.eviware.loadui.api.model.WorkspaceProvider;
@@ -35,6 +25,21 @@ import com.eviware.loadui.ui.fx.api.intent.BlockingTask;
 import com.eviware.loadui.ui.fx.api.intent.DeleteTask;
 import com.eviware.loadui.ui.fx.views.analysis.FxExecutionsInfo;
 import com.eviware.loadui.ui.fx.views.window.MainWindowView;
+import com.eviware.loadui.ui.fx.views.workspace.GettingStartedDialog;
+import com.eviware.loadui.ui.fx.views.workspace.NewVersionDialog;
+import com.eviware.loadui.util.NewVersionChecker;
+import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.event.EventHandler;
+import javafx.scene.Node;
+import javafx.scene.SceneBuilder;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+
+import static com.eviware.loadui.ui.fx.views.workspace.GettingStartedDialog.SHOW_GETTING_STARTED;
+import static com.eviware.loadui.util.NewVersionChecker.VersionInfo;
+import static com.eviware.loadui.util.NewVersionChecker.checkForNewVersion;
 
 public class MainWindow
 {
@@ -128,9 +133,15 @@ public class MainWindow
 			@Override
 			public void invalidated( Observable observable )
 			{
-				final NewVersionChecker.VersionInfo newVersion = NewVersionChecker.checkForNewVersion( workspaceProvider.getWorkspace() );
+				WorkspaceItem workspace = workspaceProvider.getWorkspace();
+				Node rootNode = stage.getScene().getRoot();
+				final VersionInfo newVersion = checkForNewVersion( workspace );
+
 				if( newVersion != null )
-					new NewVersionDialog(stage.getScene().getRoot(), newVersion).show();
+					new NewVersionDialog( rootNode, newVersion).show();
+				else if ( "true".equals( workspace.getAttribute( SHOW_GETTING_STARTED, "true" ) ) )
+					new GettingStartedDialog( workspace, rootNode ).show();
+
 				stage.showingProperty().removeListener( this );
 			}
 		} );
