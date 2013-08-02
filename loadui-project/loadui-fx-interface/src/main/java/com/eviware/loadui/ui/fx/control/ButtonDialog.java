@@ -40,7 +40,6 @@ public class ButtonDialog extends Dialog
 	{
 		super( owner, header );
 
-		//TODO: Replace with CSS.
 		Label headerLabel = LabelBuilder.create().font( font( null, FontWeight.BOLD, 14 ) ).text( header ).build();
 
 		super.getItems().setAll( headerLabel, itemPane, buttonRow );

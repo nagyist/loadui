@@ -15,32 +15,6 @@
  */
 package com.eviware.loadui.components.soapui;
 
-import java.awt.GraphicsEnvironment;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
-import javafx.application.Platform;
-import javafx.scene.Node;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
-import org.apache.xmlbeans.XmlException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.component.ComponentContext.Scope;
@@ -68,14 +42,8 @@ import com.eviware.loadui.components.soapui.testStepsTable.TestStepsTableModel;
 import com.eviware.loadui.components.soapui.utils.SoapUiProjectUtils;
 import com.eviware.loadui.impl.component.ActivityStrategies;
 import com.eviware.loadui.impl.component.categories.RunnerBase;
-import com.eviware.loadui.impl.layout.ActionLayoutComponentImpl;
-import com.eviware.loadui.impl.layout.LayoutComponentImpl;
-import com.eviware.loadui.impl.layout.LayoutContainerImpl;
-import com.eviware.loadui.impl.layout.PropertyLayoutComponentImpl;
-import com.eviware.loadui.impl.layout.SeparatorLayoutComponentImpl;
-import com.eviware.loadui.impl.layout.SettingsLayoutContainerImpl;
+import com.eviware.loadui.impl.layout.*;
 import com.eviware.loadui.integration.SoapUIProjectLoader;
-import com.eviware.loadui.ui.fx.JavaFXActivator;
 import com.eviware.soapui.SoapUIExtensionClassLoader;
 import com.eviware.soapui.SoapUIExtensionClassLoader.SoapUIClassLoaderState;
 import com.eviware.soapui.config.LoadTestConfig;
@@ -92,19 +60,11 @@ import com.eviware.soapui.impl.wsdl.teststeps.datasource.DataSource;
 import com.eviware.soapui.model.settings.Settings;
 import com.eviware.soapui.model.support.ModelSupport;
 import com.eviware.soapui.model.support.TestRunListenerAdapter;
-import com.eviware.soapui.model.testsuite.LoadTestRunListener;
-import com.eviware.soapui.model.testsuite.SamplerTestStep;
-import com.eviware.soapui.model.testsuite.TestCase;
-import com.eviware.soapui.model.testsuite.TestCaseRunContext;
-import com.eviware.soapui.model.testsuite.TestCaseRunner;
-import com.eviware.soapui.model.testsuite.TestRunner;
+import com.eviware.soapui.model.testsuite.*;
 import com.eviware.soapui.model.testsuite.TestRunner.Status;
-import com.eviware.soapui.model.testsuite.TestStep;
-import com.eviware.soapui.model.testsuite.TestStepResult;
 import com.eviware.soapui.model.testsuite.TestStepResult.TestStepStatus;
 import com.eviware.soapui.settings.HttpSettings;
 import com.eviware.soapui.settings.WsdlSettings;
-import com.eviware.soapui.support.UISupport;
 import com.eviware.soapui.support.types.StringList;
 import com.eviware.soapui.support.types.StringToObjectMap;
 import com.google.common.base.Joiner;
@@ -115,14 +75,25 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.sun.javafx.PlatformUtil;
+import javafx.scene.Node;
+import org.apache.xmlbeans.XmlException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class SoapUISamplerComponent extends RunnerBase
 {
 	/**
 	 * Creates a real deep copy of a TestCaseConfig, since .copy() doesn't quite
 	 * do it.
-	 * 
+	 *
 	 * @param config
 	 * @return
 	 */
@@ -138,8 +109,7 @@ public class SoapUISamplerComponent extends RunnerBase
 		{
 			log.error( "Failed manual copy, using .copy() instead: ", e );
 			return ( TestCaseConfig )config.copy();
-		}
-		finally
+		} finally
 		{
 			state.restore();
 		}
@@ -197,7 +167,7 @@ public class SoapUISamplerComponent extends RunnerBase
 	private final OutputTerminal errorTerminal;
 	private final AtomicLong sampleIndex = new AtomicLong();
 	private final ActionLayoutComponentImpl runOnceAction;
-	private final ActionLayoutComponentImpl openInSoapUIAction;
+	private final LayoutComponentImpl openInSoapUIAction;
 
 	private final GeneralSettings generalSettings;
 
@@ -282,7 +252,7 @@ public class SoapUISamplerComponent extends RunnerBase
 
 		box = new LayoutContainerImpl( "wrap 3, ins 0", "", "align top", "" );
 
-		if( !LoadUI.isHeadless() ) 
+		if( !LoadUI.isHeadless() )
 		{
 			box.add( testStepsTableModel.buildLayout() );
 		}
@@ -291,12 +261,14 @@ public class SoapUISamplerComponent extends RunnerBase
 			log.debug( "Skipping creation of SoapUI Runner's TestStepsTable, since in headless mode." );
 		}
 
-		openInSoapUIAction = MiscLayoutComponents.buildOpenInSoapUiButton( projectSelector.getProjectFileName(),
-				projectSelector.getTestSuite(), projectSelector.getTestCase() );
-		openInSoapUIAction.setEnabled( soapuiTestCase != null );
+		openInSoapUIAction = MiscLayoutComponents.buildOpenInSoapUiButton(
+				projectSelector.getProjectFileName(),
+				projectSelector.getTestSuite(),
+				projectSelector.getTestCase() );
+
 		box.add( openInSoapUIAction );
 
-		runOnceAction = new ActionLayoutComponentImpl( ImmutableMap.<String, Object> builder() //
+		runOnceAction = new ActionLayoutComponentImpl( ImmutableMap.<String, Object>builder() //
 				.put( ActionLayoutComponentImpl.LABEL, "Run Once" ) //
 				.put( ActionLayoutComponentImpl.ACTION, new Runnable()
 				{
@@ -311,7 +283,7 @@ public class SoapUISamplerComponent extends RunnerBase
 		box.add( runOnceAction );
 
 		ActionLayoutComponentImpl abortRunningAction = new ActionLayoutComponentImpl( ImmutableMap
-				.<String, Object> builder() //
+				.<String, Object>builder() //
 				.put( ActionLayoutComponentImpl.LABEL, "Abort Running TestCases" ) //
 				.put( ActionLayoutComponentImpl.ACTION, new Runnable()
 				{
@@ -334,11 +306,11 @@ public class SoapUISamplerComponent extends RunnerBase
 
 		wrapperBox.add( metrics );
 
-		LayoutContainer compactLayout = new LayoutContainerImpl( Collections.<String, Object> emptyMap() );
+		LayoutContainer compactLayout = new LayoutContainerImpl( Collections.<String, Object>emptyMap() );
 		compactLayout.add( metrics );
 		context.setCompactLayout( compactLayout );
 
-		wrapperBox.add( new ActionLayoutComponentImpl( ImmutableMap.<String, Object> builder()
+		wrapperBox.add( new ActionLayoutComponentImpl( ImmutableMap.<String, Object>builder()
 				.put( ActionLayoutComponentImpl.LABEL, "Reset" )
 				.put( PropertyLayoutComponentImpl.CONSTRAINTS, "align right" )
 				.put( ActionLayoutComponentImpl.ACTION, new Runnable()
@@ -405,13 +377,13 @@ public class SoapUISamplerComponent extends RunnerBase
 	private SettingsLayoutContainer generateAdvancedTab()
 	{
 		SettingsLayoutContainer advancedSettings = new SettingsLayoutContainerImpl( "Advanced", "", "", "align top", "" );
-		advancedSettings.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object> builder()
-		//
+		advancedSettings.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object>builder()
+				//
 				.put( PropertyLayoutComponentImpl.PROPERTY, concurrentSamplesProperty ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "Max concurrent requests" ) //
 				.build() ) );
-		advancedSettings.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object> builder()
-		//
+		advancedSettings.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object>builder()
+				//
 				.put( PropertyLayoutComponentImpl.PROPERTY, maxQueueSizeProperty ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "Max queue size" ) //
 				.build() ) );
@@ -484,7 +456,7 @@ public class SoapUISamplerComponent extends RunnerBase
 					}
 				}
 				setContextClassLoader( openInSoapUIAction.getClass().getClassLoader() );
-				UISupport.showErrorMessage( message );
+				log.error( message );
 			}
 		}.start();
 	}
@@ -767,8 +739,7 @@ public class SoapUISamplerComponent extends RunnerBase
 				{
 					getContext().getCounter( CanvasItem.ASSERTION_COUNTER ).increment();
 				}
-			}
-			finally
+			} finally
 			{
 				if( testCase != null )
 				{
@@ -874,7 +845,7 @@ public class SoapUISamplerComponent extends RunnerBase
 			loader.removeProjectUpdateListener( this );
 
 			for( WsdlTestCaseRunner runnerToCancel : runners )
-				runnerToCancel.cancel( "Releasing SoapUIcomponent in loadUI" );
+				runnerToCancel.cancel( "Releasing SoapUIcomponent in LoadUI" );
 
 			for( WsdlTestCase tc : testCasePool )
 				tc.release();
@@ -914,9 +885,8 @@ public class SoapUISamplerComponent extends RunnerBase
 			}
 			catch( Exception e )
 			{
-				log.debug( "Error reloading soapUI project: {} ", e );
-			}
-			finally
+				log.debug( "Error reloading SoapUI project: {} ", e );
+			} finally
 			{
 				state.restore();
 			}
@@ -929,7 +899,7 @@ public class SoapUISamplerComponent extends RunnerBase
 				projectSelector.setTestSuites( new String[0] );
 				return;
 			}
-			log.debug( "Setting soapUI TestSuite to {}", testSuiteName );
+			log.debug( "Setting SoapUI TestSuite to {}", testSuiteName );
 
 			SoapUIClassLoaderState state = SoapUIExtensionClassLoader.ensure();
 			try
@@ -960,8 +930,7 @@ public class SoapUISamplerComponent extends RunnerBase
 			catch( Exception e )
 			{
 				log.debug( "Error when setting TestSuite {}", e );
-			}
-			finally
+			} finally
 			{
 				state.restore();
 			}
@@ -991,7 +960,7 @@ public class SoapUISamplerComponent extends RunnerBase
 				return;
 			}
 
-			log.debug( "Setting soapUI TestCase to {}", testCaseName );
+			log.debug( "Setting SoapUI TestCase to {}", testCaseName );
 
 			SoapUIClassLoaderState state = SoapUIExtensionClassLoader.ensure();
 
@@ -1030,13 +999,10 @@ public class SoapUISamplerComponent extends RunnerBase
 			catch( Exception e )
 			{
 				log.error( "An error occured when trying to set TestCase.", e );
-			}
-			finally
+			} finally
 			{
 				state.restore();
 				getContext().setInvalid( soapuiTestCase == null );
-				if( openInSoapUIAction != null )
-					openInSoapUIAction.setEnabled( soapuiTestCase != null );
 				if( runOnceAction != null )
 					runOnceAction.setEnabled( soapuiTestCase != null );
 			}
@@ -1062,7 +1028,7 @@ public class SoapUISamplerComponent extends RunnerBase
 					}
 				} ) );
 			}
-			testCaseRevisionCount++ ;
+			testCaseRevisionCount++;
 		}
 
 		private synchronized void applyDisabledStateToTestSteps()
@@ -1122,7 +1088,7 @@ public class SoapUISamplerComponent extends RunnerBase
 					for( WsdlTestCaseRunner r : runners )
 					{
 						if( r.isRunning() )
-							r.cancel( "Releasing component in loadUI" );
+							r.cancel( "Releasing component in LoadUI" );
 					}
 				}
 				// wait for runners to stop
@@ -1132,7 +1098,7 @@ public class SoapUISamplerComponent extends RunnerBase
 					try
 					{
 						Thread.sleep( 1000 );
-						limit-- ;
+						limit--;
 					}
 					catch( InterruptedException e )
 					{
@@ -1164,8 +1130,7 @@ public class SoapUISamplerComponent extends RunnerBase
 				catch( Exception e )
 				{
 					e.printStackTrace();
-				}
-				finally
+				} finally
 				{
 					state.restore();
 				}
@@ -1235,8 +1200,8 @@ public class SoapUISamplerComponent extends RunnerBase
 					{
 						if( runnerToCancel.isRunning() )
 						{
-							runnerToCancel.cancel( "Canceled by loadUI" );
-							count++ ;
+							runnerToCancel.cancel( "Canceled by LoadUI" );
+							count++;
 						}
 					}
 					catch( Exception e )
@@ -1246,8 +1211,7 @@ public class SoapUISamplerComponent extends RunnerBase
 				}
 			}
 			runners.clear();
-		}
-		finally
+		} finally
 		{
 			state.restore();
 		}

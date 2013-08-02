@@ -15,13 +15,11 @@
  */
 package com.eviware.loadui.util.soapui;
 
-import gnu.cajo.invoke.Remote;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.model.WorkspaceItem;
 import com.eviware.loadui.api.model.WorkspaceProvider;
+import gnu.cajo.invoke.Remote;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CajoClient
 {
@@ -104,7 +102,7 @@ public class CajoClient
 				+ server
 				+ ":"
 				+ workspaceProviderRegistry.getWorkspace().getProperty( WorkspaceItem.SOAPUI_CAJO_PORT_PROPERTY )
-						.getStringValue() + "/" + itemName;
+				.getStringValue() + "/" + itemName;
 	}
 
 	public String getServer()
@@ -159,5 +157,18 @@ public class CajoClient
 		String soapUIPath = workspaceProviderRegistry.getWorkspace().getProperty( WorkspaceItem.SOAPUI_PATH_PROPERTY )
 				.getStringValue();
 		SoapUIStarter.start( soapUIPath );
+	}
+
+	public void openTestCase( String projectFileName, String testSuiteName, String testCaseName )
+	{
+		if( !CajoClient.getInstance().testConnection() )
+		{
+			CajoClient.getInstance().startSoapUI();
+		}
+		if( CajoClient.getInstance().testConnection() )
+		{
+			CajoClient.getInstance().invoke( "openTestCase",
+					new String[] { projectFileName, testSuiteName, testCaseName } );
+		}
 	}
 }
