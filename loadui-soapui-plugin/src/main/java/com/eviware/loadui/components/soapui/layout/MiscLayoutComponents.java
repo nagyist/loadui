@@ -15,7 +15,7 @@
  */
 package com.eviware.loadui.components.soapui.layout;
 
-import com.eviware.loadui.components.soapui.SoapUIMissingPathDialog;
+import com.eviware.loadui.components.soapui.FilePickerDialog;
 import com.eviware.loadui.impl.layout.LayoutComponentImpl;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import com.eviware.loadui.util.StringUtils;
@@ -55,7 +55,7 @@ public class MiscLayoutComponents
 							@Override
 							public void run()
 							{
-								final SoapUIMissingPathDialog confirm = new SoapUIMissingPathDialog( btn );
+								final FilePickerDialog confirm = new FilePickerDialog( btn, "You are missing the path to the SoapUI executable", "Select a SoapUI executable", FilePickerDialog.getExtensionFilterForSoapUIExecutableByPlatform() );
 								confirm.show();
 
 								confirm.setOnConfirm( new EventHandler<ActionEvent>()
@@ -65,7 +65,7 @@ public class MiscLayoutComponents
 									{
 										confirm.hide();
 
-										String newPath = confirm.soapUIExecutableProperty().get().getAbsolutePath();
+										String newPath = confirm.SelectedFileProperty().get().getAbsolutePath();
 										CajoClient.getInstance().setPathToSoapUIBat( newPath );
 
 										btn.fire();

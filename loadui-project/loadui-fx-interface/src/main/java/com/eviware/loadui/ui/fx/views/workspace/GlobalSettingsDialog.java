@@ -46,10 +46,6 @@ public class GlobalSettingsDialog
 				.field( "Path to SoapUI Executable",
 						workspace.getProperty( WorkspaceItem.SOAPUI_PATH_PROPERTY ) ).build();
 
-		SettingsTab another = Builder.create( "Another" ).build();
-
-		SettingsTab fourth = Builder.create( "Fourth" ).build();
-
-		return new SettingsDialog( parent, "Global settings", Lists.newArrayList( generalTab, statsTab, soapUI, another, fourth ) );
+		return new SettingsDialog( parent, "Global settings", Lists.newArrayList( generalTab, statsTab, soapUI ) );
 	}
 }
