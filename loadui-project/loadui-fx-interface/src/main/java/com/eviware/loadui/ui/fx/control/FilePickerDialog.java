@@ -65,6 +65,10 @@ public class FilePickerDialog extends ConfirmationDialog
 		{
 			return new FileChooser.ExtensionFilter( "SoapUI executable", "soapui*.exe" );
 		}
+		else if( PlatformUtil.isMac() )
+		{
+			return new FileChooser.ExtensionFilter( "SoapUI Executable", "soapUI*.app");
+		}
 		else
 		{
 			return new FileChooser.ExtensionFilter( "SoapUI executable", "soapui*.sh" );
@@ -77,6 +81,10 @@ public class FilePickerDialog extends ConfirmationDialog
 		if( PlatformUtil.isWindows() )
 		{
 			return new FileChooser.ExtensionFilter( "Executable", "*.exe" );
+		}
+		else if( PlatformUtil.isMac() )
+		{
+			return new FileChooser.ExtensionFilter( "Executable", "*.app");
 		}
 		else
 		{
