@@ -15,7 +15,7 @@
  */
 package com.eviware.loadui.components.soapui.layout;
 
-import com.eviware.loadui.components.soapui.FilePickerDialog;
+import com.eviware.loadui.ui.fx.control.FilePickerDialog;
 import com.eviware.loadui.impl.layout.LayoutComponentImpl;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import com.eviware.loadui.util.StringUtils;
