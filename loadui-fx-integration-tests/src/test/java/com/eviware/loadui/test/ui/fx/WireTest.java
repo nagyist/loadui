@@ -17,6 +17,8 @@ package com.eviware.loadui.test.ui.fx;
 
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
 import org.loadui.testfx.GuiTest;
 import com.eviware.loadui.util.test.TestUtils;
 import com.google.common.base.Predicate;
@@ -40,16 +42,21 @@ import static org.junit.Assert.assertThat;
 @Category(IntegrationTest.class)
 public class WireTest extends GuiTest
 {
-	private static final Predicate<Node> CONDITION_COMPONENT = new Predicate<Node>()
+	private static final TypeSafeMatcher<Node> CONDITION_COMPONENT = new TypeSafeMatcher<Node>()
 	{
 		@Override
-		public boolean apply( Node input )
+		protected boolean matchesSafely( Node node )
 		{
-			if( input.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
+			if( node.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
 			{
-				return input.toString().equals( "Condition" );
+				return node.toString().equals( "Condition" );
 			}
 			return false;
+		}
+
+		@Override
+		public void describeTo( Description description )
+		{
 		}
 	};
 
@@ -64,25 +71,14 @@ public class WireTest extends GuiTest
 
 		controller.drag( "#Assertions" ).by( 0, 250 ).drop();
 
-		System.out.println( "Create Component 1" );
 		controller.click( "#flow.category .expander-button" ).drag( CONDITION_COMPONENT ).by( 100, -400 ).drop();
 
 		waitUntil( numberOf( ".canvas-object-view" ), is(1) );
 
-		TestUtils.awaitCondition( new Callable<Boolean>()
-		{
-			@Override
-			public Boolean call() throws Exception
-			{
-				return findAll( ".canvas-object-view" ).size() == 1;
-			}
-		} );
-
 		System.gc();
 		System.gc();
 		System.gc();
 
-		System.out.println( "Create Component 2" );
 		controller.click( "#flow.category .expander-button" ).drag( CONDITION_COMPONENT ).by( 250, -100 ).drop();
 		TestUtils.awaitCondition( new Callable<Boolean>()
 		{
