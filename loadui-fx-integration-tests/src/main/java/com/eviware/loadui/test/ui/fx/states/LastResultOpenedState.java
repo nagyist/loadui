@@ -17,7 +17,7 @@ package com.eviware.loadui.test.ui.fx.states;
 
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.ui.fx.GUI;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
+import org.loadui.testfx.GuiTest;
 import javafx.scene.Node;
 
 import java.util.Set;
@@ -42,7 +42,7 @@ public class LastResultOpenedState extends TestState
 	@Override
 	protected void exitToParent() throws Exception
 	{
-		Set<Node> resultViewSet = TestFX.findAll( ".result-view" );
+		Set<Node> resultViewSet = GuiTest.findAll( ".result-view" );
 		if( !resultViewSet.isEmpty() )
 		{
 			GUI.getController().closeCurrentWindow();

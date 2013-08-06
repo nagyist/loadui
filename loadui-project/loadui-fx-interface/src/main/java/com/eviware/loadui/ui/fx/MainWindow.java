@@ -15,12 +15,6 @@
  */
 package com.eviware.loadui.ui.fx;
 
-import javafx.application.Platform;
-import javafx.event.EventHandler;
-import javafx.scene.SceneBuilder;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.model.WorkspaceItem;
 import com.eviware.loadui.api.model.WorkspaceProvider;
@@ -31,12 +25,24 @@ import com.eviware.loadui.ui.fx.api.intent.BlockingTask;
 import com.eviware.loadui.ui.fx.api.intent.DeleteTask;
 import com.eviware.loadui.ui.fx.views.analysis.FxExecutionsInfo;
 import com.eviware.loadui.ui.fx.views.window.MainWindowView;
+import com.eviware.loadui.ui.fx.views.workspace.GettingStartedDialog;
+import com.eviware.loadui.ui.fx.views.workspace.NewVersionDialog;
+import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.event.EventHandler;
+import javafx.scene.Node;
+import javafx.scene.SceneBuilder;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+
+import static com.eviware.loadui.ui.fx.views.workspace.GettingStartedDialog.SHOW_GETTING_STARTED;
+import static com.eviware.loadui.util.NewVersionChecker.VersionInfo;
+import static com.eviware.loadui.util.NewVersionChecker.checkForNewVersion;
 
 public class MainWindow
 {
-
-	// Fullscreen doesn't seem to work, the property never changes.
-	private static final String FULLSCREEN = MainWindow.class.getName() + "@fullscreen";
+	private static final String FULLSCREEN = MainWindow.class.getName() + "@fullscreen"; // This is the OS X definition of fullscreen.
 	private static final String WINDOW_WIDTH = MainWindow.class.getName() + "@width";
 	private static final String WINDOW_HEIGHT = MainWindow.class.getName() + "@height";
 
@@ -105,11 +111,37 @@ public class MainWindow
 
 				stage.setScene( SceneBuilder.create().stylesheets( LoaduiFXConstants.getLoaduiStylesheets() )
 						.root( mainView ).build() );
+
+				installOnStartupPopupDialogs();
+
+				stage.show();
+
 				BlockingTask.install( stage.getScene() );
 				AbortableBlockingTask.install( stage.getScene() );
 				DeleteTask.install( stage.getScene() );
+			}
 
-				stage.show();
+
+		} );
+	}
+
+	private void installOnStartupPopupDialogs()
+	{
+		stage.showingProperty().addListener( new InvalidationListener()
+		{
+			@Override
+			public void invalidated( Observable observable )
+			{
+				WorkspaceItem workspace = workspaceProvider.getWorkspace();
+				Node rootNode = stage.getScene().getRoot();
+				final VersionInfo newVersion = checkForNewVersion( workspace );
+
+				if( newVersion != null )
+					new NewVersionDialog( rootNode, newVersion).show();
+				else if ( "true".equals( workspace.getAttribute( SHOW_GETTING_STARTED, "true" ) ) )
+					new GettingStartedDialog( workspace, rootNode ).show();
+
+				stage.showingProperty().removeListener( this );
 			}
 		} );
 	}

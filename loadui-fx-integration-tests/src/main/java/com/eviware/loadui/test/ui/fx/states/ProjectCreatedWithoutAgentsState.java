@@ -15,10 +15,12 @@
  */
 package com.eviware.loadui.test.ui.fx.states;
 
-import static com.eviware.loadui.ui.fx.util.test.TestFX.find;
+import static org.loadui.testfx.GuiTest.find;
+import static org.loadui.testfx.GuiTest.waitUntil;
+import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 import static com.eviware.loadui.util.test.TestUtils.awaitCondition;
-
-import java.util.concurrent.Callable;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.core.Is.is;
 
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
@@ -52,14 +54,7 @@ public class ProjectCreatedWithoutAgentsState extends TestState
 		GUI.getController().sleep( 2000 ).drag( "#newProjectIcon" ).to( projectCarousel ).type( "Project 1" )
 				.type( KeyCode.TAB ).type( "project-1.xml" ).click( ".check-box" ).click( "#default" );
 
-		awaitCondition( new Callable<Boolean>()
-		{
-			@Override
-			public Boolean call() throws Exception
-			{
-				return projectCarousel.lookup( ".project-ref-view" ) != null;
-			}
-		} );
+		waitUntil( ".project-ref-view", is( visible() ) );
 	}
 
 	@Override
@@ -70,14 +65,7 @@ public class ProjectCreatedWithoutAgentsState extends TestState
 				.click( ".confirmation-dialog #default" );
 		final Node projectCarousel = find( "#projectRefCarousel" );
 
-		awaitCondition( new Callable<Boolean>()
-		{
-			@Override
-			public Boolean call() throws Exception
-			{
-				return projectCarousel.lookup( ".project-ref-view" ) == null;
-			}
-		} );
+		waitUntil( ".project-ref-view", is( not( visible() ) ) );
 	}
 
 }

@@ -11,7 +11,7 @@ import static com.eviware.loadui.test.ui.fx.tablelog.TableLogTestSupport.tableRo
 import static com.eviware.loadui.test.ui.fx.tablelog.TableLogTestSupport.testRunStopsWithinLimit;
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.TABLE_LOG;
-import static com.eviware.loadui.ui.fx.util.test.matchers.EmptyMatcher.empty;
+import static org.loadui.testfx.matchers.EmptyMatcher.empty;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;

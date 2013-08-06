@@ -15,10 +15,12 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.concurrent.TimeUnit;
-
+import org.loadui.testfx.categories.TestFX;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
+import com.eviware.loadui.ui.fx.views.canvas.component.ComponentLayoutUtils;
+import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.SettableFuture;
 import javafx.application.Application;
 import javafx.scene.SceneBuilder;
 import javafx.scene.control.Label;
@@ -26,28 +28,24 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.stage.Stage;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.eviware.loadui.test.categories.GUITest;
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
-import com.eviware.loadui.ui.fx.views.canvas.component.ComponentLayoutUtils;
-import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.SettableFuture;
+import java.util.concurrent.TimeUnit;
 
-@Category( GUITest.class )
-public class OptionsSliderTest
+import static org.loadui.testfx.Matchers.hasLabel;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+@Category( TestFX.class )
+public class OptionsSliderTest extends GuiTest
 {
 	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();
 
 	private static OptionsSlider optionsSlider;
 	private static OptionsSlider imageOptionsSlider;
 	private static Stage stage;
-	private static TestFX controller;
 	private static Label label;
 
 	public static class OptionsSliderTestApp extends Application
@@ -79,7 +77,6 @@ public class OptionsSliderTest
 	@BeforeClass
 	public static void createWindow() throws Throwable
 	{
-		controller = TestFX.wrap( new FXScreenController() );
 		FXTestUtils.launchApp( OptionsSliderTestApp.class );
 		stage = stageFuture.get( 5, TimeUnit.SECONDS );
 		FXTestUtils.bringToFront( stage );
@@ -88,23 +85,24 @@ public class OptionsSliderTest
 	@Test
 	public void property_should_updateOnClick()
 	{
-		controller.click( "#two" );
+		click( "#two" );
 		assertTrue( "two".equals( stage.getTitle() ) );
-		controller.click( "#three" );
+		click( "#three" );
 		assertTrue( "three".equals( stage.getTitle() ) );
-		controller.click( "#two" );
+		click( "#two" );
 		assertTrue( "two".equals( stage.getTitle() ) );
-		controller.click( "#one" );
+		click( "#one" );
 		assertTrue( "one".equals( stage.getTitle() ) );
 	}
 
 	@Test
 	public void images_should_work()
 	{
-		controller.click( "#gauss" );
-		assertTrue( "gauss".equals( label.getText() ) );
-		controller.click( "#sine" );
-		assertTrue( "sine".equals( label.getText() ) );
+		click( "#gauss" );
+		assertThat( label, hasLabel( "gauss" ) );
+
+		click( "#sine" );
+		assertThat( label, hasLabel( "sine" ) );
 	}
 
 	private static ImageView createImage( String imageName )

@@ -21,7 +21,7 @@ import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.FXAppLoadedState;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
+import org.loadui.testfx.GuiTest;
 import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.test.TestUtils;
 import javafx.scene.Node;
@@ -35,13 +35,15 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static com.eviware.loadui.ui.fx.util.test.FXTestUtils.getOrFail;
+import static org.loadui.testfx.Assertions.assertNodeExists;
+import static org.loadui.testfx.FXTestUtils.getOrFail;
+import static org.loadui.testfx.GuiTest.waitUntil;
+import static org.loadui.testfx.Matchers.hasLabel;
 import static org.junit.Assert.*;
 
 @Category( IntegrationTest.class )
 public class NotificationPanelTest extends FxIntegrationTestBase
 {
-
 	@Override
 	public TestState getStartingState()
 	{
@@ -59,7 +61,7 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 		}
 		catch( TimeoutException te )
 		{
-			controller.click( hideNotificationPanelButton() );
+			click( "#hide-notification-panel" );
 			waitUntilNotVisible( notificationPanel() );
 		}
 	}
@@ -76,18 +78,12 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 
 		waitUntilVisible( panelNode );
 
-		assertTrue( panelNode.isVisible() );
-		Set<Node> textNodes = TestFX.findAll( "#notification-text", panelNode );
+		assertNodeExists( "#notification-text" );
+		assertNodeExists( hasLabel( "A message" ) );
 
-		assertFalse( textNodes.isEmpty() );
-		assertTrue( textNodes.iterator().next() instanceof Label );
-		assertEquals( "A message", ( ( Label )textNodes.iterator().next() ).getText() );
-		controller.click( hideNotificationPanelButton() );
+		click( "#hide-notification-panel" );
 
 		waitUntilNotVisible( panelNode );
-
-		assertFalse( panelNode.isVisible() );
-
 	}
 
 	@Test
@@ -98,15 +94,14 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 
 		sendMsgToNotificationPanel( "A message" );
 
-		controller.sleep( 500 );
+		sleep( 500 );
 
 		sendMsgToNotificationPanel( "Second message" );
 
 		waitUntilVisible( panelNode );
 
-		assertTrue( panelNode.isVisible() );
-		Set<Node> textNodes = TestFX.findAll( "#notification-text", panelNode );
-		Set<Node> msgCountNodes = TestFX.findAll( "#msgCount", panelNode );
+		Set<Node> textNodes = GuiTest.findAll( "#notification-text", panelNode );
+		Set<Node> msgCountNodes = GuiTest.findAll( "#msgCount", panelNode );
 
 		assertFalse( textNodes.isEmpty() );
 		assertTrue( textNodes.iterator().next() instanceof Label );
@@ -121,18 +116,11 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 
 		sendMsgToNotificationPanel( "Second message" );
 
-		TestUtils.awaitCondition( new Callable<Boolean>()
-		{
-			@Override
-			public Boolean call() throws Exception
-			{
-				return "A message".equals( msgLabel.getText() );
-			}
-		}, 1000 );
+		waitUntil( msgLabel, hasLabel( "A message" ) );
 
 		assertEquals( "A message", msgLabel.getText() );
 		assertEquals( "2", msgCountLabel.getText() );
-		controller.click( hideNotificationPanelButton() );
+		click( "#hide-notification-panel" );
 
 	}
 
@@ -149,14 +137,13 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 
 		waitUntilVisible( panelNode );
 
-		assertTrue( panelNode.isVisible() );
-		Set<Node> textNodes = TestFX.findAll( "#notification-text", panelNode );
+		Set<Node> textNodes = GuiTest.findAll( "#notification-text", panelNode );
 
 		assertFalse( textNodes.isEmpty() );
 		assertTrue( textNodes.iterator().next() instanceof Label );
 		assertEquals( "A message", ( ( Label )textNodes.iterator().next() ).getText() );
 
-		controller.click( hideNotificationPanelButton() );
+		click( "#hide-notification-panel" );
 
 		waitUntilNotVisible( panelNode );
 
@@ -172,7 +159,7 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 
 		Node panelNode = notificationPanel();
 
-		controller.click( "#statsTab" ).click( "#statsTab .graphic" );
+		click( "#statsTab" ).click( "#statsTab .graphic" );
 
 		class DetachedAnalysisViewHolder
 		{
@@ -184,7 +171,7 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 			@Override
 			public Boolean call() throws Exception
 			{
-				Set<Node> nodes = TestFX.findAll( ".detached-content" );
+				Set<Node> nodes = GuiTest.findAll( ".detached-content" );
 				boolean ok = nodes.size() == 1;
 				if( ok )
 					detachedHolder.content = nodes.iterator().next();
@@ -200,33 +187,32 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 		assertFalse( panelNode.isVisible() );
 		assertFalse( clonedPanelNode.isVisible() );
 
-		controller.move( 200, 200 );
+		move( 200, 200 );
 
 		sendMsgToNotificationPanel( "A message" );
 
 		waitUntilVisible( panelNode );
 
-		assertTrue( panelNode.isVisible() );
-		Set<Node> textNodes = TestFX.findAll( "#notification-text", panelNode );
+		Set<Node> textNodes = GuiTest.findAll( "#notification-text", panelNode );
 
 		assertFalse( textNodes.isEmpty() );
 		assertTrue( textNodes.iterator().next() instanceof Label );
 		assertEquals( "A message", ( ( Label )textNodes.iterator().next() ).getText() );
 
 		assertTrue( clonedPanelNode.isVisible() );
-		textNodes = TestFX.findAll( "#notification-text", clonedPanelNode );
+		textNodes = GuiTest.findAll( "#notification-text", clonedPanelNode );
 
 		assertFalse( textNodes.isEmpty() );
 		assertTrue( textNodes.iterator().next() instanceof Label );
 		assertEquals( "A message", ( ( Label )textNodes.iterator().next() ).getText() );
 
-		controller.click( hideNotificationPanelButton() );
+		click( "#hide-notification-panel" );
 
 		waitUntilNotVisible( panelNode );
 
 		assertFalse( panelNode.isVisible() );
 		assertFalse( clonedPanelNode.isVisible() );
-		controller.closeCurrentWindow();
+		closeCurrentWindow();
 
 	}
 
@@ -246,7 +232,7 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 
 		waitUntilVisible( panelNode );
 
-		controller.click( getOrFail( "#show-system-log" ) );
+		click( getOrFail( "#show-system-log" ) );
 
 		TestUtils.awaitCondition( new Callable<Boolean>()
 		{
@@ -261,9 +247,9 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 		assertTrue( ( ( Region )inspectorView ).getHeight() > 150 );
 
 		// hide the inspector view so it won't break other tests
-		controller.move( "#Assertions" ).moveBy( 400, 0 ).drag( "#Assertions" ).by( 0, 400 ).drop();
+		move( "#Assertions" ).moveBy( 400, 0 ).drag( "#Assertions" ).by( 0, 400 ).drop();
 
-		controller.click( hideNotificationPanelButton() );
+		click( "#hide-notification-panel" );
 
 		waitUntilNotVisible( panelNode );
 
@@ -282,7 +268,7 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 		waitUntilVisible( panelNode );
 
 		// find position of notification panel, close it, then put mouse just below it
-		controller.move( hideNotificationPanelButton() ).click().moveBy( 0, 150 );
+		move( "#hide-notification-panel" ).click().moveBy( 0, 150 );
 
 		waitUntilNotVisible( panelNode );
 
@@ -291,15 +277,15 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 		waitUntilVisible( panelNode );
 
 		// put mouse on notification panel and stay there for a while
-		controller.move( hideNotificationPanelButton() ).sleep( 5000 );
+		move( "#hide-notification-panel" ).sleep( 5000 );
 		assertTrue( panelNode.isVisible() );
 
 		// if moving out and going back quickly, panel should still be visible
-		controller.moveBy( 0, 150 ).moveBy( 0, -150 ).sleep( 1000 );
+		moveBy( 0, 150 ).moveBy( 0, -150 ).sleep( 1000 );
 		assertTrue( panelNode.isVisible() );
 
 		// now go away and let the panel vanish
-		controller.moveBy( 0, 150 );
+		moveBy( 0, 150 );
 
 		waitUntilNotVisible( panelNode );
 
@@ -310,12 +296,6 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 	{
 		return getOrFail( ".notification-panel" );
 	}
-
-	private Node hideNotificationPanelButton()
-	{
-		return getOrFail( "#hide-notification-panel" );
-	}
-
 
 	private void sendMsgToNotificationPanel( String msg )
 	{

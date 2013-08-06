@@ -15,7 +15,7 @@
  */
 package com.eviware.loadui.test.ui.fx.states;
 
-import static com.eviware.loadui.ui.fx.util.test.FXTestUtils.getOrFail;
+import static org.loadui.testfx.FXTestUtils.getOrFail;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Calendar;

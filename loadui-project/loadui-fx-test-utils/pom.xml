@@ -22,7 +22,7 @@
                         <version>2.14.1</version>
                         <configuration>
                             <forkMode>always</forkMode>
-                            <groups>com.eviware.loadui.test.categories.GUITest</groups>
+                            <groups>org.loadui.testfx.categories.TestFX</groups>
                             <failIfNoTests>false</failIfNoTests>
                             <testFailureIgnore>false</testFailureIgnore>
                         </configuration>
@@ -57,7 +57,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.14.1</version>
                 <configuration>
-                    <excludedGroups>com.eviware.loadui.test.categories.GUITest</excludedGroups>
+                    <excludedGroups>org.loadui.testfx.categories.TestFX</excludedGroups>
                 </configuration>
             </plugin>
         </plugins>
@@ -92,6 +92,11 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${jUnitVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.loadui</groupId>
+            <artifactId>testFx</artifactId>
+            <version>2.7.2</version>
         </dependency>
     </dependencies>
 </project>

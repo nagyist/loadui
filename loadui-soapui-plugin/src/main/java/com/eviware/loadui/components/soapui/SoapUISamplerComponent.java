@@ -297,7 +297,7 @@ public class SoapUISamplerComponent extends RunnerBase
 		box.add( abortRunningAction );
 
 		layout.add( box );
-		layout.add( new SeparatorLayoutComponentImpl( true, "growy" ) );
+		layout.add( new SeparatorLayoutComponentImpl( true, "grow y" ) );
 
 		LayoutContainer wrapperBox = new LayoutContainerImpl( "wrap, ins 0", "", "align top", "" );
 

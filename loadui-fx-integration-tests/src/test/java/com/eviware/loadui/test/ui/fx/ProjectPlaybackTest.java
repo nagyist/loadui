@@ -19,6 +19,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 
+import org.loadui.testfx.GuiTest;
 import javafx.scene.input.KeyCode;
 
 import org.junit.AfterClass;
@@ -30,13 +31,12 @@ import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.model.WorkspaceProvider;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
 import com.eviware.loadui.util.BeanInjector;
 
 @Category( IntegrationTest.class )
 public class ProjectPlaybackTest
 {
-	private static TestFX controller;
+	private static GuiTest controller;
 
 	@BeforeClass
 	public static void enterState() throws Exception

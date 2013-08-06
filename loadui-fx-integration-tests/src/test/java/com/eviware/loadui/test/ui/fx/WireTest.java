@@ -17,7 +17,9 @@ package com.eviware.loadui.test.ui.fx;
 
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
+import org.loadui.testfx.GuiTest;
 import com.eviware.loadui.util.test.TestUtils;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -33,27 +35,32 @@ import org.junit.experimental.categories.Category;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import static com.eviware.loadui.ui.fx.util.test.TestFX.findAll;
+import static org.loadui.testfx.GuiTest.findAll;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 @Category(IntegrationTest.class)
-public class WireTest
+public class WireTest extends GuiTest
 {
-	private static final Predicate<Node> CONDITION_COMPONENT = new Predicate<Node>()
+	private static final TypeSafeMatcher<Node> CONDITION_COMPONENT = new TypeSafeMatcher<Node>()
 	{
 		@Override
-		public boolean apply( Node input )
+		protected boolean matchesSafely( Node node )
 		{
-			if( input.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
+			if( node.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
 			{
-				return input.toString().equals( "Condition" );
+				return node.toString().equals( "Condition" );
 			}
 			return false;
 		}
+
+		@Override
+		public void describeTo( Description description )
+		{
+		}
 	};
 
-	private static TestFX controller;
+	private static GuiTest controller;
 
 	@BeforeClass
 	public static void enterState() throws Exception
@@ -64,22 +71,14 @@ public class WireTest
 
 		controller.drag( "#Assertions" ).by( 0, 250 ).drop();
 
-		System.out.println( "Create Component 1" );
 		controller.click( "#flow.category .expander-button" ).drag( CONDITION_COMPONENT ).by( 100, -400 ).drop();
-		TestUtils.awaitCondition( new Callable<Boolean>()
-		{
-			@Override
-			public Boolean call() throws Exception
-			{
-				return findAll( ".canvas-object-view" ).size() == 1;
-			}
-		} );
+
+		waitUntil( numberOf( ".canvas-object-view" ), is(1) );
 
 		System.gc();
 		System.gc();
 		System.gc();
 
-		System.out.println( "Create Component 2" );
 		controller.click( "#flow.category .expander-button" ).drag( CONDITION_COMPONENT ).by( 250, -100 ).drop();
 		TestUtils.awaitCondition( new Callable<Boolean>()
 		{
@@ -107,12 +106,12 @@ public class WireTest
 		Set<Node> outputs = findAll( ".canvas-object-view .terminal-view.output-terminal" );
 		Set<Node> inputs = findAll( ".canvas-object-view .terminal-view.input-terminal" );
 
-		controller.drag( Iterables.get( inputs, 0 ) ).to( Iterables.get( outputs, 2 ) );
+		drag( Iterables.get( inputs, 0 ) ).to( Iterables.get( outputs, 2 ) );
 
-		controller.move( Iterables.get( inputs, 0 ) ).moveBy( 0, -25 ).click();
+		move( Iterables.get( inputs, 0 ) ).moveBy( 0, -25 ).click();
 		assertThat( findAll( ".connection-view" ).size(), is( 1 ) );
 
-		controller.type( KeyCode.DELETE );
+		type( KeyCode.DELETE );
 		assertThat( findAll( ".connection-view" ).size(), is( 0 ) );
 	}
 
@@ -123,11 +122,11 @@ public class WireTest
 		Set<Node> outputs = findAll( ".canvas-object-view .terminal-view.output-terminal" );
 		Set<Node> inputs = findAll( ".canvas-object-view .terminal-view.input-terminal" );
 
-		controller.drag( Iterables.get( inputs, 0 ) ).to( Iterables.get( outputs, 2 ) );
+		drag( Iterables.get( inputs, 0 ) ).to( Iterables.get( outputs, 2 ) );
 
 		assertThat( findAll( ".connection-view" ).size(), is( 1 ) );
 
-		controller.move( Iterables.get( inputs, 0 ) ).moveBy( 0, -25 ).click( MouseButton.SECONDARY )
+		move( Iterables.get( inputs, 0 ) ).moveBy( 0, -25 ).click(MouseButton.SECONDARY)
 				.click( "#delete-wire" );
 
 		assertThat( findAll( ".connection-view" ).size(), is( 0 ) );
@@ -139,18 +138,18 @@ public class WireTest
 		Set<Node> outputs = findAll( ".canvas-object-view .terminal-view.output-terminal" );
 		Set<Node> inputs = findAll( ".canvas-object-view .terminal-view.input-terminal" );
 
-		controller.drag( Iterables.get( outputs, 0 ) ).to( Iterables.get( inputs, 1 ) );
-		controller.drag( Iterables.get( inputs, 0 ) ).to( Iterables.get( outputs, 2 ) );
+		drag( Iterables.get( outputs, 0 ) ).to( Iterables.get( inputs, 1 ) );
+		drag( Iterables.get( inputs, 0 ) ).to( Iterables.get( outputs, 2 ) );
 
 		assertThat( findAll( ".connection-view" ).size(), is( 2 ) );
-		controller.drag( Iterables.get( outputs, 0 ) ).to( Iterables.get( outputs, 1 ) );
+		drag( Iterables.get( outputs, 0 ) ).to( Iterables.get( outputs, 1 ) );
 		assertThat( findAll( ".connection-view" ).size(), is( 2 ) );
 
 		Node terminal = Iterables.get( inputs, 0 );
-		controller.move( terminal ).moveBy( 0, -25 ).click().drag( terminal ).by( 0, -30 ).drop();
+		move( terminal ).moveBy( 0, -25 ).click().drag( terminal ).by( 0, -30 ).drop();
 		assertThat( findAll( ".connection-view" ).size(), is( 1 ) );
 
-		controller.drag( Iterables.get( outputs, 1 ) ).by( 0, 20 ).drop();
+		drag( Iterables.get( outputs, 1 ) ).by( 0, 20 ).drop();
 		assertThat( findAll( ".connection-view" ).size(), is( 0 ) );
 	}
 
@@ -160,12 +159,12 @@ public class WireTest
 		Set<Node> outputs = findAll( ".canvas-object-view .terminal-view.output-terminal" );
 		Set<Node> inputs = findAll( ".canvas-object-view .terminal-view.input-terminal" );
 
-		controller.drag( Iterables.get( inputs, 0 ) ).to( Iterables.get( outputs, 0 ) );
-		controller.drag( Iterables.get( inputs, 1 ) ).to( Iterables.get( outputs, 0 ) );
+		drag( Iterables.get( inputs, 0 ) ).to( Iterables.get( outputs, 0 ) );
+		drag( Iterables.get( inputs, 1 ) ).to( Iterables.get( outputs, 0 ) );
 
 		assertThat( findAll( ".connection-view" ).size(), is( 1 ) );
 
-		controller.drag( Iterables.get( outputs, 0 ) ).by( 0, 20 ).drop();
+		drag( Iterables.get( outputs, 0 ) ).by( 0, 20 ).drop();
 		assertThat( findAll( ".connection-view" ).size(), is( 0 ) );
 	}
 }
