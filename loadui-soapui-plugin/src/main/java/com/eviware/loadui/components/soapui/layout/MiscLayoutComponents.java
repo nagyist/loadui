@@ -15,9 +15,9 @@
  */
 package com.eviware.loadui.components.soapui.layout;
 
-import com.eviware.loadui.ui.fx.control.FilePickerDialog;
 import com.eviware.loadui.impl.layout.LayoutComponentImpl;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
+import com.eviware.loadui.ui.fx.control.FilePickerDialog;
 import com.eviware.loadui.util.StringUtils;
 import com.eviware.loadui.util.soapui.CajoClient;
 import com.google.common.collect.ImmutableMap;
@@ -28,6 +28,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
 
 public class MiscLayoutComponents
 {
@@ -47,15 +49,27 @@ public class MiscLayoutComponents
 			{
 				try
 				{
-					if( StringUtils.isNullOrEmpty( CajoClient.getInstance().getPathToSoapUIBat() ) )
+					File soapUIExecutable = new File( CajoClient.getInstance().getPathToSoapUIBat() );
+
+					if(
+							StringUtils.isNullOrEmpty( soapUIExecutable.getAbsolutePath() ) ||
+							!soapUIExecutable.exists() ||
+							!soapUIExecutable.isFile() ||
+							!soapUIExecutable.canExecute()
+							)
 					{
-						log.warn( "No path to SoapUI has been set!" );
+
+						log.warn( "no or invalid path to SoapUI has been set!" );
 						Platform.runLater( new Runnable()
 						{
 							@Override
 							public void run()
 							{
-								final FilePickerDialog confirm = new FilePickerDialog( btn, "You are missing the path to the SoapUI executable", "Select a SoapUI executable", FilePickerDialog.getExtensionFilterForSoapUIExecutableByPlatform() );
+								final FilePickerDialog confirm = new FilePickerDialog( btn,
+										"You are missing the path to the SoapUI executable",
+										"Select a SoapUI executable",
+										FilePickerDialog.getExtensionFilterForSoapUIExecutableByPlatform() );
+
 								confirm.show();
 
 								confirm.setOnConfirm( new EventHandler<ActionEvent>()

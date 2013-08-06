@@ -15,6 +15,7 @@
  */
 package com.eviware.loadui.ui.fx.views.workspace;
 
+import com.eviware.loadui.ui.fx.control.FilePicker;
 import javafx.scene.Node;
 
 import javax.annotation.Nonnull;
@@ -44,7 +45,10 @@ public class GlobalSettingsDialog
 		SettingsTab soapUI = Builder
 				.create( "SoapUI" )
 				.field( "Path to SoapUI Executable",
-						workspace.getProperty( WorkspaceItem.SOAPUI_PATH_PROPERTY ) ).build();
+						workspace.getProperty( WorkspaceItem.SOAPUI_PATH_PROPERTY ) )
+				.build();
+
+
 
 		return new SettingsDialog( parent, "Global settings", Lists.newArrayList( generalTab, statsTab, soapUI ) );
 	}
