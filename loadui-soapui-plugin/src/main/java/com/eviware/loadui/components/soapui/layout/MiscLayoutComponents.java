@@ -26,6 +26,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
+import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +40,7 @@ public class MiscLayoutComponents
 																				  final String testSuiteName,
 																				  final String testCaseName )
 	{
-		final Button btn = ButtonBuilder.create()
+		final Button openInSoapUIButton = ButtonBuilder.create()
 				.text( "Open in SoapUI" )
 				.build();
 
@@ -49,49 +50,23 @@ public class MiscLayoutComponents
 			{
 				try
 				{
-					File soapUIExecutable = new File( CajoClient.getInstance().getPathToSoapUIBat() );
+					final CajoClient cajo = CajoClient.getInstance();
+					File soapUIExecutable = new File( cajo.getPathToSoapUIBat() );
 
-					if(
-							StringUtils.isNullOrEmpty( soapUIExecutable.getAbsolutePath() ) ||
-							!soapUIExecutable.exists() ||
-							!soapUIExecutable.isFile() ||
-							!soapUIExecutable.canExecute()
+					if( StringUtils.isNullOrEmpty( soapUIExecutable.getAbsolutePath() )
+							|| !soapUIExecutable.exists()
+							|| !soapUIExecutable.canExecute()
 							)
 					{
-
 						log.warn( "no or invalid path to SoapUI has been set!" );
-						Platform.runLater( new Runnable()
-						{
-							@Override
-							public void run()
-							{
-								final FilePickerDialog confirm = new FilePickerDialog( btn,
-										"You are missing the path to the SoapUI executable",
-										"Select a SoapUI executable",
-										FilePickerDialog.getExtensionFilterForSoapUIExecutableByPlatform() );
-
-								confirm.show();
-
-								confirm.setOnConfirm( new EventHandler<ActionEvent>()
-								{
-									@Override
-									public void handle( ActionEvent actionEvent )
-									{
-										confirm.hide();
-
-										String newPath = confirm.SelectedFileProperty().get().getAbsolutePath();
-										CajoClient.getInstance().setPathToSoapUIBat( newPath );
-
-										btn.fire();
-									}
-								} );
-							}
-						} );
+						showFilePickerDialog( openInSoapUIButton,
+								"You are missing the path to the SoapUI executable",
+								"Select a SoapUI executable",
+								FilePickerDialog.getExtensionFilterForSoapUIExecutableByPlatform() );
 					}
 					else
 					{
-						CajoClient.getInstance().startSoapUI();
-						CajoClient.getInstance().openTestCase( projectFileName, testSuiteName, testCaseName );
+						cajo.openTestCase( projectFileName, testSuiteName, testCaseName );
 					}
 				}
 				catch( Exception e )
@@ -101,18 +76,49 @@ public class MiscLayoutComponents
 			}
 		};
 
-		btn.setOnAction( new EventHandler<ActionEvent>()
+		openInSoapUIButton.setOnAction( new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle( ActionEvent actionEvent )
 			{
-				btn.fireEvent( IntentEvent.create( IntentEvent.INTENT_RUN_BLOCKING, action ) );
+				openInSoapUIButton.fireEvent( IntentEvent.create( IntentEvent.INTENT_RUN_BLOCKING, action ) );
 			}
 		} );
 
 		return new LayoutComponentImpl( ImmutableMap.<String, Object>builder()
-				.put( "component", btn )
+				.put( "component", openInSoapUIButton )
 				.build() );
+	}
 
+	private static void showFilePickerDialog( final Button button, final String title, final String filePickerTitle, final FileChooser.ExtensionFilter extensionFilter )
+	{
+		Platform.runLater( new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				final FilePickerDialog confirm = new FilePickerDialog( button,
+						title,
+						filePickerTitle,
+						extensionFilter );
+
+				confirm.show();
+
+				confirm.setOnConfirm( new EventHandler<ActionEvent>()
+				{
+					@Override
+					public void handle( ActionEvent actionEvent )
+					{
+						CajoClient cajo = CajoClient.getInstance();
+						confirm.hide();
+
+						String newPath = confirm.SelectedFileProperty().get().getAbsolutePath();
+						cajo.setPathToSoapUIBat( newPath );
+
+						button.fire();
+					}
+				} );
+			}
+		} );
 	}
 }

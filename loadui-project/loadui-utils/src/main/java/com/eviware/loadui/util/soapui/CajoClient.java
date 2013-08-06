@@ -161,13 +161,17 @@ public class CajoClient
 
 	public void openTestCase( String projectFileName, String testSuiteName, String testCaseName )
 	{
-		if( !CajoClient.getInstance().testConnection() )
+		CajoClient cajo= CajoClient.getInstance();
+		boolean connected = cajo.testConnection();
+
+		if( !connected )
 		{
-			CajoClient.getInstance().startSoapUI();
+			cajo.startSoapUI();
+			connected = cajo.testConnection();
 		}
-		if( CajoClient.getInstance().testConnection() )
+		if( connected )
 		{
-			CajoClient.getInstance().invoke( "openTestCase",
+			cajo.invoke( "openTestCase",
 					new String[] { projectFileName, testSuiteName, testCaseName } );
 		}
 	}
