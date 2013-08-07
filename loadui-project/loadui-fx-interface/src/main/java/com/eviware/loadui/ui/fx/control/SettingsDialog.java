@@ -20,12 +20,15 @@ import static javafx.beans.binding.Bindings.size;
 
 import java.util.List;
 
+import com.sun.javafx.scene.control.skin.TabPaneSkin;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.stage.WindowEvent;
 
 import javax.annotation.Nonnull;
@@ -54,12 +57,12 @@ public class SettingsDialog extends ConfirmationDialog
 
 		hasExactlyOneTab = size( tabPane.getTabs() ).isEqualTo( 1 );
 		bindStyleClass( tabPane, "single-tab", hasExactlyOneTab );
-
 		setOnShowing( new EventHandler<WindowEvent>()
 		{
 			@Override
 			public void handle( WindowEvent arg0 )
 			{
+
 				refereshTabs( tabs );
 			}
 		} );
@@ -69,13 +72,15 @@ public class SettingsDialog extends ConfirmationDialog
 			@Override
 			public void handle( WindowEvent _ )
 			{
-				final Region tabHeader = ( Region )tabPane.lookup( ".tab-header-area" );
-				final double headerHeight = tabHeader.getHeight();
-
 				if( hasExactlyOneTab.get() )
 				{
+					Region tabHeader = ( Region )tabPane.lookup( ".tab-header-area" );
+					double headerHeight = tabHeader.getHeight();
 					SettingsDialog.this.setHeight( SettingsDialog.this.getHeight() - headerHeight );
 					tabHeader.setPrefHeight( 0.0 );
+				}else{
+					StackPane node = ( StackPane )lookup( ".headers-region" );
+					SettingsDialog.this.setWidth( node.getWidth() + 110 );
 				}
 			}
 		} );

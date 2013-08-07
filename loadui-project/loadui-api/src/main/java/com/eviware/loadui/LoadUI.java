@@ -67,7 +67,6 @@ public class LoadUI
 			File sysPropsFile = Paths.get( getWorkingDir().getAbsolutePath(), "conf", "system.properties" ).toFile();
 			try(FileInputStream fis = new FileInputStream( sysPropsFile ))
 			{
-				System.out.println( "Loading LoadUI system.properties from " + sysPropsFile.getAbsolutePath() );
 				systemProperties.load( fis );
 				loadUiVersion = systemProperties.getProperty( "loadui.version" );
 				if( loadUiVersion == null )

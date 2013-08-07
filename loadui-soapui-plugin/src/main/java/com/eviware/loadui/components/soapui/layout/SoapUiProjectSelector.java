@@ -303,14 +303,13 @@ public class SoapUiProjectSelector
 					.create()
 					.styleClass( "project-selector" )
 					.fillWidth( true )
-					.prefHeight( 325 )
+					.prefWidth( 325 )
 					.prefHeight( 160 )
 					.spacing( 10 )
 					.padding( new Insets( 10 ) )
 					.style( "-fx-background-color: #f4f4f4;" )
 					.children( new Label( "SoapUI Project" ), picker, new Label( "TestSuite" ), testSuiteCombo,
 							new Label( "TestCase" ), testCaseCombo ).build();
-
 			bridge.getChildren().setAll( StackPaneBuilder.create().children( vBox ).build() );
 		}
 
