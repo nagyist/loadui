@@ -69,6 +69,7 @@ public abstract class LoadUILauncher
 		{
 			if( arg.contains( "cmd" ) )
 			{
+				printLoadUIASCIILogo();
 				List<String> argList = new ArrayList<>( Arrays.asList( args ) );
 				argList.remove( arg );
 				String[] newArgs = argList.toArray( new String[argList.size()] );
@@ -78,6 +79,37 @@ public abstract class LoadUILauncher
 		}
 
 		Application.launch( FXApplication.class, args );
+	}
+
+	private static void printLoadUIASCIILogo(){
+		System.out.println(
+				"                                                 \n" +
+				"                    .:::.                        \n" +
+				"                  .==:::::.                      \n" +
+				"                .====:::::::.                    \n" +
+				"              .======:::::::::.                  \n" +
+				"            .========:::::::::::.                \n" +
+				"          .:=========:::::::::::::.              \n" +
+				"        .:::=========:::::::::::::::.            \n" +
+				"       :::::=========:::::::::::::::::           \n" +
+				"       :::::=========:::::::::::::::::           \n" +
+				"        ':::=========:::::::::::::::'            \n" +
+				"          ':======================'              \n" +
+				"            '==================='                \n" +
+				"              '==============='                  \n" +
+				"                '==========='                    \n" +
+				"                  ':::::::'                      \n" +
+				"                    ':::'                        \n" +
+				"                                                 \n" +
+				"                                                 \n" +
+				" ::                       ::  ::   ::  ::::      \n" +
+				" ::                       ::  ::   ::   ::       \n" +
+				" ::      ::::   ::::: ::::::  ::   ::   ::       \n" +
+				" ::     ::  :: ::  :: ::  ::  ::   ::   ::       \n" +
+				" ::::::  ::::   ::: : ::::::   :::::   ::::      \n" +
+				"\n" +
+				"     	       LoadUI " + LoadUI.version() + "\n"
+		);
 	}
 
 	protected static Framework framework;

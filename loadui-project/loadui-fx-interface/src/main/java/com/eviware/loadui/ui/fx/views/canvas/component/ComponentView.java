@@ -15,6 +15,7 @@
  */
 package com.eviware.loadui.ui.fx.views.canvas.component;
 
+import com.eviware.loadui.ui.fx.util.*;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.event.ActionEvent;
@@ -33,11 +34,9 @@ import com.eviware.loadui.api.model.ComponentItem;
 import com.eviware.loadui.ui.fx.MenuItemsProvider;
 import com.eviware.loadui.ui.fx.MenuItemsProvider.HasMenuItems;
 import com.eviware.loadui.ui.fx.MenuItemsProvider.Options;
-import com.eviware.loadui.ui.fx.util.FXMLUtils;
-import com.eviware.loadui.ui.fx.util.SettingsLayoutUtils;
-import com.eviware.loadui.ui.fx.util.NodeUtils;
-import com.eviware.loadui.ui.fx.util.Properties;
 import com.eviware.loadui.ui.fx.views.canvas.CanvasObjectView;
+
+import static com.eviware.loadui.ui.fx.util.UIUtils.toCssId;
 
 public class ComponentView extends CanvasObjectView
 {
@@ -48,6 +47,8 @@ public class ComponentView extends CanvasObjectView
 	protected ComponentView( final ComponentItem component )
 	{
 		super( component );
+		getStyleClass().add( toCssId( component.getType() ) );
+
 		layoutReloaded = Properties.observeEvent( component, ComponentItem.LAYOUT_RELOADED );
 
 		FXMLUtils.load( this, null, ComponentView.class.getResource( ComponentView.class.getSimpleName() + ".fxml" ) );

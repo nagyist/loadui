@@ -17,7 +17,9 @@ package com.eviware.loadui.test.ui.fx.states;
 
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.ui.fx.FxTestState;
+import javafx.scene.Node;
 
+import static org.loadui.testfx.GuiTest.find;
 import static org.loadui.testfx.GuiTest.findAll;
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.WEB_PAGE_RUNNER;
@@ -43,7 +45,7 @@ public class SimpleWebTestState extends FxTestState
 	{
 		connect( FIXED_RATE_GENERATOR ).to( WEB_PAGE_RUNNER );
 
-		controller.click( ".component-view .text-field" ).type( "www.google.com" );
+		controller.click( ".component-view .text-field" ).type( "win-srvmontest" );
 	}
 
 	@Override
