@@ -68,6 +68,8 @@ public abstract class LoadUILauncher
 
 	public static void main( String[] args )
 	{
+		ensureFontsAreAvailableForJavaFX();
+
 		for( String arg : args )
 		{
 			if( arg.contains( "cmd" ) )
@@ -81,30 +83,6 @@ public abstract class LoadUILauncher
 			}
 		}
 
-		try
-		{
-			Font.getDefault();
-		}
-		catch( NullPointerException e )
-		{
-			if( !trueTypeFontExists() )
-			{
-				System.out.println( "Found no TrueType fonts on system, installing.." );
-
-				if( installTrueTypeFontsOnSystem() )
-				{
-					System.out.println( "Successfully installed TrueType fonts" );
-				}
-				else
-				{
-					System.out.println( "Failed to install TrueType fonts" );
-				}
-			}
-			else
-			{
-				System.out.println( "TrueType fonts found on system. " );
-			}
-		}
 		Application.launch( FXApplication.class, args );
 	}
 
@@ -140,8 +118,36 @@ public abstract class LoadUILauncher
 		);
 	}
 
+	private static void ensureFontsAreAvailableForJavaFX(){
+		try
+		{
+			Font.getDefault();
+		}
+		catch( NullPointerException e )
+		{
+			if( !trueTypeFontExists() )
+			{
+				System.out.println( "Found no TrueType fonts on system, installing.." );
+
+				if( installTrueTypeFontsOnSystem() )
+				{
+					System.out.println( "Successfully installed TrueType fonts" );
+				}
+				else
+				{
+					System.out.println( "Failed to install TrueType fonts" );
+				}
+			}
+			else
+			{
+				System.out.println( "TrueType fonts found on system. " );
+			}
+		}
+	}
+
 	private static boolean trueTypeFontExists()
 	{
+
 		File file = new File( System.getProperty( "user.home" ) + "/.fonts" );
 		if( !file.exists() || !file.isDirectory() )
 		{
