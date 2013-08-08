@@ -27,9 +27,11 @@ import com.eviware.loadui.ui.fx.views.analysis.FxExecutionsInfo;
 import com.eviware.loadui.ui.fx.views.window.MainWindowView;
 import com.eviware.loadui.ui.fx.views.workspace.GettingStartedDialog;
 import com.eviware.loadui.ui.fx.views.workspace.NewVersionDialog;
+import com.eviware.loadui.util.NewVersionChecker;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.SceneBuilder;
@@ -132,14 +134,35 @@ public class MainWindow
 			@Override
 			public void invalidated( Observable observable )
 			{
-				WorkspaceItem workspace = workspaceProvider.getWorkspace();
-				Node rootNode = stage.getScene().getRoot();
-				final VersionInfo newVersion = checkForNewVersion( workspace );
+				final WorkspaceItem workspace = workspaceProvider.getWorkspace();
+				final Node rootNode = stage.getScene().getRoot();
 
-				if( newVersion != null )
-					new NewVersionDialog( rootNode, newVersion).show();
-				else if ( "true".equals( workspace.getAttribute( SHOW_GETTING_STARTED, "true" ) ) )
-					new GettingStartedDialog( workspace, rootNode ).show();
+				final Task<VersionInfo> checkVersionTask = new Task<VersionInfo>(){
+
+					private VersionInfo newVersion;
+
+					@Override
+					protected VersionInfo call() throws Exception
+					{
+						newVersion = checkForNewVersion( workspace );
+						return newVersion;
+					}
+
+					@Override
+					protected void succeeded()
+					{
+						super.succeeded();
+
+						if( newVersion != null )
+							new NewVersionDialog( rootNode, newVersion).show();
+						else if ( "true".equals( workspace.getAttribute( SHOW_GETTING_STARTED, "true" ) ) )
+							new GettingStartedDialog( workspace, rootNode ).show();
+					}
+				};
+
+				new Thread(checkVersionTask).start();
+
+
 
 				stage.showingProperty().removeListener( this );
 			}
