@@ -21,7 +21,9 @@ import com.eviware.loadui.launcher.LoadUIFXLauncher.FXApplication;
 import com.eviware.loadui.launcher.api.OSGiUtils;
 import com.eviware.loadui.launcher.util.BndUtils;
 import com.eviware.loadui.launcher.util.ErrorHandler;
+import com.sun.javafx.PlatformUtil;
 import javafx.application.Application;
+import javafx.scene.text.Font;
 import org.apache.commons.cli.*;
 import org.apache.felix.framework.FrameworkFactory;
 import org.apache.felix.main.AutoProcessor;
@@ -52,6 +54,7 @@ public abstract class LoadUILauncher
 {
 	protected static final String LOADUI_HOME = "loadui.home";
 	protected static final String LOADUI_NAME = "loadui.name";
+	protected static final String LOADUI_WORKING = "loadui.working";
 	protected static final String LOADUI_BUILD_DATE = "loadui.build.date";
 	protected static final String LOADUI_BUILD_NUMBER = "loadui.build.number";
 
@@ -78,38 +81,101 @@ public abstract class LoadUILauncher
 			}
 		}
 
+		try
+		{
+			Font.getDefault();
+		}
+		catch( NullPointerException e )
+		{
+			if( !trueTypeFontExists() )
+			{
+				System.out.println( "Found no TrueType fonts on system, installing.." );
+
+				if( installTrueTypeFontsOnSystem() )
+				{
+					System.out.println( "Successfully installed TrueType fonts" );
+				}
+				else
+				{
+					System.out.println( "Failed to install TrueType fonts" );
+				}
+			}
+			else
+			{
+				System.out.println( "TrueType fonts found on system. " );
+			}
+		}
 		Application.launch( FXApplication.class, args );
 	}
 
-	private static void printLoadUIASCIILogo(){
+	private static void printLoadUIASCIILogo()
+	{
 		System.out.println(
 				"                                                 \n" +
-				"                    .:::.                        \n" +
-				"                  .==:::::.                      \n" +
-				"                .====:::::::.                    \n" +
-				"              .======:::::::::.                  \n" +
-				"            .========:::::::::::.                \n" +
-				"          .:=========:::::::::::::.              \n" +
-				"        .:::=========:::::::::::::::.            \n" +
-				"       :::::=========:::::::::::::::::           \n" +
-				"       :::::=========:::::::::::::::::           \n" +
-				"        ':::=========:::::::::::::::'            \n" +
-				"          ':======================'              \n" +
-				"            '==================='                \n" +
-				"              '==============='                  \n" +
-				"                '==========='                    \n" +
-				"                  ':::::::'                      \n" +
-				"                    ':::'                        \n" +
-				"                                                 \n" +
-				"                                                 \n" +
-				" ::                       ::  ::   ::  ::::      \n" +
-				" ::                       ::  ::   ::   ::       \n" +
-				" ::      ::::   ::::: ::::::  ::   ::   ::       \n" +
-				" ::     ::  :: ::  :: ::  ::  ::   ::   ::       \n" +
-				" ::::::  ::::   ::: : ::::::   :::::   ::::      \n" +
-				"\n" +
-				"     	       LoadUI " + LoadUI.version() + "\n"
+						"                    .:::.                        \n" +
+						"                  .==:::::.                      \n" +
+						"                .====:::::::.                    \n" +
+						"              .======:::::::::.                  \n" +
+						"            .========:::::::::::.                \n" +
+						"          .:=========:::::::::::::.              \n" +
+						"        .:::=========:::::::::::::::.            \n" +
+						"       :::::=========:::::::::::::::::           \n" +
+						"       :::::=========:::::::::::::::::           \n" +
+						"        ':::=========:::::::::::::::'            \n" +
+						"          ':======================'              \n" +
+						"            '==================='                \n" +
+						"              '==============='                  \n" +
+						"                '==========='                    \n" +
+						"                  ':::::::'                      \n" +
+						"                    ':::'                        \n" +
+						"                                                 \n" +
+						"                                                 \n" +
+						" ::                       ::  ::   ::  ::::      \n" +
+						" ::                       ::  ::   ::   ::       \n" +
+						" ::      ::::   ::::: ::::::  ::   ::   ::       \n" +
+						" ::     ::  :: ::  :: ::  ::  ::   ::   ::       \n" +
+						" ::::::  ::::   ::: : ::::::   :::::   ::::      \n" +
+						"\n" +
+						"     	       LoadUI " + LoadUI.version() + "\n\n"
 		);
+	}
+
+	private static boolean trueTypeFontExists()
+	{
+		File file = new File( System.getProperty( "user.home" ) + "/.fonts" );
+		if( !file.exists() || !file.isDirectory() )
+		{
+			return false;
+		}
+		else if( file.list().length > 0 )
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	private static boolean installTrueTypeFontsOnSystem()
+	{
+		String workingDir = LoadUI.getWorkingDir().getAbsolutePath();
+		workingDir = workingDir.substring( 0, workingDir.length() - 1 );
+
+		String command = "/bin/mkdir -p ~/.fonts; /bin/cp jre/lib/fonts/* ~/.fonts; /usr/bin/fc-cache";
+		try
+		{
+			ProcessBuilder process = new ProcessBuilder( "bash", "-c", command );
+			Process p = process.directory( new File( workingDir ) ).start();
+			p.waitFor();
+			return true;
+		}
+		catch( InterruptedException | IOException e )
+		{
+			log.warning( "Unable to install LoadUI fonts on local system\n" );
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	protected static Framework framework;
@@ -293,6 +359,7 @@ public abstract class LoadUILauncher
 		}
 	}
 
+
 	private void loadExternalJarsAsBundles()
 	{
 		File source = new File( LoadUI.getWorkingDir(), "ext" );
@@ -337,7 +404,7 @@ public abstract class LoadUILauncher
 
 			try
 			{
-				@SuppressWarnings("resource")
+				@SuppressWarnings( "resource" )
 				RandomAccessFile randomAccessFile = new RandomAccessFile( lockFile, "rw" );
 				FileLock lock = randomAccessFile.getChannel().tryLock();
 				if( lock == null )
