@@ -15,12 +15,10 @@
  */
 package com.eviware.loadui.ui.fx.util;
 
+import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.assertion.AssertionItem;
 import com.eviware.loadui.api.component.ComponentRegistry;
-import com.eviware.loadui.api.model.AgentItem;
-import com.eviware.loadui.api.model.ComponentItem;
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.api.model.SceneItem;
+import com.eviware.loadui.api.model.*;
 import com.eviware.loadui.ui.fx.api.ImageResolver;
 import com.eviware.loadui.ui.fx.views.window.Overlay;
 import com.eviware.loadui.ui.fx.views.window.OverlayHolder;
@@ -29,10 +27,8 @@ import com.google.common.base.Preconditions;
 import com.sun.javafx.PlatformUtil;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.stage.FileChooser;
+import javafx.stage.*;
 import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.stage.PopupWindow;
-import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -84,13 +81,85 @@ public class UIUtils
 			return new Overlay.NoOpOverlay();
 	}
 
+	public static File openSingleExtensionFileChooser( AttributeHolder workspace, ExtensionFilter extensionFilterWithSingleExtension, Window ownerWindow )
+	{
+		FileChooser fileChooser = FileChooserBuilder
+				.create()
+				.initialDirectory(
+						new File( UIUtils.getSaveDirectory( workspace ) ) )
+				.extensionFilters( extensionFilterWithSingleExtension )
+				.build();
+
+		File file = fileChooser.showSaveDialog( ownerWindow );
+
+		if( file != null )
+		{
+					/*
+					 * this code might be unnecessary when they release javafx 8.0
+					 * and may make FileChooser be able to save with extension.
+					 * Confirmed to be fixed in JavaFx 8 at: https://javafx-jira.kenai.com/browse/RT-18836
+					 */
+			String extension = extensionFilterWithSingleExtension.getExtensions().get( 0 ).substring( 1 );
+
+			if( !file.getName().endsWith( extension ) )
+			{
+				file = createUniqueFileWithExtension( file.getAbsolutePath(), extension );
+			}
+
+			log.debug( "file: " + file.getAbsolutePath() );
+			workspace.setAttribute( UIUtils.LATEST_DIRECTORY, file.getParentFile().getAbsolutePath() );
+		}
+
+		return file;
+
+	}
+
+	private static File createUniqueFileWithExtension( String AbsolutePathToFile, String extension )
+	{
+		File file = new File( AbsolutePathToFile + extension );
+
+		for( int i = 2; file.exists(); i++ )
+		{
+			file = new File( AbsolutePathToFile + "(" + i + ")" + extension );
+		}
+
+		return file;
+	}
+
+
+	public static String getSaveDirectory( AttributeHolder workspace )
+	{
+		String dir = workspace.getAttribute( LATEST_DIRECTORY, System.getProperty( LoadUI.LOADUI_HOME ) );
+
+		if( !isDirectory( dir ) )
+		{
+			dir = System.getProperty( "user.home" );
+		}
+
+		return dir;
+	}
+
+	private static boolean isDirectory( String dir )
+	{
+		try
+		{
+			return new File( dir ).getCanonicalFile().isDirectory();
+		}
+		catch( IOException e )
+		{
+			log.error( "Error with directory: " + dir, e );
+			return false;
+		}
+	}
+
 	@Nonnull
 	public static Image getImageFor( Object object )
 	{
 		try
 		{
 			return doGetImage( object );
-		} catch( Exception e )
+		}
+		catch( Exception e )
 		{
 			log.warn( "Could not get image for " + object, e );
 			return new Image( root( "default-component-icon.png" ) );
@@ -109,23 +178,27 @@ public class UIUtils
 		if( object instanceof AgentItem || AgentItem.class.equals( object ) )
 		{
 			return new Image( root( "agent-icon.png" ) );
-		} else if( object instanceof ProjectItem || ProjectItem.class.equals( object ) )
+		}
+		else if( object instanceof ProjectItem || ProjectItem.class.equals( object ) )
 		{
 			return new Image( root( "project-icon.png" ) );
-		} else if( object instanceof SceneItem || SceneItem.class.equals( object ) )
+		}
+		else if( object instanceof SceneItem || SceneItem.class.equals( object ) )
 		{
 			return new Image( root( "testcase-icon.png" ) );
-		} else if( object instanceof ComponentItem )
+		}
+		else if( object instanceof ComponentItem )
 		{
 			return new Image( BeanInjector.getBean( ComponentRegistry.class )
-					.findDescriptor( ((ComponentItem) object).getType() ).getIcon().toString() );
-		} else if( object instanceof AssertionItem )
+					.findDescriptor( ( ( ComponentItem )object ).getType() ).getIcon().toString() );
+		}
+		else if( object instanceof AssertionItem )
 		{
 			return new Image( root( "assertion_icon_toolbar.png" ) );
 		}
 
 		throw new RuntimeException( "No image found for resource "
-				+ (object instanceof Class ? object : "of class " + object.getClass().getName()) );
+				+ ( object instanceof Class ? object : "of class " + object.getClass().getName() ) );
 	}
 
 	private static String root( String fileName )
@@ -164,7 +237,8 @@ public class UIUtils
 			try
 			{
 				Desktop.getDesktop().browse( new java.net.URI( url ) );
-			} catch( IOException | URISyntaxException e )
+			}
+			catch( IOException | URISyntaxException e )
 			{
 				log.error( "Unable to launch browser with url in external browser!", e );
 			}
@@ -181,14 +255,16 @@ public class UIUtils
 					try
 					{
 						Runtime.getRuntime().exec( "open " + url );
-					} catch( IOException e )
+					}
+					catch( IOException e )
 					{
 						log.error( "Unable to fork native browser with url in external browser!", e );
 					}
 				}
 			} );
 			t.start();
-		} catch( Exception e )
+		}
+		catch( Exception e )
 		{
 			log.error( "unable to display url!", e );
 		}
