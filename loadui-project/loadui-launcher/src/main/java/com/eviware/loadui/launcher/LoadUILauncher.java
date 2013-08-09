@@ -21,7 +21,6 @@ import com.eviware.loadui.launcher.LoadUIFXLauncher.FXApplication;
 import com.eviware.loadui.launcher.api.OSGiUtils;
 import com.eviware.loadui.launcher.util.BndUtils;
 import com.eviware.loadui.launcher.util.ErrorHandler;
-import com.sun.javafx.PlatformUtil;
 import javafx.application.Application;
 import javafx.scene.text.Font;
 import org.apache.commons.cli.*;
@@ -54,7 +53,6 @@ public abstract class LoadUILauncher
 {
 	protected static final String LOADUI_HOME = "loadui.home";
 	protected static final String LOADUI_NAME = "loadui.name";
-	protected static final String LOADUI_WORKING = "loadui.working";
 	protected static final String LOADUI_BUILD_DATE = "loadui.build.date";
 	protected static final String LOADUI_BUILD_NUMBER = "loadui.build.number";
 
@@ -68,13 +66,13 @@ public abstract class LoadUILauncher
 
 	public static void main( String[] args )
 	{
-		ensureFontsAreAvailableForJavaFX();
+		ensureFontsAvailableForJavaFX();
+		printLoadUIASCIILogo();
 
 		for( String arg : args )
 		{
 			if( arg.contains( "cmd" ) )
 			{
-				printLoadUIASCIILogo();
 				List<String> argList = new ArrayList<>( Arrays.asList( args ) );
 				argList.remove( arg );
 				String[] newArgs = argList.toArray( new String[argList.size()] );
@@ -85,7 +83,6 @@ public abstract class LoadUILauncher
 
 		Application.launch( FXApplication.class, args );
 	}
-
 	private static void printLoadUIASCIILogo()
 	{
 		System.out.println(
@@ -114,40 +111,35 @@ public abstract class LoadUILauncher
 						" ::     ::  :: ::  :: ::  ::  ::   ::   ::       \n" +
 						" ::::::  ::::   ::: : ::::::   :::::   ::::      \n" +
 						"\n" +
-						"     	       LoadUI " + LoadUI.version() + "\n\n"
+						"     	      LoadUI " + LoadUI.version() + "\n\n"
 		);
 	}
 
-	private static void ensureFontsAreAvailableForJavaFX(){
-		try
+	private static void ensureFontsAvailableForJavaFX()
+	{
+		if( Font.getFontNames().size() == 0 || !trueTypeFontExists() )
 		{
-			Font.getDefault();
-		}
-		catch( NullPointerException e )
-		{
-			if( !trueTypeFontExists() )
-			{
-				System.out.println( "Found no TrueType fonts on system, installing.." );
+			System.out.println( "Found no TrueType fonts on system, installing.." );
 
-				if( installTrueTypeFontsOnSystem() )
-				{
-					System.out.println( "Successfully installed TrueType fonts" );
-				}
-				else
-				{
-					System.out.println( "Failed to install TrueType fonts" );
-				}
+			if( installTrueTypeFontsOnSystem() )
+			{
+				System.out.println( "Successfully installed TrueType fonts\nLoadUI needs to be restarted for the changes to take effect." );
+				LoadUI.restart();
 			}
 			else
 			{
-				System.out.println( "TrueType fonts found on system. " );
+				System.out.println( "Failed to install TrueType fonts\nLoadUI depends on JavaFX that depends on TrueType fonts to work." );
+				System.exit( -1 );
 			}
+		}
+		else
+		{
+			System.out.println( "TrueType fonts identified on system." );
 		}
 	}
 
 	private static boolean trueTypeFontExists()
 	{
-
 		File file = new File( System.getProperty( "user.home" ) + "/.fonts" );
 		if( !file.exists() || !file.isDirectory() )
 		{
@@ -168,7 +160,7 @@ public abstract class LoadUILauncher
 		String workingDir = LoadUI.getWorkingDir().getAbsolutePath();
 		workingDir = workingDir.substring( 0, workingDir.length() - 1 );
 
-		String command = "/bin/mkdir -p ~/.fonts; /bin/cp jre/lib/fonts/* ~/.fonts; /usr/bin/fc-cache";
+		String command = "/bin/mkdir -p ~/.fonts; /bin/cp " + workingDir + "jre/lib/fonts/* ~/.fonts; /usr/bin/fc-cache";
 		try
 		{
 			ProcessBuilder process = new ProcessBuilder( "bash", "-c", command );

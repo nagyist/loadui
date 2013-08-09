@@ -15,15 +15,14 @@
  */
 package com.eviware.loadui;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Paths;
 import java.util.Properties;
 
 public class LoadUI
 {
 
+	public static final String ARGUMENTS = "sun.java.command";
 	/**
 	 * The main version number of loadUI.
 	 */
@@ -58,6 +57,7 @@ public class LoadUI
 	public static final String TRUST_STORE = "loadui.ssl.trustStore";
 	public static final String KEY_STORE_PASSWORD = "loadui.ssl.keyStorePassword";
 	public static final String TRUST_STORE_PASSWORD = "loadui.ssl.trustStorePassword";
+	public static final String CLASSPATH = "java.class.path";
 
 	public static synchronized String version()
 	{
@@ -116,15 +116,28 @@ public class LoadUI
 
 	public static void restart()
 	{
+		String java = "java";
+		File f = new File( "jre/bin/java" );
+
+		if( f.exists() )
+		{
+			java = f.getAbsolutePath();
+		}
 		try
 		{
-			Runtime.getRuntime().exec( "loadui.bat" );
+			Process p = Runtime.getRuntime().exec( java + " -cp " + System.getProperty( CLASSPATH ) + " -Xms128m -Xmx1024m -XX:MaxPermSize=128m com.javafx.main.Main " + System.getProperty( ARGUMENTS ) );
+			BufferedReader input = new BufferedReader( new InputStreamReader( p.getInputStream() ) );
+			String line;
+			while( ( line = input.readLine() ) != null ){
+				System.out.println( line );
+			}
+			System.exit( 0 );
 		}
 		catch( IOException e )
 		{
 			e.printStackTrace();
 		}
-		System.exit( 0 );
+
 	}
 
 }
