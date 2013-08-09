@@ -124,7 +124,7 @@ public class SoapUISamplerComponent extends RunnerBase
 	private static final String DISABLED_TESTSTEPS = "disabledTestSteps";
 	public static final String TYPE = SoapUISamplerComponent.class.getName();
 
-	@SuppressWarnings( "hiding" )
+	@SuppressWarnings("hiding")
 	private static final Logger log = LoggerFactory.getLogger( SoapUISamplerComponent.class );
 
 	private static final Joiner.MapJoiner mapJoiner = Joiner.on( ',' ).withKeyValueSeparator( "=" );
@@ -535,9 +535,8 @@ public class SoapUISamplerComponent extends RunnerBase
 					log.debug( "setting project" );
 					setProject( projectFileWorkingCopy.getValue() );
 				}
-				else if( property == testSteps_isDisabled )
+				else if( property == testSteps_isDisabled || property == generalSettings.getForceSharedDatasourcesProperty() )
 				{
-					log.debug( "Reload TestCase because testSteps_isDisabled changed." );
 					runner.reloadTestCase();
 				}
 			}
@@ -982,7 +981,12 @@ public class SoapUISamplerComponent extends RunnerBase
 				// make sure there is an ID which is needed to detect if the
 				// testCase has changed
 				soapuiTestCase.getId();
-				SoapUiProjectUtils.makeAllDataSourcesShared( soapuiTestCase );
+
+				if( generalSettings.getForceSharedDatasources() )
+				{
+					SoapUiProjectUtils.makeAllDataSourcesShared( soapuiTestCase );
+				}
+
 				SoapUiProjectUtils.disableAllDataSourceLoops( soapuiTestCase );
 
 				testCasePool.clear();
