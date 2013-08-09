@@ -21,7 +21,6 @@ import java.util.Properties;
 
 public class LoadUI
 {
-
 	public static final String ARGUMENTS = "sun.java.command";
 	/**
 	 * The main version number of loadUI.
@@ -125,12 +124,14 @@ public class LoadUI
 		}
 		try
 		{
-			Process p = Runtime.getRuntime().exec( java + " -cp " + System.getProperty( CLASSPATH ) + " -Xms128m -Xmx1024m -XX:MaxPermSize=128m com.javafx.main.Main " + System.getProperty( ARGUMENTS ) );
-			BufferedReader input = new BufferedReader( new InputStreamReader( p.getInputStream() ) );
+			Process process = Runtime.getRuntime().exec( java + " -cp " + System.getProperty( CLASSPATH ) + " -Xms128m -Xmx1024m -XX:MaxPermSize=128m com.javafx.main.Main " + System.getProperty( ARGUMENTS ) );
+			BufferedReader processOutput = new BufferedReader( new InputStreamReader( process.getInputStream() ) );
+
 			String line;
-			while( ( line = input.readLine() ) != null ){
+			while( ( line = processOutput.readLine() ) != null ){
 				System.out.println( line );
 			}
+
 			System.exit( 0 );
 		}
 		catch( IOException e )

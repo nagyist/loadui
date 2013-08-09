@@ -83,6 +83,7 @@ public abstract class LoadUILauncher
 
 		Application.launch( FXApplication.class, args );
 	}
+
 	private static void printLoadUIASCIILogo()
 	{
 		System.out.println(
@@ -117,28 +118,22 @@ public abstract class LoadUILauncher
 
 	private static void ensureFontsAvailableForJavaFX()
 	{
-		if( Font.getFontNames().size() == 0 || !trueTypeFontExists() )
+		if( Font.getFontNames().size() == 0 || !isTrueTypeFontInstalled() )
 		{
-			System.out.println( "Found no TrueType fonts on system, installing.." );
-
 			if( installTrueTypeFontsOnSystem() )
 			{
-				System.out.println( "Successfully installed TrueType fonts\nLoadUI needs to be restarted for the changes to take effect." );
+				//installing TrueType fonts for JavaFX, also restarting LoadUI for changes to take effect.
 				LoadUI.restart();
 			}
 			else
 			{
-				System.out.println( "Failed to install TrueType fonts\nLoadUI depends on JavaFX that depends on TrueType fonts to work." );
+				System.err.println( "Failed to install TrueType fonts\nLoadUI depends on JavaFX that depends on TrueType fonts to work." );
 				System.exit( -1 );
 			}
 		}
-		else
-		{
-			System.out.println( "TrueType fonts identified on system." );
-		}
 	}
 
-	private static boolean trueTypeFontExists()
+	private static boolean isTrueTypeFontInstalled()
 	{
 		File file = new File( System.getProperty( "user.home" ) + "/.fonts" );
 		if( !file.exists() || !file.isDirectory() )
