@@ -58,6 +58,8 @@ public class LoadUI
 	public static final String TRUST_STORE_PASSWORD = "loadui.ssl.trustStorePassword";
 	public static final String CLASSPATH = "java.class.path";
 
+
+
 	public static synchronized String version()
 	{
 		if( loadUiVersion == null )
@@ -115,20 +117,34 @@ public class LoadUI
 
 	public static void restart()
 	{
-		String java = "java";
-		File f = new File( "jre/bin/java" );
+		String executable = "";
+		File f = null;
+		if( LoadUI.isRunningOnWindows() )
+		{
+			f = new File( "jre/bin/java.exe" );
+		}
+		else if( LoadUI.isRunningOnLinux() )
+		{
+			f = new File( "jre/bin/java" );
+		}
+		else
+		{
+			executable = "java";
+		}
 
 		if( f.exists() )
 		{
-			java = f.getAbsolutePath();
+			executable = f.getAbsolutePath();
 		}
+
 		try
 		{
-			Process process = Runtime.getRuntime().exec( java + " -cp " + System.getProperty( CLASSPATH ) + " -Xms128m -Xmx1024m -XX:MaxPermSize=128m com.javafx.main.Main " + System.getProperty( ARGUMENTS ) );
+			Process process = Runtime.getRuntime().exec( executable + " -cp " + System.getProperty( CLASSPATH ) + " -Xms128m -Xmx1024m -XX:MaxPermSize=128m com.javafx.main.Main " + System.getProperty( ARGUMENTS ) );
 			BufferedReader processOutput = new BufferedReader( new InputStreamReader( process.getInputStream() ) );
 
 			String line;
-			while( ( line = processOutput.readLine() ) != null ){
+			while( ( line = processOutput.readLine() ) != null )
+			{
 				System.out.println( line );
 			}
 
@@ -138,7 +154,19 @@ public class LoadUI
 		{
 			e.printStackTrace();
 		}
-
 	}
 
+	private static final String OS = System.getProperty( "os.name" );
+	public static boolean isRunningOnMac(){
+		return OS.startsWith( "Mac" );
+	}
+
+	public static boolean isRunningOnLinux(){
+		return OS.startsWith( "Linux" );
+	}
+
+	public static boolean isRunningOnWindows(){
+		return OS.startsWith( "Windows" );
+	}
 }
+
