@@ -139,15 +139,7 @@ public class LoadUI
 
 		try
 		{
-			Process process = Runtime.getRuntime().exec( executable + " -cp " + System.getProperty( CLASSPATH ) + " -Xms128m -Xmx1024m -XX:MaxPermSize=128m com.javafx.main.Main " + System.getProperty( ARGUMENTS ) );
-			BufferedReader processOutput = new BufferedReader( new InputStreamReader( process.getInputStream() ) );
-
-			String line;
-			while( ( line = processOutput.readLine() ) != null )
-			{
-				System.out.println( line );
-			}
-
+			Runtime.getRuntime().exec( executable + " -cp " + System.getProperty( CLASSPATH ) + " -Xms128m -Xmx1024m -XX:MaxPermSize=128m com.javafx.main.Main " + System.getProperty( ARGUMENTS ) );
 			System.exit( 0 );
 		}
 		catch( IOException e )

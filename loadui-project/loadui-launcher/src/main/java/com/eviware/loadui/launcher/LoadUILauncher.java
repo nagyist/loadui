@@ -112,15 +112,15 @@ public abstract class LoadUILauncher
 						" ::     ::  :: ::  :: ::  ::  ::   ::   ::       \n" +
 						" ::::::  ::::   ::: : ::::::   :::::   ::::      \n" +
 						"\n" +
-						"     	      LoadUI " + LoadUI.version() + "\n\n"
+						"     	        LoadUI " + LoadUI.version() + "\n\n"
 		);
 	}
 
 	private static void ensureFontsAvailableForJavaFX()
 	{
-		if( Font.getFontNames().size() == 0 || !isTrueTypeFontInstalled() )
+		if( Font.getFontNames().size() == 0 && !isTrueTypeInstalled() )
 		{
-			if( installTrueTypeFontsOnSystem() )
+			if( installTrueType() )
 			{
 				//installing TrueType fonts for JavaFX, also restarting LoadUI for changes to take effect.
 				LoadUI.restart();
@@ -133,16 +133,12 @@ public abstract class LoadUILauncher
 		}
 	}
 
-	private static boolean isTrueTypeFontInstalled()
+	private static boolean isTrueTypeInstalled()
 	{
-		File file = new File( System.getProperty( "user.home" ) + "/.fonts" );
-		if( !file.exists() || !file.isDirectory() )
+		File fontDirectory = new File( System.getProperty( "user.home" ) + "/.fonts" );
+		if( fontDirectory.exists() )
 		{
-			return false;
-		}
-		else if( file.list().length > 0 )
-		{
-			return true;
+			return fontDirectory.list().length > 0;
 		}
 		else
 		{
@@ -150,16 +146,15 @@ public abstract class LoadUILauncher
 		}
 	}
 
-	private static boolean installTrueTypeFontsOnSystem()
+	private static boolean installTrueType()
 	{
 		String workingDir = LoadUI.getWorkingDir().getAbsolutePath();
 		workingDir = workingDir.substring( 0, workingDir.length() - 1 );
 
-		String command = "/bin/mkdir -p ~/.fonts; /bin/cp " + workingDir + "jre/lib/fonts/* ~/.fonts; /usr/bin/fc-cache";
+		String command = "bash -c \"/bin/mkdir -p ~/.fonts; /bin/cp " + workingDir + "jre/lib/fonts/* ~/.fonts; /usr/bin/fc-cache\"";
 		try
 		{
-			ProcessBuilder process = new ProcessBuilder( "bash", "-c", command );
-			Process p = process.directory( new File( workingDir ) ).start();
+			Process p = Runtime.getRuntime().exec( command );
 			p.waitFor();
 			return true;
 		}
