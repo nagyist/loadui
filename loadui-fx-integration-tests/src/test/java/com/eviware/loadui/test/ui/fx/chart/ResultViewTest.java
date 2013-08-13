@@ -27,6 +27,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
+import static org.loadui.testfx.FXTestUtils.awaitEvents;
 import static org.loadui.testfx.FXTestUtils.getOrFail;
 import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
 import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
@@ -73,11 +74,10 @@ public class ResultViewTest extends FxIntegrationTestBase
 		assertThat( RECENT, contains( 0, TEST_RUNS ) );
 		assertThat( ARCHIVE, contains( 2, TEST_RUNS ) );
 
-		click( "#archive-0 #menuButton" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
-		click( "#archive-0 #menuButton" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
+		removeArchivedExecution();
+		removeArchivedExecution();
 		assertThat( ARCHIVE, contains( 0, TEST_RUNS ) );
 	}
-
 
 	@Test
 	public void menuOptionsAreCorrectAndWorking()
@@ -111,8 +111,7 @@ public class ResultViewTest extends FxIntegrationTestBase
 		MenuButton menuButton = ( MenuButton )getOrFail( "#archive-0 #menuButton" );
 		assertEquals( "Renamed Execution", menuButton.textProperty().get() );
 
-		// delete execution
-		click( "#archive-0 #menuButton" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
+		removeArchivedExecution();
 		assertThat( ARCHIVE, contains( 0, TEST_RUNS ) );
 	}
 
@@ -134,7 +133,10 @@ public class ResultViewTest extends FxIntegrationTestBase
 
 	private void openManageTestRunsDialog()
 	{
-		click( "#statsTab" ).sleep( 500 ).click( "#open-execution" ).sleep( 500 );
+		click( "#statsTab" );
+		waitForNode( "#open-execution" );
+		click( "#open-execution" );
+		waitForNode( ".result-view" );
 	}
 
 	private void archiveResult( Node result0 )
@@ -145,6 +147,11 @@ public class ResultViewTest extends FxIntegrationTestBase
 	private boolean resultsViewWindowIsOpen()
 	{
 		return !GuiTest.findAll( ".analysis-view" ).isEmpty();
+	}
+
+	private void removeArchivedExecution()
+	{
+		click( "#archive-0 #menuButton" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
 	}
 
 }
