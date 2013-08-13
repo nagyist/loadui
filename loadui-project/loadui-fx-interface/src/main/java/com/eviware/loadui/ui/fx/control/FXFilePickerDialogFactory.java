@@ -22,6 +22,6 @@ public class FXFilePickerDialogFactory implements FilePickerDialogFactory
 	public FilePickerDialog createDialog( String buttonText, String stageTitle, String filePickerTitle, FilePickerDialog.ExtensionFilter filter )
 	{
 		Stage stage = ( Stage )BeanInjector.getBean( Stage.class );
-		return new FXFilePickerDialog( stage.getScene().getRoot(), stageTitle, filePickerTitle, filter );
+		return new FXFilePickerDialog( stage, stageTitle, filePickerTitle, filter );
 	}
 }

@@ -81,7 +81,7 @@ public class MiscLayoutComponents
 			@Override
 			public void handle( ActionEvent actionEvent )
 			{
-				action.run();
+				new Thread( action ).start();
 			}
 		} );
 

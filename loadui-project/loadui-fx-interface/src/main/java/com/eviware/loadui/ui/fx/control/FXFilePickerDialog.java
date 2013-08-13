@@ -29,13 +29,11 @@ public class FXFilePickerDialog extends ConfirmationDialog implements FilePicker
 
 	Logger log = LoggerFactory.getLogger( FXFilePickerDialog.class );
 
-	public FXFilePickerDialog( Node owner, String dialogTitle, String filePickerTitle, ExtensionFilter filter )
+	public FXFilePickerDialog( Stage stage, String dialogTitle, String filePickerTitle, ExtensionFilter filter )
 	{
-		super( owner, dialogTitle, "Set" );
+		super( stage.getScene().getRoot(), dialogTitle, "Set" );
 
 		log.info( "Instantiated FXFilePickerDialog" );
-
-		Stage stage = ( Stage )BeanInjector.getBean( Stage.class );
 
 		picker = new FilePicker( stage, filePickerTitle, getExtensionFilter( filter ) );
 
@@ -46,12 +44,11 @@ public class FXFilePickerDialog extends ConfirmationDialog implements FilePicker
 				picker );
 	}
 
-	public FXFilePickerDialog( Node parent, String dialogTitle, String filePickerTitle )
+	public FXFilePickerDialog( Stage stage, String dialogTitle, String filePickerTitle )
 	{
-		super( parent, dialogTitle,
+		super( stage.getScene().getRoot(), dialogTitle,
 				"Set" );
 
-		Stage stage = ( Stage )BeanInjector.getBean( Stage.class );
 		picker = new FilePicker( stage, filePickerTitle, getExtensionFilter( ExtensionFilter.NO_FILTER ) );
 
 		getItems().setAll(
@@ -106,7 +103,7 @@ public class FXFilePickerDialog extends ConfirmationDialog implements FilePicker
 
 		if( PlatformUtil.isWindows() )
 		{
-			return new FileChooser.ExtensionFilter( "SoapUI executable", "soapui*.exe" );
+			return new FileChooser.ExtensionFilter( "SoapUI Executable", "soapui*.exe" );
 		}
 		else if( PlatformUtil.isMac() )
 		{
@@ -114,7 +111,7 @@ public class FXFilePickerDialog extends ConfirmationDialog implements FilePicker
 		}
 		else
 		{
-			return new FileChooser.ExtensionFilter( "SoapUI executable", "soapui*.sh" );
+			return new FileChooser.ExtensionFilter( "SoapUI Executable", "soapui*.sh" );
 		}
 	}
 
