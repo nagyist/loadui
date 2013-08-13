@@ -40,13 +40,21 @@ public class LoadUiRobot
 		}
 	}
 
-	private Queue<Point> predefinedPoints = Lists.newLinkedList( ImmutableList.of( new Point( 250, 250 ), new Point(
-			450, 450 ) ) );
+	private Queue<Point> predefinedPoints;
 	private GuiTest controller;
+
+	{
+		resetPredefinedPoints();
+	}
 
 	private LoadUiRobot( GuiTest controller )
 	{
 		this.controller = controller;
+	}
+
+	public void resetPredefinedPoints() {
+		predefinedPoints = Lists.newLinkedList( ImmutableList.of( new Point( 250, 250 ), new Point(
+				450, 450 ) ) );
 	}
 
 	public static LoadUiRobot usingController( GuiTest controller )
