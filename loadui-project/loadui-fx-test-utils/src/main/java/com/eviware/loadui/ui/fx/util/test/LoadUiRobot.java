@@ -69,7 +69,7 @@ public class LoadUiRobot
 
 		expandCategoryOf( component );
 
-		Window window = find( "#runners.category" ).getScene().getWindow();
+		Window window = find( "#" + component.category + ".category" ).getScene().getWindow();
 		int windowX = ( int )window.getX();
 		int windowY = ( int )window.getY();
 		controller.drag( matcherForIconOf( component ) )
