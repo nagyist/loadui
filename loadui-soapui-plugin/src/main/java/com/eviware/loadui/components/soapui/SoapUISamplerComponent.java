@@ -261,7 +261,9 @@ public class SoapUISamplerComponent extends RunnerBase
 			log.debug( "Skipping creation of SoapUI Runner's TestStepsTable, since in headless mode." );
 		}
 
-		openInSoapUIAction = MiscLayoutComponents.buildOpenInSoapUiButton(
+		MiscLayoutComponents miscLayoutComponents = new MiscLayoutComponents();
+
+		openInSoapUIAction = miscLayoutComponents.buildOpenInSoapUiButton(
 				projectSelector.getProjectFileName(),
 				projectSelector.getTestSuite(),
 				projectSelector.getTestCase() );
