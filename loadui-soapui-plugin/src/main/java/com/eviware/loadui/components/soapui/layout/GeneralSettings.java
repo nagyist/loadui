@@ -15,13 +15,6 @@
  */
 package com.eviware.loadui.components.soapui.layout;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.events.EventHandler;
 import com.eviware.loadui.api.events.PropertyEvent;
@@ -32,6 +25,12 @@ import com.eviware.loadui.components.soapui.SoapUISamplerComponent.SoapUITestCas
 import com.eviware.loadui.impl.layout.PropertyLayoutComponentImpl;
 import com.eviware.loadui.impl.layout.SettingsLayoutContainerImpl;
 import com.google.common.collect.ImmutableMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 public class GeneralSettings
 {
@@ -48,6 +47,7 @@ public class GeneralSettings
 	public static final String USE_PROJECT_RELATIVE_PATH = "useProjectRelativePath";
 	public static final String ALL_TEST_STEPS_INCLUDED = "TestCase and all TestSteps";
 	public static final String REQUEST_TEST_STEPS_INCLUDED = "TestCase and RequestTestSteps";
+	private static final String FORCE_SHARE_DATASOURCES = "forceShareDatasources";
 
 	private final List<String> outputLevelOptions = Arrays.asList( TEST_CASE_ONLY, REQUEST_TEST_STEPS_INCLUDED,
 			ALL_TEST_STEPS_INCLUDED );
@@ -61,6 +61,7 @@ public class GeneralSettings
 	private final Property<Boolean> outputTestCaseProperties;
 	private final Property<Boolean> closeConnections;
 	private final Property<Boolean> disableSoapUIAssertions;
+	private final Property<Boolean> forceSharedDatasources;
 
 	public static GeneralSettings newInstance( ComponentContext context, SoapUITestCaseRunner testCaseRunner )
 	{
@@ -80,6 +81,7 @@ public class GeneralSettings
 		closeConnections = context.createProperty( CLOSE_CONNECTIONS_AFTER_REQUEST, Boolean.class, false );
 		disableSoapUIAssertions = context.createProperty( DISABLE_SOAPUI_ASSERTIONS, Boolean.class, false );
 		context.addEventListener( PropertyEvent.class, new PropertyChangedHandler( testCaseRunner ) );
+		forceSharedDatasources = context.createProperty( FORCE_SHARE_DATASOURCES, Boolean.class, true );
 	}
 
 	public Boolean getRaiseAssertionOnError()
@@ -137,54 +139,70 @@ public class GeneralSettings
 		disableSoapUIAssertions.setValue( areDisabled );
 	}
 
+	public boolean getForceSharedDatasources()
+	{
+		return forceSharedDatasources.getValue();
+	}
+
+	public Property<Boolean> getForceSharedDatasourcesProperty()
+	{
+		return forceSharedDatasources;
+	}
+
 	public SettingsLayoutContainerImpl buildLayout()
 	{
 		SettingsLayoutContainerImpl settingsLayoutTab = new SettingsLayoutContainerImpl( "General", "", "", "align top",
 				"" );
 
-		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object> builder() //
+		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object>builder() //
 				.put( PropertyLayoutComponentImpl.PROPERTY, raiseAssertionOnError ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "Raise Project Failure on Error" ) //
 				.build() ) );
 
-		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object> builder() //
+		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object>builder() //
 				.put( PropertyLayoutComponentImpl.PROPERTY, outputLevel ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "Output Level" ) //
 				.put( OptionsProvider.OPTIONS, outputLevelOptions ) //
 				.build() ) );
 
-		settingsLayoutTab.add( new PropertyLayoutComponentImpl<File>( ImmutableMap.<String, Object> builder() //
+		settingsLayoutTab.add( new PropertyLayoutComponentImpl<File>( ImmutableMap.<String, Object>builder() //
 				.put( PropertyLayoutComponentImpl.PROPERTY, settingsFile ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "SoapUI settings" ) //
 				.put( PropertyLayoutComponentImpl.CONSTRAINTS, "w 200!, spanx 2" ) //
 				.build() ) );
 
-		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object> builder() //
+		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object>builder() //
 				.put( PropertyLayoutComponentImpl.PROPERTY, useProjectRelativePath ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "Use relative path for project" ) //
 				.build() ) );
 
-		settingsLayoutTab.add( new PropertyLayoutComponentImpl<File>( ImmutableMap.<String, Object> builder() //
+		settingsLayoutTab.add( new PropertyLayoutComponentImpl<File>( ImmutableMap.<String, Object>builder() //
 				.put( PropertyLayoutComponentImpl.PROPERTY, projectPassword ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "Project Password" ) //
 				.put( PropertyLayoutComponentImpl.CONSTRAINTS, "w 200!, spanx 2" ) //
 				.put( "widget", "password" ) //
 				.build() ) );
 
-		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object> builder() //
+		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object>builder() //
 				.put( PropertyLayoutComponentImpl.PROPERTY, outputTestCaseProperties ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "Add TestCase Properties to Result Message" ) //
 				.build() ) );
 
-		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object> builder() //
+		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object>builder() //
 				.put( PropertyLayoutComponentImpl.PROPERTY, closeConnections ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "Close connections between each request" ) //
 				.build() ) );
 
-		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object> builder() //
+		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object>builder() //
 				.put( PropertyLayoutComponentImpl.PROPERTY, disableSoapUIAssertions ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "Disable all SoapUI assertions" ) //
 				.build() ) );
+
+		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object>builder() //
+				.put( PropertyLayoutComponentImpl.PROPERTY, forceSharedDatasources ) //
+				.put( PropertyLayoutComponentImpl.LABEL, "Make all datasources shared" ) //
+				.build() ) );
+
 
 		return settingsLayoutTab;
 	}

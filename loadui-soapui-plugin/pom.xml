@@ -297,6 +297,7 @@
             <groupId>com.eviware.loadui</groupId>
             <artifactId>loadui-fx-interface</artifactId>
             <version>${loadUIVersion}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.eviware.loadui</groupId>
@@ -759,72 +760,6 @@
             <artifactId>hamcrest-library</artifactId>
             <version>1.3</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>teamdev</groupId>
-            <artifactId>xulrunner-windows</artifactId>
-            <version>3.3</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>teamdev</groupId>
-            <artifactId>xulrunner-linux64</artifactId>
-            <version>3.3</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>teamdev</groupId>
-            <artifactId>xulrunner-linux</artifactId>
-            <version>3.3</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>teamdev</groupId>
-            <artifactId>xulrunner-mac</artifactId>
-            <version>3.3</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>teamdev</groupId>
-            <artifactId>MozillaInterfaces</artifactId>
-            <version>3.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>teamdev</groupId>
-            <artifactId>engine-gecko</artifactId>
-            <version>3.3</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>teamdev</groupId>
-            <artifactId>engine-gecko15</artifactId>
-            <version>3.3</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>teamdev</groupId>
-            <artifactId>engine-ie</artifactId>
-            <version>3.3</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>teamdev</groupId>
-            <artifactId>engine-webkit</artifactId>
-            <version>3.3</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>teamdev</groupId>
-            <artifactId>jniwrap</artifactId>
-            <version>3.8.4</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>teamdev</groupId>
-            <artifactId>jxbrowser</artifactId>
-            <version>3.3</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.loadui</groupId>

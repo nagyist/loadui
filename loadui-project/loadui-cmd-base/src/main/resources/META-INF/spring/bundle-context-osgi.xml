@@ -7,8 +7,12 @@
 	<osgi:reference interface="com.eviware.loadui.api.model.WorkspaceProvider"
 		id="workspaceProvider" />
 
+    <osgi:service id="cmdFilePickerDialogFactory" ranking="0" interface="com.eviware.loadui.api.ui.dialog.FilePickerDialogFactory"/>
 	<osgi:list interface="com.eviware.loadui.launcher.api.GroovyCommand"
 		id="commands" cardinality="0..N">
 		<osgi:listener bind-method="execute" ref="commandRunner" />
 	</osgi:list>
+
+
+
 </beans>
