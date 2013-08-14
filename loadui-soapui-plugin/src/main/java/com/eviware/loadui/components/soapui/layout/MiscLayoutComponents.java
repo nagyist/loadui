@@ -51,12 +51,21 @@ public class MiscLayoutComponents
 				try
 				{
 					final CajoClient cajo = CajoClient.getInstance();
-					File soapUIExecutable = new File( cajo.getPathToSoapUIBat() );
+					String path = cajo.getPathToSoapUIBat();
+
+					File soapUIExecutable;
+					if( StringUtils.isNullOrEmpty( path ) )
+					{
+						soapUIExecutable = new File( "" );
+					}
+					else
+					{
+						soapUIExecutable = new File( path );
+					}
 
 					if( StringUtils.isNullOrEmpty( soapUIExecutable.getAbsolutePath() )
 							|| !soapUIExecutable.exists()
-							|| !soapUIExecutable.canExecute()
-							)
+							|| !soapUIExecutable.canExecute() )
 					{
 						log.warn( "no or an invalid path to SoapUI has been set!" );
 						showFilePickerDialog( openInSoapUIButton,
