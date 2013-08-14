@@ -33,8 +33,6 @@ public class FXFilePickerDialog extends ConfirmationDialog implements FilePicker
 	{
 		super( stage.getScene().getRoot(), dialogTitle, "Set" );
 
-		log.info( "Instantiated FXFilePickerDialog" );
-
 		picker = new FilePicker( stage, filePickerTitle, getExtensionFilter( filter ) );
 
 		getItems().setAll(
@@ -87,9 +85,15 @@ public class FXFilePickerDialog extends ConfirmationDialog implements FilePicker
 			@Override
 			public void handle( ActionEvent actionEvent )
 			{
-				getOwner().fireEvent( IntentEvent.create( IntentEvent.INTENT_RUN_BLOCKING, action ) );
+				fireEvent( IntentEvent.create( IntentEvent.INTENT_RUN_BLOCKING, action ) );
+				hide();
 			}
 		} );
+	}
+
+	@Override
+	public void hide(){
+		super.hide();
 	}
 
 	@Override
