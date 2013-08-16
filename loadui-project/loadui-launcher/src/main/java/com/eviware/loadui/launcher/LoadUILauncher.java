@@ -123,6 +123,7 @@ public abstract class LoadUILauncher
 			log.info( "Preparing fonts for JavaFX2" );
 			if( installTrueTypeFont() )
 			{
+				log.info( "Restarting LoadUI for changes to take effect." );
 				LoadUI.restart();
 			}
 			else
@@ -138,7 +139,7 @@ public abstract class LoadUILauncher
 		try
 		{
 			//If a Unix-based System is lacking TrueType fonts for JavaFX this causes a NullPointerException
-			//This is because Oracle took a decision not to support Type-1 Post-script Fonts.
+			//This is because Oracle took a decision not to support Type-1 Post-script Fonts for JavaFX.
 			//Many components give a call to this method, so we need to support it by installing fonts.
 			Font.getDefault();
 			return true;
@@ -153,13 +154,21 @@ public abstract class LoadUILauncher
 	{
 		String workingDir = LoadUI.getWorkingDir().getAbsolutePath();
 		workingDir = workingDir.substring( 0, workingDir.length() - 1 );
+		String userHome = System.getProperty( "user.home" );
 
-		String command = "bash -c \"/bin/mkdir -p ~/.fonts; /bin/cp " + workingDir + "jre/lib/fonts/* ~/.fonts; /usr/bin/fc-cache\"";
-		log.info( "fork().exec( " + command + " )" );
 		try
 		{
-			Process p = Runtime.getRuntime().exec( command );
-			p.waitFor();
+			ProcessBuilder pb = new ProcessBuilder( );
+
+			Process currentProcess = pb.command( "/bin/mkdir", "-p", userHome + "/.fonts" ).inheritIO().start();
+			currentProcess.waitFor();
+
+			currentProcess = pb.command( "/bin/cp", "-rf", workingDir + "jre/lib/fonts/*", userHome + "/.fonts" ).inheritIO().start();
+			currentProcess.waitFor();
+
+			currentProcess = pb.command( "/usr/bin/fc-cache" ).inheritIO().start();
+			currentProcess.waitFor();
+
 			return true;
 		}
 		catch( InterruptedException | IOException e )

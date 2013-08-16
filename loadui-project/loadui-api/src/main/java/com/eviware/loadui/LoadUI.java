@@ -15,8 +15,12 @@
  */
 package com.eviware.loadui;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class LoadUI
@@ -57,7 +61,6 @@ public class LoadUI
 	public static final String KEY_STORE_PASSWORD = "loadui.ssl.keyStorePassword";
 	public static final String TRUST_STORE_PASSWORD = "loadui.ssl.trustStorePassword";
 	public static final String CLASSPATH = "java.class.path";
-
 
 
 	public static synchronized String version()
@@ -139,25 +142,46 @@ public class LoadUI
 
 		try
 		{
-			Runtime.getRuntime().exec( executable + " -cp " + System.getProperty( CLASSPATH ) + " -Xms128m -Xmx1024m -XX:MaxPermSize=128m com.javafx.main.Main " + System.getProperty( ARGUMENTS ) );
-			System.exit( 0 );
+			List<String> commands = new ArrayList<>();
+			commands.add( executable );
+			commands.add( "-cp" );
+			commands.add( System.getProperty( CLASSPATH ) );
+			commands.add( "-Xms128m" );
+			commands.add( "-Xmx1024m" );
+			commands.add( "-XX:MaxPermSize=128m" );
+
+			for( String arg : System.getProperty( ARGUMENTS ).split( " " ) ){
+				if(arg.length() > 0){
+					commands.add( arg );
+				}
+			}
+
+			ProcessBuilder pb = new ProcessBuilder( commands );
+			Process p = pb.inheritIO().start();
+			p.waitFor();
+
+			System.exit(0);
 		}
-		catch( IOException e )
+		catch( IOException | InterruptedException e )
 		{
 			e.printStackTrace();
 		}
 	}
 
 	private static final String OS = System.getProperty( "os.name" );
-	public static boolean isRunningOnMac(){
+
+	public static boolean isRunningOnMac()
+	{
 		return OS.startsWith( "Mac" );
 	}
 
-	public static boolean isRunningOnLinux(){
+	public static boolean isRunningOnLinux()
+	{
 		return OS.startsWith( "Linux" );
 	}
 
-	public static boolean isRunningOnWindows(){
+	public static boolean isRunningOnWindows()
+	{
 		return OS.startsWith( "Windows" );
 	}
 }
