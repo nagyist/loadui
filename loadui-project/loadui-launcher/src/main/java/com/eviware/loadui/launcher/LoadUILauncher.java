@@ -118,13 +118,11 @@ public abstract class LoadUILauncher
 
 	private static void ensureFontsAvailableForJavaFX()
 	{
-		if( Font.getFontNames().size() == 0 && !isTrueTypeInstalled() )
+		if( !isJavaFXFontsAvailable() )
 		{
-			log.info( "Installing JavaFX Fonts" );
-			if( installTrueType() )
+			log.info( "Preparing fonts for JavaFX2" );
+			if( installTrueTypeFont() )
 			{
-
-				//installing TrueType fonts for JavaFX, also restarting LoadUI for changes to take effect.
 				LoadUI.restart();
 			}
 			else
@@ -132,25 +130,26 @@ public abstract class LoadUILauncher
 				System.err.println( "Failed to install TrueType fonts\nLoadUI depends on JavaFX that depends on TrueType fonts to work." );
 				System.exit( -1 );
 			}
-		}else{
-			log.info( "JavaFX Fonts available" );
 		}
 	}
 
-	private static boolean isTrueTypeInstalled()
+	private static boolean isJavaFXFontsAvailable()
 	{
-		File fontDirectory = new File( System.getProperty( "user.home" ) + "/.fonts" );
-		if( fontDirectory.exists() )
+		try
 		{
-			return fontDirectory.list().length > 0;
+			//If a Unix-based System is lacking TrueType fonts for JavaFX this causes a NullPointerException
+			//This is because Oracle took a decision not to support Type-1 Post-script Fonts.
+			//Many components give a call to this method, so we need to support it by installing fonts.
+			Font.getDefault();
+			return true;
 		}
-		else
+		catch( NullPointerException e )
 		{
 			return false;
 		}
 	}
 
-	private static boolean installTrueType()
+	private static boolean installTrueTypeFont()
 	{
 		String workingDir = LoadUI.getWorkingDir().getAbsolutePath();
 		workingDir = workingDir.substring( 0, workingDir.length() - 1 );
@@ -397,7 +396,7 @@ public abstract class LoadUILauncher
 
 			try
 			{
-				@SuppressWarnings( "resource" )
+				@SuppressWarnings("resource")
 				RandomAccessFile randomAccessFile = new RandomAccessFile( lockFile, "rw" );
 				FileLock lock = randomAccessFile.getChannel().tryLock();
 				if( lock == null )
