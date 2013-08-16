@@ -120,8 +120,10 @@ public abstract class LoadUILauncher
 	{
 		if( Font.getFontNames().size() == 0 && !isTrueTypeInstalled() )
 		{
+			log.info( "Installing JavaFX Fonts" );
 			if( installTrueType() )
 			{
+
 				//installing TrueType fonts for JavaFX, also restarting LoadUI for changes to take effect.
 				LoadUI.restart();
 			}
@@ -130,6 +132,8 @@ public abstract class LoadUILauncher
 				System.err.println( "Failed to install TrueType fonts\nLoadUI depends on JavaFX that depends on TrueType fonts to work." );
 				System.exit( -1 );
 			}
+		}else{
+			log.info( "JavaFX Fonts available" );
 		}
 	}
 
@@ -152,6 +156,7 @@ public abstract class LoadUILauncher
 		workingDir = workingDir.substring( 0, workingDir.length() - 1 );
 
 		String command = "bash -c \"/bin/mkdir -p ~/.fonts; /bin/cp " + workingDir + "jre/lib/fonts/* ~/.fonts; /usr/bin/fc-cache\"";
+		log.info( "fork().exec( " + command + " )" );
 		try
 		{
 			Process p = Runtime.getRuntime().exec( command );
