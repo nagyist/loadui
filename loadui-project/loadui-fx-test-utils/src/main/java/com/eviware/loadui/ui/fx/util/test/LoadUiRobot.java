@@ -20,8 +20,10 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertThat;
 import static org.loadui.testfx.GuiTest.find;
 import static org.loadui.testfx.GuiTest.findAll;
+import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
 
 public class LoadUiRobot
 {
@@ -189,5 +191,18 @@ public class LoadUiRobot
 		controller.sleep( unit.toMillis( number ) );
 		clickPlayStopButton();
 		controller.sleep( 2000 );
+	}
+
+	public void deleteAllComponentsFromProjectView()
+	{
+		controller.click( "#designTab" );
+
+		int maxTries = 20;
+		int tries = 0;
+		while( tries++ < maxTries && !findAll( ".component-view" ).isEmpty() )
+			controller.click( ".component-view #menu" ).click( "#delete-item" ).click( "#default" );
+
+		assertThat( ".component-layer", contains( 0, ".component-view" ) );
+		resetPredefinedPoints();
 	}
 }

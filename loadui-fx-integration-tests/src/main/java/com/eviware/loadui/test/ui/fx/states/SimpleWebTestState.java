@@ -49,14 +49,6 @@ public class SimpleWebTestState extends FxTestState
 	@Override
 	protected void exitToParent() throws Exception
 	{
-		controller.click( "#designTab" );
-
-		int maxTries = 2;
-		int tries = 0;
-		while( tries++ < maxTries && !findAll( ".component-view" ).isEmpty() )
-			controller.click( ".component-view #menu" ).click( "#delete-item" ).click( "#default" );
-
-		assertThat( ".component-layer", contains( 0, ".component-view" ) );
-		robot.resetPredefinedPoints();
+		robot.deleteAllComponentsFromProjectView();
 	}
 }
