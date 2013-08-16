@@ -15,22 +15,22 @@
  */
 package com.eviware.loadui.impl.messaging.socket;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.eviware.loadui.LoadUI;
+import com.eviware.loadui.api.messaging.MessageEndpoint;
+import com.eviware.loadui.api.messaging.MessageEndpointProvider;
+import com.eviware.loadui.util.messaging.ChannelRoutingSupport;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import org.apache.commons.ssl.KeyMaterial;
 import org.apache.commons.ssl.SSLClient;
 import org.apache.commons.ssl.TrustMaterial;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.api.messaging.MessageEndpoint;
-import com.eviware.loadui.api.messaging.MessageEndpointProvider;
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SocketMessageEndpointProvider implements MessageEndpointProvider
 {
@@ -38,12 +38,11 @@ public class SocketMessageEndpointProvider implements MessageEndpointProvider
 
 	private static final Pattern urlPattern = Pattern.compile( "https?://([^/:]+)(:(\\d+))?(/.*)?" );
 
-	private final SSLClient client;
+	private SSLClient client;
 
-	public SocketMessageEndpointProvider() throws IOException, GeneralSecurityException
+	public void init() throws IOException, GeneralSecurityException
 	{
 		client = new SSLClient();
-
 		client.addTrustMaterial( new TrustMaterial( System.getProperty( LoadUI.TRUST_STORE ), System.getProperty(
 				LoadUI.TRUST_STORE_PASSWORD ).toCharArray() ) );
 
@@ -63,6 +62,6 @@ public class SocketMessageEndpointProvider implements MessageEndpointProvider
 		String host = urlMatcher.group( 1 );
 		int port = Integer.parseInt( Objects.firstNonNull( urlMatcher.group( 3 ), "8443" ) );
 
-		return new ClientSocketMessageEndpoint( client, host, port );
+		return new ClientSocketMessageEndpoint( client, host, port, new ChannelRoutingSupport() );
 	}
 }
