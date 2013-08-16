@@ -130,14 +130,12 @@ public class LoadUI
 		{
 			f = new File( "jre/bin/java" );
 		}
-		else
-		{
-			executable = "java";
-		}
 
 		if( f.exists() )
 		{
 			executable = f.getAbsolutePath();
+		}else{
+			executable = "java";
 		}
 
 		try
@@ -150,8 +148,10 @@ public class LoadUI
 			commands.add( "-Xmx1024m" );
 			commands.add( "-XX:MaxPermSize=128m" );
 
-			for( String arg : System.getProperty( ARGUMENTS ).split( " " ) ){
-				if(arg.length() > 0){
+			for( String arg : System.getProperty( ARGUMENTS ).split( " " ) )
+			{
+				if( arg.length() > 0 )
+				{
 					commands.add( arg );
 				}
 			}
@@ -160,7 +160,7 @@ public class LoadUI
 			Process p = pb.start();
 			p.waitFor();
 
-			System.exit(0);
+			System.exit( 0 );
 		}
 		catch( IOException | InterruptedException e )
 		{
