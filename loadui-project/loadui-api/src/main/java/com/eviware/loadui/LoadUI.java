@@ -156,8 +156,7 @@ public class LoadUI
 				}
 			}
 
-			ProcessBuilder pb = new ProcessBuilder( commands );
-			pb.redirectOutput( ProcessBuilder.Redirect.PIPE);
+			ProcessBuilder pb = new ProcessBuilder( commands ).redirectOutput( ProcessBuilder.Redirect.INHERIT );
 			Process p = pb.start();
 			p.waitFor();
 

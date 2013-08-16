@@ -123,7 +123,7 @@ public abstract class LoadUILauncher
 			log.info( "Preparing fonts for JavaFX2" );
 			if( installTrueTypeFont() )
 			{
-				log.info( "Restarting LoadUI for changes to take effect." );
+				log.info( "Restarting LoadUI for changes to take effect.\n" );
 				LoadUI.restart();
 			}
 			else
