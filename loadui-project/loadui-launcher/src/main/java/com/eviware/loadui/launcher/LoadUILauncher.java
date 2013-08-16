@@ -158,15 +158,15 @@ public abstract class LoadUILauncher
 
 		try
 		{
-			ProcessBuilder pb = new ProcessBuilder( );
+			ProcessBuilder pb = new ProcessBuilder();
 
-			Process currentProcess = pb.command( "/bin/mkdir", "-p", userHome + "/.fonts" ).inheritIO().start();
+			Process currentProcess = pb.command( "/bin/mkdir", "-p", userHome + "/.fonts" ).start();
 			currentProcess.waitFor();
 
-			currentProcess = pb.command( "/bin/cp", "-rf", workingDir + "jre/lib/fonts/*", userHome + "/.fonts" ).inheritIO().start();
+			currentProcess = pb.command( "/bin/cp", "-rf", workingDir + "jre/lib/fonts", userHome + "/.fonts" ).start();
 			currentProcess.waitFor();
 
-			currentProcess = pb.command( "/usr/bin/fc-cache" ).inheritIO().start();
+			currentProcess = pb.command( "/usr/bin/fc-cache" ).start();
 			currentProcess.waitFor();
 
 			return true;
@@ -405,7 +405,7 @@ public abstract class LoadUILauncher
 
 			try
 			{
-				@SuppressWarnings("resource")
+				@SuppressWarnings( "resource" )
 				RandomAccessFile randomAccessFile = new RandomAccessFile( lockFile, "rw" );
 				FileLock lock = randomAccessFile.getChannel().tryLock();
 				if( lock == null )

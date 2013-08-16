@@ -157,7 +157,8 @@ public class LoadUI
 			}
 
 			ProcessBuilder pb = new ProcessBuilder( commands );
-			Process p = pb.inheritIO().start();
+			pb.redirectOutput( ProcessBuilder.Redirect.PIPE);
+			Process p = pb.start();
 			p.waitFor();
 
 			System.exit(0);
