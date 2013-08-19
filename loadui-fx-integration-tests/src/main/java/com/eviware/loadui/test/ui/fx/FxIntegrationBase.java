@@ -17,6 +17,11 @@ public class FxIntegrationBase extends GuiTest
 {
 	protected final LoadUiRobot robot;
 
+	public enum RunBlocking
+	{
+		BLOCKING, NON_BLOCKING
+	}
+
 	public FxIntegrationBase()
 	{
 		robot = LoadUiRobot.usingController( this );
@@ -29,7 +34,27 @@ public class FxIntegrationBase extends GuiTest
 
 	public void runTestFor( int number, TimeUnit unit )
 	{
-		robot.runTestFor( number, unit );
+		runTestFor( number, unit, RunBlocking.BLOCKING );
+	}
+
+	public void runTestFor( final int number, final TimeUnit unit, RunBlocking blocking )
+	{
+		if( blocking == RunBlocking.NON_BLOCKING )
+		{
+			new Thread( new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					robot.runTestFor( number, unit );
+				}
+			} ).start();
+		}
+		else
+		{
+			robot.runTestFor( number, unit );
+		}
+
 	}
 
 	public ComponentHandle connect( LoadUiRobot.Component component )
