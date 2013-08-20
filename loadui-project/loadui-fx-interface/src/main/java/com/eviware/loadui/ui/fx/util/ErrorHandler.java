@@ -18,6 +18,7 @@ package com.eviware.loadui.ui.fx.util;
 import java.io.File;
 import java.io.IOException;
 
+import com.eviware.loadui.LoadUI;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -109,34 +110,7 @@ public class ErrorHandler
 		@Override
 		public void handle( ActionEvent _ )
 		{
-			String classPath = ".;lib/*;";
-			String java = "java";
-
-			if( PlatformUtil.isWindows() )
-			{
-				File f = new File( "jre/bin/java.exe" );
-				if( f.exists() )
-					java = "jre/bin/java.exe";
-			}
-			else if( PlatformUtil.isLinux() )
-			{
-				classPath = classPath.replace( ";", ":" );
-				File f = new File( "jre/bin/java" );
-				if( f.exists() )
-					java = "jre/bin/java";
-			}
-
-			try
-			{
-				Runtime.getRuntime().exec(
-						java + " -Xms128m -Xmx1024m -XX:MaxPermSize=256m -cp " + classPath
-								+ " com.javafx.main.Main --nofx=false" );
-			}
-			catch( IOException e )
-			{
-				e.printStackTrace();
-			}
-			System.exit( 1 );
+			LoadUI.restart();
 		}
 	};
 
