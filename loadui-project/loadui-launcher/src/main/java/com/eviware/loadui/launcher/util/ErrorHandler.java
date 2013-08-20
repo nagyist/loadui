@@ -21,7 +21,9 @@ import static java.lang.Runtime.getRuntime;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Scanner;
 
+import com.eviware.loadui.LoadUI;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -42,7 +44,6 @@ import com.sun.javafx.PlatformUtil;
 
 public class ErrorHandler
 {
-
 	private static class ShowPrompt implements Runnable
 	{
 		final String message;
@@ -57,7 +58,6 @@ public class ErrorHandler
 		{
 			doShowPrompt( message );
 		}
-
 	}
 
 	public static void promptRestart()
@@ -115,34 +115,7 @@ public class ErrorHandler
 		@Override
 		public void handle( ActionEvent _ )
 		{
-			String classPath = ".;lib/*;";
-			String java = "java";
-
-			if( isWindows() )
-			{
-				File f = new File( "jre/bin/java.exe" );
-				if( f.exists() )
-					java = "jre/bin/java.exe";
-			}
-			else if( isLinux() )
-			{
-				classPath = classPath.replace( ";", ":" );
-				File f = new File( "jre/bin/java" );
-				if( f.exists() )
-					java = "jre/bin/java";
-			}
-
-			try
-			{
-				getRuntime().exec(
-						java + " -Xms128m -Xmx1024m -XX:MaxPermSize=256m -cp " + classPath
-								+ " com.javafx.main.Main --nofx=false" );
-			}
-			catch( IOException e )
-			{
-				e.printStackTrace();
-			}
-			System.exit( 1 );
+			LoadUI.restart();
 		}
 	};
 
