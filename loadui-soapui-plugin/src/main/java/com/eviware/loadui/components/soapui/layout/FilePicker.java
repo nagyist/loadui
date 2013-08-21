@@ -15,10 +15,7 @@
  */
 package com.eviware.loadui.components.soapui.layout;
 
-import java.io.File;
-
 import com.google.common.base.Objects;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.value.ChangeListener;
@@ -34,6 +31,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.FileChooserBuilder;
 import javafx.stage.Window;
+
+import java.io.File;
 
 public class FilePicker extends HBox
 {
@@ -90,8 +89,9 @@ public class FilePicker extends HBox
 
 	public void setSelected( File file )
 	{
-		if(file != null){
+		if( file != null )
+		{
 			selectedProperty.set( file );
-		}	
+		}
 	}
 }

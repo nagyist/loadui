@@ -19,11 +19,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class LoadUI
 {
-
+	public static final String ARGUMENTS = "sun.java.command";
 	/**
 	 * The main version number of loadUI.
 	 */
@@ -58,6 +60,8 @@ public class LoadUI
 	public static final String TRUST_STORE = "loadui.ssl.trustStore";
 	public static final String KEY_STORE_PASSWORD = "loadui.ssl.keyStorePassword";
 	public static final String TRUST_STORE_PASSWORD = "loadui.ssl.trustStorePassword";
+	public static final String CLASSPATH = "java.class.path";
+
 
 	public static synchronized String version()
 	{
@@ -116,15 +120,69 @@ public class LoadUI
 
 	public static void restart()
 	{
+		String executable = "";
+		File f = null;
+		if( LoadUI.isRunningOnWindows() )
+		{
+			f = new File( "jre/bin/java.exe" );
+		}
+		else if( LoadUI.isRunningOnLinux() )
+		{
+			f = new File( "jre/bin/java" );
+		}
+
+		if( f.exists() )
+		{
+			executable = f.getAbsolutePath();
+		}else{
+			executable = "java";
+		}
+
 		try
 		{
-			Runtime.getRuntime().exec( "loadui.bat" );
+			List<String> commands = new ArrayList<>();
+			commands.add( executable );
+			commands.add( "-cp" );
+			commands.add( System.getProperty( CLASSPATH ) );
+			commands.add( "-Xms128m" );
+			commands.add( "-Xmx1024m" );
+			commands.add( "-XX:MaxPermSize=128m" );
+
+			for( String arg : System.getProperty( ARGUMENTS ).split( " " ) )
+			{
+				if( arg.length() > 0 )
+				{
+					commands.add( arg );
+				}
+			}
+
+			ProcessBuilder pb = new ProcessBuilder( commands ).redirectOutput( ProcessBuilder.Redirect.INHERIT );
+			Process p = pb.start();
+			p.waitFor();
+
+			System.exit( 0 );
 		}
-		catch( IOException e )
+		catch( IOException | InterruptedException e )
 		{
 			e.printStackTrace();
 		}
-		System.exit( 0 );
 	}
 
+	private static final String OS = System.getProperty( "os.name" );
+
+	public static boolean isRunningOnMac()
+	{
+		return OS.startsWith( "Mac" );
+	}
+
+	public static boolean isRunningOnLinux()
+	{
+		return OS.startsWith( "Linux" );
+	}
+
+	public static boolean isRunningOnWindows()
+	{
+		return OS.startsWith( "Windows" );
+	}
 }
+
