@@ -15,13 +15,17 @@
  */
 package com.eviware.loadui.ui.fx.input;
 
-import static com.eviware.loadui.ui.fx.util.test.TestFX.offset;
+import static org.loadui.testfx.GuiTest.offset;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.util.concurrent.TimeUnit;
 
+import org.loadui.testfx.categories.TestFX;
+import org.loadui.testfx.FXScreenController;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
@@ -42,18 +46,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.eviware.loadui.test.categories.GUITest;
 import com.eviware.loadui.ui.fx.api.input.Selectable;
-import com.eviware.loadui.ui.fx.input.MovableImpl;
-import com.eviware.loadui.ui.fx.input.MultiMovable;
-import com.eviware.loadui.ui.fx.input.SelectableImpl;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
-import com.eviware.loadui.ui.fx.util.test.TestFX.MouseMotion;
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
+import org.loadui.testfx.GuiTest.MouseMotion;
 import com.google.common.util.concurrent.SettableFuture;
 
-@Category( GUITest.class )
+@Category( TestFX.class )
 public class MultiMovableTest
 {
 	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();
@@ -61,7 +58,7 @@ public class MultiMovableTest
 	private static Selectable selectable2;
 	private static Selectable selectable3;
 	private static Stage stage;
-	private static TestFX controller;
+	private static GuiTest controller;
 	private static Pane background;
 
 	public static class SelectableTestApp extends Application
@@ -111,10 +108,10 @@ public class MultiMovableTest
 	@BeforeClass
 	public static void createWindow() throws Throwable
 	{
-		controller = TestFX.wrap( new FXScreenController() );
+		controller = GuiTest.wrap( new FXScreenController() );
 		FXTestUtils.launchApp( SelectableTestApp.class );
 		stage = stageFuture.get( 5, TimeUnit.SECONDS );
-		TestFX.targetWindow( stage );
+		GuiTest.targetWindow( stage );
 		FXTestUtils.bringToFront( stage );
 	}
 

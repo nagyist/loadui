@@ -1,4 +1,4 @@
-package com.eviware.loadui.ui.fx.util.test.matchers;
+package org.loadui.testfx.matchers;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;

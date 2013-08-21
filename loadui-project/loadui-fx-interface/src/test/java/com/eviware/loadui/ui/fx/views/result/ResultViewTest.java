@@ -15,49 +15,36 @@
  */
 package com.eviware.loadui.ui.fx.views.result;
 
-import static com.eviware.loadui.ui.fx.util.ObservableLists.filter;
-import static com.eviware.loadui.ui.fx.util.ObservableLists.fx;
-import static com.eviware.loadui.ui.fx.util.ObservableLists.ofCollection;
-import static com.eviware.loadui.ui.fx.util.test.TestFX.targetWindow;
-import static com.eviware.loadui.ui.fx.util.test.TestFX.wrap;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import com.eviware.loadui.api.statistics.store.Execution;
+import com.eviware.loadui.api.statistics.store.ExecutionManager;
+import org.loadui.testfx.categories.TestFX;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
+import com.google.common.base.Predicate;
+import com.google.common.util.concurrent.SettableFuture;
+import javafx.application.Application;
+import javafx.collections.ObservableList;
+import javafx.scene.SceneBuilder;
+import javafx.stage.Stage;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.Closeable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import javafx.application.Application;
-import javafx.collections.ObservableList;
-import javafx.scene.Node;
-import javafx.scene.SceneBuilder;
-import javafx.stage.Stage;
+import static com.eviware.loadui.ui.fx.util.ObservableLists.*;
+import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-
-import com.eviware.loadui.api.statistics.store.Execution;
-import com.eviware.loadui.api.statistics.store.ExecutionManager;
-import com.eviware.loadui.test.categories.GUITest;
-import com.eviware.loadui.ui.fx.control.PageList;
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
-import com.google.common.base.Predicate;
-import com.google.common.util.concurrent.SettableFuture;
-
-@Category( GUITest.class )
-public class ResultViewTest
+@Category( TestFX.class )
+public class ResultViewTest extends GuiTest
 {
-
 	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();
 	private static Stage stage;
-	private static TestFX controller;
 	private static ResultView view;
 
 	static Execution res0;
@@ -134,8 +121,6 @@ public class ResultViewTest
 	@Before
 	public void createWindow() throws Throwable
 	{
-
-		controller = wrap( new FXScreenController() );
 		FXTestUtils.launchApp( ResultViewTestApp.class );
 		stage = targetWindow( stageFuture.get( 5, TimeUnit.SECONDS ) );
 		FXTestUtils.bringToFront( stage );
@@ -143,25 +128,19 @@ public class ResultViewTest
 	}
 
 	@Test
-	public void ensureExecutionsInRightPlaceAndCanDrageToArchive() throws Exception
+	public void ensureExecutionsInRightPlaceAndCanDragToArchive() throws Exception
 	{
-		PageList<?> recentLane = TestFX.find( "#result-node-list" );
-		assertEquals( 2, recentLane.getItems().size() );
+		assertThat( "#result-node-list", contains( 2, ".execution-view" ) );
+		assertThat( "#result-node-list", contains( "#result-0" ) );
+		assertThat( "#result-node-list", contains( "#result-1" ) );
 
-		Node res0Node = TestFX.find( "#result-0" );
-		assertTrue( recentLane.getItems().contains( res0Node ) );
+		assertThat( "#archive-node-list", contains( 1, ".execution-view" ) );
+		assertThat( "#archive-node-list", contains( "#archive-0" ) );
 
-		Node res1Node = TestFX.find( "#result-1" );
-		assertTrue( recentLane.getItems().contains( res1Node ) );
+		drag( "#result-0" ).to( "#archive-0" );
 
-		PageList<?> archiveLane = TestFX.find( "#archive-node-list" );
-		assertEquals( 1, archiveLane.getItems().size() );
-
-		Node archNode = TestFX.find( "#archive-0" );
-		assertTrue( archiveLane.getItems().contains( archNode ) );
-
-		controller.drag( "#result-0" ).to( "#archive-0" );
 		FXTestUtils.awaitEvents();
+
 		verify( res0 ).archive();
 	}
 

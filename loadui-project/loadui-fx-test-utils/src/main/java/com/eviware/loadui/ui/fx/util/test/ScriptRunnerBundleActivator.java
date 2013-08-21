@@ -33,6 +33,8 @@ import java.util.regex.Pattern;
 
 import javafx.stage.Stage;
 
+import org.loadui.testfx.FXScreenController;
+import org.loadui.testfx.GuiTest;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -77,7 +79,7 @@ public class ScriptRunnerBundleActivator implements BundleActivator
 
 					binding.setVariable( "workspace", workspaceProvider.getWorkspace() );
 					binding.setVariable( "stage", stage );
-					binding.setVariable( "controller", TestFX.wrap( new FXScreenController() ).target( stage ) );
+					binding.setVariable( "controller", GuiTest.wrap( new FXScreenController() ).target( stage ) );
 
 					Thread.sleep( 3000 );
 

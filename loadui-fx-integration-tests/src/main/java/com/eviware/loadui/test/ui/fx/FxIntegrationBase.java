@@ -2,31 +2,29 @@ package com.eviware.loadui.test.ui.fx;
 
 import com.eviware.loadui.ui.fx.util.test.ComponentHandle;
 import com.eviware.loadui.ui.fx.util.test.LoadUiRobot;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
 import com.eviware.loadui.util.test.TestUtils;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
+import org.loadui.testfx.GuiTest;
 
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-
-import static com.eviware.loadui.ui.fx.util.test.TestFX.find;
-import static com.eviware.loadui.ui.fx.util.test.TestFX.findAll;
 
 /**
  * @Author Henrik
  */
-public class FxIntegrationBase
+public class FxIntegrationBase extends GuiTest
 {
-
-	protected final TestFX controller;
 	protected final LoadUiRobot robot;
+
+	public enum RunBlocking
+	{
+		BLOCKING, NON_BLOCKING
+	}
 
 	public FxIntegrationBase()
 	{
-		controller = GUI.getController();
-		robot = LoadUiRobot.usingController( controller );
+		robot = LoadUiRobot.usingController( this );
 	}
 
 	public void create( LoadUiRobot.Component component )
@@ -36,7 +34,27 @@ public class FxIntegrationBase
 
 	public void runTestFor( int number, TimeUnit unit )
 	{
-		robot.runTestFor( number, unit );
+		runTestFor( number, unit, RunBlocking.BLOCKING );
+	}
+
+	public void runTestFor( final int number, final TimeUnit unit, RunBlocking blocking )
+	{
+		if( blocking == RunBlocking.NON_BLOCKING )
+		{
+			new Thread( new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					robot.runTestFor( number, unit );
+				}
+			} ).start();
+		}
+		else
+		{
+			robot.runTestFor( number, unit );
+		}
+
 	}
 
 	public ComponentHandle connect( LoadUiRobot.Component component )
@@ -87,7 +105,7 @@ public class FxIntegrationBase
 
 		public KnobHandle to( long value )
 		{
-			controller.doubleClick( knob ).type( Long.toString( value ) ).type( KeyCode.ENTER );
+			doubleClick( knob ).type( Long.toString( value ) ).type( KeyCode.ENTER );
 			return this;
 		}
 

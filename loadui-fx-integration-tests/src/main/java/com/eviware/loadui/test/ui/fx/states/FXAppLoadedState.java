@@ -19,8 +19,10 @@ import javafx.stage.Stage;
 
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.ui.fx.GUI;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
+
+import java.util.NoSuchElementException;
 
 public class FXAppLoadedState extends TestState
 {
@@ -35,18 +37,30 @@ public class FXAppLoadedState extends TestState
 	protected void enterFromParent() throws Exception
 	{
 		GUI.getBundleContext();
-		final Stage dialog = TestFX.findStageByTitle( "Welcome to LoadUI" );
-		FXTestUtils.invokeAndWait( new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				log.debug( "Closing 'Getting Started' dialog" );
-				dialog.close();
-			}
-		}, 1 );
+		closeWindow("Welcome to LoadUI");
+		closeWindow("New version available");
 
 		GUI.getController().click( "#mainButton" ).click( "#mainButton" ).sleep( 500 );
+	}
+
+	private void closeWindow( final String windowTitle ) throws Exception
+	{
+		try {
+			final Stage dialog = GuiTest.findStageByTitle( windowTitle );
+
+			FXTestUtils.invokeAndWait( new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					log.debug( "Closing window: '"+windowTitle+"'" );
+					dialog.close();
+				}
+			}, 1 );
+		}
+		catch (NoSuchElementException e ) {
+			// No need to close a window if it's not open.
+		}
 	}
 
 	@Override

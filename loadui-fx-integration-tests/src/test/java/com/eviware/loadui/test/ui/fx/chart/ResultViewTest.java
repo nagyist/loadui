@@ -19,7 +19,7 @@ import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.FxIntegrationTestBase;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
+import org.loadui.testfx.GuiTest;
 import javafx.scene.Node;
 import javafx.scene.control.MenuButton;
 import javafx.scene.input.KeyCode;
@@ -27,9 +27,10 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import static com.eviware.loadui.ui.fx.util.test.FXTestUtils.getOrFail;
-import static com.eviware.loadui.ui.fx.util.test.matchers.ContainsNodesMatcher.contains;
-import static com.eviware.loadui.ui.fx.util.test.matchers.VisibleNodesMatcher.visible;
+import static org.loadui.testfx.FXTestUtils.awaitEvents;
+import static org.loadui.testfx.FXTestUtils.getOrFail;
+import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
+import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.Is.is;
@@ -48,7 +49,7 @@ public class ResultViewTest extends FxIntegrationTestBase
 	{
 		if( resultsViewWindowIsOpen() )
 		{
-			controller.closeCurrentWindow();
+			closeCurrentWindow();
 		}
 	}
 
@@ -73,11 +74,10 @@ public class ResultViewTest extends FxIntegrationTestBase
 		assertThat( RECENT, contains( 0, TEST_RUNS ) );
 		assertThat( ARCHIVE, contains( 2, TEST_RUNS ) );
 
-		controller.click( "#archive-0 #menuButton" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
-		controller.click( "#archive-0 #menuButton" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
+		removeArchivedExecution();
+		removeArchivedExecution();
 		assertThat( ARCHIVE, contains( 0, TEST_RUNS ) );
 	}
-
 
 	@Test
 	public void menuOptionsAreCorrectAndWorking()
@@ -87,21 +87,21 @@ public class ResultViewTest extends FxIntegrationTestBase
 		openManageTestRunsDialog();
 
 		// check recent execution menu's options
-		controller.click( "#result-0 #menuButton" );
+		click( "#result-0 #menuButton" );
 
 		assertThat( "#open-item", is( visible() ) );
 		assertThat( "#delete-item", is( visible() ) );
 		assertThat( "#rename-item", is( not( visible() ) ) );
 
 		// check if Open option works
-		controller.click( "#open-item" );
+		click( "#open-item" );
 		getOrFail( ".analysis-view" );
 		getOrFail( "#statsTab" );
 
-		controller.click( "#open-execution" ).sleep( 500 );
+		click( "#open-execution" ).sleep( 500 );
 
 		// check archive execution menu's options
-		controller.drag( "#result-0" ).to( "#archive-node-list" ).click( "#archive-0 #menuButton" );
+		drag( "#result-0" ).to( "#archive-node-list" ).click( "#archive-0 #menuButton" );
 		assertThat( "#open-item", is( visible() ) );
 		assertThat( "#delete-item", is( visible() ) );
 		assertThat( "#rename-item", is( visible() ) );
@@ -111,14 +111,13 @@ public class ResultViewTest extends FxIntegrationTestBase
 		MenuButton menuButton = ( MenuButton )getOrFail( "#archive-0 #menuButton" );
 		assertEquals( "Renamed Execution", menuButton.textProperty().get() );
 
-		// delete execution
-		controller.click( "#archive-0 #menuButton" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
+		removeArchivedExecution();
 		assertThat( ARCHIVE, contains( 0, TEST_RUNS ) );
 	}
 
 	private void renameTestRun()
 	{
-		controller.click( "#rename-item" ).type( "Renamed Execution" ).type( KeyCode.ENTER );
+		click( "#rename-item" ).type( "Renamed Execution" ).type( KeyCode.ENTER );
 	}
 
 	@Override
@@ -134,17 +133,25 @@ public class ResultViewTest extends FxIntegrationTestBase
 
 	private void openManageTestRunsDialog()
 	{
-		controller.click( "#statsTab" ).sleep( 500 ).click( "#open-execution" ).sleep( 500 );
+		click( "#statsTab" );
+		waitForNode( "#open-execution" );
+		click( "#open-execution" );
+		waitForNode( ".result-view" );
 	}
 
 	private void archiveResult( Node result0 )
 	{
-		controller.drag( result0 ).to( "#archive-node-list" );
+		drag( result0 ).to( "#archive-node-list" );
 	}
 
 	private boolean resultsViewWindowIsOpen()
 	{
-		return !TestFX.findAll( ".analysis-view" ).isEmpty();
+		return !GuiTest.findAll( ".analysis-view" ).isEmpty();
+	}
+
+	private void removeArchivedExecution()
+	{
+		click( "#archive-0 #menuButton" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
 	}
 
 }

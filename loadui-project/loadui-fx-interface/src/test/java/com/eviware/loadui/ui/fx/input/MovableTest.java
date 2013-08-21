@@ -25,72 +25,49 @@ import static org.junit.Assert.assertTrue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import javafx.application.Application;
+import org.loadui.testfx.categories.TestFX;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.GroupBuilder;
 import javafx.scene.Node;
-import javafx.scene.SceneBuilder;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
-import javafx.stage.Stage;
 
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.eviware.loadui.test.categories.GUITest;
 import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
-import com.eviware.loadui.ui.fx.util.test.TestFX.MouseMotion;
-import com.google.common.util.concurrent.SettableFuture;
 
-@Category( GUITest.class )
-public class MovableTest
+@Category( TestFX.class )
+public class MovableTest extends GuiTest
 {
-	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();
 	private static MovableImpl movable;
-	private static Stage stage;
-	private static TestFX controller;
 	private static Group group;
 
-	public static class MovableTestApp extends Application
+	private static void createRootNode()
 	{
-		@Override
-		public void start( Stage primaryStage ) throws Exception
-		{
-			Rectangle dragRect = RectangleBuilder.create().id( "dragrect" ).width( 25 ).height( 25 ).fill( Color.BLUE )
-					.build();
-			movable = MovableImpl.install( dragRect );
+		Rectangle dragRect = RectangleBuilder.create().id( "dragrect" ).width( 25 ).height( 25 ).fill( Color.BLUE )
+				.build();
+		movable = MovableImpl.install( dragRect );
 
-			Rectangle dropRect = RectangleBuilder.create().id( "droprect" ).width( 50 ).height( 50 ).layoutX( 100 )
-					.layoutY( 100 ).build();
-			dropRect.fillProperty().bind( when( movable.acceptableProperty() ).then( Color.GREEN ).otherwise( Color.RED ) );
+		Rectangle dropRect = RectangleBuilder.create().id( "droprect" ).width( 50 ).height( 50 ).layoutX( 100 )
+				.layoutY( 100 ).build();
+		dropRect.fillProperty().bind( when( movable.acceptableProperty() ).then( Color.GREEN ).otherwise( Color.RED ) );
 
-			group = GroupBuilder.create().children( dropRect, dragRect ).build();
-
-			primaryStage.setScene( SceneBuilder.create().width( 300 ).height( 200 ).root( group ).build() );
-
-			primaryStage.show();
-
-			stageFuture.set( primaryStage );
-		}
+		group = GroupBuilder.create().children( dropRect, dragRect ).build();
 	}
 
 	@BeforeClass
-	public static void createWindow() throws Throwable
+	public static void createWindow()
 	{
-		controller = TestFX.wrap( new FXScreenController() );
-		FXTestUtils.launchApp( MovableTestApp.class );
-		stage = stageFuture.get( 5, TimeUnit.SECONDS );
-		TestFX.targetWindow( stage );
-		FXTestUtils.bringToFront( stage );
+		createRootNode();
+		showNodeInStage( group );
 	}
 
 	@After
@@ -109,7 +86,7 @@ public class MovableTest
 
 		assertThat( movable.isDragging(), is( false ) );
 
-		MouseMotion dragging = controller.drag( movableNode ).by( 100, 50 );
+		MouseMotion dragging = drag( movableNode ).by( 100, 50 );
 
 		assertThat( movable.isDragging(), is( true ) );
 
@@ -143,7 +120,7 @@ public class MovableTest
 	public void shouldAcceptOnHover() throws Throwable
 	{
 		final Node movableNode = movable.getNode();
-		final Node dropzone = stage.getScene().lookup( "#droprect" );
+		final Node dropzone = find( "#droprect" );
 
 		dropzone.addEventHandler( DraggableEvent.DRAGGABLE_ENTERED, new EventHandler<DraggableEvent>()
 		{
@@ -157,7 +134,7 @@ public class MovableTest
 
 		assertThat( movable.isAcceptable(), is( false ) );
 
-		MouseMotion dragging = controller.drag( movableNode ).via( dropzone );
+		MouseMotion dragging = drag( movableNode ).via( dropzone );
 
 		assertTrue( movable.isAcceptable() );
 
@@ -172,7 +149,7 @@ public class MovableTest
 	public void shouldDrop() throws Throwable
 	{
 		final Node movableNode = movable.getNode();
-		final Node dropzone = stage.getScene().lookup( "#droprect" );
+		final Node dropzone = find( "#droprect" );
 
 		final CountDownLatch droppedLatch = new CountDownLatch( 1 );
 
@@ -193,7 +170,7 @@ public class MovableTest
 			}
 		} );
 
-		controller.drag( movableNode ).to( dropzone );
+		drag( movableNode ).to( dropzone );
 
 		droppedLatch.await( 2, TimeUnit.SECONDS );
 	}

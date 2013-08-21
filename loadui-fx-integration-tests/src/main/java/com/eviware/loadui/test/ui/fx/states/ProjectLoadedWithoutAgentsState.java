@@ -15,7 +15,7 @@
  */
 package com.eviware.loadui.test.ui.fx.states;
 
-import static com.eviware.loadui.ui.fx.util.test.TestFX.findAll;
+import static org.loadui.testfx.GuiTest.findAll;
 
 import java.util.Collection;
 import java.util.concurrent.Callable;
@@ -24,9 +24,9 @@ import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.model.WorkspaceProvider;
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.ui.fx.GUI;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
 import com.eviware.loadui.util.BeanInjector;
-import com.eviware.loadui.util.test.TestUtils;
+import org.loadui.testfx.GuiTest;
+import org.loadui.testfx.TestUtils;
 
 public class ProjectLoadedWithoutAgentsState extends TestState
 {
@@ -77,7 +77,7 @@ public class ProjectLoadedWithoutAgentsState extends TestState
 		//If there is a save dialog, do not save:
 		try
 		{
-			GUI.getController().click( "#no" ).target( TestFX.getWindowByIndex( 0 ) );
+			GUI.getController().click( "#no" ).target( GuiTest.getWindowByIndex( 0 ) );
 		}
 		catch( Exception e )
 		{

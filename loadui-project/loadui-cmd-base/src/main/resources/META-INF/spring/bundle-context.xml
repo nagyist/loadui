@@ -8,4 +8,6 @@
 		<constructor-arg ref="workspaceProvider" />
 	</bean>
 
+    <bean id="cmdFilePickerDialogFactory" class="com.eviware.loadui.cmd.interaction.CmdFilePickerDialogFactory"/>
+
 </beans>

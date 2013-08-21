@@ -11,7 +11,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class LoggingEventWrapper
 {
-	private String generatedString = null;
 	private String additionalInfo = "";
 	private LoggingEvent event;
 
@@ -28,12 +27,8 @@ public class LoggingEventWrapper
 
 	public String toString()
 	{
-		if( generatedString == null )
-		{
-			StringBuilder sb = new StringBuilder();
-			sb.append( new Date( event.getTimeStamp() ) ).append( ": " ).append( event.getMessage() ).append( "\r\n" );
-			generatedString = sb.toString();
-		}
-		return generatedString;
+		if( additionalInfo.isEmpty() )
+			return event.getMessage().toString();
+		return event.getMessage().toString() + Character.LINE_SEPARATOR + additionalInfo;
 	}
 }

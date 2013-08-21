@@ -3,14 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>loadui-project</artifactId>
     <packaging>pom</packaging>
-    <version>2.6.0</version>
+    <version>2.6.1</version>
     <name>loadUI Project</name>
     <url>http://www.loadui.org</url>
-
     <parent>
         <groupId>com.eviware.loadui</groupId>
         <artifactId>loadui-parent</artifactId>
-        <version>2.6.0</version>
+        <version>2.6.1</version>
     </parent>
 
     <modules>
@@ -236,6 +235,12 @@
             <artifactId>junit</artifactId>
             <version>${jUnitVersion}</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hamcrest</groupId>
+                    <artifactId>hamcrest-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>

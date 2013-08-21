@@ -123,17 +123,7 @@ public class NewVersionChecker
 			}
 		}
 
-		catch( IOException e )
-		{
-			log.debug( "Error while checking for new version: ", e );
-			return null;
-		}
-		catch( SAXException e )
-		{
-			log.debug( "Error while checking for new version: ", e );
-			return null;
-		}
-		catch( ParserConfigurationException e )
+		catch( IOException | SAXException | ParserConfigurationException e )
 		{
 			log.debug( "Error while checking for new version: ", e );
 			return null;
@@ -165,7 +155,7 @@ public class NewVersionChecker
 		@Nonnull
 		final private WorkspaceItem workspace;
 
-		VersionInfo( String versionName, String releaseNotes, String downloadUrl, WorkspaceItem workspace )
+		public VersionInfo( String versionName, String releaseNotes, String downloadUrl, WorkspaceItem workspace )
 		{
 			this.versionName = versionName;
 			this.releaseNotes = releaseNotes;

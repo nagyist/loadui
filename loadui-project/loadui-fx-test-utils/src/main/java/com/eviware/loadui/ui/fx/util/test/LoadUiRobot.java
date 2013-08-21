@@ -6,9 +6,13 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import javafx.scene.Node;
-import javafx.scene.control.*;
 import javafx.scene.control.Label;
 import javafx.stage.Window;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.junit.internal.matchers.TypeSafeMatcher;
+import org.loadui.testfx.GuiTest;
 
 import java.awt.*;
 import java.util.Queue;
@@ -16,8 +20,10 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import static com.eviware.loadui.ui.fx.util.test.TestFX.find;
-import static com.eviware.loadui.ui.fx.util.test.TestFX.findAll;
+import static org.junit.Assert.assertThat;
+import static org.loadui.testfx.GuiTest.find;
+import static org.loadui.testfx.GuiTest.findAll;
+import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
 
 public class LoadUiRobot
 {
@@ -36,16 +42,24 @@ public class LoadUiRobot
 		}
 	}
 
-	private Queue<Point> predefinedPoints = Lists.newLinkedList( ImmutableList.of( new Point( 250, 250 ), new Point(
-			450, 450 ) ) );
-	private TestFX controller;
+	private Queue<Point> predefinedPoints;
+	private GuiTest controller;
 
-	private LoadUiRobot( TestFX controller )
+	{
+		resetPredefinedPoints();
+	}
+
+	private LoadUiRobot( GuiTest controller )
 	{
 		this.controller = controller;
 	}
 
-	public static LoadUiRobot usingController( TestFX controller )
+	public void resetPredefinedPoints() {
+		predefinedPoints = Lists.newLinkedList( ImmutableList.of( new Point( 250, 250 ), new Point(
+				450, 450 ) ) );
+	}
+
+	public static LoadUiRobot usingController( GuiTest controller )
 	{
 		return new LoadUiRobot( controller );
 	}
@@ -59,16 +73,16 @@ public class LoadUiRobot
 
 	public ComponentHandle createComponentAt( final Component component, Point targetPoint )
 	{
-		final int numberOfComponents = TestFX.findAll( ".canvas-object-view" ).size();
+		final int numberOfComponents = GuiTest.findAll( ".canvas-object-view" ).size();
 		Set<Node> oldOutputs = findAll( ".canvas-object-view .terminal-view.output-terminal" );
 		Set<Node> oldInputs = findAll( ".canvas-object-view .terminal-view.input-terminal" );
 
 		expandCategoryOf( component );
 
-		Window window = find( "#runners.category" ).getScene().getWindow();
+		Window window = find( "#" + component.category + ".category" ).getScene().getWindow();
 		int windowX = ( int )window.getX();
 		int windowY = ( int )window.getY();
-		controller.drag( predicateForIconOf( component ) )
+		controller.drag( matcherForIconOf( component ) )
 				.to( windowX + targetPoint.x, windowY + targetPoint.y );
 
 		TestUtils.awaitCondition( new Callable<Boolean>()
@@ -76,7 +90,7 @@ public class LoadUiRobot
 			@Override
 			public Boolean call() throws Exception
 			{
-				return TestFX.findAll( ".canvas-object-view" ).size() == numberOfComponents + 1;
+				return GuiTest.findAll( ".canvas-object-view" ).size() == numberOfComponents + 1;
 			}
 		}, 25000 );
 
@@ -88,25 +102,31 @@ public class LoadUiRobot
 		return new ComponentHandle( inputs, outputs, controller, this );
 	}
 
-	public Predicate<Node> predicateForIconOf( final Component component )
+	public Matcher<Node> matcherForIconOf( final Component component )
 	{
-		return new Predicate<Node>()
-		{
-			@Override
-			public boolean apply( Node input )
-			{
-				if( input.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
-				{
-					return input.toString().equals( component.name );
-				}
-				return false;
-			}
-		};
+		 return new TypeSafeMatcher<Node>()
+		 {
+			 @Override
+			 public boolean matchesSafely( Node node )
+			 {
+				 if( node.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
+				 {
+					 return node.toString().equals( component.name );
+				 }
+				 return false;
+			 }
+
+			 @Override
+			 public void describeTo( Description description )
+			 {
+				 //To change body of implemented methods use File | Settings | File Templates.
+			 }
+		 };
 	}
 
 	public void expandCategoryOf( Component component )
 	{
-		if( TestFX.findAll( "#" + component.category + ".category .expander-button" ).isEmpty() )
+		if( GuiTest.findAll( "#" + component.category + ".category .expander-button" ).isEmpty() )
 		{
 			scrollToCategoryOf( component );
 		}
@@ -116,7 +136,7 @@ public class LoadUiRobot
 	public void scrollToCategoryOf( Component component )
 	{
 		int maxToolboxCategories = 50;
-		while( TestFX.findAll( "#" + component.category + ".category" ).isEmpty() )
+		while( GuiTest.findAll( "#" + component.category + ".category" ).isEmpty() )
 		{
 			if( --maxToolboxCategories < 0 )
 				throw new RuntimeException( "Could not find component category " + component.category
@@ -171,5 +191,18 @@ public class LoadUiRobot
 		controller.sleep( unit.toMillis( number ) );
 		clickPlayStopButton();
 		controller.sleep( 2000 );
+	}
+
+	public void deleteAllComponentsFromProjectView()
+	{
+		controller.click( "#designTab" );
+
+		int maxTries = 20;
+		int tries = 0;
+		while( tries++ < maxTries && !findAll( ".component-view" ).isEmpty() )
+			controller.click( ".component-view #menu" ).click( "#delete-item" ).click( "#default" );
+
+		assertThat( ".component-layer", contains( 0, ".component-view" ) );
+		resetPredefinedPoints();
 	}
 }

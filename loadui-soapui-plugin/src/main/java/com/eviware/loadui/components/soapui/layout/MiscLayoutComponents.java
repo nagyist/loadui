@@ -15,67 +15,119 @@
  */
 package com.eviware.loadui.components.soapui.layout;
 
-import java.io.File;
-
+import com.eviware.loadui.api.ui.dialog.FilePickerDialog;
+import com.eviware.loadui.api.ui.dialog.FilePickerDialogFactory;
+import com.eviware.loadui.impl.layout.LayoutComponentImpl;
+import com.eviware.loadui.util.BeanInjector;
+import com.eviware.loadui.util.StringUtils;
+import com.eviware.loadui.util.soapui.CajoClient;
+import com.google.common.collect.ImmutableMap;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eviware.loadui.impl.layout.ActionLayoutComponentImpl;
-import com.eviware.loadui.util.StringUtils;
-import com.eviware.loadui.util.soapui.CajoClient;
-import com.eviware.soapui.support.UISupport;
-import com.google.common.collect.ImmutableMap;
+import java.io.File;
 
 public class MiscLayoutComponents
 {
 	private static final Logger log = LoggerFactory.getLogger( MiscLayoutComponents.class );
 
-	public static ActionLayoutComponentImpl buildOpenInSoapUiButton( final String projectFileName,
-			final String testSuiteName, final String testCaseName )
+	public LayoutComponentImpl buildOpenInSoapUiButton( final String projectFileName,
+																		 final String testSuiteName,
+																		 final String testCaseName )
 	{
-		return new ActionLayoutComponentImpl( ImmutableMap.<String, Object> builder() //
-				.put( ActionLayoutComponentImpl.LABEL, "Open in soapUI" ) //
-				.put( ActionLayoutComponentImpl.ASYNC, false ) //
-				.put( ActionLayoutComponentImpl.ACTION, new Runnable()
+		final Button openInSoapUIButton = ButtonBuilder.create()
+				.text( "Open in SoapUI" )
+				.build();
+
+		final Runnable action = new Runnable()
+		{
+			public void run()
+			{
+				try
 				{
-					@Override
+					final CajoClient cajo = CajoClient.getInstance();
+					String path = cajo.getPathToSoapUIBat();
+
+					File soapUIExecutable;
+					if( StringUtils.isNullOrEmpty( path ) )
+					{
+						soapUIExecutable = new File( "" );
+					}
+					else
+					{
+						soapUIExecutable = new File( path );
+					}
+
+					if( StringUtils.isNullOrEmpty( soapUIExecutable.getAbsolutePath() )
+							|| !soapUIExecutable.exists()
+							|| !soapUIExecutable.canExecute() )
+					{
+						log.warn( "no or an invalid path to SoapUI has been set!" );
+						showFilePickerDialog( openInSoapUIButton,
+								"You are missing the path to the SoapUI executable",
+								"Select a SoapUI executable",
+								FilePickerDialog.ExtensionFilter.SOAPUI_EXECUTABLE );
+					}
+					else
+					{
+						log.info( "Opening TestCase In SoapUI" );
+						cajo.openTestCase( projectFileName, testSuiteName, testCaseName );
+					}
+				}
+				catch( Exception e )
+				{
+					e.printStackTrace();
+				}
+			}
+		};
+
+		openInSoapUIButton.setOnAction( new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle( ActionEvent actionEvent )
+			{
+				new Thread( action ).start();
+			}
+		} );
+
+		return new LayoutComponentImpl( ImmutableMap.<String, Object>builder()
+				.put( "component", openInSoapUIButton )
+				.build() );
+	}
+
+	private void showFilePickerDialog( final Button button, final String title, final String filePickerTitle, FilePickerDialog.ExtensionFilter soapuiExecutable )
+	{
+		Platform.runLater( new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				FilePickerDialogFactory filePickerDialogFactory = BeanInjector.getBean( FilePickerDialogFactory.class );
+
+				final FilePickerDialog confirm = filePickerDialogFactory.createDialog( button.getText(), title, filePickerTitle, FilePickerDialog.ExtensionFilter.SOAPUI_EXECUTABLE );
+
+				Runnable callback = new Runnable()
+				{
 					public void run()
 					{
-						try
-						{
-							if( StringUtils.isNullOrEmpty( CajoClient.getInstance().getPathToSoapUIBat() ) )
-							{
-								log.warn( "No path to soapUI has been set!" );
-								boolean confirm = UISupport
-										.confirm(
-												"To open the TestCase in soapUI you must provide the path to the soapUI executable\nWould you like to do that now?.",
-												"Enter path to soapUI" );
-								if( !confirm )
-									return;
-								File soapUIPath = UISupport.getFileDialogs().open( null, "Select soapUI executable", null,
-										null, null );
-								if( soapUIPath == null )
-								{
-									log.error( "Path to soapUI not provided." );
-									return;
-								}
-								CajoClient.getInstance().setPathToSoapUIBat( soapUIPath.getAbsolutePath() );
-							}
-							if( !CajoClient.getInstance().testConnection() )
-							{
-								CajoClient.getInstance().startSoapUI();
-							}
-							if( CajoClient.getInstance().testConnection() )
-							{
-								CajoClient.getInstance().invoke( "openTestCase",
-										new String[] { projectFileName, testSuiteName, testCaseName } );
-							}
-						}
-						catch( Exception e )
-						{
-							e.printStackTrace();
-						}
+						CajoClient cajo = CajoClient.getInstance();
+
+						String newPath = confirm.getFile().getAbsolutePath();
+						cajo.setPathToSoapUIBat( newPath );
+
+						button.fire();
 					}
-				} ).build() );
+				};
+
+				confirm.show();
+
+				confirm.setOnConfirm( callback );
+			}
+		} );
 	}
 }

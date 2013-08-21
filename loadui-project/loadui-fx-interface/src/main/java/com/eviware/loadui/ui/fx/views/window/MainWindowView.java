@@ -37,10 +37,14 @@ import com.eviware.loadui.ui.fx.views.project.ProjectView;
 import com.eviware.loadui.ui.fx.views.project.SaveProjectDialog;
 import com.eviware.loadui.ui.fx.views.rename.RenameDialog;
 import com.eviware.loadui.ui.fx.views.workspace.GlobalSettingsDialog;
+import com.eviware.loadui.ui.fx.views.workspace.NewVersionDialog;
 import com.eviware.loadui.ui.fx.views.workspace.SystemPropertiesDialog;
 import com.eviware.loadui.ui.fx.views.workspace.WorkspaceView;
+import com.eviware.loadui.util.NewVersionChecker;
 import com.google.common.base.Preconditions;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -134,7 +138,6 @@ public class MainWindowView extends StackPane implements OverlayHolder
 			e1.printStackTrace();
 			ErrorHandler.promptRestart();
 		}
-
 	}
 
 	public MenuButton getMainButton()

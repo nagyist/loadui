@@ -15,8 +15,8 @@
  */
 package com.eviware.loadui.component.soapui;
 
-import static com.eviware.loadui.ui.fx.util.test.TestFX.targetWindow;
-import static com.eviware.loadui.ui.fx.util.test.TestFX.wrap;
+import static org.loadui.testfx.GuiTest.targetWindow;
+import static org.loadui.testfx.GuiTest.wrap;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
@@ -31,6 +31,8 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import org.loadui.testfx.categories.TestFX;
+import org.loadui.testfx.GuiTest;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.GroupBuilder;
@@ -55,23 +57,21 @@ import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.components.soapui.SoapUISamplerComponent;
 import com.eviware.loadui.components.soapui.TestCasePropertiesNode;
-import com.eviware.loadui.test.categories.GUITest;
 import com.eviware.loadui.ui.fx.util.TestingProperty;
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
+import org.loadui.testfx.FXScreenController;
+import org.loadui.testfx.FXTestUtils;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
 import com.eviware.soapui.model.testsuite.TestProperty;
 import com.google.common.util.concurrent.SettableFuture;
 import com.sun.javafx.scene.control.skin.LabeledText;
 import com.sun.javafx.scene.control.skin.TableRowSkin;
 
-@Category( GUITest.class )
+@Category( TestFX.class )
 public class TestCasePropertiesNodeGuiTest
 {
 	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();
 	//private static Stage stage;
-	private static TestFX controller;
+	private static GuiTest controller;
 
 	private static List<TestProperty> inputProperties = new ArrayList<>();
 	private static List<Property<?>> outputProperties = new ArrayList<>();
@@ -219,7 +219,7 @@ public class TestCasePropertiesNodeGuiTest
 
 	public static void setIndexStyleclassToCells()
 	{
-		Set<Node> rows = TestFX.findAll( ".table-row-cell" );
+		Set<Node> rows = GuiTest.findAll( ".table-row-cell" );
 		;
 		int n = 0;
 		for( Node row : rows )
@@ -248,7 +248,7 @@ public class TestCasePropertiesNodeGuiTest
 	@Test
 	public void shouldDisplayAValue()
 	{
-		LabeledText text = ( LabeledText )TestFX.find( ".text", TestFX.find( ".column0-row0" ) );
+		LabeledText text = ( LabeledText )GuiTest.find( ".text", GuiTest.find( ".column0-row0" ) );
 		assertEquals( "p1", text.getText() );
 	}
 
@@ -333,7 +333,7 @@ public class TestCasePropertiesNodeGuiTest
 
 	private String getText( String selector )
 	{
-		return ( ( Text )TestFX.find( ".text", TestFX.find( selector ) ) ).getText();
+		return ( ( Text )GuiTest.find( ".text", GuiTest.find( selector ) ) ).getText();
 	}
 
 }

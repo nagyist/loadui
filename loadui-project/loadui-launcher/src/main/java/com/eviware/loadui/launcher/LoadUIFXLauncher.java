@@ -40,6 +40,7 @@ public class LoadUIFXLauncher extends LoadUILauncher
 
 	public static void main( String[] args )
 	{
+
 		Application.launch( FXApplication.class, args );
 	}
 
@@ -80,6 +81,7 @@ public class LoadUIFXLauncher extends LoadUILauncher
 		@Override
 		public void start( final Stage stage ) throws Exception
 		{
+
 			log.info( "Starting FXApplication, LoadUI Version: " + LoadUI.version() );
 			File workingDir = LoadUI.getWorkingDir();
 			log.info( "LoadUI Working directory: " + workingDir );

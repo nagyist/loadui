@@ -15,10 +15,17 @@
  */
 package com.eviware.loadui.test.ui.fx;
 
+import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
+import static javafx.scene.input.KeyCode.A;
+import static javafx.scene.input.KeyCode.CONTROL;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 
+import com.eviware.loadui.test.TestState;
+import com.eviware.loadui.test.ui.fx.states.SimpleWebTestState;
+import javafx.scene.Node;
+import org.loadui.testfx.GuiTest;
 import javafx.scene.input.KeyCode;
 
 import org.junit.AfterClass;
@@ -30,38 +37,22 @@ import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.model.WorkspaceProvider;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
 import com.eviware.loadui.util.BeanInjector;
 
 @Category( IntegrationTest.class )
-public class ProjectPlaybackTest
+public class ProjectPlaybackTest extends FxIntegrationTestBase
 {
-	private static TestFX controller;
-
-	@BeforeClass
-	public static void enterState() throws Exception
-	{
-		ProjectLoadedWithoutAgentsState.STATE.enter();
-		controller = GUI.getController();
-	}
-
-	@AfterClass
-	public static void leaveState() throws Exception
-	{
-		ProjectLoadedWithoutAgentsState.STATE.getParent().enter();
-	}
-
 	@Test
 	public void shouldPlayAndStop() throws Exception
 	{
-		controller.click( ".project-playback-panel .play-button" ).sleep( 5000 );
+		click( ".project-playback-panel .play-button" ).sleep( 5000 );
 
 		Collection<? extends ProjectItem> projects = BeanInjector.getBean( WorkspaceProvider.class ).getWorkspace()
 				.getProjects();
 		ProjectItem project = projects.iterator().next();
 		assertTrue( project.isRunning() );
 
-		controller.click( ".project-playback-panel .play-button" ).sleep( 4000 );
+		click( ".project-playback-panel .play-button" ).sleep( 4000 );
 		assertTrue( !project.isRunning() );
 	}
 
@@ -70,12 +61,28 @@ public class ProjectPlaybackTest
 	{
 		ProjectItem project = ProjectLoadedWithoutAgentsState.STATE.getProject();
 
-		controller.click( "#set-limits" ).click( "#time-limit" ).press( KeyCode.CONTROL, KeyCode.A )
-				.release( KeyCode.CONTROL, KeyCode.A ).sleep( 100 ).type( "6" ).sleep( 100 ).click( "#default" )
+		long veryHighLoad = 10_000;
+		turnKnobIn( FIXED_RATE_GENERATOR ).to( veryHighLoad );
+
+		increaseMaxConcurrentRequests();
+
+		click( "#set-limits" ).click( "#time-limit" ).doubleClick().type( "6" ).click( "#default" )
 				.sleep( 1000 ).click( ".project-playback-panel .play-button" ).sleep( 4000 );
+
 		assertTrue( project.isRunning() );
 
-		controller.sleep( 9000 );
+		sleep( 9000 );
 		assertTrue( !project.isRunning() );
+	}
+
+	private void increaseMaxConcurrentRequests()
+	{
+		click( ".web-page-runner .menu-button" ).click( "Settings" ).click( "#max-concurrent-requests" ).doubleClick().type( "1000" ).click( "#default" );
+	}
+
+	@Override
+	public TestState getStartingState()
+	{
+		return SimpleWebTestState.STATE;
 	}
 }

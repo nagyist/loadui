@@ -15,7 +15,7 @@
  */
 package com.eviware.loadui.ui.fx.util;
 
-import static com.eviware.loadui.ui.fx.util.test.TestFX.targetWindow;
+import static org.loadui.testfx.GuiTest.targetWindow;
 import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -23,6 +23,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.TimeUnit;
 
+import org.loadui.testfx.categories.TestFX;
+import org.loadui.testfx.FXScreenController;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Bounds;
@@ -38,13 +42,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.eviware.loadui.test.categories.GUITest;
-import com.eviware.loadui.ui.fx.util.test.FXScreenController;
-import com.eviware.loadui.ui.fx.util.test.FXTestUtils;
-import com.eviware.loadui.ui.fx.util.test.TestFX;
 import com.google.common.util.concurrent.SettableFuture;
 
-@Category( GUITest.class )
+@Category( TestFX.class )
 public class NodeUtilsTest
 {
 
@@ -63,13 +63,13 @@ public class NodeUtilsTest
 	}
 
 	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();
-	private static TestFX controller;
+	private static GuiTest controller;
 	private static Stage stage;
 
 	@BeforeClass
 	public static void setup()
 	{
-		controller = TestFX.wrap( new FXScreenController() );
+		controller = GuiTest.wrap( new FXScreenController() );
 		FXTestUtils.launchApp( NodeUtilsTestApp.class );
 		try
 		{
