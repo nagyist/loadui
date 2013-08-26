@@ -4,20 +4,21 @@ import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.FxIntegrationTestBase;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import static com.eviware.loadui.test.ui.fx.tablelog.TableLogTestSupport.tableRows;
-import static com.eviware.loadui.test.ui.fx.tablelog.TableLogTestSupport.testRunStopsWithinLimit;
+import static com.eviware.loadui.test.ui.fx.FxIntegrationBase.RunBlocking.NON_BLOCKING;
+import static com.eviware.loadui.test.ui.fx.tablelog.TableLogTestSupport.*;
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.TABLE_LOG;
-import static org.loadui.testfx.matchers.EmptyMatcher.empty;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
+import static org.loadui.testfx.matchers.EmptyMatcher.empty;
 
-@Category( IntegrationTest.class )
+@Category(IntegrationTest.class)
 public class TableLogTest extends FxIntegrationTestBase
 {
 	//TODO: Needs to reset state between tests.
@@ -51,7 +52,7 @@ public class TableLogTest extends FxIntegrationTestBase
 	}
 
 	@Test
-	public void should_beAbleToHandle_hugeLoadsNicely()
+	public void should_beAbleToHandle_hugeLoadsWithoutFreezingTheGUI()
 	{
 		// GIVEN
 		connect( FIXED_RATE_GENERATOR ).to( TABLE_LOG );
@@ -62,13 +63,21 @@ public class TableLogTest extends FxIntegrationTestBase
 
 		// WHEN
 		robot.pointAtPlayStopButton();
+		runTestFor( 2, SECONDS, NON_BLOCKING );
 
-		long startT = System.currentTimeMillis();
-		runTestFor( 2, SECONDS );
+		waitForProjectToHaveRunningAs( true );
+		sleep( 1500 );
 
 		// THEN
-		testRunStopsWithinLimit( startT, 5000 );
+		assertCanRunEventInJavaFxThreadWithin( 1, SECONDS );
 
+	}
+
+	@After
+	public void cleanup()
+	{
+		waitForProjectToHaveRunningAs( false );
+		robot.deleteAllComponentsFromProjectView();
 	}
 
 	//TODO test log files work when the user chooses to use them

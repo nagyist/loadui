@@ -17,14 +17,12 @@ package com.eviware.loadui.test.ui.fx.states;
 
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.ui.fx.FxTestState;
-import javafx.scene.Node;
 
-import static org.loadui.testfx.GuiTest.find;
-import static org.loadui.testfx.GuiTest.findAll;
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.WEB_PAGE_RUNNER;
-import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
 import static org.junit.Assert.assertThat;
+import static org.loadui.testfx.GuiTest.findAll;
+import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
 
 public class SimpleWebTestState extends FxTestState
 {
@@ -51,13 +49,6 @@ public class SimpleWebTestState extends FxTestState
 	@Override
 	protected void exitToParent() throws Exception
 	{
-		controller.click( "#designTab" );
-
-		int maxTries = 2;
-		int tries = 0;
-		while( tries++ < maxTries && !findAll( ".component-view" ).isEmpty() )
-			controller.click( ".component-view #menu" ).click( "#delete-item" ).click( "#default" );
-
-		assertThat( ".component-layer", contains( 0, ".component-view" ) );
+		robot.deleteAllComponentsFromProjectView();
 	}
 }

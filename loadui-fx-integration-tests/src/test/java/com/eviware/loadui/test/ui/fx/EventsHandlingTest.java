@@ -15,35 +15,30 @@
  */
 package com.eviware.loadui.test.ui.fx;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import com.eviware.loadui.api.model.ComponentItem;
+import com.eviware.loadui.test.categories.IntegrationTest;
+import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
+import com.eviware.loadui.util.test.TestUtils;
+import javafx.scene.Node;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.loadui.testfx.GuiTest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
-import org.loadui.testfx.GuiTest;
-import javafx.scene.Node;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.eviware.loadui.api.model.ComponentItem;
-import com.eviware.loadui.test.categories.IntegrationTest;
-import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import com.eviware.loadui.util.test.TestUtils;
-import com.google.common.base.Predicate;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for testing loadUI events handling.
- * 
+ *
  * @author renato
  */
 @Category( IntegrationTest.class )
@@ -51,19 +46,6 @@ public class EventsHandlingTest
 {
 
 	private static final Logger log = LoggerFactory.getLogger( EventsHandlingTest.class );
-
-	private static final Predicate<Node> CONDITION_COMPONENT = new Predicate<Node>()
-	{
-		@Override
-		public boolean apply( Node input )
-		{
-			if( input.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
-			{
-				return input.toString().equals( "Fixed Rate" );
-			}
-			return false;
-		}
-	};
 
 	private static GuiTest controller;
 
@@ -87,7 +69,7 @@ public class EventsHandlingTest
 	@Test
 	public void testKnobExists() throws Exception
 	{
-		controller.click( "#generators" ).drag( CONDITION_COMPONENT ).by( 150, -50 ).drop();
+		controller.click( "#generators" ).drag( "Fixed Rate" ).by( 150, -50 ).drop();
 		TestUtils.awaitCondition( new Callable<Boolean>()
 		{
 			@Override

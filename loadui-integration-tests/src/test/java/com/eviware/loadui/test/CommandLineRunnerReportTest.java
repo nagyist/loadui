@@ -15,7 +15,6 @@ package com.eviware.loadui.test;/*
  */
 
 
-import com.eviware.loadui.test.CommandLineLauncherTestUtils;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -42,7 +41,7 @@ import static org.xmlmatchers.xpath.HasXPath.hasXPath;
  * Date: 2013-07-04
  * Time: 10:59
  */
-@Category(IntegrationTest.class)
+@Category( IntegrationTest.class )
 public class CommandLineRunnerReportTest
 {
 	protected static final Logger log = LoggerFactory.getLogger( CommandLineRunnerReportTest.class );
@@ -66,7 +65,7 @@ public class CommandLineRunnerReportTest
 		}
 	}
 
-	@Test
+	@Test( timeout = 60_000 )
 	public void reportCreatedTest()
 	{
 		//Given

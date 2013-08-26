@@ -20,8 +20,10 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertThat;
 import static org.loadui.testfx.GuiTest.find;
 import static org.loadui.testfx.GuiTest.findAll;
+import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
 
 public class LoadUiRobot
 {
@@ -40,13 +42,21 @@ public class LoadUiRobot
 		}
 	}
 
-	private Queue<Point> predefinedPoints = Lists.newLinkedList( ImmutableList.of( new Point( 250, 250 ), new Point(
-			450, 450 ) ) );
+	private Queue<Point> predefinedPoints;
 	private GuiTest controller;
+
+	{
+		resetPredefinedPoints();
+	}
 
 	private LoadUiRobot( GuiTest controller )
 	{
 		this.controller = controller;
+	}
+
+	public void resetPredefinedPoints() {
+		predefinedPoints = Lists.newLinkedList( ImmutableList.of( new Point( 250, 250 ), new Point(
+				450, 450 ) ) );
 	}
 
 	public static LoadUiRobot usingController( GuiTest controller )
@@ -69,7 +79,7 @@ public class LoadUiRobot
 
 		expandCategoryOf( component );
 
-		Window window = find( "#runners.category" ).getScene().getWindow();
+		Window window = find( "#" + component.category + ".category" ).getScene().getWindow();
 		int windowX = ( int )window.getX();
 		int windowY = ( int )window.getY();
 		controller.drag( matcherForIconOf( component ) )
@@ -181,5 +191,18 @@ public class LoadUiRobot
 		controller.sleep( unit.toMillis( number ) );
 		clickPlayStopButton();
 		controller.sleep( 2000 );
+	}
+
+	public void deleteAllComponentsFromProjectView()
+	{
+		controller.click( "#designTab" );
+
+		int maxTries = 20;
+		int tries = 0;
+		while( tries++ < maxTries && !findAll( ".component-view" ).isEmpty() )
+			controller.click( ".component-view #menu" ).click( "#delete-item" ).click( "#default" );
+
+		assertThat( ".component-layer", contains( 0, ".component-view" ) );
+		resetPredefinedPoints();
 	}
 }

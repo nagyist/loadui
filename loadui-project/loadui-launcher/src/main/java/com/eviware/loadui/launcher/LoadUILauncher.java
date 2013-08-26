@@ -22,6 +22,7 @@ import com.eviware.loadui.launcher.api.OSGiUtils;
 import com.eviware.loadui.launcher.util.BndUtils;
 import com.eviware.loadui.launcher.util.ErrorHandler;
 import javafx.application.Application;
+import javafx.scene.text.Font;
 import org.apache.commons.cli.*;
 import org.apache.felix.framework.FrameworkFactory;
 import org.apache.felix.main.AutoProcessor;
@@ -65,11 +66,13 @@ public abstract class LoadUILauncher
 
 	public static void main( String[] args )
 	{
+		ensureFontsAvailableForJavaFX();
+		printLoadUIASCIILogo();
+
 		for( String arg : args )
 		{
 			if( arg.contains( "cmd" ) )
 			{
-				printLoadUIASCIILogo();
 				List<String> argList = new ArrayList<>( Arrays.asList( args ) );
 				argList.remove( arg );
 				String[] newArgs = argList.toArray( new String[argList.size()] );
@@ -81,35 +84,99 @@ public abstract class LoadUILauncher
 		Application.launch( FXApplication.class, args );
 	}
 
-	private static void printLoadUIASCIILogo(){
+	private static void printLoadUIASCIILogo()
+	{
 		System.out.println(
 				"                                                 \n" +
-				"                    .:::.                        \n" +
-				"                  .==:::::.                      \n" +
-				"                .====:::::::.                    \n" +
-				"              .======:::::::::.                  \n" +
-				"            .========:::::::::::.                \n" +
-				"          .:=========:::::::::::::.              \n" +
-				"        .:::=========:::::::::::::::.            \n" +
-				"       :::::=========:::::::::::::::::           \n" +
-				"       :::::=========:::::::::::::::::           \n" +
-				"        ':::=========:::::::::::::::'            \n" +
-				"          ':======================'              \n" +
-				"            '==================='                \n" +
-				"              '==============='                  \n" +
-				"                '==========='                    \n" +
-				"                  ':::::::'                      \n" +
-				"                    ':::'                        \n" +
-				"                                                 \n" +
-				"                                                 \n" +
-				" ::                       ::  ::   ::  ::::      \n" +
-				" ::                       ::  ::   ::   ::       \n" +
-				" ::      ::::   ::::: ::::::  ::   ::   ::       \n" +
-				" ::     ::  :: ::  :: ::  ::  ::   ::   ::       \n" +
-				" ::::::  ::::   ::: : ::::::   :::::   ::::      \n" +
-				"\n" +
-				"     	       LoadUI " + LoadUI.version() + "\n"
+						"                    .:::.                        \n" +
+						"                  .==:::::.                      \n" +
+						"                .====:::::::.                    \n" +
+						"              .======:::::::::.                  \n" +
+						"            .========:::::::::::.                \n" +
+						"          .:=========:::::::::::::.              \n" +
+						"        .:::=========:::::::::::::::.            \n" +
+						"       :::::=========:::::::::::::::::           \n" +
+						"       :::::=========:::::::::::::::::           \n" +
+						"        ':::=========:::::::::::::::'            \n" +
+						"          ':======================'              \n" +
+						"            '==================='                \n" +
+						"              '==============='                  \n" +
+						"                '==========='                    \n" +
+						"                  ':::::::'                      \n" +
+						"                    ':::'                        \n" +
+						"                                                 \n" +
+						"                                                 \n" +
+						" ::                       ::  ::   ::  ::::      \n" +
+						" ::                       ::  ::   ::   ::       \n" +
+						" ::      ::::   ::::: ::::::  ::   ::   ::       \n" +
+						" ::     ::  :: ::  :: ::  ::  ::   ::   ::       \n" +
+						" ::::::  ::::   ::: : ::::::   :::::   ::::      \n" +
+						"\n" +
+						"     	        LoadUI " + LoadUI.version() + "\n\n"
 		);
+	}
+
+	private static void ensureFontsAvailableForJavaFX()
+	{
+		if( !isJavaFXFontsAvailable() )
+		{
+			log.info( "Preparing fonts for JavaFX2" );
+			if( installTrueTypeFont() )
+			{
+				log.info( "Restarting JRE for changes to take effect." );
+				LoadUI.restart();
+			}
+			else
+			{
+				System.err.println( "Failed to install TrueType fonts\nLoadUI depends on JavaFX that depends on TrueType fonts to work." );
+				System.exit( -1 );
+			}
+		}
+	}
+
+	private static boolean isJavaFXFontsAvailable()
+	{
+		try
+		{
+			//If a Unix-based System is lacking TrueType fonts for JavaFX this causes a NullPointerException
+			//This is because Oracle took a decision not to support Type-1 Post-script Fonts for JavaFX.
+			//Many components give a call to this method, so we need to support it by installing fonts.
+			Font.getDefault();
+			return true;
+		}
+		catch( NullPointerException e )
+		{
+			return false;
+		}
+	}
+
+	private static boolean installTrueTypeFont()
+	{
+		String workingDir = LoadUI.getWorkingDir().getAbsolutePath();
+		workingDir = workingDir.substring( 0, workingDir.length() - 1 );
+		String userHome = System.getProperty( "user.home" );
+
+		try
+		{
+			ProcessBuilder pb = new ProcessBuilder();
+
+			Process currentProcess = pb.command( "/bin/mkdir", "-p", userHome + "/.fonts" ).start();
+			currentProcess.waitFor();
+
+			currentProcess = pb.command( "/bin/cp", "-rf", workingDir + "jre/lib/fonts", userHome + "/.fonts" ).start();
+			currentProcess.waitFor();
+
+			currentProcess = pb.command( "/usr/bin/fc-cache" ).start();
+			currentProcess.waitFor();
+
+			return true;
+		}
+		catch( InterruptedException | IOException e )
+		{
+			log.warning( "Unable to install LoadUI fonts on local system\n" );
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	protected static Framework framework;
@@ -293,6 +360,7 @@ public abstract class LoadUILauncher
 		}
 	}
 
+
 	private void loadExternalJarsAsBundles()
 	{
 		File source = new File( LoadUI.getWorkingDir(), "ext" );
@@ -337,7 +405,7 @@ public abstract class LoadUILauncher
 
 			try
 			{
-				@SuppressWarnings("resource")
+				@SuppressWarnings( "resource" )
 				RandomAccessFile randomAccessFile = new RandomAccessFile( lockFile, "rw" );
 				FileLock lock = randomAccessFile.getChannel().tryLock();
 				if( lock == null )
