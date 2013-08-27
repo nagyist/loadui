@@ -50,10 +50,9 @@ public class CreateAssertionDialog extends ConfirmationDialog
 		getItems().add( hBox );
 	}
 
-	public AssertableWrapper<ListenableValue<Number>> getSelectedAssertable()
+	public StatisticWrapper<Number> getSelectedAssertable()
 	{
-		Labeled selected = tree.getSelectionModel().getSelectedItem().getValue();
-		return ( AssertableWrapper<ListenableValue<Number>> )selected;
+		return  tree.getSelectedAssertion();
 	}
 
 	public Constraint<Number> getConstraint()

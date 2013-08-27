@@ -85,7 +85,6 @@ public class AssertionInspectorView extends HBox
 	@FXML
 	private void initialize()
 	{
-
 		projectProperty.addListener( new ChangeListener<ProjectItem>()
 		{
 			@Override
@@ -138,7 +137,7 @@ public class AssertionInspectorView extends HBox
 			@Override
 			public void handle( ActionEvent actionEvent )
 			{
-				AssertableWrapper<ListenableValue<Number>> selectedWrapper = dialog.getSelectedAssertable();
+				StatisticWrapper<Number> selectedWrapper = dialog.getSelectedAssertable();
 
 				Resolver<? extends ListenableValue<Number>> resolver = selectedWrapper.getResolver();
 

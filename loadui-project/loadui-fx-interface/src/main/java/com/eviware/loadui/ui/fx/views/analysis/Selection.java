@@ -36,7 +36,7 @@ public class Selection
 	{
 		if( selectedIsSource )
 		{
-			source = ( ( LabeledStringValue )selected.getValue() ).getValue();
+			source = ( ( LabeledStringValue<String, String> )selected.getValue() ).getValue();
 			statistic = selected.getParent().getValue().getLabel();
 			variable = selected.getParent().getParent().getValue().getLabel();
 			holder = ( StatisticHolder )selected.getParent().getParent().getParent().getValue();

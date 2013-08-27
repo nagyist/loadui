@@ -75,6 +75,7 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 	{
 		super( root );
 		setShowRoot( false );
+
 		getSelectionModel().setSelectionMode( SelectionMode.MULTIPLE );
 		getStyleClass().add( "assertable-tree" );
 
@@ -131,6 +132,8 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 
 	private static abstract class TreeCreator
 	{
+
+
 		abstract void createTree( StatisticHolder holder, TreeItem<Labeled> root );
 
 		TreeItem<Labeled> treeItem( Labeled value, TreeItem<Labeled> parent )
@@ -139,7 +142,6 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 			parent.getChildren().add( item );
 			return item;
 		}
-
 	}
 
 	private class StandardTreeCreator extends TreeCreator
@@ -169,7 +171,7 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 				{
 					statisticItem.getChildren().add( dummyItem( AGENT_TOTAL, StatisticVariable.MAIN_SOURCE ) );
 					for( AgentItem agent : agents )
-						treeItem( new LabeledStringValue( agent.getLabel() ), statisticItem );
+						treeItem( new LabeledStringValue<String, Labeled>( agent.getLabel(), agent ), statisticItem );
 				}
 
 			}
@@ -181,14 +183,12 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 		@Override
 		public void createTree( StatisticHolder holder, TreeItem<Labeled> root )
 		{
-
 			for( String variableName : holder.getStatisticVariableNames() )
 			{
 				StatisticVariable variable = holder.getStatisticVariable( variableName );
 				final TreeItem<Labeled> variableItem = treeItem( variable, root );
 				createSubItems( variable, variableItem );
 			}
-
 		}
 
 		private void createSubItems( StatisticVariable variable, final TreeItem<Labeled> variableItem )
@@ -212,7 +212,7 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 
 				for( String source : variable.getSources() )
 					if( !source.equals( StatisticVariable.MAIN_SOURCE ) )
-						treeItem( new LabeledStringValue( source ), itemsBySource.get( source ) );
+						treeItem( itemsBySource.get( source ).getValue(), itemsBySource.get( source ) );
 			}
 		}
 	}

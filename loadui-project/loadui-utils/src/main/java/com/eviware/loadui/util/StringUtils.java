@@ -101,6 +101,15 @@ public class StringUtils
 				.substring( string.length() - ( maxLength - 3 - splitIndex ) ) );
 	}
 
+	public static String replace( String original, char replace, char with )
+	{
+		return original.replace( replace, with );
+	}
+
+	public static String replaceUnderscoreWithSpace( String original ){
+		return replace( original, '_', ' ');
+	}
+
 	/**
 	 * Converts line separators in a String to the system default (defined in the
 	 * System Property "line.separator").
@@ -186,6 +195,8 @@ public class StringUtils
 		}
 		return strings;
 	}
+
+
 
 	public static String toHhMmSs( long seconds )
 	{
