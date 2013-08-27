@@ -23,6 +23,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import com.eviware.loadui.api.model.ModelItemType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -202,6 +203,12 @@ public final class AgentItemImpl extends ModelItemImpl<AgentItemConfig> implemen
 	public String getHelpUrl()
 	{
 		return "http://www.loadui.org/Distribution/distribution-getting-started.html";
+	}
+
+	@Override
+	public ModelItemType getModelItemType()
+	{
+		return ModelItemType.AGENT;
 	}
 
 	@Override

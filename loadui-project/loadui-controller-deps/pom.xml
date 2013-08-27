@@ -24,7 +24,7 @@
 							<includeScope>compile</includeScope>
 							<excludeTypes>pom</excludeTypes>
 							<!-- includeScope doesn't seem to work -->
-							<excludeGroupIds>javafx,com.google.code.findbugs</excludeGroupIds>
+							<excludeGroupIds>com.google.code.findbugs</excludeGroupIds>
 							<outputDirectory>${basedir}/target/bundle</outputDirectory>
 						</configuration>
 					</execution>

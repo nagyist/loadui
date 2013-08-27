@@ -40,8 +40,7 @@ public interface StatisticHolder extends EventFirer, Chart.Owner
 	/**
 	 * Retrieves a particular Statistic by its name.
 	 * 
-	 * @param statisticName
-	 * @param description
+	 * @param statisticVariableName
 	 * @return
 	 */
 	public StatisticVariable getStatisticVariable( String statisticVariableName );

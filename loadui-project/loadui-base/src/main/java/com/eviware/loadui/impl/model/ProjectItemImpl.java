@@ -35,6 +35,7 @@ import java.util.concurrent.TimeoutException;
 
 import javax.annotation.Nonnull;
 
+import com.eviware.loadui.api.model.*;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 import org.slf4j.Logger;
@@ -59,14 +60,6 @@ import com.eviware.loadui.api.messaging.MessageAwaiterFactory;
 import com.eviware.loadui.api.messaging.MessageEndpoint;
 import com.eviware.loadui.api.messaging.MessageListener;
 import com.eviware.loadui.api.messaging.SceneCommunication;
-import com.eviware.loadui.api.model.AgentItem;
-import com.eviware.loadui.api.model.Assignment;
-import com.eviware.loadui.api.model.CanvasItem;
-import com.eviware.loadui.api.model.CanvasObjectItem;
-import com.eviware.loadui.api.model.ComponentItem;
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.api.model.SceneItem;
-import com.eviware.loadui.api.model.WorkspaceItem;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.api.property.PropertySynchronizer;
 import com.eviware.loadui.api.statistics.model.StatisticPages;
@@ -647,6 +640,12 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 		{
 			s.setAbortOnFinish( abort );
 		}
+	}
+
+	@Override
+	public ModelItemType getModelItemType()
+	{
+		return ModelItemType.PROJECT;
 	}
 
 	private class AssignmentImpl implements Assignment
