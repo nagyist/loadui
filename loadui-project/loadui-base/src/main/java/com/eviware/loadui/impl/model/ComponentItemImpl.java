@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
+import com.eviware.loadui.api.model.*;
 import org.springframework.core.convert.ConversionService;
 
 import com.eviware.loadui.LoadUI;
@@ -48,13 +49,6 @@ import com.eviware.loadui.api.execution.TestExecutionTask;
 import com.eviware.loadui.api.execution.TestRunner;
 import com.eviware.loadui.api.layout.LayoutComponent;
 import com.eviware.loadui.api.layout.SettingsLayoutContainer;
-import com.eviware.loadui.api.model.AgentItem;
-import com.eviware.loadui.api.model.Assignment;
-import com.eviware.loadui.api.model.CanvasItem;
-import com.eviware.loadui.api.model.ComponentItem;
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.api.model.SceneItem;
-import com.eviware.loadui.api.model.WorkspaceItem;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.api.statistics.Statistic;
 import com.eviware.loadui.api.statistics.StatisticVariable;
@@ -312,6 +306,12 @@ public class ComponentItemImpl extends ModelItemImpl<ComponentItemConfig> implem
 	public String getHelpUrl()
 	{
 		return customHelpUrl;
+	}
+
+	@Override
+	public ModelItemType getModelItemType()
+	{
+		return ModelItemType.COMMON_COMPONENT;
 	}
 
 	@Override

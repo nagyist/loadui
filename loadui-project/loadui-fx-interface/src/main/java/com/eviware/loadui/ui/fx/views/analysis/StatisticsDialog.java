@@ -68,7 +68,7 @@ public class StatisticsDialog extends ConfirmationDialog
 				{
 					for( Chart chart : charts )
 					{
-						if( addSegment( chartView, chart, selection ) )
+						if( addSegmentIfRightChart( chartView, chart, selection ) )
 							break;
 					}
 				}
@@ -94,7 +94,7 @@ public class StatisticsDialog extends ConfirmationDialog
 		getItems().add( hBox );
 	}
 
-	private boolean addSegment( final ConfigurableLineChartView chartView, Chart chart, Selection selection )
+	private boolean addSegmentIfRightChart( final ConfigurableLineChartView chartView, Chart chart, Selection selection )
 	{
 		if( selection.holder.equals( chart.getOwner() ) )
 		{

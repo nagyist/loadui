@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.eviware.loadui.api.model.*;
 import org.apache.xmlbeans.XmlException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +34,6 @@ import com.eviware.loadui.api.events.EventHandler;
 import com.eviware.loadui.api.events.PropertyEvent;
 import com.eviware.loadui.api.execution.TestExecution;
 import com.eviware.loadui.api.execution.TestRunner;
-import com.eviware.loadui.api.model.AgentItem;
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.api.model.ProjectRef;
-import com.eviware.loadui.api.model.WorkspaceItem;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.config.AgentItemConfig;
 import com.eviware.loadui.config.LoaduiProjectDocumentConfig;
@@ -388,6 +385,12 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 	public void setNumberOfAutosaves( long n )
 	{
 		numberOfAutosaves.setValue( n );
+	}
+
+	@Override
+	public ModelItemType getModelItemType()
+	{
+		return ModelItemType.WORKSPACE;
 	}
 
 	private class ProjectListener implements EventHandler<BaseEvent>

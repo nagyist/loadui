@@ -19,6 +19,7 @@ import com.eviware.loadui.api.statistics.StatisticHolder;
 import com.eviware.loadui.api.traits.Labeled;
 import com.eviware.loadui.ui.fx.util.TreeUtils.LabeledStringValue;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,13 +36,11 @@ public class Selection
 	public final String variable;
 	public final StatisticHolder holder;
 
-	Selection( @Nonnull TreeItem<Labeled> selected, boolean selectedIsSource )
+	Selection( @Nonnull TreeItem<Labeled> selected )
 	{
-		/* TODO: this needs to be fixed. It seems that the selectedIsSource also applies for JMX (tomcat, weblogic and JBoss).
-		 * selectedIsSource is also dependent on if there is an agent in LoadUI (it does not check if it is connected or used in any way) (its wrong).
-		 * in this if statement only !(selected.getParent().getParent().getValue() instanceof StatisticHolder) could work fine too.
-		 */
-		if( selectedIsSource || !( selected.getParent().getParent().getValue() instanceof StatisticHolder ) )
+		final int nodeDepth = TreeView.getNodeLevel( selected );
+
+		if( nodeDepth == 3 )
 		{
 			// selected is agent or tree is having 3 levels ex weblogic, tomcat
 			source = ( ( LabeledStringValue )selected.getValue() ).getValue();
@@ -49,7 +48,7 @@ public class Selection
 			variable = selected.getParent().getParent().getValue().getLabel();
 			holder = ( StatisticHolder )selected.getParent().getParent().getParent().getValue();
 		}
-		else
+		else if( nodeDepth == 2 )
 		{
 			// selected is statistic
 			source = null;
@@ -57,8 +56,10 @@ public class Selection
 			variable = selected.getParent().getValue().getLabel();
 			holder = ( StatisticHolder )selected.getParent().getParent().getValue();
 		}
+		else
+		{
+			throw new IllegalArgumentException( "StatisticTree should not contain any statistic at nodeDepth = " + nodeDepth );
+		}
 
-
-		log.debug( "Selection = source:" + source + " statistic: " + statistic + " variable: " + variable + " holder:" + holder.getLabel() );
 	}
 }
