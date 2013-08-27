@@ -1,13 +1,13 @@
 /*
  * Copyright 2013 SmartBear Software
- * 
+ *
  * Licensed under the EUPL, Version 1.1 or - as soon they will be approved by the European Commission - subsequent
  * versions of the EUPL (the "Licence");
  * You may not use this work except in compliance with the Licence.
  * You may obtain a copy of the Licence at:
- * 
+ *
  * http://ec.europa.eu/idabc/eupl
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the Licence is
  * distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
  * express or implied. See the Licence for the specific language governing permissions and limitations
@@ -15,12 +15,14 @@
  */
 package com.eviware.loadui.test.ui.fx.states;
 
+import com.eviware.loadui.api.events.EventFirer;
 import com.eviware.loadui.api.model.ProjectRef;
 import com.eviware.loadui.api.model.WorkspaceItem;
 import com.eviware.loadui.api.model.WorkspaceProvider;
 import com.eviware.loadui.test.categories.IntegrationTest;
-import com.eviware.loadui.test.ui.fx.GUI;
+import com.eviware.loadui.test.ui.fx.FxIntegrationBase;
 import com.eviware.loadui.util.BeanInjector;
+import com.eviware.loadui.util.test.TestUtils;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import javafx.scene.input.KeyCode;
@@ -39,7 +41,7 @@ import static org.junit.Assert.assertThat;
  * @author dain.nilsson
  */
 @Category(IntegrationTest.class)
-public class ProjectCreatedWithoutAgentsStateTest
+public class ProjectCreatedWithoutAgentsStateTest extends FxIntegrationBase
 {
 	private String nameOfCreatedProject;
 
@@ -131,14 +133,16 @@ public class ProjectCreatedWithoutAgentsStateTest
 
 	private void renameProjectThroughMenuButton( String newProjectName )
 	{
-		GUI.getController().click( "#projectRefCarousel .project-ref-view #menuButton" ).click( "#rename-item" )
+		click( "#projectRefCarousel .project-ref-view #menuButton" ).click( "#rename-item" )
 				.type( newProjectName ).type( KeyCode.ENTER );
+		waitOnProjectCarouselEvents();
 	}
 
 	private void renameProjectThroughContextMenu( String newProjectName )
 	{
-		GUI.getController().move( "#projectRefCarousel .project-ref-view" ).click( MouseButton.SECONDARY )
+		move( "#projectRefCarousel .project-ref-view" ).click( MouseButton.SECONDARY )
 				.click( "#rename-item" ).type( newProjectName ).type( KeyCode.ENTER );
+		waitOnProjectCarouselEvents();
 	}
 
 	private ProjectRef assertProjectExistsWithName( final String expectedName )
@@ -156,20 +160,23 @@ public class ProjectCreatedWithoutAgentsStateTest
 
 	private void cloneProjectThroughMenuButton( String name )
 	{
-		GUI.getController().click( "#projectRefCarousel .project-ref-view .menu-button" ).click( "#clone-item" )
+		click( "#projectRefCarousel .project-ref-view .menu-button" ).click( "#clone-item" )
 				.type( name ).click( ".check-box" ).click( "#default" );
+		waitOnProjectCarouselEvents();
 	}
 
 	private void cloneProjectThroughContextMenu( String name )
 	{
-		GUI.getController().click( "#projectRefCarousel .project-ref-view .menu-button" ).click( "#clone-item" )
+		click( "#projectRefCarousel .project-ref-view .menu-button" ).click( "#clone-item" )
 				.type( name ).click( ".check-box" ).click( "#default" );
+		waitOnProjectCarouselEvents();
 	}
 
 	private void createProjectThroughContextMenu( String name )
 	{
-		GUI.getController().move( "#projectRefCarousel .prev" ).click( MouseButton.SECONDARY ).sleep( 500 )
+		move( "#projectRefCarousel .prev" ).click( MouseButton.SECONDARY ).sleep( 500 )
 				.click( "#create-item" ).type( name ).click( ".check-box" ).click( "#default" );
+		waitOnProjectCarouselEvents();
 	}
 
 	private void assertProjectCountIs( int expectedCount )
@@ -181,6 +188,18 @@ public class ProjectCreatedWithoutAgentsStateTest
 	private WorkspaceItem getWorkspace()
 	{
 		return BeanInjector.getBean( WorkspaceProvider.class ).getWorkspace();
+	}
+
+	private void waitOnProjectCarouselEvents()
+	{
+		try
+		{
+			TestUtils.awaitEvents( ( EventFirer )find( "#projectRefCarousel" ) );
+		}
+		catch( Exception e )
+		{
+			e.printStackTrace();
+		}
 	}
 
 }
