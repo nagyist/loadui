@@ -25,20 +25,20 @@ public class TreeUtils
 {
 	public static TreeItem<Labeled> dummyItem( final String label )
 	{
-		return new TreeItem<Labeled>( new LabeledStringValue( label, label ) );
+		return new TreeItem<Labeled>( new LabeledKeyValue( label, label ) );
 	}
 
 	public static TreeItem<Labeled> dummyItem( final String label, @Nonnull final String value )
 	{
-		return new TreeItem<Labeled>( new LabeledStringValue( label, value ) );
+		return new TreeItem<Labeled>( new LabeledKeyValue( label, value ) );
 	}
 
-	public static class LabeledStringValue<Key extends String, Value extends Object> implements Labeled
+	public static class LabeledKeyValue<Key extends String, Value extends Object> implements Labeled
 	{
 		private final Key label;
 		private final Value value;
 
-		public LabeledStringValue( @Nonnull final Key label, final Value value )
+		public LabeledKeyValue( @Nonnull final Key label, final Value value )
 		{
 			this.label = label;
 			this.value = value;
@@ -47,7 +47,7 @@ public class TreeUtils
 		@Override
 		public String getLabel()
 		{
-			return label;
+			return label.toString();
 		}
 
 		public Value getValue()

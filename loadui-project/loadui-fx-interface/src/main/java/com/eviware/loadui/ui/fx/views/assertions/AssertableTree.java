@@ -22,6 +22,7 @@ import com.eviware.loadui.api.statistics.StatisticVariable;
 import com.eviware.loadui.api.traits.Labeled;
 import com.eviware.loadui.ui.fx.control.fields.Validatable;
 import com.eviware.loadui.ui.fx.util.TreeUtils;
+
 import com.eviware.loadui.util.StringUtils;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -42,7 +43,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.eviware.loadui.ui.fx.util.TreeUtils.dummyItem;
 
 public class AssertableTree extends TreeView<Labeled> implements Validatable
 {
@@ -59,8 +59,8 @@ public class AssertableTree extends TreeView<Labeled> implements Validatable
 
 	public static AssertableTree forHolder( StatisticHolder holder )
 	{
-		TreeItem<Labeled> holderItem = new TreeItem<Labeled>( holder );
-		return new AssertableTree( holder, holderItem );
+		TreeItem<Labeled> treeRoot = new TreeItem<Labeled>( holder );
+		return new AssertableTree( holder, treeRoot );
 	}
 
 	AssertableTree( StatisticHolder holder, TreeItem<Labeled> root )
@@ -68,7 +68,7 @@ public class AssertableTree extends TreeView<Labeled> implements Validatable
 		super( root );
 
 		setShowRoot( false );
-      getSelectionModel().setSelectionMode( SelectionMode.SINGLE );
+		getSelectionModel().setSelectionMode( SelectionMode.SINGLE );
 		getStyleClass().add( "assertable-tree" );
 
 		agents = ImmutableList.copyOf( holder.getCanvas().getProject().getWorkspace().getAgents() );
@@ -103,7 +103,6 @@ public class AssertableTree extends TreeView<Labeled> implements Validatable
 			}
 		} );
 
-
 		setCellFactory( new Callback<TreeView<Labeled>, TreeCell<Labeled>>()
 		{
 			@Override
@@ -116,34 +115,31 @@ public class AssertableTree extends TreeView<Labeled> implements Validatable
 
 	public StatisticWrapper<Number> getSelectedAssertion()
 	{
-		TreeUtils.LabeledStringValue<String, StatisticWrapper<Number>> assertable =
-				( TreeUtils.LabeledStringValue<String, StatisticWrapper<Number>> )getSelectionModel().getSelectedItem().getValue();
-
-		return assertable.getValue();
+		Object selected =	getSelectionModel().getSelectedItem().getValue();
+		return  ( ( TreeUtils.LabeledKeyValue<String, StatisticWrapper<Number>> ) selected ).getValue();
 	}
 
 	private void addVariablesToTree( StatisticHolder holder, TreeItem<Labeled> root )
 	{
 		log.debug( "Adding variables to tree, StatisticHolder: " + holder );
-		TreeCreator creator = ( root.getValue() instanceof CanvasItem || root.getValue() instanceof ComponentItem ) ? new ComponentTreeCreator()
-				: new MonitorTreeCreator();
+		TreeCreator creator = ( root.getValue() instanceof CanvasItem || root.getValue() instanceof ComponentItem ) ? new AssertableComponentTreeCreator()
+				: new AssertableMonitorTreeCreator();
 		creator.createTree( holder, root );
 	}
 
-
-	private static abstract class TreeCreator
+	private abstract class TreeCreator
 	{
 		abstract void createTree( StatisticHolder holder, TreeItem<Labeled> root );
 
-		TreeItem<Labeled> treeItem( Labeled value, TreeItem<Labeled> parent )
+		TreeItem<Labeled> treeNode( Labeled value, TreeItem<Labeled> parent )
 		{
-			TreeItem<Labeled> item = new TreeItem<>( value );
-			parent.getChildren().add( item );
-			return item;
+			TreeItem<Labeled> treeNode = new TreeItem<>( value );
+			parent.getChildren().add( treeNode );
+			return treeNode;
 		}
 	}
 
-	private class ComponentTreeCreator extends TreeCreator
+	private class AssertableComponentTreeCreator extends TreeCreator
 	{
 		@Override
 		public void createTree( StatisticHolder holder, TreeItem<Labeled> root )
@@ -151,68 +147,71 @@ public class AssertableTree extends TreeView<Labeled> implements Validatable
 			for( String variableName : holder.getStatisticVariableNames() )
 			{
 				StatisticVariable variable = holder.getStatisticVariable( variableName );
-				boolean forceAgentStatistics = holder instanceof SceneItem;
-				TreeItem<Labeled> variableItem = treeItem( variable, root );
-				boolean mayBeInAgents = forceAgentStatistics
-						|| !( variable.getStatisticHolder().getCanvas() instanceof ProjectItem );
-				createSubItems( variable, variableItem, mayBeInAgents );
+
+				TreeItem<Labeled> rootNode = treeNode( variable, root );
+
+				createSubItems( variable, rootNode );
 			}
 		}
 
-		private void createSubItems( StatisticVariable variable, TreeItem<Labeled> variableItem, boolean mayBeInAgents )
+		private void createSubItems( StatisticVariable variable, TreeItem<Labeled> parent )
 		{
 			for( String statisticName : variable.getStatisticNames() )
 			{
-				Statistic<Number> statistic = ( Statistic<Number> )variable.getStatistic( statisticName, StatisticVariable.MAIN_SOURCE );
+				Statistic statistic = variable.getStatistic( statisticName, StatisticVariable.MAIN_SOURCE );
+				String statisticLabel = StringUtils.capitalizeEachWord( StringUtils.replaceUnderscoreWithSpace( statistic.getLabel() ) );
 
-				TreeUtils.LabeledStringValue <String, StatisticWrapper<Number>> assertable = new TreeUtils.LabeledStringValue<String, StatisticWrapper<Number>>(
-						StringUtils.replaceUnderscoreWithSpace( statistic.getLabel() ),
-						new StatisticWrapper<Number>( statistic )
-				);
+				TreeUtils.LabeledKeyValue<String, StatisticWrapper> assertable =
+						new TreeUtils.LabeledKeyValue<String, StatisticWrapper>(
+								statisticLabel,
+								new StatisticWrapper( statistic )
+						);
 
-				treeItem( assertable, variableItem );
-         }
-}
+				treeNode( assertable, parent );
+			}
+		}
+	}
 
-private class MonitorTreeCreator extends TreeCreator
-{
-	@Override
+	private class AssertableMonitorTreeCreator extends TreeCreator
+	{
+		@Override
 		public void createTree( StatisticHolder holder, TreeItem<Labeled> root )
 		{
 
 			for( String variableName : holder.getStatisticVariableNames() )
 			{
 				StatisticVariable variable = holder.getStatisticVariable( variableName );
-				final TreeItem<Labeled> variableItem = treeItem( variable, root );
-				createSubItems( variable, variableItem );
+				final TreeItem<Labeled> rootNode = treeNode( variable, root );
+				createBranches( variable, rootNode );
 			}
 
 		}
 
-		private void createSubItems( StatisticVariable variable, final TreeItem<Labeled> variableItem )
+		private void createBranches( StatisticVariable variable, final TreeItem<Labeled> parent )
 		{
 			for( String statisticName : variable.getStatisticNames() )
 			{
-				Map<String, TreeItem<Labeled>> statsBySource = new HashMap<>();
-				Map<String, TreeItem<Labeled>> statsByLabel = new HashMap<>();
+				Map<String, TreeItem<Labeled>> branchBySource = new HashMap<>();
+				Map<String, TreeItem<Labeled>> branchByLabel = new HashMap<>();
 
 				for( String source : variable.getSources() )
 				{
-					Statistic<Number> statistic = ( Statistic<Number> )variable.getStatistic( statisticName, source );
-					TreeItem<Labeled> statItem = statsByLabel.get( statistic.getLabel() );
+					Statistic statistic = variable.getStatistic( statisticName, source );
+					TreeItem<Labeled> assertable = branchByLabel.get( statistic.getLabel() );
 
-					if( statItem == null )
+					if( assertable == null )
 					{
-						statItem = treeItem( new StatisticWrapper<Number>( statistic ), variableItem );
-						statsByLabel.put( statistic.getLabel(), statItem );
+						assertable = treeNode( new StatisticWrapper( statistic ), parent );
+						branchByLabel.put( statistic.getLabel(), assertable );
 					}
-					statsBySource.put( source, statItem );
+					branchBySource.put( source, assertable );
 				}
 
 				for( String source : variable.getSources() )
 					if( !source.equals( StatisticVariable.MAIN_SOURCE ) )
 					{
-						treeItem( new TreeUtils.LabeledStringValue( source, statsBySource.get( source ).getValue() ), statsBySource.get( source ) );
+						TreeItem currentBranch = branchBySource.get( source );
+						treeNode( new TreeUtils.LabeledKeyValue( source, currentBranch.getValue() ), currentBranch );
 					}
 			}
 		}

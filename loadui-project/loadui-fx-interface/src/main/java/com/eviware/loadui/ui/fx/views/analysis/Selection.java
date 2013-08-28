@@ -17,7 +17,7 @@ package com.eviware.loadui.ui.fx.views.analysis;
 
 import com.eviware.loadui.api.statistics.StatisticHolder;
 import com.eviware.loadui.api.traits.Labeled;
-import com.eviware.loadui.ui.fx.util.TreeUtils.LabeledStringValue;
+import com.eviware.loadui.ui.fx.util.TreeUtils;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ public class Selection
 		if( nodeDepth == 3 )
 		{
 			// selected is agent or tree is having 3 levels ex weblogic, tomcat
-			source = ( ( LabeledStringValue )selected.getValue() ).getValue();
+			source = ( ( TreeUtils.LabeledKeyValue<String, String> )selected.getValue() ).getValue();
 			statistic = selected.getParent().getValue().getLabel();
 			variable = selected.getParent().getParent().getValue().getLabel();
 			holder = ( StatisticHolder )selected.getParent().getParent().getParent().getValue();
