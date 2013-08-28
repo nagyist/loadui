@@ -46,15 +46,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AssertableTree extends TreeView<Labeled> implements Validatable
 {
-	public static final String AGENT_TOTAL = "Total";
-
 	protected static final Logger log = LoggerFactory.getLogger( AssertableTree.class );
 
 	public static BooleanProperty isValidProperty = new SimpleBooleanProperty( false );
 
-	private final ImmutableCollection<AgentItem> agents;
-
-	// Used to prevent unwanted chain reactions when forcing TreeItems to collapse. 
+	// Used to prevent unwanted chain reactions when forcing TreeItems to collapse.
 	public final AtomicBoolean isForceCollapsing = new AtomicBoolean( false );
 
 	public static AssertableTree forHolder( StatisticHolder holder )
@@ -71,7 +67,6 @@ public class AssertableTree extends TreeView<Labeled> implements Validatable
 		getSelectionModel().setSelectionMode( SelectionMode.SINGLE );
 		getStyleClass().add( "assertable-tree" );
 
-		agents = ImmutableList.copyOf( holder.getCanvas().getProject().getWorkspace().getAgents() );
 
 		addVariablesToTree( holder, root );
 
@@ -147,10 +142,8 @@ public class AssertableTree extends TreeView<Labeled> implements Validatable
 			for( String variableName : holder.getStatisticVariableNames() )
 			{
 				StatisticVariable variable = holder.getStatisticVariable( variableName );
-
-				TreeItem<Labeled> rootNode = treeNode( variable, root );
-
-				createSubItems( variable, rootNode );
+            TreeItem<Labeled> rootNode = treeNode( variable, root );
+            createSubItems( variable, rootNode );
 			}
 		}
 
@@ -227,34 +220,5 @@ public class AssertableTree extends TreeView<Labeled> implements Validatable
 	public boolean isValid()
 	{
 		return isValidProperty.get();
-	}
-
-	private class ExpandedTreeItemsLimiter implements ChangeListener<Boolean>
-	{
-		private final TreeItem<Labeled> variableItem;
-		private final TreeItem<Labeled> holderItem;
-
-		ExpandedTreeItemsLimiter( TreeItem<Labeled> variableItem, TreeItem<Labeled> holderItem )
-		{
-			this.variableItem = variableItem;
-			this.holderItem = holderItem;
-		}
-
-		@Override
-		public void changed( ObservableValue<? extends Boolean> arg0, Boolean oldValue, Boolean newValue )
-		{
-			if( newValue.booleanValue() )
-			{
-				for( TreeItem<Labeled> item : holderItem.getChildren() )
-				{
-					if( item != variableItem )
-					{
-						isForceCollapsing.set( true );
-						item.setExpanded( false );
-						isForceCollapsing.set( false );
-					}
-				}
-			}
-		}
 	}
 }

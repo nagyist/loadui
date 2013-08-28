@@ -47,7 +47,7 @@ public class TreeUtils
 		@Override
 		public String getLabel()
 		{
-			return label.toString();
+			return label;
 		}
 
 		public Value getValue()
