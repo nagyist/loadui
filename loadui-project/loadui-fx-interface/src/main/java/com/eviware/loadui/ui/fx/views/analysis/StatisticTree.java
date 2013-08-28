@@ -15,31 +15,8 @@
  */
 package com.eviware.loadui.ui.fx.views.analysis;
 
-import static com.eviware.loadui.ui.fx.util.TreeUtils.dummyItem;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
-import javafx.util.Callback;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.model.AgentItem;
-import com.eviware.loadui.api.model.CanvasItem;
-import com.eviware.loadui.api.model.ComponentItem;
+import com.eviware.loadui.api.model.ModelItem;
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.api.statistics.Statistic;
@@ -51,6 +28,26 @@ import com.eviware.loadui.ui.fx.util.TreeUtils.LabeledStringValue;
 import com.eviware.loadui.ui.fx.views.assertions.LabeledTreeCell;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TreeCell;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
+import javafx.util.Callback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static com.eviware.loadui.ui.fx.util.TreeUtils.dummyItem;
 
 public class StatisticTree extends TreeView<Labeled> implements Validatable
 {
@@ -60,7 +57,7 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 
 	private final BooleanProperty isValidProperty = new SimpleBooleanProperty( false );
 
-	// Used to prevent unwanted chain reactions when forcing TreeItems to collapse. 
+	// Used to prevent unwanted chain reactions when forcing TreeItems to collapse.
 	public final AtomicBoolean isForceCollapsing = new AtomicBoolean( false );
 
 	private final ImmutableCollection<AgentItem> agents;
@@ -87,7 +84,7 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 		{
 			@Override
 			public void changed( ObservableValue<? extends TreeItem<Labeled>> arg0, TreeItem<Labeled> oldValue,
-					TreeItem<Labeled> newValue )
+										TreeItem<Labeled> newValue )
 			{
 				if( isForceCollapsing.get() )
 					return;
@@ -108,7 +105,7 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 						isValidProperty.set( true );
 					}
 				}
-				log.debug( "getSelectionModel().getSelectedItems(): " + getSelectionModel().getSelectedItems() );
+				log.debug( "getSelectionModel().getSelectedItems(): {}", getSelectionModel().getSelectedItems() );
 			}
 		} );
 
@@ -125,9 +122,28 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 	private void addVariablesToTree( StatisticHolder holder, TreeItem<Labeled> root )
 	{
 		log.debug( "Adding variables to tree, StatisticHolder: " + holder );
-		TreeCreator creator = ( root.getValue() instanceof CanvasItem || root.getValue() instanceof ComponentItem ) ? new StandardTreeCreator()
-				: new MonitorTreeCreator();
-		creator.createTree( holder, root );
+		getTreeCreatorFor( root ).createTree( holder, root );
+	}
+
+	private TreeCreator getTreeCreatorFor( TreeItem<Labeled> root )
+	{
+		Labeled rootValue = root.getValue();
+		if( rootValue instanceof ModelItem )
+		{
+			switch( ( ( ModelItem )rootValue ).getModelItemType() )
+			{
+				case COMMON_COMPONENT:
+				case PROJECT:
+				case SCENARIO:
+					return new StandardTreeCreator();
+				case AGENT:
+				case WORKSPACE:
+					throw new RuntimeException( "Completely unexpected modelItemType, cannot create StatisticTree: " +
+							rootValue );
+			}
+		}
+
+		return new MonitorTreeCreator();
 	}
 
 	private static abstract class TreeCreator
@@ -149,10 +165,11 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 		@Override
 		public void createTree( StatisticHolder holder, TreeItem<Labeled> root )
 		{
+			boolean forceAgentStatistics = ( holder instanceof SceneItem );
+
 			for( String variableName : holder.getStatisticVariableNames() )
 			{
 				StatisticVariable variable = holder.getStatisticVariable( variableName );
-				boolean forceAgentStatistics = holder instanceof SceneItem;
 				TreeItem<Labeled> variableItem = treeItem( variable, root );
 				boolean mayBeInAgents = forceAgentStatistics
 						|| !( variable.getStatisticHolder().getCanvas() instanceof ProjectItem );
@@ -229,23 +246,6 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 		return isValidProperty.get();
 	}
 
-	private int getDepth()
-	{
-		int depth = 3;
-		if( !agents.isEmpty() )
-			depth++ ;
-		return depth;
-	}
-
-	private boolean isSource( TreeItem<Labeled> item )
-	{
-		if( agents.isEmpty() )
-			return false;
-		log.debug( "TreeView.getNodeLevel( item ): " + TreeView.getNodeLevel( item ) );
-		log.debug( "getDepth(): " + getDepth() );
-		return TreeView.getNodeLevel( item ) + 1 == getDepth();
-	}
-
 	public List<Selection> getSelections()
 	{
 		List<TreeItem<Labeled>> selectedItems = getSelectionModel().getSelectedItems();
@@ -253,7 +253,7 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 		for( TreeItem<Labeled> item : selectedItems )
 		{
 			if( item.getChildren().isEmpty() ) // forbid selecting a parent (which is possible in multi-selections)
-				selections.add( new Selection( item, isSource( item ) ) );
+				selections.add( new Selection( item ) );
 		}
 		return selections;
 	}

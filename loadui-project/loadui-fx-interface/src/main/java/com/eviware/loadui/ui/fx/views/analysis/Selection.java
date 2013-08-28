@@ -15,38 +15,51 @@
  */
 package com.eviware.loadui.ui.fx.views.analysis;
 
+import com.eviware.loadui.api.statistics.StatisticHolder;
+import com.eviware.loadui.api.traits.Labeled;
+import com.eviware.loadui.ui.fx.util.TreeUtils.LabeledStringValue;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import com.eviware.loadui.api.statistics.StatisticHolder;
-import com.eviware.loadui.api.traits.Labeled;
-import com.eviware.loadui.ui.fx.util.TreeUtils.LabeledStringValue;
-
 @Immutable
 public class Selection
 {
+	private static final Logger log = LoggerFactory.getLogger( Selection.class );
+
 	public final String source;
 	public final String statistic;
 	public final String variable;
 	public final StatisticHolder holder;
 
-	Selection( @Nonnull TreeItem<Labeled> selected, boolean selectedIsSource )
+	Selection( @Nonnull TreeItem<Labeled> selected )
 	{
-		if( selectedIsSource )
+		final int nodeDepth = TreeView.getNodeLevel( selected );
+
+		if( nodeDepth == 3 )
 		{
-			source = ( ( LabeledStringValue<String, String> )selected.getValue() ).getValue();
+			// selected is agent or tree is having 3 levels ex weblogic, tomcat
+			source = ( ( LabeledStringValue )selected.getValue() ).getValue();
 			statistic = selected.getParent().getValue().getLabel();
 			variable = selected.getParent().getParent().getValue().getLabel();
 			holder = ( StatisticHolder )selected.getParent().getParent().getParent().getValue();
 		}
-		else
+		else if( nodeDepth == 2 )
 		{
+			// selected is statistic
 			source = null;
 			statistic = selected.getValue().getLabel();
 			variable = selected.getParent().getValue().getLabel();
 			holder = ( StatisticHolder )selected.getParent().getParent().getValue();
 		}
+		else
+		{
+			throw new IllegalArgumentException( "StatisticTree should not contain any statistic at nodeDepth = " + nodeDepth );
+		}
+
 	}
 }

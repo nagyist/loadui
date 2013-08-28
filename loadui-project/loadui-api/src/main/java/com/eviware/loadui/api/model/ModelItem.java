@@ -53,4 +53,11 @@ public interface ModelItem extends BaseItem, AddonHolder, AttributeHolder, Prope
 	 *           The name of the action to trigger.
 	 */
 	public void triggerAction( @Nonnull String actionName );
+
+	/**
+	 * @return the type of this model item. This is used to identify model items without having to resort to checking
+	 * the class of the model items.
+	 */
+	public ModelItemType getModelItemType();
+
 }

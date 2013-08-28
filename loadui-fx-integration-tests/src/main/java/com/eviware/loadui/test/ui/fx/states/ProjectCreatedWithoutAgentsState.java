@@ -15,18 +15,16 @@
  */
 package com.eviware.loadui.test.ui.fx.states;
 
-import static org.loadui.testfx.GuiTest.find;
-import static org.loadui.testfx.GuiTest.waitUntil;
-import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
-import static com.eviware.loadui.util.test.TestUtils.awaitCondition;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.core.Is.is;
-
+import com.eviware.loadui.test.TestState;
+import com.eviware.loadui.test.ui.fx.GUI;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 
-import com.eviware.loadui.test.TestState;
-import com.eviware.loadui.test.ui.fx.GUI;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.core.Is.is;
+import static org.loadui.testfx.GuiTest.find;
+import static org.loadui.testfx.GuiTest.waitUntil;
+import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 
 public class ProjectCreatedWithoutAgentsState extends TestState
 {
@@ -43,15 +41,14 @@ public class ProjectCreatedWithoutAgentsState extends TestState
 		super( name, parent );
 	}
 
-	// This method randomly throws an IndexOutOfBoundsException which breaks the test.
-	// TODO: We should look into it once the source code for ObservableList is released.
 	@Override
 	protected void enterFromParent() throws Exception
 	{
 		final Node projectCarousel = find( "#projectRefCarousel" );
-		log.debug( "Creating new project." );
+		System.out.println( "ProjectCreateWithoutAgentsState - Creating new project." );
+		waitUntil( "#newProjectIcon", is( visible() ) );
 
-		GUI.getController().sleep( 2000 ).drag( "#newProjectIcon" ).to( projectCarousel ).type( "Project 1" )
+		GUI.getController().drag( "#newProjectIcon" ).to( projectCarousel ).type( "Project 1" )
 				.type( KeyCode.TAB ).type( "project-1.xml" ).click( ".check-box" ).click( "#default" );
 
 		waitUntil( ".project-ref-view", is( visible() ) );
@@ -63,8 +60,6 @@ public class ProjectCreatedWithoutAgentsState extends TestState
 		log.debug( "Deleting project." );
 		GUI.getController().click( "#projectRefCarousel .project-ref-view .menu-button" ).click( "#delete-item" )
 				.click( ".confirmation-dialog #default" );
-		final Node projectCarousel = find( "#projectRefCarousel" );
-
 		waitUntil( ".project-ref-view", is( not( visible() ) ) );
 	}
 
