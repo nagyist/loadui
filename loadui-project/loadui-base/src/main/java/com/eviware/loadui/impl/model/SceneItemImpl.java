@@ -430,6 +430,7 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 		remoteStatistics.clear();
 	}
 
+	@Override
 	public void setMessageEndpoint( MessageEndpoint messageEndpoint )
 	{
 		this.messageEndpoint = messageEndpoint;

@@ -3,9 +3,6 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<!-- <bean id="beanInjectorContextSetter" class="com.eviware.loadui.util.BeanInjector$ContextSetter" 
-		/> -->
-
 	<bean id="addressableRegistry"
 		class="com.eviware.loadui.impl.addressable.AddressableRegistryImpl" />
 
@@ -63,8 +60,15 @@
 	<bean id="broadcastMessageEndpoint"
 		class="com.eviware.loadui.util.messaging.BroadcastMessageEndpointImpl" />
 
+    <bean id="agentFactory"
+          class="com.eviware.loadui.impl.model.AgentFactory">
+        <constructor-arg ref="broadcastMessageEndpoint" />
+        <constructor-arg ref="messageEndpointProvider" />
+        <constructor-arg ref="scheduledExecutorService" />
+    </bean>
+
 	<bean id="workspaceProvider" class="com.eviware.loadui.impl.model.WorkspaceProviderImpl">
-		<constructor-arg ref="addonRegistry" />
+		<constructor-arg ref="agentFactory" />
 	</bean>
 
 	<bean id="componentRegistry" name="behaviorProvider"

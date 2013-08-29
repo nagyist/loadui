@@ -59,19 +59,22 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 	private final AgentListener agentListener = new AgentListener();
 	private final Property<Boolean> localMode;
 	private final Property<Long> numberOfAutosaves;
+	private final AgentFactory agentFactory;
 
-	public static WorkspaceItemImpl loadWorkspace( File workspaceFile ) throws XmlException, IOException
+	public static WorkspaceItemImpl loadWorkspace( File workspaceFile, AgentFactory agentFactory )
+			throws XmlException, IOException
 	{
 		WorkspaceItemImpl object = new WorkspaceItemImpl( workspaceFile,
 				workspaceFile.exists() ? LoaduiWorkspaceDocumentConfig.Factory.parse( workspaceFile )
-						: LoaduiWorkspaceDocumentConfig.Factory.newInstance() );
+						: LoaduiWorkspaceDocumentConfig.Factory.newInstance(),
+				agentFactory );
 		object.init();
 		object.postInit();
 
 		return object;
 	}
 
-	private WorkspaceItemImpl( File workspaceFile, LoaduiWorkspaceDocumentConfig doc )
+	private WorkspaceItemImpl( File workspaceFile, LoaduiWorkspaceDocumentConfig doc, AgentFactory agentFactory )
 	{
 		super( doc.getLoaduiWorkspace() == null ? doc.addNewLoaduiWorkspace() : doc.getLoaduiWorkspace() );
 
@@ -79,6 +82,7 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 		agentList = CollectionEventSupport.of( this, AGENTS );
 
 		this.doc = doc;
+		this.agentFactory = agentFactory;
 		this.workspaceFile = workspaceFile;
 
 		localMode = createProperty( LOCAL_MODE_PROPERTY, Boolean.class, true );
@@ -104,7 +108,7 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 		{
 			for( AgentItemConfig agentConfig : getConfig().getAgentList() )
 			{
-				AgentItemImpl agent = AgentItemImpl.newInstance( this, agentConfig );
+				AgentItemImpl agent = agentFactory.newInstance( this, agentConfig );
 				agent.addEventListener( BaseEvent.class, agentListener );
 				agentList.addItem( agent );
 			}
@@ -222,7 +226,7 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 		AgentItemConfig agentConfig = getConfig().addNewAgent();
 		agentConfig.setUrl( url );
 		agentConfig.setLabel( label );
-		AgentItemImpl agent = AgentItemImpl.newInstance( this, agentConfig );
+		AgentItemImpl agent = agentFactory.newInstance( this, agentConfig );
 		agent.addEventListener( BaseEvent.class, agentListener );
 		agentList.addItem( agent );
 		return agent;
@@ -235,7 +239,7 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 		agentConfig.setUrl( ref.getUrl() );
 		agentConfig.setId( ref.getId() );
 		agentConfig.setLabel( label );
-		AgentItemImpl agent = AgentItemImpl.newInstance( this, agentConfig );
+		AgentItemImpl agent = agentFactory.newInstance( this, agentConfig );
 		agent.addEventListener( BaseEvent.class, agentListener );
 		agentList.addItem( agent );
 		return agent;
@@ -254,7 +258,7 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 	@Override
 	public Collection<ProjectRef> getProjectRefs()
 	{
-		return ImmutableSet.<ProjectRef> copyOf( projectList.getItems() );
+		return ImmutableSet.<ProjectRef>copyOf( projectList.getItems() );
 	}
 
 	@Override

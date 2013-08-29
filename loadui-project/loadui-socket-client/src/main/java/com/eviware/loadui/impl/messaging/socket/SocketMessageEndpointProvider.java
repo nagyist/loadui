@@ -43,14 +43,28 @@ public class SocketMessageEndpointProvider implements MessageEndpointProvider
 	public void init() throws IOException, GeneralSecurityException
 	{
 		client = new SSLClient();
-		client.addTrustMaterial( new TrustMaterial( System.getProperty( LoadUI.TRUST_STORE ), System.getProperty(
+		client.addTrustMaterial( new TrustMaterial( provideTrustStorePath(), System.getProperty(
 				LoadUI.TRUST_STORE_PASSWORD ).toCharArray() ) );
 
 		client.setCheckHostname( false ); // default setting is "true" for SSLClient
 		client.setCheckCRL( false ); // default setting is "true" for SSLClient
 
-		client.setKeyMaterial( new KeyMaterial( System.getProperty( LoadUI.KEY_STORE ), System.getProperty(
-				LoadUI.KEY_STORE_PASSWORD ).toCharArray() ) );
+		client.setKeyMaterial( new KeyMaterial( provideKeyStorePath(), provideKeyStorePassword() ) );
+	}
+
+	protected char[] provideKeyStorePassword()
+	{
+		return System.getProperty( LoadUI.KEY_STORE_PASSWORD ).toCharArray();
+	}
+
+	protected String provideKeyStorePath()
+	{
+		return System.getProperty( LoadUI.KEY_STORE );
+	}
+
+	protected String provideTrustStorePath()
+	{
+		return System.getProperty( LoadUI.TRUST_STORE );
 	}
 
 	@Override

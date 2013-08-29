@@ -48,15 +48,6 @@ public final class AgentItemImpl extends ModelItemImpl<AgentItemConfig> implemen
 {
 	private static final Logger log = LoggerFactory.getLogger( AgentItemImpl.class );
 
-	public static AgentItemImpl newInstance( WorkspaceItem workspace, AgentItemConfig config )
-	{
-		AgentItemImpl object = new AgentItemImpl( workspace, config );
-		object.init();
-		object.postInit();
-
-		return object;
-	}
-
 	private final WorkspaceItem workspace;
 	private final MessageEndpointProvider provider;
 	private final BroadcastMessageEndpoint broadcastEndpoint;
@@ -68,13 +59,16 @@ public final class AgentItemImpl extends ModelItemImpl<AgentItemConfig> implemen
 	private long timeDiff = 0;
 	private long fastestTimeCheck = Long.MAX_VALUE;
 
-	private AgentItemImpl( WorkspaceItem workspace, AgentItemConfig config )
+	AgentItemImpl( BroadcastMessageEndpoint broadcastEndpoint,
+								  MessageEndpointProvider messageEndpointProvider,
+								  ScheduledExecutorService scheduledExecutorService,
+								  WorkspaceItem workspace, AgentItemConfig config )
 	{
 		super( config );
+		this.provider = messageEndpointProvider;
+		this.broadcastEndpoint = broadcastEndpoint;
+		this.executorService = scheduledExecutorService;
 		this.workspace = workspace;
-		broadcastEndpoint = BeanInjector.getBean( BroadcastMessageEndpoint.class );
-		provider = BeanInjector.getBean( MessageEndpointProvider.class );
-		executorService = BeanInjector.getBean( ScheduledExecutorService.class );
 
 		createProperty( MAX_THREADS_PROPERTY, Long.class, 1000 );
 		setupClient();
