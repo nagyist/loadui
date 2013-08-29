@@ -15,26 +15,7 @@
  */
 package com.eviware.loadui.impl.messaging.socket;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Semaphore;
-
-import javax.annotation.concurrent.GuardedBy;
-import javax.annotation.concurrent.ThreadSafe;
-import javax.net.ssl.HandshakeCompletedEvent;
-import javax.net.ssl.HandshakeCompletedListener;
-import javax.net.ssl.SSLSocket;
-
-import org.apache.commons.ssl.SSLClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.api.execution.TestState;
 import com.eviware.loadui.api.messaging.ConnectionListener;
 import com.eviware.loadui.api.messaging.MessageEndpoint;
 import com.eviware.loadui.api.messaging.MessageListener;
@@ -43,9 +24,29 @@ import com.eviware.loadui.api.testevents.MessageLevel;
 import com.eviware.loadui.api.testevents.TestEventManager;
 import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.messaging.ChannelRoutingSupport;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
+import org.apache.commons.ssl.SSLClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import javax.annotation.concurrent.GuardedBy;
+import javax.annotation.concurrent.ThreadSafe;
+import javax.net.ssl.HandshakeCompletedEvent;
+import javax.net.ssl.HandshakeCompletedListener;
+import javax.net.ssl.SSLSocket;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Semaphore;
+
+import static java.lang.Thread.sleep;
 
 @ThreadSafe
 public class ClientSocketMessageEndpoint implements MessageEndpoint
@@ -63,7 +64,7 @@ public class ClientSocketMessageEndpoint implements MessageEndpoint
 	protected static final Logger log = LoggerFactory.getLogger( ClientSocketMessageEndpoint.class );
 	private static final Message CLOSE_MESSAGE = new Message( "/service/close", null );
 
-	private final ChannelRoutingSupport routingSupport = new ChannelRoutingSupport();
+	private final ChannelRoutingSupport routingSupport;
 	private final Set<ConnectionListener> listeners = Sets.newCopyOnWriteArraySet();
 	private final BlockingQueue<Message> messageQueue = Queues.newLinkedBlockingQueue();
 	private final SSLClient sslClient;
@@ -75,11 +76,13 @@ public class ClientSocketMessageEndpoint implements MessageEndpoint
 	@GuardedBy( "this" )
 	private Thread connectionThread = null;
 
-	public ClientSocketMessageEndpoint( SSLClient sslClient, String host, int port )
+	public ClientSocketMessageEndpoint( SSLClient sslClient, String host, int port,
+													ChannelRoutingSupport routingSupport )
 	{
 		this.sslClient = sslClient;
 		this.host = host;
 		this.port = port;
+		this.routingSupport = routingSupport;
 	}
 
 	@Override
@@ -252,7 +255,7 @@ public class ClientSocketMessageEndpoint implements MessageEndpoint
 		{
 			while( targetState == TargetState.OPEN )
 			{
-				try (SSLSocket socket = connect())
+				try( SSLSocket socket = connect() )
 				{
 					if( state == State.CONNECTED )
 					{
@@ -272,20 +275,18 @@ public class ClientSocketMessageEndpoint implements MessageEndpoint
 			}
 		}
 
-		private void sendMessages( SSLSocket socket )
+		private void sendMessages( @Nonnull SSLSocket socket )
 		{
-			assert socket != null;
+			Preconditions.checkNotNull( socket );
 
-			ObjectOutputStream oos = null;
 
-			try
+			try( ObjectOutputStream oos = new ObjectOutputStream( socket.getOutputStream() ) )
 			{
 				sendMessage( "/service/init", LoadUI.AGENT_VERSION );
 				for( ConnectionListener listener : listeners )
 				{
 					listener.handleConnectionChange( ClientSocketMessageEndpoint.this, true );
 				}
-				oos = new ObjectOutputStream( socket.getOutputStream() );
 
 				Message message = null;
 				do
@@ -308,8 +309,6 @@ public class ClientSocketMessageEndpoint implements MessageEndpoint
 			}
 			finally
 			{
-				Closeables.closeQuietly( oos );
-
 				log.debug( "MessageEndpoint disconnected!" );
 				for( ConnectionListener listener : listeners )
 				{
@@ -337,19 +336,7 @@ public class ClientSocketMessageEndpoint implements MessageEndpoint
 				}
 				catch( IOException e )
 				{
-					//TODO: If/When we move to Java 7, use closeQuietly instead of the try-catch.
-					//Closeables.closeQuietly( socket );
-					try
-					{
-						if( socket != null )
-						{
-							socket.close();
-						}
-					}
-					catch( IOException e2 )
-					{
-						//Ignore
-					}
+					Closeables.closeQuietly( socket );
 
 					if( targetState == TargetState.OPEN )
 					{
@@ -357,7 +344,7 @@ public class ClientSocketMessageEndpoint implements MessageEndpoint
 						try
 						{
 							log.debug( "Sleeping for 5s before retrying..." );
-							Thread.sleep( 5000 );
+							sleep( 5000 );
 						}
 						catch( InterruptedException e1 )
 						{
