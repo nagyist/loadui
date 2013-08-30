@@ -31,10 +31,7 @@ import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,6 +126,7 @@ public class AssertableTree extends TreeView<Labeled> implements Validatable
 		TreeItem<Labeled> treeNode( Labeled value, TreeItem<Labeled> parent )
 		{
 			TreeItem<Labeled> treeNode = new TreeItem<>( value );
+
 			parent.getChildren().add( treeNode );
 			return treeNode;
 		}

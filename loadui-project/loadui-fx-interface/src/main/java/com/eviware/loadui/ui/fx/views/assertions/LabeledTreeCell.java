@@ -17,6 +17,8 @@ package com.eviware.loadui.ui.fx.views.assertions;
 
 import com.eviware.loadui.api.statistics.Statistic;
 import com.eviware.loadui.api.traits.Labeled;
+import com.eviware.loadui.ui.fx.util.UIUtils;
+import com.eviware.loadui.util.StringUtils;
 import com.eviware.loadui.util.statistics.StatisticNameFormatter;
 
 import javafx.scene.control.TreeCell;
@@ -35,9 +37,17 @@ public class LabeledTreeCell extends TreeCell<Labeled>
 		else
 		{
 			if( item instanceof Statistic<?> || item instanceof StatisticWrapper )
+            {
 				setText( StatisticNameFormatter.format( item.getLabel() ) );
+                setId( UIUtils.toCssId( StatisticNameFormatter.format( item.getLabel() ) ) );
+
+            }
 			else
+            {
 				setText( item.getLabel() );
+                setId( UIUtils.toCssId ( item.getLabel() ) );
+            }
+
 		}
 	}
 }
