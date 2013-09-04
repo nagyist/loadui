@@ -13,7 +13,6 @@
     </parent>
 
     <modules>
-        <module>loadui-socket-client</module>
         <module>loadui-core-deps</module>
         <module>loadui-api</module>
         <module>loadui-fx-api</module>
