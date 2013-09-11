@@ -237,6 +237,10 @@ public abstract class MessageEndPointBase implements MessageEndpoint
 			{
 				log.error( "Problem closing connection", e );
 			}
+			catch( ExceptionInInitializerError e )
+			{
+				log.error( "Could not create or initialize InputStream for MessageReceiver" );
+			}
 			finally
 			{
 				informConnectionListenersConnectionStatusIs( false );
@@ -281,7 +285,7 @@ public abstract class MessageEndPointBase implements MessageEndpoint
 			}
 			catch( ExceptionInInitializerError e )
 			{
-				log.error( "Could not create or initialize OutputStream for MessageSender: {}", e );
+				log.error( "Could not create or initialize OutputStream for MessageSender" );
 			}
 			catch( IOException e )
 			{
