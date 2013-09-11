@@ -30,6 +30,7 @@ public abstract class MessageEndPointBase implements MessageEndpoint
 	protected final ChannelRoutingSupport routingSupport;
 	private Thread messageReceiverThread;
 	private Thread messageSenderThread;
+	private boolean isInit = false;
 
 
 	protected MessageEndPointBase( ChannelRoutingSupport routingSupport )
@@ -166,12 +167,16 @@ public abstract class MessageEndPointBase implements MessageEndpoint
 	{
 		messageReceiverThread = new Thread( new MessageReceiver( socket ) );
 		messageSenderThread = new Thread( new MessageSender( socket ) );
+		isInit = true;
 		messageReceiverThread.start();
 		messageSenderThread.start();
 	}
 
 	protected void interruptMessageThreadsAndWaitForThemToDie()
 	{
+		if( !isInit )
+			return;
+
 		messageReceiverThread.interrupt();
 		messageSenderThread.interrupt();
 
@@ -184,6 +189,10 @@ public abstract class MessageEndPointBase implements MessageEndpoint
 		catch( InterruptedException e )
 		{
 			log.debug( "Problem waiting for threads to die" );
+		}
+		finally
+		{
+			isInit = false;
 		}
 	}
 
