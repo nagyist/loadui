@@ -15,17 +15,6 @@
  */
 package com.eviware.loadui.impl.model;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-
-import com.eviware.loadui.api.model.*;
-import org.apache.xmlbeans.XmlException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.discovery.AgentDiscovery.AgentReference;
 import com.eviware.loadui.api.events.BaseEvent;
@@ -34,18 +23,24 @@ import com.eviware.loadui.api.events.EventHandler;
 import com.eviware.loadui.api.events.PropertyEvent;
 import com.eviware.loadui.api.execution.TestExecution;
 import com.eviware.loadui.api.execution.TestRunner;
+import com.eviware.loadui.api.model.*;
 import com.eviware.loadui.api.property.Property;
-import com.eviware.loadui.config.AgentItemConfig;
-import com.eviware.loadui.config.LoaduiProjectDocumentConfig;
-import com.eviware.loadui.config.LoaduiWorkspaceDocumentConfig;
-import com.eviware.loadui.config.ProjectReferenceConfig;
-import com.eviware.loadui.config.WorkspaceItemConfig;
+import com.eviware.loadui.config.*;
 import com.eviware.loadui.impl.XmlBeansUtils;
 import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.ReleasableUtils;
 import com.eviware.loadui.util.collections.CollectionEventSupport;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import org.apache.xmlbeans.XmlException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implements WorkspaceItem
 {
@@ -59,6 +54,7 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 	private final AgentListener agentListener = new AgentListener();
 	private final Property<Boolean> localMode;
 	private final Property<Long> numberOfAutosaves;
+	private ProjectItem currentProject = null;
 
 	public static WorkspaceItemImpl loadWorkspace( File workspaceFile ) throws XmlException, IOException
 	{
@@ -254,7 +250,7 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 	@Override
 	public Collection<ProjectRef> getProjectRefs()
 	{
-		return ImmutableSet.<ProjectRef> copyOf( projectList.getItems() );
+		return ImmutableSet.<ProjectRef>copyOf( projectList.getItems() );
 	}
 
 	@Override
@@ -333,6 +329,7 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 		log.debug( "public void projectLoaded" );
 		fireCollectionEvent( PROJECTS, CollectionEvent.Event.ADDED, project );
 		project.addEventListener( BaseEvent.class, projectListener );
+		currentProject = project;
 	}
 
 	@Override
@@ -388,6 +385,12 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 	}
 
 	@Override
+	public ProjectItem getCurrentProject()
+	{
+		return currentProject;
+	}
+
+	@Override
 	public ModelItemType getModelItemType()
 	{
 		return ModelItemType.WORKSPACE;
@@ -399,7 +402,10 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 		public void handleEvent( BaseEvent event )
 		{
 			if( event.getKey().equals( RELEASED ) )
+			{
+				currentProject = null;
 				fireCollectionEvent( PROJECTS, CollectionEvent.Event.REMOVED, event.getSource() );
+			}
 			else if( event.getKey().equals( DELETED ) )
 				removeProject( ( ProjectItem )event.getSource() );
 		}
