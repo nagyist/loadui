@@ -15,6 +15,10 @@
  */
 package com.eviware.loadui.test;
 
+import com.eviware.loadui.LoadUI;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
@@ -24,17 +28,12 @@ import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-
-import com.eviware.loadui.LoadUI;
-
 /**
  * An embedded headless loadUI Controller which can be used for testing. All
  * packages in the loadui-api bundle are exported into the runtime so that they
  * can be used in tests. The loadui-fx-interface bundle is removed due to its
  * dependency on JavaFX.
- * 
+ *
  * @author dain.nilsson
  */
 public class ControllerWrapper
@@ -60,9 +59,7 @@ public class ControllerWrapper
 		config.setProperty( "felix.cache.rootdir", baseDir.getAbsolutePath() );
 
 		File bundleDir = new File( baseDir, "bundle" );
-		IntegrationTestUtils.copyDirectory( new File( "../loadui-project/loadui-controller-deps/target/bundle" ), bundleDir );
-		IntegrationTestUtils.copyDirectory( new File( "target/bundle" ), bundleDir );
-		IntegrationTestUtils.copyDirectory( new File( "target/conf" ), new File( baseDir, "conf" ) );
+		copyRuntimeDirectories( bundleDir, baseDir );
 
 		System.setProperty( LoadUI.LOADUI_WORKING, baseDir.getAbsolutePath() );
 
@@ -78,7 +75,7 @@ public class ControllerWrapper
 			{
 				//FIXME we do this because tests are not currently run inside a genuine OSGi environment
 				// We need to use something like pax-exam to create a OSGi test environment
-				try (ZipFile api = new ZipFile( bundle ))
+				try( ZipFile api = new ZipFile( bundle ) )
 				{
 					Set<String> packages = new TreeSet<>();
 					for( Enumeration<? extends ZipEntry> e = api.entries(); e.hasMoreElements(); )
@@ -113,6 +110,13 @@ public class ControllerWrapper
 		launcher.init();
 		launcher.start();
 		context = launcher.getBundleContext();
+	}
+
+	protected void copyRuntimeDirectories( File bundleDir, File baseDir ) throws IOException
+	{
+		IntegrationTestUtils.copyDirectory( new File( "../loadui-project/loadui-controller-deps/target/bundle" ), bundleDir );
+		IntegrationTestUtils.copyDirectory( new File( "target/bundle" ), bundleDir );
+		IntegrationTestUtils.copyDirectory( new File( "target/conf" ), new File( baseDir, "conf" ) );
 	}
 
 	public void stop() throws BundleException
