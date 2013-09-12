@@ -15,51 +15,16 @@
  */
 package com.eviware.loadui.impl.model;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import javax.annotation.Nonnull;
-
-import com.eviware.loadui.api.model.*;
-import org.apache.xmlbeans.XmlException;
-import org.apache.xmlbeans.XmlObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
-
 import com.eviware.loadui.api.addressable.Addressable;
 import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.counter.CounterSynchronizer;
-import com.eviware.loadui.api.events.ActionEvent;
-import com.eviware.loadui.api.events.BaseEvent;
-import com.eviware.loadui.api.events.CollectionEvent;
-import com.eviware.loadui.api.events.EventFirer;
-import com.eviware.loadui.api.events.EventHandler;
-import com.eviware.loadui.api.events.RemoteActionEvent;
+import com.eviware.loadui.api.events.*;
 import com.eviware.loadui.api.execution.Phase;
 import com.eviware.loadui.api.execution.TestExecution;
 import com.eviware.loadui.api.execution.TestExecutionTask;
 import com.eviware.loadui.api.execution.TestRunner;
-import com.eviware.loadui.api.messaging.BroadcastMessageEndpoint;
-import com.eviware.loadui.api.messaging.MessageAwaiterFactory;
-import com.eviware.loadui.api.messaging.MessageEndpoint;
-import com.eviware.loadui.api.messaging.MessageListener;
-import com.eviware.loadui.api.messaging.SceneCommunication;
+import com.eviware.loadui.api.messaging.*;
+import com.eviware.loadui.api.model.*;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.api.property.PropertySynchronizer;
 import com.eviware.loadui.api.statistics.model.StatisticPages;
@@ -69,20 +34,12 @@ import com.eviware.loadui.api.terminal.InputTerminal;
 import com.eviware.loadui.api.terminal.OutputTerminal;
 import com.eviware.loadui.api.terminal.TerminalMessage;
 import com.eviware.loadui.api.traits.Releasable;
-import com.eviware.loadui.config.ComponentItemConfig;
-import com.eviware.loadui.config.LoaduiProjectDocumentConfig;
-import com.eviware.loadui.config.ProjectItemConfig;
-import com.eviware.loadui.config.SceneAssignmentConfig;
-import com.eviware.loadui.config.SceneItemConfig;
+import com.eviware.loadui.config.*;
 import com.eviware.loadui.impl.XmlBeansUtils;
 import com.eviware.loadui.impl.counter.AggregatedCounterSupport;
 import com.eviware.loadui.impl.statistics.model.StatisticPagesImpl;
 import com.eviware.loadui.impl.summary.MutableChapterImpl;
-import com.eviware.loadui.impl.summary.sections.ProjectDataSection;
-import com.eviware.loadui.impl.summary.sections.ProjectDataSummarySection;
-import com.eviware.loadui.impl.summary.sections.ProjectExecutionDataSection;
-import com.eviware.loadui.impl.summary.sections.ProjectExecutionMetricsSection;
-import com.eviware.loadui.impl.summary.sections.ProjectExecutionNotablesSection;
+import com.eviware.loadui.impl.summary.sections.*;
 import com.eviware.loadui.impl.terminal.ConnectionImpl;
 import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.ReleasableUtils;
@@ -92,18 +49,25 @@ import com.eviware.loadui.util.events.EventFuture;
 import com.eviware.loadui.util.messaging.BroadcastMessageEndpointImpl;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
+import org.apache.xmlbeans.XmlException;
+import org.apache.xmlbeans.XmlObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionService;
+
+import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.*;
 
 public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implements ProjectItem
 {
 	protected static final Logger log = LoggerFactory.getLogger( ProjectItemImpl.class );
 
-	
+
 	private final WorkspaceItem workspace;
 	private final LoaduiProjectDocumentConfig doc;
 	private final CollectionEventSupport<Assignment, Void> assignments = new CollectionEventSupport<>( this, ASSIGNMENTS );
@@ -113,7 +77,7 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 	private final SceneComponentListener sceneComponentListener = new SceneComponentListener();
 	private final Map<SceneItem, BroadcastMessageEndpoint> sceneEndpoints = Maps.newHashMap();
 	private final AgentReadyAwaiterTask agentAwaiter = new AgentReadyAwaiterTask();
-	private final MessageAwaiterFactory messageAwaiterFactory; 
+	private final MessageAwaiterFactory messageAwaiterFactory;
 	private final ConversionService conversionService;
 	private final PropertySynchronizer propertySynchronizer;
 	private final CounterSynchronizer counterSynchronizer;
@@ -122,7 +86,7 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 	private final Property<Boolean> saveReport;
 	private final Property<String> reportFolder;
 	private final Property<String> reportFormat;
-	
+
 	private final File projectFile;
 
 	public static ProjectItemImpl loadProject( WorkspaceItem workspace, File projectFile ) throws XmlException,
@@ -146,7 +110,7 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 		conversionService = BeanInjector.getBean( ConversionService.class );
 		propertySynchronizer = BeanInjector.getBean( PropertySynchronizer.class );
 		counterSynchronizer = BeanInjector.getBean( CounterSynchronizer.class );
-		messageAwaiterFactory = BeanInjector.getBean( MessageAwaiterFactory.class ); 
+		messageAwaiterFactory = BeanInjector.getBean( MessageAwaiterFactory.class );
 		saveReport = createProperty( SAVE_REPORT_PROPERTY, Boolean.class, false );
 		reportFolder = createProperty( REPORT_FOLDER_PROPERTY, String.class, "" );
 		reportFormat = createProperty( REPORT_FORMAT_PROPERTY, String.class, "" );
@@ -228,7 +192,7 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 	private void sendAssignMessage( AgentItem agent, SceneItem scene )
 	{
 		agent.sendMessage( AgentItem.AGENT_CHANNEL,
-				ImmutableMap.<String, String> of( AgentItem.ASSIGN, scene.getId(), AgentItem.PROJECT_ID, getId() ) );
+				ImmutableMap.<String, String>of( AgentItem.ASSIGN, scene.getId(), AgentItem.PROJECT_ID, getId() ) );
 	}
 
 	private boolean attachScene( SceneItemImpl scene )
@@ -373,12 +337,12 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 		for( SceneItem scene : getChildren() )
 			scene.delete();
 
-		release();
-
 		if( !projectFile.delete() )
 			throw new RuntimeException( "Unable to delete project file: " + projectFile.getAbsolutePath() );
 
 		super.delete();
+
+		release();
 	}
 
 	@Override
@@ -395,7 +359,7 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 	public void assignScene( SceneItem scene, AgentItem agent )
 	{
 		AssignmentImpl assignment = getOrCreateAssignment( scene, agent );
-		
+
 		if( assignments.addItem( assignment ) )
 		{
 			sceneEndpoints.get( scene ).registerEndpoint( agent );
@@ -405,7 +369,7 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 			conf.setAgentRef( agent.getId() );
 			conf.setAgentLabel( agent.getLabel() );
 			conf.setAgentAddress( agent.getUrl() );
-						
+
 			sendAssignMessage( agent, scene );
 		}
 	}
@@ -849,12 +813,13 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 			{
 				SceneItem scene = ( SceneItem )addressableRegistry.lookup( message.get( AgentItem.STARTED ) );
 				AssignmentImpl assignment = getAssignment( scene, agent );
-				
+
 				if( assignment != null )
 					assignment.setLoaded( true );
 
-				if(scene.isRunning() && !workspace.isLocalMode() ) {
-					
+				if( scene.isRunning() && !workspace.isLocalMode() )
+				{
+
 					if( scene != null && scene.isRunning() && !scene.getProject().getWorkspace().isLocalMode() )
 					{
 						final String canvasId = message.get( AgentItem.STARTED );
@@ -871,7 +836,7 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 						} );
 					}
 				}
-				
+
 				if( scene.isRunning() && !workspace.isLocalMode() )
 				{
 					agent.sendMessage( SceneCommunication.CHANNEL,
@@ -881,7 +846,7 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 			}
 		}
 	}
-	
+
 	private class AgentContextListener implements MessageListener
 	{
 		@Override
@@ -964,9 +929,8 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 	 * 'doGenerateSummary' method. This event is fired after 'onComplete' method
 	 * of test case is executed in local mode, and when controller receives agent
 	 * data in distributed mode.
-	 * 
+	 *
 	 * @author predrag.vucetic
-	 * 
 	 */
 	private class SceneCompleteAwaiter implements EventHandler<BaseEvent>
 	{
