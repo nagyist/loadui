@@ -15,24 +15,10 @@
  */
 package com.eviware.loadui.impl.model;
 
-import java.util.Collection;
-import java.util.EventObject;
-
-import javax.annotation.Nonnull;
-import javax.annotation.OverridingMethodsMustInvokeSuper;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
-
 import com.eviware.loadui.api.addon.Addon;
 import com.eviware.loadui.api.addressable.AddressableRegistry;
 import com.eviware.loadui.api.addressable.AddressableRegistry.DuplicateAddressException;
-import com.eviware.loadui.api.events.ActionEvent;
-import com.eviware.loadui.api.events.BaseEvent;
-import com.eviware.loadui.api.events.CollectionEvent;
-import com.eviware.loadui.api.events.EventHandler;
-import com.eviware.loadui.api.events.PropertyEvent;
+import com.eviware.loadui.api.events.*;
 import com.eviware.loadui.api.model.ModelItem;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.api.property.PropertyMap;
@@ -45,6 +31,14 @@ import com.eviware.loadui.util.ReleasableUtils;
 import com.eviware.loadui.util.events.EventSupport;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionService;
+
+import javax.annotation.Nonnull;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
+import java.util.Collection;
+import java.util.EventObject;
 
 public abstract class ModelItemImpl<Config extends ModelItemConfig> implements ModelItem
 {
@@ -187,17 +181,16 @@ public abstract class ModelItemImpl<Config extends ModelItemConfig> implements M
 	public void delete()
 	{
 		log.debug( "Deleting {}", this );
-		if( !released )
-		{
-			fireBaseEvent( DELETED );
-			fireBaseEvent( RELEASED );
-			released = true;
-			release();
-			addressableRegistry.unregister( this );
-			eventSupport.clearEventListeners();
-		}
-		else
+		if( released )
 			throw new RuntimeException( "Cannot delete released ModelItem" );
+
+		fireBaseEvent( DELETED );
+		fireBaseEvent( RELEASED );
+		released = true;
+		release();
+		addressableRegistry.unregister( this );
+		eventSupport.clearEventListeners();
+
 	}
 
 	@Override
