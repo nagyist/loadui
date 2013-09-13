@@ -41,21 +41,18 @@ public class IntegrationTestUtils
 
 	public static void copyDirectory( File sourceLocation, File targetLocation ) throws IOException
 	{
-		System.out.println( "Copying Directory " + sourceLocation.getAbsolutePath()
-				+ " into " + targetLocation.getAbsolutePath() );
 		if( !sourceLocation.exists() )
-			throw new IOException( "File does not exist: " + sourceLocation.getAbsolutePath() );
+			throw new IOException( "File does not exist: " + sourceLocation );
 		if( sourceLocation.isDirectory() )
 		{
 			if( !targetLocation.exists() && !targetLocation.mkdir() )
-				throw new IOException( "Unable to create directory: " + targetLocation.getAbsolutePath() );
+				throw new IOException( "Unable to create directory: " + targetLocation );
 
 			for( String child : sourceLocation.list() )
 				copyDirectory( new File( sourceLocation, child ), new File( targetLocation, child ) );
 		}
 		else
 		{
-			System.out.println( "Copying file " + sourceLocation + " into " + targetLocation );
 			Files.copy( sourceLocation, targetLocation );
 		}
 	}
