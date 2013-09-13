@@ -63,10 +63,12 @@ public class ControllerWrapper
 
 		System.setProperty( LoadUI.LOADUI_WORKING, baseDir.getAbsolutePath() );
 
+		String[] excludeBundlePatterns = excludeBundlePatterns();
+
 		// Remove bundles depending on JavaFX and the API bundle.
 		for( File bundle : bundleDir.listFiles() )
 		{
-			if( bundle.getName().contains( "loadui-fx" ) || bundle.getName().contains( "groovy-component" ) )
+			if( isBundleInExcludedPatterns( bundle, excludeBundlePatterns ) )
 			{
 				if( !bundle.delete() )
 					throw new IOException( "Unable to delete file: " + bundle );
@@ -112,11 +114,27 @@ public class ControllerWrapper
 		context = launcher.getBundleContext();
 	}
 
+	private boolean isBundleInExcludedPatterns( File bundleFile, String[] excludeBundlePatterns )
+	{
+		String bundleName = bundleFile.getName();
+		for( String pattern : excludeBundlePatterns )
+		{
+			if( bundleName.matches( pattern ) )
+				return true;
+		}
+		return false;
+	}
+
 	protected void copyRuntimeDirectories( File bundleDir, File baseDir ) throws IOException
 	{
 		IntegrationTestUtils.copyDirectory( new File( "../loadui-project/loadui-controller-deps/target/bundle" ), bundleDir );
 		IntegrationTestUtils.copyDirectory( new File( "target/bundle" ), bundleDir );
 		IntegrationTestUtils.copyDirectory( new File( "target/conf" ), new File( baseDir, "conf" ) );
+	}
+
+	protected String[] excludeBundlePatterns()
+	{
+		return new String[] { "loadui-fx.*", ".*groovy-component.*" };
 	}
 
 	public void stop() throws BundleException

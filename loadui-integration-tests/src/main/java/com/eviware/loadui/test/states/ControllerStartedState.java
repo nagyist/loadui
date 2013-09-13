@@ -28,9 +28,16 @@ import java.util.concurrent.TimeUnit;
 
 public class ControllerStartedState extends TestState
 {
-	public static final ControllerStartedState STATE = new ControllerStartedState();
+	private static ControllerStartedState instance;
 
 	public ControllerWrapper controller;
+
+	public static synchronized ControllerStartedState getState()
+	{
+		if( instance == null )
+			instance = new ControllerStartedState();
+		return instance;
+	}
 
 	private ControllerStartedState()
 	{

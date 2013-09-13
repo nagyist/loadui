@@ -15,11 +15,11 @@
  */
 package com.eviware.loadui.test;
 
+import com.google.common.io.Files;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
-
-import com.google.common.io.Files;
 
 /**
  * A collection of static utility methods for simplifying some tasks.
@@ -41,18 +41,21 @@ public class IntegrationTestUtils
 
 	public static void copyDirectory( File sourceLocation, File targetLocation ) throws IOException
 	{
+		System.out.println( "Copying Directory " + sourceLocation.getAbsolutePath()
+				+ " into " + targetLocation.getAbsolutePath() );
 		if( !sourceLocation.exists() )
-			throw new IOException( "File does not exist: " + sourceLocation );
+			throw new IOException( "File does not exist: " + sourceLocation.getAbsolutePath() );
 		if( sourceLocation.isDirectory() )
 		{
 			if( !targetLocation.exists() && !targetLocation.mkdir() )
-				throw new IOException( "Unable to create directory: " + targetLocation );
+				throw new IOException( "Unable to create directory: " + targetLocation.getAbsolutePath() );
 
 			for( String child : sourceLocation.list() )
 				copyDirectory( new File( sourceLocation, child ), new File( targetLocation, child ) );
 		}
 		else
 		{
+			System.out.println( "Copying file " + sourceLocation + " into " + targetLocation );
 			Files.copy( sourceLocation, targetLocation );
 		}
 	}

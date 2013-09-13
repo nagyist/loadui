@@ -32,7 +32,7 @@ public class ControllerStartedStateTest
 	@Before
 	public void enterState()
 	{
-		ControllerStartedState.STATE.enter();
+		ControllerStartedState.getState().enter();
 	}
 
 	@Test
@@ -44,7 +44,7 @@ public class ControllerStartedStateTest
 
 	private void ensureAllBundlesHaveStartedUp()
 	{
-		Bundle[] bundles = ControllerStartedState.STATE.controller.getBundleContext().getBundles();
+		Bundle[] bundles = ControllerStartedState.getState().controller.getBundleContext().getBundles();
 		for( Bundle bundle : bundles )
 			assertThat( bundle.getSymbolicName() + " is not Active or Resolved", bundle.getState(),
 					anyOf( is( Bundle.ACTIVE ), is( Bundle.RESOLVED ) ) );
@@ -52,7 +52,7 @@ public class ControllerStartedStateTest
 
 	private void ensureWorkspaceProviderWasPublishedAsAService() throws Exception
 	{
-		WorkspaceProvider workspaceProvider = ControllerStartedState.STATE.getService( WorkspaceProvider.class );
+		WorkspaceProvider workspaceProvider = ControllerStartedState.getState().getService( WorkspaceProvider.class );
 		assertThat( workspaceProvider, notNullValue() );
 	}
 
