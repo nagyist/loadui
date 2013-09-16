@@ -40,7 +40,7 @@ public class CommandLineLauncherTestUtils
 	public static final String CMD_RUNNER_NAME_OSX = "loadUI-cmd.command";
 	public static final String CMD_RUNNER_NAME_UNIX = "loadUI-cmd.sh";
 
-	private static synchronized int launchCommandLineRunner( String[] commands )
+	private synchronized int launchCommandLineRunner( String[] commands )
 	{
 		int exitValue = -1;
 
@@ -85,7 +85,7 @@ public class CommandLineLauncherTestUtils
 		return exitValue;
 	}
 
-	private static void attachStreamPrinter( Process proc )
+	private void attachStreamPrinter( Process proc )
 	{
 		StreamPrinter errorListener = new StreamPrinter( proc.getErrorStream(), "ERROR" );
 		StreamPrinter inputListener = new StreamPrinter( proc.getInputStream(), "INPUT" );
@@ -94,7 +94,7 @@ public class CommandLineLauncherTestUtils
 		inputListener.start();
 	}
 
-	public static Collection<File> getFilesAt( String path ) throws NullPointerException
+	public Collection<File> getFilesAt( String path ) throws NullPointerException
 	{
 		File folder = new File( path );
 
@@ -120,7 +120,7 @@ public class CommandLineLauncherTestUtils
 		return filesInPath;
 	}
 
-	public static String getXMLFrom( File summaryFile ) throws RuntimeException
+	public String getXMLFrom( File summaryFile ) throws RuntimeException
 	{
 		try(FileInputStream inputStream = new FileInputStream( summaryFile ))
 		{
@@ -132,7 +132,7 @@ public class CommandLineLauncherTestUtils
 		}
 	}
 
-	public static String getCmdRunnerFileName()
+	public String getCmdRunnerFileName()
 	{
 		if( SystemUtils.IS_OS_WINDOWS )
 		{
@@ -148,12 +148,12 @@ public class CommandLineLauncherTestUtils
 		}
 	}
 
-	public static int launchCommandLineRunnerWithCommands( String... Commands )
+	public int launchCommandLineRunnerWithCommands( String... Commands )
 	{
 		return launchCommandLineRunner( concat( getLaunchCommands(), Commands ) );
 	}
 
-	private static String[] getLaunchCommands()
+	private String[] getLaunchCommands()
 	{
 
 		if( SystemUtils.IS_OS_WINDOWS )
@@ -167,7 +167,7 @@ public class CommandLineLauncherTestUtils
 
 	}
 
-	private static String getLauncherPath()
+	private String getLauncherPath()
 	{
 		return getPathToCommandLineRunnerFile() + File.separator + getCmdRunnerFileName();
 	}
@@ -198,7 +198,7 @@ public class CommandLineLauncherTestUtils
 		}
 	}
 
-	public static String getPathToCommandLineRunnerFile()
+	public String getPathToCommandLineRunnerFile()
 	{
 		Path pathA = Paths.get( "", "loadui-installers", "loadui-controller-installer", "target", "main", getCmdRunnerFileName() );
 		Path pathB = Paths.get( "", "..", "loadui-installers", "loadui-controller-installer", "target", "main", getCmdRunnerFileName() );

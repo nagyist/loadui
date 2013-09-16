@@ -50,6 +50,8 @@ public class CommandLineRunnerReportTest
 	private static final String GET_FIRST_CHART_IMAGE_XPATH = "//jasperPrint[1]/page[1]/image[1]/imageSource[1]";
 	private static final int MINIMUM_REASONABLE_CHARACTER_LENGTH_OF_CHART_IMAGE = 2000;
 
+	private final CommandLineLauncherTestUtils utils = new CommandLineLauncherTestUtils();
+
 	@After
 	public void deleteOutputFiles()
 	{
@@ -69,7 +71,7 @@ public class CommandLineRunnerReportTest
 	public void reportCreatedTest()
 	{
 		//Given
-		int exitValue = CommandLineLauncherTestUtils.launchCommandLineRunnerWithCommands(
+		int exitValue = utils.launchCommandLineRunnerWithCommands(
 				"-p", getProjectFilePath( "basictest.xml" ), "-L", "1:0:0", "-F", "XML", "-r", OUTPUT_FOLDER_NAME );
 
 		//Then
@@ -86,12 +88,12 @@ public class CommandLineRunnerReportTest
 
 	private Source statisticsXMLFile()
 	{
-		return the( CommandLineLauncherTestUtils.getXMLFrom( findFileWithNameContaining( outputFiles(), "statistics" ) ) );
+		return the( utils.getXMLFrom( findFileWithNameContaining( outputFiles(), "statistics" ) ) );
 	}
 
 	private Collection<File> outputFiles()
 	{
-		return CommandLineLauncherTestUtils.getFilesAt( getOutPutFolderPath() );
+		return utils.getFilesAt( getOutPutFolderPath() );
 	}
 
 	private File findFileWithNameContaining( Collection<File> outputFiles, String partOfName )
@@ -107,7 +109,7 @@ public class CommandLineRunnerReportTest
 
 	private String getOutPutFolderPath()
 	{
-		return CommandLineLauncherTestUtils.getPathToCommandLineRunnerFile() + File.separator + OUTPUT_FOLDER_NAME;
+		return utils.getPathToCommandLineRunnerFile() + File.separator + OUTPUT_FOLDER_NAME;
 	}
 
 	private String getProjectFilePath( String name )
