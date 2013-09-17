@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import javax.xml.transform.Source;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Collection;
 
 import static com.eviware.loadui.util.test.matchers.StringLengthMatcher.lenghtGreaterThan;
@@ -109,7 +110,7 @@ public class CommandLineRunnerReportTest
 
 	private String getOutPutFolderPath()
 	{
-		return utils.getPathToCommandLineRunnerFile() + File.separator + OUTPUT_FOLDER_NAME;
+		return Paths.get( utils.getMainFolderLocation(), OUTPUT_FOLDER_NAME ).toFile().getAbsolutePath();
 	}
 
 	private String getProjectFilePath( String name )
