@@ -84,15 +84,8 @@ output = { message ->
 	def writeLog = saveFile.value && saveFileName
 	if( controller || writeLog ) {
 		synchronized( this ) {
-			log.info( "THREAD ENTERING" )
 			addedColumns += message.keySet() - tableColumns
-			def added = message.keySet() - tableColumns
-			if( added )
-				log.info( "   ACTUALLY ADDED COLUMNS: " + message.keySet() + " - " + tableColumns )
 			tableColumns += addedColumns
-			if( added )
-				log.info( "   tableColumns is now $tableColumns" )
-			log.info( "THREAD LEAVING" )
 		}
 		
 		if ( formatTimestamps.value ) {
@@ -235,7 +228,6 @@ tableWriter = {
 
 writeToFile =
 {
-	log.info "CONSUMER!"
 	if( saveFileName )
 	{
 		withFileWriter() { fileWriter -> 
