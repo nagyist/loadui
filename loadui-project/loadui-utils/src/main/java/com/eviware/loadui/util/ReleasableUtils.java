@@ -19,6 +19,8 @@ import com.eviware.loadui.api.traits.Releasable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
+import java.util.Arrays;
+
 /**
  * Utility class for handling Releasables.
  * 
@@ -45,7 +47,7 @@ public class ReleasableUtils
 	 */
 	public static void releaseAll( Object... objects )
 	{
-		for( Object object : objects )
+		for( Object object : Arrays.copyOf( objects, objects.length ) )
 		{
 			if( object instanceof Iterable && !( object instanceof Releasable ) )
 			{
