@@ -15,26 +15,10 @@
  */
 package com.eviware.loadui.impl.model;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
-import com.eviware.loadui.api.model.ModelItemType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.api.messaging.BroadcastMessageEndpoint;
-import com.eviware.loadui.api.messaging.ConnectionListener;
-import com.eviware.loadui.api.messaging.MessageEndpoint;
-import com.eviware.loadui.api.messaging.MessageEndpointProvider;
-import com.eviware.loadui.api.messaging.MessageListener;
-import com.eviware.loadui.api.messaging.VersionMismatchException;
+import com.eviware.loadui.api.messaging.*;
 import com.eviware.loadui.api.model.AgentItem;
+import com.eviware.loadui.api.model.ModelItemType;
 import com.eviware.loadui.api.model.WorkspaceItem;
 import com.eviware.loadui.api.testevents.MessageLevel;
 import com.eviware.loadui.api.testevents.TestEventManager;
@@ -43,6 +27,16 @@ import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.ReleasableUtils;
 import com.eviware.loadui.util.messaging.MessageEndpointSupport;
 import com.google.common.collect.ImmutableMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public final class AgentItemImpl extends ModelItemImpl<AgentItemConfig> implements AgentItem
 {
@@ -60,9 +54,9 @@ public final class AgentItemImpl extends ModelItemImpl<AgentItemConfig> implemen
 	private long fastestTimeCheck = Long.MAX_VALUE;
 
 	AgentItemImpl( BroadcastMessageEndpoint broadcastEndpoint,
-								  MessageEndpointProvider messageEndpointProvider,
-								  ScheduledExecutorService scheduledExecutorService,
-								  WorkspaceItem workspace, AgentItemConfig config )
+						MessageEndpointProvider messageEndpointProvider,
+						ScheduledExecutorService scheduledExecutorService,
+						WorkspaceItem workspace, AgentItemConfig config )
 	{
 		super( config );
 		this.provider = messageEndpointProvider;
@@ -247,8 +241,9 @@ public final class AgentItemImpl extends ModelItemImpl<AgentItemConfig> implemen
 	{
 		if( enabled != isEnabled() )
 		{
+			log.info( "{}abling Agent: {}", enabled ? "En" : "Dis", getUrl() );
 			getConfig().setEnabled( enabled );
-			fireBaseEvent( ENABLED );
+
 			try
 			{
 				if( enabled )
@@ -325,6 +320,7 @@ public final class AgentItemImpl extends ModelItemImpl<AgentItemConfig> implemen
 	{
 		super.release();
 		broadcastEndpoint.deregisterEndpoint( AgentItemImpl.this );
+		log.debug( "Releasing Agent, closing agent endpoint" );
 		endpointSupport.getSource().close();
 		ReleasableUtils.release( endpointSupport );
 

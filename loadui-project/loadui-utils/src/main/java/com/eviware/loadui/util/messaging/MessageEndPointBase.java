@@ -16,13 +16,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * @author renato
  */
-public abstract class MessageEndPointBase implements MessageEndpoint
+abstract class MessageEndPointBase implements MessageEndpoint
 {
 
 	final static Logger log = LoggerFactory.getLogger( MessageEndPointBase.class );
 
-	public static final String SERVICE_INIT = "/service/init";
-	public static final String SERVICE_CLOSE = "/service/close";
 	protected static final Message CLOSE_MESSAGE = new Message( SERVICE_CLOSE, null );
 
 	protected final LinkedBlockingQueue<Message> outMessageQueue = Queues.newLinkedBlockingQueue();
@@ -97,7 +95,6 @@ public abstract class MessageEndPointBase implements MessageEndpoint
 		try
 		{
 			Message msg = readMessageFrom( oi );
-			log.debug( "Read message on channel '{}': '{}'", msg.channel, msg.data );
 			return msg;
 		}
 		catch( InterruptedException ie )
@@ -151,22 +148,10 @@ public abstract class MessageEndPointBase implements MessageEndpoint
 		}
 	}
 
-	private void requestClose()
-	{
-		new Thread( new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				close();
-			}
-		} ).start();
-	}
-
 	protected void startMessageSenderAndReceiverWith( Socket socket )
 	{
-		messageReceiverThread = new Thread( new MessageReceiver( socket ) );
-		messageSenderThread = new Thread( new MessageSender( socket ) );
+		messageReceiverThread = new Thread( new MessageReceiver( socket ), "MessageEndPointBase#MessageReceiver" );
+		messageSenderThread = new Thread( new MessageSender( socket ), "MessageEndPointBase#MessageSender" );
 		isInit = true;
 		messageReceiverThread.start();
 		messageSenderThread.start();
@@ -177,22 +162,28 @@ public abstract class MessageEndPointBase implements MessageEndpoint
 		if( !isInit )
 			return;
 
-		messageReceiverThread.interrupt();
-		messageSenderThread.interrupt();
-
 		try
 		{
-			final int maxWait = 500;
-			messageReceiverThread.join( maxWait );
-			messageSenderThread.join( maxWait );
-		}
-		catch( InterruptedException e )
-		{
-			log.debug( "Problem waiting for threads to die" );
+			interruptThreadAndWait( messageSenderThread );
+			interruptThreadAndWait( messageReceiverThread );
 		}
 		finally
 		{
 			isInit = false;
+		}
+	}
+
+	private void interruptThreadAndWait( Thread thread )
+	{
+		thread.interrupt();
+		try
+		{
+			final int maxWait = 2_000;
+			thread.join( maxWait );
+		}
+		catch( InterruptedException e )
+		{
+			log.warn( "Interrupted while waiting for thread to die: {}", thread.getName() );
 		}
 	}
 
@@ -225,7 +216,7 @@ public abstract class MessageEndPointBase implements MessageEndpoint
 					{
 						routingSupport.fireMessage( incomingMsg.channel, MessageEndPointBase.this, incomingMsg.data );
 					}
-					log.info( "Received signal to close connection to {}", socket.getLocalSocketAddress() );
+					log.info( "Closing connection to {}", socket.getLocalSocketAddress() );
 				}
 				else
 				{
@@ -244,7 +235,8 @@ public abstract class MessageEndPointBase implements MessageEndpoint
 			finally
 			{
 				informConnectionListenersConnectionStatusIs( false );
-				requestClose();
+				log.info( "Thread {} closing endpoint", Thread.currentThread().getName() );
+				close();
 			}
 		}
 
@@ -263,6 +255,8 @@ public abstract class MessageEndPointBase implements MessageEndpoint
 		@Override
 		public void run()
 		{
+			outMessageQueue.clear();
+
 			Message message;
 			try( ObjectOutput oo = provideObjectOutputStream( socket ) )
 			{
@@ -274,7 +268,6 @@ public abstract class MessageEndPointBase implements MessageEndpoint
 				do
 				{
 					message = outMessageQueue.take();
-					log.debug( "Sending out message: '{}: {}'", message.channel, message.data );
 					writeMessage( oo, message );
 				}
 				while( message != CLOSE_MESSAGE );
@@ -293,7 +286,8 @@ public abstract class MessageEndPointBase implements MessageEndpoint
 			}
 			finally
 			{
-				requestClose();
+				log.info( "Thread {} closing endpoint", Thread.currentThread().getName() );
+				close();
 			}
 		}
 

@@ -18,11 +18,21 @@ package com.eviware.loadui.api.messaging;
 /**
  * Like a Socket, but much more high-level. The MessageEndpoint is an endpoint
  * of a channeled, two-way synchronous messaging queue.
- * 
+ *
  * @author dain.nilsson
  */
 public interface MessageEndpoint
 {
+	/**
+	 * Channel used to initialize a service
+	 */
+	public static final String SERVICE_INIT = "/service/init";
+
+	/**
+	 * Channel used to stop a service
+	 */
+	public static final String SERVICE_CLOSE = "/service/close";
+
 	/**
 	 * Each channel name needs to start with this String.
 	 */
@@ -38,45 +48,38 @@ public interface MessageEndpoint
 	 * Sends a message to the other endpoint of this connection, over the
 	 * specified channel. The message data needs to be serializable by the
 	 * implementation.
-	 * 
-	 * @param channel
-	 *           The channel over which to send the message.
-	 * @param data
-	 *           The data to send.
+	 *
+	 * @param channel The channel over which to send the message.
+	 * @param data The data to send.
 	 */
 	public void sendMessage( String channel, Object data );
 
 	/**
 	 * Adds a listener for messages arriving on a specific channel.
-	 * 
-	 * @param channel
-	 *           The channel to listen for messages on.
-	 * @param listener
-	 *           The MessageListener to notify about incoming messages.
+	 *
+	 * @param channel The channel to listen for messages on.
+	 * @param listener The MessageListener to notify about incoming messages.
 	 */
 	public void addMessageListener( String channel, MessageListener listener );
 
 	/**
 	 * Stops listening for messages previously listened for.
-	 * 
-	 * @param listener
-	 *           The MessageListener to remove.
+	 *
+	 * @param listener The MessageListener to remove.
 	 */
 	public void removeMessageListener( MessageListener listener );
 
 	/**
 	 * Adds a listener for connection events for the MessageEndpoint.
-	 * 
-	 * @param listener
-	 *           The ConnectionListener to notify about connection events.
+	 *
+	 * @param listener The ConnectionListener to notify about connection events.
 	 */
 	public void addConnectionListener( ConnectionListener listener );
 
 	/**
 	 * Stops listening for connection events previously listened for.
-	 * 
-	 * @param listener
-	 *           The ConnectionListener to remove.
+	 *
+	 * @param listener The ConnectionListener to remove.
 	 */
 	public void removeConnectionListener( ConnectionListener listener );
 
