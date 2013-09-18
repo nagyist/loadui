@@ -18,12 +18,13 @@ package com.eviware.loadui.impl.statistics;
 import com.eviware.loadui.api.model.AgentItem;
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.model.SceneItem;
-import com.eviware.loadui.api.statistics.*;
+import com.eviware.loadui.api.statistics.EntryAggregator;
+import com.eviware.loadui.api.statistics.StatisticHolder;
+import com.eviware.loadui.api.statistics.StatisticVariable;
+import com.eviware.loadui.api.statistics.StatisticsAggregator;
 import com.eviware.loadui.api.statistics.store.*;
 import com.eviware.loadui.api.statistics.store.ExecutionManager.State;
-import com.eviware.loadui.util.BeanInjector;
-import com.google.common.collect.Ordering;
-import com.google.common.collect.TreeMultimap;
+import com.google.common.collect.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,16 +35,9 @@ public class AgentDataAggregator implements StatisticsAggregator
 	public final static Logger log = LoggerFactory.getLogger( AgentDataAggregator.class );
 
 	private final static int BUFFER_SIZE = 5;
-	public static final Comparator<Object> NO_ORDER_COMPARATOR = new Comparator<Object>()
-	{
-		@Override
-		public int compare( Object o1, Object o2 )
-		{
-			return -1;
-		}
-	};
 
-	private final HashMap<String, TreeMultimap<Long, Entry>> entriesIntoSecondsByTrackId = new HashMap<>();
+	private final NavigableMap<Long, SetMultimap<String, Entry>> entriesIntoTrackIdBySecond = Maps.newTreeMap();
+	private final TreeMultimap<Long, String> agentIdBySeconds = TreeMultimap.create();
 	private final ExecutionManager executionManager;
 	private final StatisticsInterpolator statisticsInterpolator;
 
@@ -51,16 +45,17 @@ public class AgentDataAggregator implements StatisticsAggregator
 	{
 		this.executionManager = executionManager;
 		statisticsInterpolator = new StatisticsInterpolator( executionManager );
-
 		executionManager.addExecutionListener( new FlushingExecutionListener() );
 	}
 
 
-	private SceneItem getSceneWithTrackId( String trackId )
+	private SceneItem getScene( String trackId, AgentItem agent, ProjectItem project )
 	{
-		StatisticsManager statisticsManager = BeanInjector.getBean( StatisticsManager.class );
+		Collection<? extends SceneItem> assignedScenes = project.getScenesAssignedTo( agent );
 
-		for( StatisticHolder holder : statisticsManager.getStatisticHolders() )
+		HashSet<StatisticHolder> assignedHolders = getStatisticHolders( assignedScenes );
+
+		for( StatisticHolder holder : assignedHolders )
 		{
 			for( StatisticVariable variable : holder.getStatisticVariables() )
 			{
@@ -68,21 +63,26 @@ public class AgentDataAggregator implements StatisticsAggregator
 				{
 					if( descriptor.getId().equalsIgnoreCase( trackId ) )
 					{
-						return ( SceneItem )holder.getCanvas();
+						if( holder instanceof SceneItem )
+						{
+							return ( SceneItem )holder;
+						}
+						else
+						{
+							holder.getCanvas();
+						}
+
 					}
 				}
 			}
 		}
 
-		return null;
+		throw new RuntimeException( "Could not find trackId during data aggregation" );
 	}
 
-	private SceneItem getScene( String trackId, AgentItem agent, ProjectItem project )
+
+	private HashSet<StatisticHolder> getStatisticHolders( Collection<? extends SceneItem> assignedScenes )
 	{
-
-		Collection<? extends SceneItem> assignedScenes = project.getScenesAssignedTo( agent );
-
-
 		HashSet<StatisticHolder> assignedHolders = new HashSet<>();
 
 		for( SceneItem scene : assignedScenes )
@@ -94,30 +94,7 @@ public class AgentDataAggregator implements StatisticsAggregator
 				assignedHolders.add( component );
 			}
 		}
-
-		for( StatisticHolder holder : assignedHolders )
-		{
-			for( StatisticVariable variable : holder.getStatisticVariables() )
-			{
-				for( TrackDescriptor descriptor : variable.getTrackDescriptors() )
-				{
-					if( descriptor.getId().equalsIgnoreCase( trackId ) )
-					{
-
-						if( holder instanceof SceneItem )
-						{
-							return ( SceneItem )holder;
-						}
-						else
-						{
-							return ( SceneItem )holder.getCanvas();
-						}
-					}
-				}
-			}
-		}
-
-		throw new RuntimeException( "Could not find trackId during data aggregation" );
+		return assignedHolders;
 	}
 
 	public synchronized void update( Entry entry, String trackId, AgentItem agent )
@@ -125,61 +102,80 @@ public class AgentDataAggregator implements StatisticsAggregator
 		// updates the unaggregated statistic
 		statisticsInterpolator.update( entry, trackId, agent.getLabel() );
 
-		int assignedAgentsConnected = getNumberOfAgentsConnected( trackId, agent );
+		Collection<String> assignedAgentsConnected = getAgentsSendingDataWithTrackId( trackId, agent );
 
-		updateAndAggregate( entry, trackId, assignedAgentsConnected );
+		updateAndAggregate( entry, trackId, agent.getId(), assignedAgentsConnected );
 	}
 
-	private int getNumberOfAgentsConnected( String trackId, AgentItem agent )
+	private Collection<String> getAgentsSendingDataWithTrackId( String trackId, AgentItem agent )
 	{
 		ProjectItem project = agent.getWorkspace().getCurrentProject();
 		SceneItem scene = getScene( trackId, agent, project );
 		Collection<? extends AgentItem> assignedAgents = project.getAgentsAssignedTo( scene );
-		return getNumberOfAgentsConnected( assignedAgents );
+		return getIdsOfAgentsConnected( assignedAgents );
 	}
 
-	public void updateAndAggregate( Entry entry, String trackId, final int assignedAgentsConnected )
+	public void updateAndAggregate( final Entry entry, final String trackId, final String currentAgentId, final Collection<String> connectedAgentIds )
 	{
+
 		long time = entry.getTimestamp() / 1000;
 
-		TreeMultimap<Long, Entry> map = entriesIntoSecondsByTrackId.get( trackId );
-		if( map == null )
+		if( !entriesIntoTrackIdBySecond.isEmpty() && time < entriesIntoTrackIdBySecond.firstEntry().getKey() )
 		{
-			map = TreeMultimap.create( Ordering.natural(), NO_ORDER_COMPARATOR );
-			entriesIntoSecondsByTrackId.put( trackId, map );
+			// old value
+			log.warn( "received old message" );
+			return;
 		}
 
-		map.put( time, entry );
+		agentIdBySeconds.put( time, currentAgentId );
+		SetMultimap<String, Entry> currentEntryMap = entriesIntoTrackIdBySecond.get( time );
 
-		if( map.get( time ).size() == assignedAgentsConnected )
+		if( currentEntryMap == null )
 		{
-			flushAndRemove( trackId, time );
+			// no map for this time yet
+			entriesIntoTrackIdBySecond.put( time, HashMultimap.<String, Entry>create() );
+			currentEntryMap = entriesIntoTrackIdBySecond.get( time );
+		}
+		currentEntryMap.put( trackId, entry );
+
+		Collection<Long> flushableTimes = getFlushableTimes( connectedAgentIds, agentIdBySeconds );
+		if( !flushableTimes.isEmpty() )
+		{
+			flushTimes( flushableTimes );
 		}
 
-		removeOldMessages();
+		flushOldTimes();
 	}
 
-	private void removeOldMessages()
+	private void flushTimes( Collection<Long> flushableTimes )
 	{
-		for( String trackId : entriesIntoSecondsByTrackId.keySet() )
+		// making copy to avoid concurrent modification
+		Iterable<Long> copyOfTimes = new TreeSet<>( flushableTimes );
+		for( Long flushableTime : copyOfTimes )
 		{
-			NavigableSet<Long> timeSet = entriesIntoSecondsByTrackId.get( trackId ).keySet();
-
-			if( timeSet.size() > BUFFER_SIZE )
-			{
-				Long oldestTime = timeSet.first();
-				log.debug( "Removing old incomplete messages: " + oldestTime + " : " + trackId );
-				//flushAndRemove( trackId, oldestTime );
-				entriesIntoSecondsByTrackId.get( trackId ).removeAll( oldestTime );
-			}
+			flushAndRemove( flushableTime.longValue() );
 		}
-
 	}
 
-	private void flushAndRemove( String trackId, Long time )
+	private void flushOldTimes()
 	{
-		flush( trackId, entriesIntoSecondsByTrackId.get( trackId ).get( time ) );
-		entriesIntoSecondsByTrackId.get( trackId ).removeAll( time );
+		if( entriesIntoTrackIdBySecond.size() > BUFFER_SIZE )
+		{
+			flushAndRemove( entriesIntoTrackIdBySecond.firstEntry().getKey() );
+		}
+	}
+
+	private void flushAndRemove( Long time )
+	{
+		SetMultimap<String, Entry> entriesByTrackId = entriesIntoTrackIdBySecond.get( time );
+
+		for( String trackId : entriesByTrackId.keySet() )
+		{
+			flush( trackId, entriesByTrackId.get( trackId ) );
+		}
+		entriesIntoTrackIdBySecond.remove( time );
+		agentIdBySeconds.removeAll( time );
+
 	}
 
 	private synchronized void flush( String trackId, Set<Entry> entries )
@@ -202,11 +198,7 @@ public class AgentDataAggregator implements StatisticsAggregator
 			{
 				statisticsInterpolator.update( entry, trackId, StatisticVariable.MAIN_SOURCE );
 			}
-			else
-			{
-				//this was ignored before.
-				//log.warn("Could not get aggregated entry, entries {} discarded", entries);
-			}
+
 		}
 		else
 		{
@@ -219,13 +211,9 @@ public class AgentDataAggregator implements StatisticsAggregator
 	{
 		long flushTime = System.currentTimeMillis();
 
-		for( String trackId : entriesIntoSecondsByTrackId.keySet() )
+		for( Long time : Sets.newLinkedHashSet( entriesIntoTrackIdBySecond.keySet() ) )
 		{
-			NavigableSet<Long> timeSet = entriesIntoSecondsByTrackId.get( trackId ).keySet();
-			for( Long time : timeSet )
-			{
-				flushAndRemove( trackId, time );
-			}
+			flushAndRemove( time );
 		}
 
 		statisticsInterpolator.flush( flushTime );
@@ -243,19 +231,55 @@ public class AgentDataAggregator implements StatisticsAggregator
 		statisticsInterpolator.update( entry, trackId, source );
 	}
 
-	public int getNumberOfAgentsConnected( Collection<? extends AgentItem> agents )
+	public Collection<String> getIdsOfAgentsConnected( Collection<? extends AgentItem> agents )
 	{
-		int result = 0;
+		HashSet<String> result = new HashSet<>();
 
 		for( AgentItem agent : agents )
 		{
 			if( agent.isReady() )
 			{
-				result++;
+				result.add( agent.getId() );
 			}
 		}
 
 		return result;
+	}
+
+	public Collection<Long> getFlushableTimes( final Collection<String> agents, final TreeMultimap<Long, String> reportedAgentsBySecond )
+	{
+		long lastFlushableTime = getLatestFlushableTime( agents, reportedAgentsBySecond );
+
+		if( lastFlushableTime == -1 )
+		{
+			return new TreeSet<>();
+		}
+
+		NavigableSet<Long> timeSet = reportedAgentsBySecond.keySet();
+
+		return timeSet.subSet( timeSet.first(), true, lastFlushableTime, false );
+
+	}
+
+	private long getLatestFlushableTime( Collection<String> agents, TreeMultimap<Long, String> reportedAgentsBySecond )
+	{
+		ArrayList<String> copy = new ArrayList<>( agents );
+		for( Long time : reportedAgentsBySecond.keySet().descendingSet() )
+		{
+
+			for( String agentId : reportedAgentsBySecond.get( time ) )
+			{
+				copy.remove( agentId );
+			}
+
+			if( copy.isEmpty() )
+			{
+				return time;
+			}
+
+		}
+
+		return -1;
 	}
 
 	private class FlushingExecutionListener implements ExecutionListener
@@ -263,7 +287,8 @@ public class AgentDataAggregator implements StatisticsAggregator
 		@Override
 		public void executionStarted( State oldState )
 		{
-			entriesIntoSecondsByTrackId.clear();
+			entriesIntoTrackIdBySecond.clear();
+			agentIdBySeconds.clear();
 			statisticsInterpolator.reset();
 		}
 
@@ -275,7 +300,8 @@ public class AgentDataAggregator implements StatisticsAggregator
 		@Override
 		public void executionStopped( State oldState )
 		{
-			//flushAll();
+			log.debug( "Stop signal received" );
+			flushAll();
 		}
 
 		@Override

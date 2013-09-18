@@ -12,10 +12,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -75,21 +72,23 @@ public class AgentDataAggregatorTest
 		when( executionManagerMock.getTrack( anyString() ) ).thenReturn( trackMock );
 
 		aggregator = new AgentDataAggregator( executionManagerMock );
-
 	}
 
 	@Test
-	public void shouldReportStatistic()
+	public void aggregationOfSingleStatisticAndSingleAgent()
 	{
 		//given
+		String agentId = "Single Agent";
+		List<String> agentsConnected = Arrays.asList( agentId );
 		Entry entry1 = newEntry( 777l, VAR_STAT_NAME, 4 );
-		int numberOfAgents = 1;
+		Entry entry2 = newEntry( 1222l, VAR_STAT_NAME, 3 );
 
 		//when
-		aggregator.updateAndAggregate( entry1, "TrackID", numberOfAgents );
+		aggregator.updateAndAggregate( entry1, "TrackID", agentId, agentsConnected );
+		aggregator.updateAndAggregate( entry2, "TrackID", agentId, agentsConnected );
 
 		//then
-		verify( executionManagerMock ).writeEntry( trackIdCaptor.capture(), entryCaptor.capture(), sourceCaptor.capture() );
+		verify( executionManagerMock, times( 1 ) ).writeEntry( trackIdCaptor.capture(), entryCaptor.capture(), sourceCaptor.capture() );
 
 		assertThat( trackIdCaptor.getValue(), equalTo( "TrackID" ) );
 		assertThat( sourceCaptor.getValue(), equalTo( StatisticVariable.MAIN_SOURCE ) );
@@ -101,14 +100,24 @@ public class AgentDataAggregatorTest
 	}
 
 	@Test
-	public void shouldNotReportStatistic()
+	public void shouldNotReportStatisticWhenAllAgentsIsNotDoneMessaging()
 	{
 		//given
-		Entry entry1 = newEntry( 777, VAR_STAT_NAME, 4 );
-		int numberOfAgents = 2;
+		String singleTrackId = "trackid1";
+
+		String agentId1 = "coolAgent2008";
+		String agentId2 = "max is the best programmer";
+		List<String> agentsConnected = Arrays.asList( agentId1, agentId2 );
+
+		Entry entry1 = newEntry( 777, VAR_STAT_NAME, 1 );
+		Entry entry2 = newEntry( 555, VAR_STAT_NAME, 2 );
+		Entry entry3 = newEntry( 1777, VAR_STAT_NAME, 3 );
+
 
 		//when
-		aggregator.updateAndAggregate( entry1, "TrackID", numberOfAgents );
+		aggregator.updateAndAggregate( entry1, singleTrackId, agentId1, agentsConnected );
+		aggregator.updateAndAggregate( entry2, singleTrackId, agentId2, agentsConnected );
+		aggregator.updateAndAggregate( entry3, singleTrackId, agentId2, agentsConnected );
 
 		//then
 		verify( executionManagerMock, never() ).writeEntry( anyString(), ( Entry )anyObject(), anyString() );
@@ -118,120 +127,246 @@ public class AgentDataAggregatorTest
 	public void gettingUpdatesFrom2AgentsShouldAggregate()
 	{
 		//given
-		int val1 = 4, val2 = 2;
+		String singleTrackId = "trackid1";
+
+		String agentId1 = "coolAgent2008";
+		String agentId2 = "max is the best programmer";
+		List<String> agentsConnected = Arrays.asList( agentId1, agentId2 );
+
+		int val1 = 3;
+		int val2 = 4;
+
 		Entry entry1 = newEntry( 777, VAR_STAT_NAME, val1 );
-		Entry entry2 = newEntry( 888, VAR_STAT_NAME, val2 );
-		int numberOfAgents = 2;
-		String trackId = "TrackID";
+		Entry entry2 = newEntry( 555, VAR_STAT_NAME, val2 );
+		Entry entry3 = newEntry( 1777, VAR_STAT_NAME, 3 );
+		Entry entry4 = newEntry( 1555, VAR_STAT_NAME, 4 );
 
 		//when
-		aggregator.updateAndAggregate( entry1, trackId, numberOfAgents );
-		aggregator.updateAndAggregate( entry2, trackId, numberOfAgents );
+		aggregator.updateAndAggregate( entry1, singleTrackId, agentId1, agentsConnected );
+		aggregator.updateAndAggregate( entry2, singleTrackId, agentId2, agentsConnected );
+		aggregator.updateAndAggregate( entry3, singleTrackId, agentId1, agentsConnected );
+		aggregator.updateAndAggregate( entry4, singleTrackId, agentId2, agentsConnected );
 
 		//then
-		verify( executionManagerMock ).writeEntry( trackIdCaptor.capture(), entryCaptor.capture(), sourceCaptor.capture() );
+		verify( executionManagerMock, times( 1 ) ).writeEntry( trackIdCaptor.capture(), entryCaptor.capture(), sourceCaptor.capture() );
 
-		assertThat( trackIdCaptor.getValue(), equalTo( "TrackID" ) );
+		assertThat( trackIdCaptor.getValue(), equalTo( "trackid1" ) );
 		assertThat( sourceCaptor.getValue(), equalTo( StatisticVariable.MAIN_SOURCE ) );
 
 		Entry capturedEntry = entryCaptor.getValue();
 		assertThat( capturedEntry.getValue( VAR_STAT_NAME ).intValue(), equalTo( val1 + val2 ) );
-		assertThat( capturedEntry.getTimestamp(), equalTo( 888l ) );
+		assertThat( capturedEntry.getTimestamp(), equalTo( 777l ) );
 	}
 
 	@Test
-	public void multipleIntertwinedUpdatesWithDifferentTrackIdsTest()
+	public void multipleUpdatesWithDifferentTrackIdsTest()
 	{
 		//given
+		String trackId1 = "TrackID1";
+		String trackId2 = "TrackID2";
+
+		String agentId1 = "coolAgent2008";
+		String agentId2 = "agent2";
+		List<String> agentsConnected = Arrays.asList( agentId1, agentId2 );
+
 		Entry entry1 = newEntry( 777, VAR_STAT_NAME, 4 );
 		Entry entry2 = newEntry( 666, VAR_STAT_NAME, 6 );
 		Entry entry3 = newEntry( 1111, VAR_STAT_NAME, 2 );
 		Entry entry4 = newEntry( 1222, VAR_STAT_NAME, 3 );
 		Entry entry5 = newEntry( 2222, VAR_STAT_NAME, 1 );
 		Entry entry6 = newEntry( 2333, VAR_STAT_NAME, 5 );
-		int numberOfAgents = 2;
-		String trackId1 = "TrackID1";
-		String trackId2 = "TrackID2";
+		Entry entry7 = newEntry( 3333, VAR_STAT_NAME, 1 );
+		Entry entry8 = newEntry( 5554, VAR_STAT_NAME, 5 );
+
 
 		//when
-		aggregator.updateAndAggregate( entry1, trackId1, numberOfAgents );
-		aggregator.updateAndAggregate( entry5, trackId2, numberOfAgents );
-		aggregator.updateAndAggregate( entry6, trackId2, numberOfAgents );
-		aggregator.updateAndAggregate( entry4, trackId1, numberOfAgents );
-		aggregator.updateAndAggregate( entry3, trackId1, numberOfAgents );
-		aggregator.updateAndAggregate( entry2, trackId1, numberOfAgents );
+		aggregator.updateAndAggregate( entry1, trackId1, agentId1, agentsConnected );
+		aggregator.updateAndAggregate( entry2, trackId1, agentId2, agentsConnected );
+		aggregator.updateAndAggregate( entry3, trackId2, agentId2, agentsConnected );
+		aggregator.updateAndAggregate( entry4, trackId2, agentId1, agentsConnected );
+		aggregator.updateAndAggregate( entry5, trackId1, agentId2, agentsConnected );
+		aggregator.updateAndAggregate( entry6, trackId1, agentId1, agentsConnected );
+		aggregator.updateAndAggregate( entry7, trackId1, agentId1, agentsConnected );
+		aggregator.updateAndAggregate( entry8, trackId1, agentId2, agentsConnected );
 
 		//then
 		verify( executionManagerMock, times( 3 ) ).writeEntry( trackIdCaptor.capture(), entryCaptor.capture(), sourceCaptor.capture() );
 
-		assertThat( entryCaptor.getAllValues().size(), equalTo( 3 ) );
+		List<String> trackIdCaptors = trackIdCaptor.getAllValues();
+		List<Entry> capturedEntries = entryCaptor.getAllValues();
+
+		assertThat( capturedEntries.get( 0 ).getTimestamp(), equalTo( 777l ) );
+		assertThat( trackIdCaptors.get( 0 ), equalTo( trackId1 ) );
+
+		assertThat( capturedEntries.get( 1 ).getTimestamp(), equalTo( 1222l ) );
+		assertThat( trackIdCaptors.get( 1 ), equalTo( trackId2 ) );
+
+		assertThat( capturedEntries.get( 2 ).getTimestamp(), equalTo( 2333l ) );
+		assertThat( trackIdCaptors.get( 2 ), equalTo( trackId1 ) );
+
+	}
+
+	@Test
+	public void whenOneAgentIsDelayedMultipleTimesShouldFlush()
+	{
+		//given
+		String trackId1 = "TrackID1";
+
+		String agentId1 = "coolAgent2008";
+		String agentId2 = "agent2";
+		List<String> agentsConnected = Arrays.asList( agentId1, agentId2 );
+
+		Entry entry1 = newEntry( 777, VAR_STAT_NAME, 4 );
+		Entry entry2 = newEntry( 1111, VAR_STAT_NAME, 6 );
+		Entry entry3 = newEntry( 2222, VAR_STAT_NAME, 2 );
+		Entry entry4 = newEntry( 3333, VAR_STAT_NAME, 3 );
+
+		//when
+		aggregator.updateAndAggregate( entry1, trackId1, agentId1, agentsConnected );
+		aggregator.updateAndAggregate( entry2, trackId1, agentId1, agentsConnected );
+		aggregator.updateAndAggregate( entry3, trackId1, agentId1, agentsConnected );
+		aggregator.updateAndAggregate( entry4, trackId1, agentId2, agentsConnected );
+
+
+		//then
+		verify( executionManagerMock, times( 2 ) ).writeEntry( trackIdCaptor.capture(), entryCaptor.capture(), sourceCaptor.capture() );
 
 		List<String> trackIdCaptors = trackIdCaptor.getAllValues();
 		List<Entry> capturedEntries = entryCaptor.getAllValues();
-		assertThat( capturedEntries.get( 0 ).getValue( VAR_STAT_NAME ).intValue(), equalTo( 6 ) );
-		assertThat( capturedEntries.get( 0 ).getTimestamp(), equalTo( 2333l ) );
-		assertThat( trackIdCaptors.get( 0 ), equalTo( trackId2 ) );
 
-		assertThat( capturedEntries.get( 1 ).getValue( VAR_STAT_NAME ).intValue(), equalTo( 5 ) );
-		assertThat( capturedEntries.get( 1 ).getTimestamp(), equalTo( 1222l ) );
-		assertThat( trackIdCaptors.get( 1 ), equalTo( trackId1 ) );
+		assertThat( capturedEntries.get( 0 ).getTimestamp(), equalTo( 777l ) );
+		assertThat( capturedEntries.get( 0 ).getValue( VAR_STAT_NAME ).intValue(), equalTo( 4 ) );
 
-		assertThat( capturedEntries.get( 2 ).getValue( VAR_STAT_NAME ).intValue(), equalTo( 10 ) );
-		assertThat( capturedEntries.get( 2 ).getTimestamp(), equalTo( 777l ) );
-		assertThat( trackIdCaptors.get( 2 ), equalTo( trackId1 ) );
+		assertThat( capturedEntries.get( 1 ).getTimestamp(), equalTo( 1111l ) );
+		assertThat( capturedEntries.get( 1 ).getValue( VAR_STAT_NAME ).intValue(), equalTo( 6 ) );
+
 	}
 
 	@Test
-	public void updatesWithDifferentTrackIdsAndSimilarTimesStampTest()
+	public void oneAgentDisconnectsShouldMakeItAggregateOldMessages()
 	{
 		//given
-		int numberOfAgents = 2;
+		String trackId1 = "TrackID1";
+
+		String agentId1 = "coolAgent2008";
+		String agentId2 = "agent2";
+		List<String> twoAgents = Arrays.asList( agentId1, agentId2 );
+		List<String> oneAgent = Arrays.asList( agentId1 );
+
 		Entry entry1 = newEntry( 777, VAR_STAT_NAME, 4 );
-		Entry entry2 = newEntry( 666, VAR_STAT_NAME, 6 );
-		String trackId1 = "TrackID1";
-		String trackId2 = "TrackID2";
+		Entry entry2 = newEntry( 555, VAR_STAT_NAME, 6 );
+		Entry entry3 = newEntry( 2222, VAR_STAT_NAME, 2 );
+		Entry entry4 = newEntry( 3333, VAR_STAT_NAME, 3 );
+		Entry entry5 = newEntry( 3444, VAR_STAT_NAME, 5 );
+		Entry entry6 = newEntry( 4444, VAR_STAT_NAME, 7 );
 
 		//when
-		aggregator.updateAndAggregate( entry1, trackId1, numberOfAgents );
-		aggregator.updateAndAggregate( entry2, trackId2, numberOfAgents );
+		aggregator.updateAndAggregate( entry1, trackId1, agentId1, twoAgents );
+		aggregator.updateAndAggregate( entry2, trackId1, agentId2, twoAgents );
+		aggregator.updateAndAggregate( entry3, trackId1, agentId1, twoAgents );
+		aggregator.updateAndAggregate( entry4, trackId1, agentId1, twoAgents );
+		aggregator.updateAndAggregate( entry5, trackId1, agentId1, twoAgents );
+		aggregator.updateAndAggregate( entry6, trackId1, agentId1, oneAgent );
+
 
 		//then
-		verify( executionManagerMock, never() ).writeEntry( trackIdCaptor.capture(), entryCaptor.capture(), sourceCaptor.capture() );
+		verify( executionManagerMock, times( 3 ) ).writeEntry( trackIdCaptor.capture(), entryCaptor.capture(), sourceCaptor.capture() );
 
-	}
-
-	@Test
-	public void automaticFlushingTest()
-	{
-		//given
-		int numberOfAgents = 2;
-		String trackId1 = "TrackID1";
-
-		//when
-		aggregator.updateAndAggregate( newEntry( 1, VAR_STAT_NAME, 5 ), trackId1, numberOfAgents );
-		aggregator.updateAndAggregate( newEntry( 1001, VAR_STAT_NAME, 5 ), trackId1, numberOfAgents );
-		aggregator.updateAndAggregate( newEntry( 2002, VAR_STAT_NAME, 5 ), trackId1, numberOfAgents );
-		aggregator.updateAndAggregate( newEntry( 3003, VAR_STAT_NAME, 5 ), trackId1, numberOfAgents );
-		aggregator.updateAndAggregate( newEntry( 4004, VAR_STAT_NAME, 5 ), trackId1, numberOfAgents );
-
-		aggregator.updateAndAggregate( newEntry( 2, VAR_STAT_NAME, 5 ), trackId1, numberOfAgents );
-
-		aggregator.updateAndAggregate( newEntry( 5004, VAR_STAT_NAME, 5 ), trackId1, numberOfAgents );
-		aggregator.updateAndAggregate( newEntry( 6004, VAR_STAT_NAME, 5 ), trackId1, numberOfAgents );
-		aggregator.updateAndAggregate( newEntry( 1002, VAR_STAT_NAME, 5 ), trackId1, numberOfAgents );
-
-		//then
-		verify( executionManagerMock, times( 1 ) ).writeEntry( trackIdCaptor.capture(), entryCaptor.capture(), sourceCaptor.capture() );
 		List<Entry> capturedEntries = entryCaptor.getAllValues();
 
 		assertThat( capturedEntries.get( 0 ).getValue( VAR_STAT_NAME ).intValue(), equalTo( 10 ) );
-		assertThat( capturedEntries.get( 0 ).getTimestamp(), equalTo( 2l ) );
+		assertThat( capturedEntries.get( 0 ).getTimestamp(), equalTo( 777l ) );
 
-//		assertThat( capturedEntries.get( 1 ).getValue( VAR_STAT_NAME ).intValue(), equalTo( 5 ) );
-//		assertThat( capturedEntries.get( 1 ).getTimestamp(), equalTo( 1001l ) );
-//
-//		assertThat( capturedEntries.get( 2 ).getValue( VAR_STAT_NAME ).intValue(), equalTo( 5 ) );
-//		assertThat( capturedEntries.get( 2 ).getTimestamp(), equalTo( 1002l ) );
+		assertThat( capturedEntries.get( 1 ).getValue( VAR_STAT_NAME ).intValue(), equalTo( 2 ) );
+		assertThat( capturedEntries.get( 1 ).getTimestamp(), equalTo( 2222l ) );
+
+		assertThat( capturedEntries.get( 2 ).getValue( VAR_STAT_NAME ).intValue(), equalTo( 8 ) );
+		assertThat( capturedEntries.get( 2 ).getTimestamp(), equalTo( 3444l ) );
+	}
+
+	@Test
+	public void shouldThrowAwayOldValue()
+	{
+		//given
+		String trackId1 = "TrackID1";
+
+		String agentId1 = "coolAgent2008";
+		String agentId2 = "agent2";
+		List<String> twoAgents = Arrays.asList( agentId1, agentId2 );
+
+		Entry entry1 = newEntry( 1777, VAR_STAT_NAME, 4 );
+		Entry entry2 = newEntry( 1555, VAR_STAT_NAME, 6 );
+		Entry entry3 = newEntry( 3222, VAR_STAT_NAME, 2 );
+		Entry entry4 = newEntry( 3333, VAR_STAT_NAME, 3 );
+		Entry entry5 = newEntry( 777, VAR_STAT_NAME, 7 );
+		Entry entry6 = newEntry( 888, VAR_STAT_NAME, 7 );
+		Entry entry7 = newEntry( 4444, VAR_STAT_NAME, 7 );
+		Entry entry8 = newEntry( 4555, VAR_STAT_NAME, 7 );
+
+		//when
+		aggregator.updateAndAggregate( entry1, trackId1, agentId1, twoAgents );
+		aggregator.updateAndAggregate( entry2, trackId1, agentId2, twoAgents );
+		aggregator.updateAndAggregate( entry3, trackId1, agentId1, twoAgents );
+		aggregator.updateAndAggregate( entry4, trackId1, agentId2, twoAgents );
+
+		aggregator.updateAndAggregate( entry5, trackId1, agentId1, twoAgents );
+		aggregator.updateAndAggregate( entry6, trackId1, agentId2, twoAgents );
+
+		aggregator.updateAndAggregate( entry7, trackId1, agentId1, twoAgents );
+		aggregator.updateAndAggregate( entry8, trackId1, agentId2, twoAgents );
+
+
+		//then
+		verify( executionManagerMock, times( 2 ) ).writeEntry( trackIdCaptor.capture(), entryCaptor.capture(), sourceCaptor.capture() );
+
+		List<Entry> capturedEntries = entryCaptor.getAllValues();
+
+		assertThat( capturedEntries.get( 0 ).getValue( VAR_STAT_NAME ).intValue(), equalTo( 10 ) );
+		assertThat( capturedEntries.get( 0 ).getTimestamp(), equalTo( 1777l ) );
+
+		assertThat( capturedEntries.get( 1 ).getValue( VAR_STAT_NAME ).intValue(), equalTo( 5 ) );
+		assertThat( capturedEntries.get( 1 ).getTimestamp(), equalTo( 3333l ) );
+
+
+	}
+
+	@Test
+	public void shouldFlushAfter5reportedSeconds()
+	{
+		//given
+		String trackId1 = "TrackID1";
+
+		String agentId1 = "coolAgent2008";
+		String agentId2 = "not used agent";
+		List<String> twoAgents = Arrays.asList( agentId1, agentId2 );
+
+		Entry entry1 = newEntry( 444, VAR_STAT_NAME, 4 );
+		Entry entry2 = newEntry( 1555, VAR_STAT_NAME, 6 );
+		Entry entry3 = newEntry( 2222, VAR_STAT_NAME, 2 );
+		Entry entry4 = newEntry( 3333, VAR_STAT_NAME, 3 );
+		Entry entry5 = newEntry( 4444, VAR_STAT_NAME, 7 );
+		Entry entry6 = newEntry( 5555, VAR_STAT_NAME, 7 );
+		Entry entry7 = newEntry( 6666, VAR_STAT_NAME, 7 );
+		Entry entry8 = newEntry( 6666, VAR_STAT_NAME, 7 );
+
+		//when
+		aggregator.updateAndAggregate( entry1, trackId1, agentId1, twoAgents );
+		aggregator.updateAndAggregate( entry2, trackId1, agentId1, twoAgents );
+		aggregator.updateAndAggregate( entry3, trackId1, agentId1, twoAgents );
+		aggregator.updateAndAggregate( entry4, trackId1, agentId1, twoAgents );
+		aggregator.updateAndAggregate( entry5, trackId1, agentId1, twoAgents );
+
+		aggregator.updateAndAggregate( entry6, trackId1, agentId1, twoAgents );
+
+
+		//then
+		verify( executionManagerMock, times( 1 ) ).writeEntry( trackIdCaptor.capture(), entryCaptor.capture(), sourceCaptor.capture() );
+
+		List<Entry> capturedEntries = entryCaptor.getAllValues();
+
+		assertThat( capturedEntries.get( 0 ).getValue( VAR_STAT_NAME ).intValue(), equalTo( 4 ) );
+		assertThat( capturedEntries.get( 0 ).getTimestamp(), equalTo( 444l ) );
+
 	}
 
 	private EntryImpl newEntry( long timeStamp, String description, long value )
