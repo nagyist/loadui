@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit
 inputTerminal.description = 'Messages sent here will be displayed in the table.'
 likes( inputTerminal ) { true }
 
-table = null
+def tableReference = new java.util.concurrent.atomic.AtomicReference()
 tableWriterFuture = null
 fileWriterFuture = null
 tableWriterDelay = 250
@@ -65,7 +65,17 @@ createProperty( 'formatTimestamps', Boolean, true )
 createProperty( 'addHeaders', Boolean, false )
 
 cellFactory = { val -> { it -> val.value[val.tableColumn.text] } as ObservableValue } as Callback
-rebuildTable = { table = new TableView( prefHeight: 200, minWidth: 500 ) }
+
+def lastTable = []
+
+rebuildTable = {
+	def t = new TableView( prefHeight: 200, minWidth: 500, id: (new Random().nextInt() as String))
+	log.info("CREATED TABLE: " + t )//+ " (lastTable is " + lastTable + ")")
+
+	lastTable << t
+	return t
+}
+
 final tableColumns = [] as CopyOnWriteArraySet
 final addedColumns = []
 def latestHeader
@@ -81,6 +91,7 @@ onMessage = { o, i, m ->
 }
 
 output = { message ->
+	log.info "OUTPUT"
 	def writeLog = saveFile.value && saveFileName
 	if( controller || writeLog ) {
 		synchronized( this ) {
@@ -136,10 +147,15 @@ onAction( "STOP" ) { stopTableWriter() }
 onAction( "COMPLETE" ) { closeWriter() }
 
 onAction( "RESET" ) {
+		try{
+	throw new RuntimeException("RESETTED")
+	} catch(e){e.printStackTrace()}
+
 	buildFileName()
 	log.info("RESET CLEARING")
+	table.items.clear()
 	tableColumns.clear()
-	refreshLayout()
+	table.columns.clear()
 }
 
 onRelease = { closeWriter() }
@@ -185,17 +201,29 @@ synchronized startTableWriter() {
 }
 
 void stopTableWriter() {
+	log.info("STOP TABLEWRITER!!!!!!!!!!!!!!!!!!")
 	tableWriterFuture?.cancel( true )
 	tableWriter.run()
 	tableWriterFuture = null
 }
 
 tableWriter = {
+	table = tableReference.get()
+	log.info("USING TABLE: " + table + " that has scene: " + table.getScene().getWindow() )
+	while( table?.getScene()?.getWindow() == null && !lastTable.isEmpty() )
+	{
+		table = lastTable.pop()
+		log.info("    REVERTING TO TABLE: " + table + " that has scene: " + table?.getScene()?.getWindow() )
+	}
+	tableReference.set( table )
+	lastTable.clear()
 	def newColumns = []
 	synchronized( this ) {
 		for ( iter = addedColumns.iterator(); iter.hasNext();) {
 			def added = iter.next()
 			iter.remove()
+			if( table.columns.any{ it.text == added } )
+				continue
 			log.info "Adding column to Table Log: $added"
 			def column = new TableColumn( cellValueFactory: cellFactory, text: added, sortable: false )
 			column.widthProperty().addListener( { obs, oldVal, width -> setAttribute( "width_$added", "$width" ) } as ChangeListener )
@@ -206,7 +234,6 @@ tableWriter = {
 			}
 		}	
 	}
-	
 	def newMessages = []
 	def excessItems =  0
 	synchronized( messageQueue ) {
@@ -220,6 +247,7 @@ tableWriter = {
 			if ( newColumns ) table.columns.addAll newColumns
 			if ( excessItems > 0 ) table.items.remove( 0, excessItems )
 			if ( newMessages ) table.items.addAll newMessages
+			log.info( "added " + newMessages.size() + " new messages!!!!!!!!!!!!!!!!!!!!!!!!!" )
 		}
 	}
 	
@@ -267,13 +295,16 @@ validateLogFilePath = { filePath ->
 addTimestampToFileName = { it.replaceAll('^(.*?)(\\.\\w+)?$', '$1-'+System.currentTimeMillis()+'$2') }
 
 refreshLayout = {
-	rebuildTable()
+	log.info( "REFRESH LAYOUT!!!" )
+
 	layout(layout: 'wrap 4') {
-		node( component: table, constraints: 'span' )
+		node( component: rebuildTable, constraints: 'span', handle: tableReference )
 		action( label: 'Reset', action: { table.items.clear() } )
 		action( label: 'Clear', action: {
+			table.items.clear()
 			tableColumns.clear()
-			refreshLayout()
+			table.columns.clear()
+			//refreshLayout()
 		} )
 		action( label: 'Save', action: {
 			def fileChooser = new FileChooser( title: 'Save log' )
@@ -296,7 +327,7 @@ refreshLayout = {
 	}
 	compactLayout {
 		box( widget: 'display' ) {
-			node( label: 'Rows', content: { table.items.size() } )
+			node( label: 'Rows', content: { tableReference.get()?.items?.size() } )
 			node( label: 'Output File', content: { saveFileName ?: '-' } )
 		}
 	}

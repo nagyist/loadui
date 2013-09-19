@@ -15,53 +15,9 @@
  */
 package com.eviware.loadui.ui.fx.views.canvas.component;
 
-import java.io.File;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.concurrent.ExecutorService;
-
-import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.binding.Bindings;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Orientation;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBuilder;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.LabelBuilder;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Separator;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.VBoxBuilder;
-import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.util.Callback;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.tbee.javafx.scene.layout.MigPane;
-
 import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.api.layout.ActionLayoutComponent;
+import com.eviware.loadui.api.layout.*;
 import com.eviware.loadui.api.layout.ActionLayoutComponent.ActionEnabledListener;
-import com.eviware.loadui.api.layout.LabelLayoutComponent;
-import com.eviware.loadui.api.layout.LayoutComponent;
-import com.eviware.loadui.api.layout.LayoutContainer;
-import com.eviware.loadui.api.layout.OptionsProvider;
-import com.eviware.loadui.api.layout.PropertyLayoutComponent;
-import com.eviware.loadui.api.layout.SeparatorLayoutComponent;
-import com.eviware.loadui.api.layout.TableLayoutComponent;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.impl.layout.OptionsProviderImpl;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
@@ -75,20 +31,46 @@ import com.eviware.loadui.util.layout.FormattedString;
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Orientation;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBoxBuilder;
+import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.util.Callback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.tbee.javafx.scene.layout.MigPane;
+
+import java.io.File;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Used to generate the component UI widgets (such as knobs and textfields) from
  * LayoutComponents.
- * 
+ *
  * @author maximilian.skog
- * 
  */
 
 public class ComponentLayoutUtils
 {
 	protected static final Logger log = LoggerFactory.getLogger( ComponentLayoutUtils.class );
 
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	public static Node instantiateLayout( LayoutComponent component )
 	{
 		//Legacy rules that we need, that pre-emp anything else
@@ -97,7 +79,7 @@ public class ComponentLayoutUtils
 			//TODO: Add all the stuff from the old WidgetRegistry
 			if( "display".equals( component.get( "widget" ) ) )
 			{
-				LayoutContainer container = ( LayoutContainer )component;
+				LayoutContainer container = (LayoutContainer) component;
 				MigPane pane = new MigPane( container.getLayoutConstraints(), container.getColumnConstraints(),
 						container.getRowConstraints() );
 				pane.getStyleClass().add( "display" );
@@ -108,7 +90,7 @@ public class ComponentLayoutUtils
 					Node node = instantiateLayout( child );
 					if( node instanceof Parent )
 					{
-						for( Node n : ( ( Parent )node ).getChildrenUnmodifiable() )
+						for( Node n : ((Parent) node).getChildrenUnmodifiable() )
 						{
 							n.setStyle( "-fx-font-size: 11;" );
 						}
@@ -116,20 +98,19 @@ public class ComponentLayoutUtils
 					pane.add( node, child.getConstraints() );
 				}
 				return pane;
-			}
-			else if( "selectorWidget".equals( component.get( "widget" ) ) )
+			} else if( "selectorWidget".equals( component.get( "widget" ) ) )
 			{
 
-				Iterable<String> options = ( Iterable<String> )component.get( "labels" );
+				Iterable<String> options = (Iterable<String>) component.get( "labels" );
 
-				boolean showLabels = ( boolean )Objects.firstNonNull( component.get( "showLabels" ), true );
+				boolean showLabels = (boolean) Objects.firstNonNull( component.get( "showLabels" ), true );
 				OptionsSlider slider = new OptionsSlider( Iterables.filter( options, String.class ) );
 				slider.setShowLabels( showLabels );
 
 				if( component.has( "images" ) )
 				{
 					List<ImageView> images = Lists.newArrayList();
-					Iterable<String> imageNames = ( Iterable<String> )component.get( "images" );
+					Iterable<String> imageNames = (Iterable<String>) component.get( "images" );
 
 					for( String imageName : imageNames )
 					{
@@ -140,25 +121,38 @@ public class ComponentLayoutUtils
 					slider.getImages().setAll( images );
 				}
 
-				Property<String> loadUiProperty = ( Property<String> )component.get( "selected" );
+				Property<String> loadUiProperty = (Property<String>) component.get( "selected" );
 				slider.selectedProperty().bindBidirectional( Properties.convert( loadUiProperty ) );
 
-				Label propertyLabel = LabelBuilder.create().text( ( String )component.get( "label" ) ).build();
+				Label propertyLabel = LabelBuilder.create().text( (String) component.get( "label" ) ).build();
 
 				return VBoxBuilder.create().children( propertyLabel, slider ).build();
 			}
-		}
-		else if( component.has( "component" ) )
+		} else if( component.has( "component" ) )
 		{
-			Object c = component.get( "component" );
-			if( c instanceof Node )
+			Callable c = (Callable) component.get( "component" );
+			AtomicReference ref = (AtomicReference) component.get( "handle" );
+
+			if( ref.get() == null )
 			{
-				return ( Node )c;
+				try
+				{
+					ref.set( c.call() );
+					return (Node) ref.get();
+				} catch( Exception e )
+				{
+					e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+					return null;
+				}
+			} else
+			{
+				return (Node) ref.get();
 			}
-		}
-		else if( component.has( "fString" ) )
+
+
+		} else if( component.has( "fString" ) )
 		{
-			final FormattedString fString = ( FormattedString )component.get( "fString" );
+			final FormattedString fString = (FormattedString) component.get( "fString" );
 			final Label label = new Label( fString.getCurrentValue() );
 			fString.addObserver( new Observer()
 			{
@@ -177,12 +171,12 @@ public class ComponentLayoutUtils
 			} );
 
 			return VBoxBuilder.create()
-					.children( LabelBuilder.create().text( ( String )component.get( "label" ) ).build(), label ).build();
+					.children( LabelBuilder.create().text( (String) component.get( "label" ) ).build(), label ).build();
 		}
 
 		if( component instanceof LayoutContainer )
 		{
-			LayoutContainer container = ( LayoutContainer )component;
+			LayoutContainer container = (LayoutContainer) component;
 			MigPane pane = new MigPane( container.getLayoutConstraints(), container.getColumnConstraints(),
 					container.getRowConstraints() );
 			for( LayoutComponent child : container )
@@ -190,10 +184,9 @@ public class ComponentLayoutUtils
 				pane.add( instantiateLayout( child ), child.getConstraints() );
 			}
 			return pane;
-		}
-		else if( component instanceof ActionLayoutComponent )
+		} else if( component instanceof ActionLayoutComponent )
 		{
-			final ActionLayoutComponent action = ( ActionLayoutComponent )component;
+			final ActionLayoutComponent action = (ActionLayoutComponent) component;
 			final Button button = ButtonBuilder.create().text( action.getLabel() ).disable( !action.isEnabled() ).build();
 			button.setOnAction( new EventHandler<ActionEvent>()
 			{
@@ -203,8 +196,7 @@ public class ComponentLayoutUtils
 					if( action.isAsynchronous() )
 					{
 						BeanInjector.getBean( ExecutorService.class ).submit( action.getAction() );
-					}
-					else
+					} else
 					{
 						button.fireEvent( IntentEvent.create( IntentEvent.INTENT_RUN_BLOCKING, action.getAction() ) );
 					}
@@ -225,21 +217,17 @@ public class ComponentLayoutUtils
 			button.getProperties().put( "_KEEP_STRONG_REF_TO_LISTENER_PROPERTY_", disableSynchListener );
 
 			return button;
-		}
-		else if( component instanceof LabelLayoutComponent )
+		} else if( component instanceof LabelLayoutComponent )
 		{
-			return new Label( ( ( LabelLayoutComponent )component ).getLabel() );
-		}
-		else if( component instanceof PropertyLayoutComponent )
+			return new Label( ((LabelLayoutComponent) component).getLabel() );
+		} else if( component instanceof PropertyLayoutComponent )
 		{
-			return createPropertyNode( ( PropertyLayoutComponent<?> )component );
-		}
-		else if( component instanceof SeparatorLayoutComponent )
+			return createPropertyNode( (PropertyLayoutComponent<?>) component );
+		} else if( component instanceof SeparatorLayoutComponent )
 		{
-			SeparatorLayoutComponent separator = ( SeparatorLayoutComponent )component;
+			SeparatorLayoutComponent separator = (SeparatorLayoutComponent) component;
 			return new Separator( separator.isVertical() ? Orientation.VERTICAL : Orientation.HORIZONTAL );
-		}
-		else if( component instanceof TableLayoutComponent )
+		} else if( component instanceof TableLayoutComponent )
 		{
 			//TODO: Table stuff
 			return new TableView<>();
@@ -255,26 +243,21 @@ public class ComponentLayoutUtils
 		if( propLayoutComp.isReadOnly() )
 		{
 			return createLabel( propLayoutComp, propertyLabel );
-		}
-		else if( propLayoutComp.has( "options" ) )
+		} else if( propLayoutComp.has( "options" ) )
 		{
 			return createOptionsNode( propLayoutComp, propertyLabel );
-		}
-		else if( type == String.class )
+		} else if( type == String.class )
 		{
 			return createTextNode( propLayoutComp, propertyLabel );
 
-		}
-		else if( Number.class.isAssignableFrom( type ) )
+		} else if( Number.class.isAssignableFrom( type ) )
 		{
 			return createKnob( propLayoutComp );
-		}
-		else if( type == Boolean.class )
+		} else if( type == Boolean.class )
 		{
 			return createCheckBox( propLayoutComp );
 
-		}
-		else if( type == File.class )
+		} else if( type == File.class )
 		{
 			return createFilePicker( propLayoutComp, propertyLabel );
 		}
@@ -282,51 +265,50 @@ public class ComponentLayoutUtils
 		return LabelBuilder.create().build();
 	}
 
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	private static Node createCheckBox( PropertyLayoutComponent<?> propLayoutComp )
 	{
 		if( propLayoutComp.getProperty().getKey().equals( "enabledInDistMode" ) && !LoadUI.isPro() )
 		{
 			return VBoxBuilder.create().styleClass( "only-relevant-for-pro" ).build();
-		}
-		else
+		} else
 		{
 			CheckBox checkBox = new CheckBox( propLayoutComp.getLabel() );
-			javafx.beans.property.Property<Boolean> jfxProp = Properties.convert( ( Property<Boolean> )propLayoutComp
+			javafx.beans.property.Property<Boolean> jfxProp = Properties.convert( (Property<Boolean>) propLayoutComp
 					.getProperty() );
 			checkBox.selectedProperty().bindBidirectional( jfxProp );
 			return nodeWithProperty( checkBox, jfxProp );
 		}
 	}
 
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	private static Node createKnob( PropertyLayoutComponent<?> propLayoutComp )
 	{
 		Knob knob = new Knob( propLayoutComp.getLabel() );
-		javafx.beans.property.Property<Number> jfxProp = Properties.convert( ( Property<Number> )propLayoutComp
+		javafx.beans.property.Property<Number> jfxProp = Properties.convert( (Property<Number>) propLayoutComp
 				.getProperty() );
 		knob.valueProperty().bindBidirectional( jfxProp );
 		if( propLayoutComp.has( "min" ) )
 		{
-			knob.setMin( ( ( Number )propLayoutComp.get( "min" ) ).doubleValue() );
+			knob.setMin( ((Number) propLayoutComp.get( "min" )).doubleValue() );
 		}
 		if( propLayoutComp.has( "max" ) )
 		{
-			knob.setMax( ( ( Number )propLayoutComp.get( "max" ) ).doubleValue() );
+			knob.setMax( ((Number) propLayoutComp.get( "max" )).doubleValue() );
 		}
 		if( propLayoutComp.has( "step" ) )
 		{
-			knob.setStep( ( ( Number )propLayoutComp.get( "step" ) ).doubleValue() );
+			knob.setStep( ((Number) propLayoutComp.get( "step" )).doubleValue() );
 		}
 		if( propLayoutComp.has( "span" ) )
 		{
-			knob.setSpan( ( ( Number )propLayoutComp.get( "span" ) ).doubleValue() );
+			knob.setSpan( ((Number) propLayoutComp.get( "span" )).doubleValue() );
 		}
 
 		return nodeWithProperty( knob, jfxProp );
 	}
 
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	private static Node createTextNode( PropertyLayoutComponent<?> propLayoutComp, Label propertyLabel )
 	{
 		final TextField textField = new TextField();
@@ -340,13 +322,13 @@ public class ComponentLayoutUtils
 			}
 		} );
 
-		javafx.beans.property.Property<String> jfxProp = Properties.convert( ( Property<String> )propLayoutComp
+		javafx.beans.property.Property<String> jfxProp = Properties.convert( (Property<String>) propLayoutComp
 				.getProperty() );
 		textField.textProperty().bindBidirectional( jfxProp );
 		return nodeWithProperty( VBoxBuilder.create().children( propertyLabel, textField ).build(), jfxProp );
 	}
 
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	private static Node createFilePicker( PropertyLayoutComponent<?> propLayoutComp, Label propertyLabel )
 	{
 
@@ -355,25 +337,23 @@ public class ComponentLayoutUtils
 		if( propertyLabel.getText().contains( "Geb " ) )
 		{
 			filter = new ExtensionFilter( "Geb script file (*.groovy)", "*.groovy" );
-		}
-		else if( propertyLabel.getText().contains( "Groovy" ) )
+		} else if( propertyLabel.getText().contains( "Groovy" ) )
 		{
 			filter = new ExtensionFilter( "Groovy Script (*.groovy)", "*.groovy" );
 
-		}
-		else if( propertyLabel.getText().contains( "soapUI" ) )
+		} else if( propertyLabel.getText().contains( "soapUI" ) )
 		{
 			filter = new ExtensionFilter( "SoapUI Project (*.xml)", "*.xml", "*.XML" );
 		}
 		//Just add more special cases here as we have more needs. 
 		FilePicker filePicker = new FilePicker( propertyLabel.getText(), filter );
 		javafx.beans.property.Property<File> jfxProp = Properties
-				.convert( ( Property<File> )propLayoutComp.getProperty() );
+				.convert( (Property<File>) propLayoutComp.getProperty() );
 		filePicker.selectedProperty().bindBidirectional( jfxProp );
 		return nodeWithProperty( VBoxBuilder.create().children( propertyLabel, filePicker ).build(), jfxProp );
 	}
 
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	private static Node createOptionsNode( PropertyLayoutComponent<?> propLayoutComp, Label propertyLabel )
 	{
 		log.debug( "OPTIONS NODE: " + propLayoutComp );
@@ -382,18 +362,16 @@ public class ComponentLayoutUtils
 		OptionsProvider<Object> options;
 		if( opts instanceof OptionsProvider<?> )
 		{
-			options = ( OptionsProvider<Object> )opts;
-		}
-		else if( opts instanceof Iterable<?> )
+			options = (OptionsProvider<Object>) opts;
+		} else if( opts instanceof Iterable<?> )
 		{
-			options = new OptionsProviderImpl<>( ( Iterable<Object> )opts );
-		}
-		else
+			options = new OptionsProviderImpl<>( (Iterable<Object>) opts );
+		} else
 		{
 			options = new OptionsProviderImpl<>( opts );
 		}
 
-		if( "combobox".equalsIgnoreCase( ( String )propLayoutComp.get( "widget" ) ) )
+		if( "combobox".equalsIgnoreCase( (String) propLayoutComp.get( "widget" ) ) )
 		{
 			final OptionsProvider<Object> finalOptions = options;
 
@@ -420,7 +398,7 @@ public class ComponentLayoutUtils
 			comboBox.setButtonCell( cellFactory.call( null ) );
 			comboBox.setCellFactory( cellFactory );
 			comboBox.setItems( observableList );
-			javafx.beans.property.Property<Object> jfxProp = ( javafx.beans.property.Property<Object> )Properties
+			javafx.beans.property.Property<Object> jfxProp = (javafx.beans.property.Property<Object>) Properties
 					.convert( propLayoutComp.getProperty() );
 			comboBox.valueProperty().bindBidirectional( jfxProp );
 
@@ -433,12 +411,11 @@ public class ComponentLayoutUtils
 		if( options.iterator().next() instanceof String )
 		{
 			slider = new OptionsSlider( Lists.newArrayList( Iterables.filter( options, String.class ) ) );
-			jfxProp = ( javafx.beans.property.Property<String> )Properties.convert( propLayoutComp.getProperty() );
+			jfxProp = (javafx.beans.property.Property<String>) Properties.convert( propLayoutComp.getProperty() );
 			slider.selectedProperty().bindBidirectional( jfxProp );
 			slider.setSelected( propLayoutComp.getProperty().getStringValue() );
 			log.debug( " slider.getSelected(): " + slider.getSelected() );
-		}
-		else
+		} else
 			throw new RuntimeException( "options just supports sliders at the moment" );
 
 		return nodeWithProperty( VBoxBuilder.create().children( propertyLabel, slider ).build(), jfxProp );

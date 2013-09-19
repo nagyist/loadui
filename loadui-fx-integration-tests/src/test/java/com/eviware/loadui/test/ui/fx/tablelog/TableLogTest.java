@@ -10,8 +10,7 @@ import org.junit.experimental.categories.Category;
 
 import static com.eviware.loadui.test.ui.fx.FxIntegrationBase.RunBlocking.NON_BLOCKING;
 import static com.eviware.loadui.test.ui.fx.tablelog.TableLogTestSupport.*;
-import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
-import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.TABLE_LOG;
+import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
@@ -71,6 +70,31 @@ public class TableLogTest extends FxIntegrationTestBase
 		// THEN
 		assertCanRunEventInJavaFxThreadWithin( 1, SECONDS );
 
+	}
+
+	@Test
+	public void tableView_shouldNot_disappear() // For bug LOADUI-1031
+	{
+		// GIVEN
+		create( SCENARIO );
+		doubleClick( ".scenario-view" );
+
+		connect( FIXED_RATE_GENERATOR ).to( TABLE_LOG );
+
+		// WHEN
+		for( int i = 0; i < 10; i++ )
+			runAndCloseScenario();
+	}
+
+	private void runAndCloseScenario()
+	{
+		for( int i = 0; i < 3; i++ )
+		{
+			runTestFor( 2, SECONDS );
+			assertThat( tableRows(), is( not( empty() ) ) );
+		}
+
+		click( "#closeScenarioButton" ).doubleClick( ".scenario-view" );
 	}
 
 	@After
