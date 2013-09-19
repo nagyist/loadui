@@ -12,6 +12,7 @@ import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 import org.loadui.testfx.GuiTest;
 
+import java.awt.*;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -20,6 +21,9 @@ import java.util.concurrent.TimeoutException;
 import static com.google.code.tempusfugit.temporal.Duration.seconds;
 import static com.google.code.tempusfugit.temporal.Timeout.timeout;
 import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 
 /**
  * @Author Henrik
@@ -41,6 +45,11 @@ public class FxIntegrationBase extends GuiTest
 	public void create( LoadUiRobot.Component component )
 	{
 		robot.createComponent( component );
+	}
+
+	public void createAt( LoadUiRobot.Component component, Point targetPoint )
+	{
+		robot.createComponentAt( component, targetPoint );
 	}
 
 	public void runTestFor( int number, TimeUnit unit )
@@ -65,7 +74,16 @@ public class FxIntegrationBase extends GuiTest
 		{
 			robot.runTestFor( number, unit );
 		}
+	}
 
+	public void clickPlayStopButton()
+	{
+		click( ".project-playback-panel .play-button" );
+	}
+
+	public void waitForBlockingTaskToComplete()
+	{
+		waitUntil( "task-progress-indicator", is( not( visible() ) ) );
 	}
 
 	protected void ensureProjectIsNotRunning()

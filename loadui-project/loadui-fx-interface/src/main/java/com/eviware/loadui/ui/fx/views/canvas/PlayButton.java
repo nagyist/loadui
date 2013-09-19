@@ -73,17 +73,15 @@ public class PlayButton extends StackPane
 
 					if( canvas instanceof SceneItem )
 					{
-						if( ( ( SceneItem )canvas ).isAffectedByExecutionTask( execution ) )
+						if( ((SceneItem) canvas).isAffectedByExecutionTask( execution ) )
 						{
 							playingProperty.set( phase == Phase.PRE_START );
 						}
-					}
-					else if( canvas instanceof ProjectItem )
+					} else if( canvas instanceof ProjectItem )
 					{
-						if( ( ( ProjectItem )canvas ).getCanvas() == startedCanvas )
+						if( ((ProjectItem) canvas).getCanvas() == startedCanvas )
 							playingProperty.set( phase == Phase.PRE_START );
-					}
-					else
+					} else
 					{
 						log.warn( "Unsupported CanvasItem: " + canvas.toString() );
 					}
@@ -100,11 +98,10 @@ public class PlayButton extends StackPane
 			log.debug( "Play Button state changed, isPlaying? " + isPlaying + ", isCanvasRunning? " + canvas.isRunning() );
 			if( isPlaying && !canvas.isRunning() )
 			{
-				canvas.triggerAction( CanvasItem.COUNTER_RESET_ACTION );
+				//canvas.triggerAction( CanvasItem.COUNTER_RESET_ACTION );
 				canvas.triggerAction( CanvasItem.START_ACTION );
 				TestExecutionUtils.startCanvas( canvas );
-			}
-			else if( canvas.isRunning() && !isPlaying )
+			} else if( canvas.isRunning() && !isPlaying )
 			{
 				canvas.triggerAction( CanvasItem.STOP_ACTION );
 				TestExecutionUtils.stopCanvas( canvas );

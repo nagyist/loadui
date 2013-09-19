@@ -15,53 +15,9 @@
  */
 package com.eviware.loadui.ui.fx.views.canvas.component;
 
-import java.io.File;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.concurrent.ExecutorService;
-
-import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.binding.Bindings;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Orientation;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBuilder;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.LabelBuilder;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Separator;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.VBoxBuilder;
-import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.util.Callback;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.tbee.javafx.scene.layout.MigPane;
-
 import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.api.layout.ActionLayoutComponent;
+import com.eviware.loadui.api.layout.*;
 import com.eviware.loadui.api.layout.ActionLayoutComponent.ActionEnabledListener;
-import com.eviware.loadui.api.layout.LabelLayoutComponent;
-import com.eviware.loadui.api.layout.LayoutComponent;
-import com.eviware.loadui.api.layout.LayoutContainer;
-import com.eviware.loadui.api.layout.OptionsProvider;
-import com.eviware.loadui.api.layout.PropertyLayoutComponent;
-import com.eviware.loadui.api.layout.SeparatorLayoutComponent;
-import com.eviware.loadui.api.layout.TableLayoutComponent;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.impl.layout.OptionsProviderImpl;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
@@ -75,20 +31,46 @@ import com.eviware.loadui.util.layout.FormattedString;
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Orientation;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBoxBuilder;
+import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.util.Callback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.tbee.javafx.scene.layout.MigPane;
+
+import java.io.File;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Used to generate the component UI widgets (such as knobs and textfields) from
  * LayoutComponents.
- * 
+ *
  * @author maximilian.skog
- * 
  */
 
 public class ComponentLayoutUtils
 {
 	protected static final Logger log = LoggerFactory.getLogger( ComponentLayoutUtils.class );
 
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	public static Node instantiateLayout( LayoutComponent component )
 	{
 		//Legacy rules that we need, that pre-emp anything else
@@ -97,7 +79,7 @@ public class ComponentLayoutUtils
 			//TODO: Add all the stuff from the old WidgetRegistry
 			if( "display".equals( component.get( "widget" ) ) )
 			{
-				LayoutContainer container = ( LayoutContainer )component;
+				LayoutContainer container = (LayoutContainer) component;
 				MigPane pane = new MigPane( container.getLayoutConstraints(), container.getColumnConstraints(),
 						container.getRowConstraints() );
 				pane.getStyleClass().add( "display" );
@@ -108,7 +90,7 @@ public class ComponentLayoutUtils
 					Node node = instantiateLayout( child );
 					if( node instanceof Parent )
 					{
-						for( Node n : ( ( Parent )node ).getChildrenUnmodifiable() )
+						for( Node n : ((Parent) node).getChildrenUnmodifiable() )
 						{
 							n.setStyle( "-fx-font-size: 11;" );
 						}
@@ -116,20 +98,19 @@ public class ComponentLayoutUtils
 					pane.add( node, child.getConstraints() );
 				}
 				return pane;
-			}
-			else if( "selectorWidget".equals( component.get( "widget" ) ) )
+			} else if( "selectorWidget".equals( component.get( "widget" ) ) )
 			{
 
-				Iterable<String> options = ( Iterable<String> )component.get( "labels" );
+				Iterable<String> options = (Iterable<String>) component.get( "labels" );
 
-				boolean showLabels = ( boolean )Objects.firstNonNull( component.get( "showLabels" ), true );
+				boolean showLabels = (boolean) Objects.firstNonNull( component.get( "showLabels" ), true );
 				OptionsSlider slider = new OptionsSlider( Iterables.filter( options, String.class ) );
 				slider.setShowLabels( showLabels );
 
 				if( component.has( "images" ) )
 				{
 					List<ImageView> images = Lists.newArrayList();
-					Iterable<String> imageNames = ( Iterable<String> )component.get( "images" );
+					Iterable<String> imageNames = (Iterable<String>) component.get( "images" );
 
 					for( String imageName : imageNames )
 					{
@@ -150,11 +131,14 @@ public class ComponentLayoutUtils
 		}
 		else if( component.has( "component" ) )
 		{
-			Object c = component.get( "component" );
-			if( c instanceof Node )
+			Object o = component.get( "component" );
+			if( o instanceof Node )
 			{
-				return ( Node )c;
+				log.debug( "REDRAWING COMPONENT!" );
+				return ( Node )o;
 			}
+			throw new IllegalArgumentException( "node(component: foo) only supports foo of type Node, got: " + o );
+
 		}
 		else if( component.has( "fString" ) )
 		{
@@ -282,7 +266,7 @@ public class ComponentLayoutUtils
 		return LabelBuilder.create().build();
 	}
 
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	private static Node createCheckBox( PropertyLayoutComponent<?> propLayoutComp )
 	{
 		if( propLayoutComp.getProperty().getKey().equals( "enabledInDistMode" ) && !LoadUI.isPro() )
@@ -299,7 +283,7 @@ public class ComponentLayoutUtils
 		}
 	}
 
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	private static Node createKnob( PropertyLayoutComponent<?> propLayoutComp )
 	{
 		Knob knob = new Knob( propLayoutComp.getLabel() );
@@ -326,7 +310,7 @@ public class ComponentLayoutUtils
 		return nodeWithProperty( knob, jfxProp );
 	}
 
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	private static Node createTextNode( PropertyLayoutComponent<?> propLayoutComp, Label propertyLabel )
 	{
 		final TextField textField = new TextField();
@@ -346,7 +330,7 @@ public class ComponentLayoutUtils
 		return nodeWithProperty( VBoxBuilder.create().children( propertyLabel, textField ).build(), jfxProp );
 	}
 
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	private static Node createFilePicker( PropertyLayoutComponent<?> propLayoutComp, Label propertyLabel )
 	{
 
@@ -373,7 +357,7 @@ public class ComponentLayoutUtils
 		return nodeWithProperty( VBoxBuilder.create().children( propertyLabel, filePicker ).build(), jfxProp );
 	}
 
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	private static Node createOptionsNode( PropertyLayoutComponent<?> propLayoutComp, Label propertyLabel )
 	{
 		log.debug( "OPTIONS NODE: " + propLayoutComp );

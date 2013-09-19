@@ -15,21 +15,18 @@
  */
 package com.eviware.loadui.ui.fx.util;
 
-import static com.google.common.base.Predicates.in;
-import static com.google.common.base.Predicates.not;
-import static com.google.common.collect.Sets.newHashSet;
-
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
+import com.eviware.loadui.api.base.OrderedCollection;
+import com.eviware.loadui.api.events.*;
+import com.eviware.loadui.api.traits.Releasable;
+import com.eviware.loadui.util.BeanInjector;
+import com.google.common.base.Function;
+import com.google.common.base.Objects;
+import com.google.common.base.Predicate;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.*;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -39,48 +36,28 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
-import org.osgi.framework.ServiceReference;
-
-import com.eviware.loadui.api.base.OrderedCollection;
-import com.eviware.loadui.api.events.BaseEvent;
-import com.eviware.loadui.api.events.CollectionEvent;
-import com.eviware.loadui.api.events.EventFirer;
-import com.eviware.loadui.api.events.EventHandler;
-import com.eviware.loadui.api.events.WeakEventHandler;
-import com.eviware.loadui.util.BeanInjector;
-import com.google.common.base.Function;
-import com.google.common.base.Objects;
-import com.google.common.base.Predicate;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Ordering;
-import com.google.common.collect.Sets;
-
+import org.osgi.framework.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.ref.WeakReference;
+import java.util.*;
+import java.util.concurrent.Callable;
+
+import static com.google.common.base.Predicates.in;
+import static com.google.common.base.Predicates.not;
+import static com.google.common.collect.Sets.newHashSet;
+
 /**
  * Utility class for dealing with JavaFX ObservableLists.
- * 
+ *
  * @author dain.nilsson
  * @author henrik.olsson
  */
 public class ObservableLists
 {
 	protected static final Logger log = LoggerFactory.getLogger( ObservableLists.class );
-	
+
 	/* *
 	 * Creates a readonly ObservableList containing all OSGi published services
 	 * for the given Class type. The list is dynamically updated to reflect
@@ -107,7 +84,7 @@ public class ObservableLists
 	 * Creates a readonly ObservableList containing all OSGi published services
 	 * for the given Class type, which match the given filter. The list is
 	 * dynamically updated to reflect changes in the services.
-	 * 
+	 *
 	 * @param type
 	 * @return
 	 */
@@ -120,7 +97,7 @@ public class ObservableLists
 	/**
 	 * Creates an ObservableList of elements from an EventFirer firing
 	 * CollectionEvents.
-	 * 
+	 *
 	 * @param owner
 	 * @param collectionName
 	 * @param type
@@ -128,18 +105,23 @@ public class ObservableLists
 	 * @return
 	 */
 	public static <E> ObservableList<E> ofCollection( EventFirer owner, String collectionName, Class<E> type,
-			Iterable<? extends E> initialValues )
+																	  Iterable<? extends E> initialValues )
 	{
 		return new CollectionList<>( owner, collectionName, type, initialValues ).readOnlyList;
 	}
 
+	public static <E> CollectionList<E> ofCollectionReleasable( EventFirer owner, String collectionName, Class<E> type,
+																					Iterable<? extends E> initialValues )
+	{
+		return new CollectionList<>( owner, collectionName, type, initialValues );
+	}
+
 	/**
 	 * Creates an ObservableList of elements from an OrderedCollection.
-	 * 
 	 * Note that ObservableLists, as opposed to OrderedCollections, does not
 	 * support move operations. Such operations will be translated into removeAll
 	 * and setAll.
-	 * 
+	 *
 	 * @param collection
 	 * @return
 	 */
@@ -150,7 +132,7 @@ public class ObservableLists
 
 	/**
 	 * Creates an ObservableList of transformed elements from a given list.
-	 * 
+	 *
 	 * @param original
 	 * @param function
 	 * @return
@@ -185,7 +167,7 @@ public class ObservableLists
 	/**
 	 * Creates an ObservableList which contains all elements in the original list
 	 * which satisfy the given condition.
-	 * 
+	 *
 	 * @param original
 	 * @param condition
 	 * @return
@@ -209,7 +191,7 @@ public class ObservableLists
 	/**
 	 * Returns an unmodifiable view of the given ObservableList, where all
 	 * modifications are guaranteed to be done in the FX thread.
-	 * 
+	 *
 	 * @param originalList
 	 * @return
 	 */
@@ -248,7 +230,7 @@ public class ObservableLists
 	/**
 	 * Returns an unmodifiable view of the given ObservableList, where all
 	 * modifications are optimized.
-	 * 
+	 *
 	 * @param originalList
 	 * @return
 	 */
@@ -299,7 +281,7 @@ public class ObservableLists
 	}
 
 	public static <E, T extends Iterable<E>> ObservableList<E> fromExpression( Callable<T> expression,
-			ObservableList<? extends Observable> observables )
+																										ObservableList<? extends Observable> observables )
 	{
 		return new ExpressionList<E>( expression, observables ).readOnlyList;
 	}
@@ -335,7 +317,7 @@ public class ObservableLists
 	 * lists. The order of the elements are guaranteed to correspond to the order
 	 * of the elements in the sublists -- but as a consequence, this method is
 	 * inefficient and recreates the whole list on any change.
-	 * 
+	 *
 	 * @param listsToConcat
 	 * @return
 	 */
@@ -354,7 +336,7 @@ public class ObservableLists
 
 	@SafeVarargs
 	public static final <T> ObservableList<T> concat( ObservableList<? extends T> first,
-			ObservableList<? extends T> second, ObservableList<? extends T>... rest )
+																	  ObservableList<? extends T> second, ObservableList<? extends T>... rest )
 	{
 		return concat( FXCollections.observableList( Lists.asList( first, second, rest ) ) );
 	}
@@ -365,12 +347,12 @@ public class ObservableLists
 	 * guaranteed to correspond to the order of the elements in the sublists --
 	 * but as a consequence, this method is inefficient and recreates the whole
 	 * list on any change.
-	 * 
+	 *
 	 * @return
 	 */
 
 	public static final <T> ObservableList<T> appendElement( final ObservableList<? extends T> inputList,
-			final T elementToAppend )
+																				final T elementToAppend )
 	{
 		final ListeningList<T, T> listeningList = new ListeningList<>( inputList );
 		final InvalidationListener listener = new InvalidationListener()
@@ -394,12 +376,12 @@ public class ObservableLists
 	 * guaranteed to correspond to the order of the elements in the sublists --
 	 * but as a consequence, this method is inefficient and recreates the whole
 	 * list on any change.
-	 * 
+	 *
 	 * @return
 	 */
 
 	public static final <T> ObservableList<T> prependElement( final ObservableList<? extends T> inputList,
-			final T elementToPrepend )
+																				 final T elementToPrepend )
 	{
 		final ListeningList<T, T> listeningList = new ListeningList<>( inputList );
 		final InvalidationListener listener = new InvalidationListener()
@@ -421,7 +403,7 @@ public class ObservableLists
 	 * Like Bindings.bindContent(), but doesn't take ordering into account. This
 	 * means that list1 can be reordered after binding, and the content will
 	 * still stay in sync with list2.
-	 * 
+	 *
 	 * @param list1
 	 * @param list2
 	 */
@@ -442,7 +424,7 @@ public class ObservableLists
 	}
 
 	public static <E> void bindSorted( final List<E> list1, final ObservableList<? extends E> list2,
-			final Comparator<? super E> comparator, Observable... observables )
+												  final Comparator<? super E> comparator, Observable... observables )
 	{
 		final InvalidationListener invalidationListener = new InvalidationListener()
 		{
@@ -499,7 +481,7 @@ public class ObservableLists
 	/**
 	 * Gets the OSGi properties of an OSGi service that has been imported using
 	 * the ofServices() method.
-	 * 
+	 *
 	 * @param service
 	 * @return
 	 */
@@ -587,7 +569,7 @@ public class ObservableLists
 		private ObservableList<? extends Observable> observables; // Needs to be a field to avoid GC.
 
 		private ExpressionList( Callable<? extends Iterable<E>> expression,
-				ObservableList<? extends Observable> observables )
+										ObservableList<? extends Observable> observables )
 		{
 			this.expression = expression;
 			this.observables = observables;
@@ -696,7 +678,7 @@ public class ObservableLists
 	}
 
 	@SuppressWarnings( "serial" )
-	private static class CollectionList<E> extends ArrayList<E>
+	public static class CollectionList<E> extends ArrayList<E> implements Releasable
 	{
 		private final EventHandler<CollectionEvent> eventHandler = new WeakEventHandler<CollectionEvent>()
 		{
@@ -707,14 +689,14 @@ public class ObservableLists
 				{
 					switch( event.getEvent() )
 					{
-					case ADDED :
-						Object element = event.getElement();
-						if( type.isInstance( element ) )
-							list.add( type.cast( event.getElement() ) );
-						break;
-					case REMOVED :
-						list.remove( event.getElement() );
-						break;
+						case ADDED:
+							Object element = event.getElement();
+							if( type.isInstance( element ) )
+								list.add( type.cast( event.getElement() ) );
+							break;
+						case REMOVED:
+							list.remove( event.getElement() );
+							break;
 					}
 				}
 			}
@@ -729,7 +711,7 @@ public class ObservableLists
 		private final String collectionName;
 
 		private CollectionList( EventFirer eventFirer, String collectionName, Class<E> type,
-				Iterable<? extends E> initialValues )
+										Iterable<? extends E> initialValues )
 		{
 			this.eventFirer = eventFirer;
 			this.type = type;
@@ -740,6 +722,16 @@ public class ObservableLists
 
 			eventFirer.addEventListener( CollectionEvent.class, eventHandler );
 			list.addAll( Lists.newArrayList( initialValues ) );
+		}
+
+		public void release()
+		{
+			eventFirer.removeEventListener( CollectionEvent.class, eventHandler );
+		}
+
+		public ObservableList<E> getReadOnlyList()
+		{
+			return readOnlyList;
 		}
 	}
 

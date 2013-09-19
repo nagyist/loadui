@@ -15,44 +15,19 @@
  */
 package com.eviware.loadui.ui.fx.util;
 
-import java.lang.ref.WeakReference;
-
-import javafx.application.Platform;
-import javafx.beans.Observable;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.LongProperty;
-import javafx.beans.property.ObjectPropertyBase;
-import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.ReadOnlyDoubleProperty;
-import javafx.beans.property.ReadOnlyLongProperty;
-import javafx.beans.property.ReadOnlyStringProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.StringProperty;
-import javafx.beans.property.adapter.JavaBeanBooleanPropertyBuilder;
-import javafx.beans.property.adapter.JavaBeanDoublePropertyBuilder;
-import javafx.beans.property.adapter.JavaBeanLongPropertyBuilder;
-import javafx.beans.property.adapter.JavaBeanStringPropertyBuilder;
-import javafx.beans.property.adapter.ReadOnlyJavaBeanBooleanPropertyBuilder;
-import javafx.beans.property.adapter.ReadOnlyJavaBeanDoublePropertyBuilder;
-import javafx.beans.property.adapter.ReadOnlyJavaBeanLongPropertyBuilder;
-import javafx.beans.property.adapter.ReadOnlyJavaBeanProperty;
-import javafx.beans.property.adapter.ReadOnlyJavaBeanStringPropertyBuilder;
-
-import javax.annotation.Nonnull;
-
-import com.eviware.loadui.api.events.BaseEvent;
-import com.eviware.loadui.api.events.EventFirer;
-import com.eviware.loadui.api.events.EventHandler;
-import com.eviware.loadui.api.events.PropertyEvent;
-import com.eviware.loadui.api.events.WeakEventHandler;
+import com.eviware.loadui.api.events.*;
 import com.eviware.loadui.api.traits.Describable;
 import com.eviware.loadui.api.traits.Labeled;
+import javafx.application.Platform;
+import javafx.beans.property.*;
+import javafx.beans.property.adapter.*;
+
+import javax.annotation.Nonnull;
+import java.lang.ref.WeakReference;
 
 /**
  * Utility methods for working with JavaFX Properties.
- * 
+ *
  * @author dain.nilsson
  */
 public class Properties
@@ -63,7 +38,7 @@ public class Properties
 	/**
 	 * Creates an ReadOnlyStringProperty for a Labeled. If the Labeled is
 	 * mutable, the returned value will also implement StringProperty.
-	 * 
+	 *
 	 * @param labeled
 	 * @return
 	 */
@@ -95,7 +70,7 @@ public class Properties
 	/**
 	 * Creates an ReadOnlyStringProperty for a Describable. If the Describable is
 	 * mutable, the returned value will also implement StringProperty.
-	 * 
+	 *
 	 * @param describable
 	 * @return
 	 */
@@ -127,7 +102,7 @@ public class Properties
 	/**
 	 * Converts a loadUI Property into a JavaFX 2 Property, with two-way
 	 * listeners.
-	 * 
+	 *
 	 * @param loadUIProperty
 	 * @return
 	 */
@@ -140,7 +115,7 @@ public class Properties
 	 * Returns a StringProperty for a standard Java getter/setter pair for an
 	 * EventFirer, firing a BaseEvent for the given key whenever the value is
 	 * changed.
-	 * 
+	 *
 	 * @param bean
 	 * @param name
 	 * @param eventKey
@@ -160,16 +135,15 @@ public class Properties
 
 	/**
 	 * Read-only version of stringProperty.
-	 * 
-	 * @see stringProperty
-	 * 
+	 *
 	 * @param bean
 	 * @param name
 	 * @param eventKey
 	 * @return
+	 * @see stringProperty
 	 */
 	public static ReadOnlyStringProperty readOnlyStringProperty( @Nonnull EventFirer bean, @Nonnull String name,
-			@Nonnull String eventKey )
+																					 @Nonnull String eventKey )
 	{
 		try
 		{
@@ -186,14 +160,14 @@ public class Properties
 	 * Returns a BooleanProperty for a standard Java getter/setter pair for an
 	 * EventFirer, firing a BaseEvent for the given key whenever the value is
 	 * changed.
-	 * 
+	 *
 	 * @param bean
 	 * @param name
 	 * @param eventKey
 	 * @return
 	 */
 	public static BooleanProperty booleanProperty( @Nonnull EventFirer bean, @Nonnull String name,
-			@Nonnull String eventKey )
+																  @Nonnull String eventKey )
 	{
 		try
 		{
@@ -207,16 +181,15 @@ public class Properties
 
 	/**
 	 * Read-only version of booleanProperty.
-	 * 
-	 * @see booleanProperty
-	 * 
+	 *
 	 * @param bean
 	 * @param name
 	 * @param eventKey
 	 * @return
+	 * @see booleanProperty
 	 */
 	public static ReadOnlyBooleanProperty readOnlyBooleanProperty( @Nonnull EventFirer bean, @Nonnull String name,
-			@Nonnull String eventKey )
+																						@Nonnull String eventKey )
 	{
 		try
 		{
@@ -233,7 +206,7 @@ public class Properties
 	 * Returns a LongProperty for a standard Java getter/setter pair for an
 	 * EventFirer, firing a BaseEvent for the given key whenever the value is
 	 * changed.
-	 * 
+	 *
 	 * @param bean
 	 * @param name
 	 * @param eventKey
@@ -253,16 +226,15 @@ public class Properties
 
 	/**
 	 * Read-only version of longProperty.
-	 * 
-	 * @see booleanProperty
-	 * 
+	 *
 	 * @param bean
 	 * @param name
 	 * @param eventKey
 	 * @return
+	 * @see booleanProperty
 	 */
 	public static ReadOnlyLongProperty readOnlyLongProperty( @Nonnull EventFirer bean, @Nonnull String name,
-			@Nonnull String eventKey )
+																				@Nonnull String eventKey )
 	{
 		try
 		{
@@ -279,7 +251,7 @@ public class Properties
 	 * Returns a DoubleProperty for a standard Java getter/setter pair for an
 	 * EventFirer, firing a BaseEvent for the given key whenever the value is
 	 * changed.
-	 * 
+	 *
 	 * @param bean
 	 * @param name
 	 * @param eventKey
@@ -299,16 +271,15 @@ public class Properties
 
 	/**
 	 * Read-only version of doubleProperty.
-	 * 
-	 * @see booleanProperty
-	 * 
+	 *
 	 * @param bean
 	 * @param name
 	 * @param eventKey
 	 * @return
+	 * @see booleanProperty
 	 */
 	public static ReadOnlyDoubleProperty readOnlyDoubleProperty( @Nonnull EventFirer bean, @Nonnull String name,
-			@Nonnull String eventKey )
+																					 @Nonnull String eventKey )
 	{
 		try
 		{
@@ -323,14 +294,14 @@ public class Properties
 
 	/**
 	 * Creates an Observable from an EventFirer and an event key.
-	 * 
+	 *
 	 * @param source
 	 * @param key
 	 * @return
 	 */
-	public static Observable observeEvent( final EventFirer source, final String key )
+	public static ReleasableObservableBase observeEvent( final EventFirer source, final String key )
 	{
-		return new ObservableBase()
+		return new ReleasableObservableBase()
 		{
 			private final Runnable invalidate = new Runnable()
 			{
@@ -356,6 +327,12 @@ public class Properties
 			{
 				source.addEventListener( BaseEvent.class, handler );
 			}
+
+			@Override
+			public void release()
+			{
+				source.removeEventListener( BaseEvent.class, handler );
+			}
 		};
 
 	}
@@ -372,7 +349,7 @@ public class Properties
 	{
 		private final com.eviware.loadui.api.property.Property<T> loadUIProperty;
 		private final Runnable setValueRunnable;
-		
+
 		private final EventHandler<PropertyEvent> eventHandler = new WeakEventHandler<PropertyEvent>()
 		{
 			@Override

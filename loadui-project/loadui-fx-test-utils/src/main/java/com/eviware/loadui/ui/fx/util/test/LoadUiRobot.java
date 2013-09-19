@@ -3,7 +3,6 @@ package com.eviware.loadui.ui.fx.util.test;
 import com.eviware.loadui.util.test.TestUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.stage.Window;
@@ -88,8 +87,8 @@ public class LoadUiRobot
 		expandCategoryOf( component );
 
 		Window window = find( "#" + component.category + ".category" ).getScene().getWindow();
-		int windowX = (int) window.getX();
-		int windowY = (int) window.getY();
+		int windowX = ( int )window.getX();
+		int windowY = ( int )window.getY();
 		controller.drag( matcherForIconOf( component ) )
 				.to( windowX + targetPoint.x, windowY + targetPoint.y );
 
