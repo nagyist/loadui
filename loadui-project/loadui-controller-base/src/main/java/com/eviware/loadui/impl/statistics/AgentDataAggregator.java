@@ -69,7 +69,7 @@ public class AgentDataAggregator implements StatisticsAggregator
 						}
 						else
 						{
-							holder.getCanvas();
+							return ( SceneItem )holder.getCanvas();
 						}
 
 					}
