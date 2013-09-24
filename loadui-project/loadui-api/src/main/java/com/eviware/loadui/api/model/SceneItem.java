@@ -18,6 +18,7 @@ package com.eviware.loadui.api.model;
 import javax.annotation.Nonnull;
 
 import com.eviware.loadui.api.execution.TestExecution;
+import com.eviware.loadui.api.messaging.MessageEndpoint;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.api.terminal.InputTerminal;
 
@@ -96,4 +97,11 @@ public interface SceneItem extends CanvasItem, CanvasObjectItem
 	 */
 	@Nonnull
 	public InputTerminal getStateTerminal();
+
+	/**
+	 * Sets the message endpoint for this scenario
+	 * @param messageEndpoint
+	 */
+	void setMessageEndpoint( MessageEndpoint messageEndpoint );
+
 }

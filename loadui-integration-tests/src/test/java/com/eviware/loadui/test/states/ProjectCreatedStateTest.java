@@ -15,16 +15,15 @@
  */
 package com.eviware.loadui.test.states;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-
+import com.eviware.loadui.api.model.ProjectItem;
+import com.eviware.loadui.test.categories.IntegrationTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.test.categories.IntegrationTest;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
 @Category( IntegrationTest.class )
 public class ProjectCreatedStateTest

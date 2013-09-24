@@ -31,6 +31,7 @@ import java.io.FileOutputStream
 import java.io.FileInputStream
 import java.text.SimpleDateFormat
 import java.util.concurrent.CopyOnWriteArraySet
+import java.util.concurrent.ConcurrentLinkedQueue
 
 import javafx.application.Platform
 import javafx.stage.FileChooser
@@ -46,10 +47,12 @@ likes( inputTerminal ) { true }
 
 table = null
 tableWriterFuture = null
+fileWriterFuture = null
 tableWriterDelay = 250
 final messageQueue = [] as LinkedList
 writer = null
 writerLock = new Object()
+final writeQueue = [] as ConcurrentLinkedQueue
 
 createProperty( 'maxRows', Long, 250 )
 createProperty( 'logFilePath', String )
@@ -80,7 +83,7 @@ onMessage = { o, i, m ->
 output = { message ->
 	def writeLog = saveFile.value && saveFileName
 	if( controller || writeLog ) {
-		synchronized( addedColumns ) {
+		synchronized( this ) {
 			addedColumns += message.keySet() - tableColumns
 			tableColumns += addedColumns
 		}
@@ -105,19 +108,7 @@ output = { message ->
 		}
 
 		if( writeLog ) {
-			withFileWriter { w ->
-				try {
-					def header = tableColumns as String[]
-					if( addHeaders.value && !Arrays.equals( latestHeader, header ) ) {
-						w.writeNext( header )
-						latestHeader = header
-					}
-					def entries = header.collect { message[it] ?: "" } as String[]
-					w.writeNext( entries )
-				} catch ( e ) {
-					log.error( "Error writing to log file", e )
-				}
-			}
+			putMessageInWriteQueue( message )
 		}
 	}
 
@@ -125,6 +116,17 @@ output = { message ->
 		// on agent and enabled, so send message to controller
 		send( controllerTerminal, message )
 	}
+}
+
+putMessageInWriteQueue = { message ->
+	def header = tableColumns as String[]
+	if( addHeaders.value && !Arrays.equals( latestHeader, header ) ) {
+		writeQueue << header
+		latestHeader = header
+	}
+	def entries = header.collect { message[it] ?: "" } as String[]
+	
+	writeQueue << entries
 }
 
 onAction( "START" ) { buildFileName(); startTableWriter() }
@@ -135,6 +137,7 @@ onAction( "COMPLETE" ) { closeWriter() }
 
 onAction( "RESET" ) {
 	buildFileName()
+	log.info("RESET CLEARING")
 	tableColumns.clear()
 	refreshLayout()
 }
@@ -142,7 +145,7 @@ onAction( "RESET" ) {
 onRelease = { closeWriter() }
 
 closeWriter = {
-	withFileWriter( false ) {
+	withFileWriter( false ) { // TODO: Why do we do this?
 		writer?.close()
 		writer = null
 	}
@@ -189,7 +192,7 @@ void stopTableWriter() {
 
 tableWriter = {
 	def newColumns = []
-	synchronized( addedColumns ) {
+	synchronized( this ) {
 		for ( iter = addedColumns.iterator(); iter.hasNext();) {
 			def added = iter.next()
 			iter.remove()
@@ -217,6 +220,21 @@ tableWriter = {
 			if ( newColumns ) table.columns.addAll newColumns
 			if ( excessItems > 0 ) table.items.remove( 0, excessItems )
 			if ( newMessages ) table.items.addAll newMessages
+		}
+	}
+	
+	writeToFile()
+}
+
+writeToFile =
+{
+	if( saveFileName )
+	{
+		withFileWriter() { fileWriter -> 
+			while( !writeQueue.isEmpty() )
+			{
+				fileWriter.writeNext( writeQueue.poll() )
+			}
 		}
 	}
 }
@@ -308,11 +326,11 @@ settings( label: "General" ) {
 
 settings( label:'Logging' ) {
 	box {
-		property( property: saveFile, label: 'Save Logs?' )
-		property( property: logFilePath, label: 'Log File (Relative to LoadUI\'s home directory)' )
-		property( property: appendSaveFile, label: 'Check to append selected file' )
-		property( property: formatTimestamps, label: 'Check to format timestamps(hh:mm:ss:ms)' )
-		property( property: addHeaders, label: 'Check to add headers to a file' )
+		property( property: saveFile, label: 'Save Logs' )
+		property( property: logFilePath, label: 'File name (relative to the .loadui directory)' )
+		property( property: appendSaveFile, label: 'Append selected file' )
+		property( property: formatTimestamps, label: 'Format timestamps' )
+		property( property: addHeaders, label: 'Include headers' )
 		label( '(If not appending file, its name will be used to generate new log files each time test is run.)' )
 	}
 }

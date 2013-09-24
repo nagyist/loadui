@@ -15,17 +15,14 @@
  */
 package com.eviware.loadui.test.states;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
-
+import com.eviware.loadui.api.model.WorkspaceItem;
+import com.eviware.loadui.test.categories.IntegrationTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.eviware.loadui.api.model.WorkspaceItem;
-import com.eviware.loadui.test.categories.IntegrationTest;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThat;
 
 @Category( IntegrationTest.class )
 public class WorkspaceLoadedStateTest

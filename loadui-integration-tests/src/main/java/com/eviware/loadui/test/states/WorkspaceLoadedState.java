@@ -28,13 +28,13 @@ public class WorkspaceLoadedState extends TestState
 
 	private WorkspaceLoadedState()
 	{
-		super( "Workspace Loaded", ControllerStartedState.STATE );
+		super( "Workspace Loaded", ControllerStartedState.getState() );
 	}
 
 	@Override
 	protected void enterFromParent() throws Exception
 	{
-		WorkspaceProvider workspaceProvider = ControllerStartedState.STATE.getWorkspaceProviderByForce();
+		WorkspaceProvider workspaceProvider = ControllerStartedState.getState().getService( WorkspaceProvider.class );
 		if( !workspaceProvider.isWorkspaceLoaded() )
 		{
 			workspace = workspaceProvider.loadDefaultWorkspace();
@@ -46,7 +46,7 @@ public class WorkspaceLoadedState extends TestState
 	}
 
 	@Override
-	protected void exitToParent() throws Exception
+	protected void exitToParent()
 	{
 		ReleasableUtils.release( workspace );
 		workspace = null;

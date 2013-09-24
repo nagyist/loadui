@@ -15,25 +15,23 @@
  */
 package com.eviware.loadui.impl.model;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import com.eviware.loadui.api.addon.AddonRegistry;
 import com.eviware.loadui.api.addressable.AddressableRegistry;
 import com.eviware.loadui.api.model.WorkspaceItem;
 import com.eviware.loadui.api.model.WorkspaceProvider;
 import com.eviware.loadui.config.LoaduiWorkspaceDocumentConfig;
 import com.eviware.loadui.impl.addressable.AddressableRegistryImpl;
 import com.eviware.loadui.util.test.BeanInjectorMocker;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 public class WorkspaceProviderImplTest
 {
@@ -53,7 +51,7 @@ public class WorkspaceProviderImplTest
 		config.addNewLoaduiWorkspace();
 		config.save( tmp );
 
-		WorkspaceProvider provider = new WorkspaceProviderImpl( mock( AddonRegistry.class ) );
+		WorkspaceProvider provider = new WorkspaceProviderImpl( mock( AgentFactory.class ) );
 
 		WorkspaceItem workspace = provider.loadWorkspace( tmp );
 

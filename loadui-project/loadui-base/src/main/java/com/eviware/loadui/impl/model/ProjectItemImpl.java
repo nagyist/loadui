@@ -337,12 +337,12 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 		for( SceneItem scene : getChildren() )
 			scene.delete();
 
-		release();
-
 		if( !projectFile.delete() )
 			throw new RuntimeException( "Unable to delete project file: " + projectFile.getAbsolutePath() );
 
 		super.delete();
+
+		release();
 	}
 
 	@Override

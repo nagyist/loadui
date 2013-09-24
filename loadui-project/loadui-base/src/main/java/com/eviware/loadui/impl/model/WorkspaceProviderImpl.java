@@ -39,9 +39,11 @@ public class WorkspaceProviderImpl implements WorkspaceProvider, Releasable
 
 	private final EventSupport eventSupport = new EventSupport( this );
 	private WorkspaceItem workspace;
+	private final AgentFactory agentFactory;
 
-	public WorkspaceProviderImpl( AddonRegistry addonRegistry )
+	public WorkspaceProviderImpl( AgentFactory agentFactory )
 	{
+		this.agentFactory = agentFactory;
 	}
 
 	@Override
@@ -50,7 +52,7 @@ public class WorkspaceProviderImpl implements WorkspaceProvider, Releasable
 		try
 		{
 			log.info( "Loading workspace from file: {}", workspaceFile );
-			workspace = WorkspaceItemImpl.loadWorkspace( workspaceFile );
+			workspace = WorkspaceItemImpl.loadWorkspace( workspaceFile, agentFactory );
 			fireEvent( new BaseEvent( this, WORKSPACE_LOADED ) );
 
 			return workspace;

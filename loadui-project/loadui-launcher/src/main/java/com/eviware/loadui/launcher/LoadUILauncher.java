@@ -193,7 +193,8 @@ public abstract class LoadUILauncher
 		argv = args;
 
 		//Fix for Protection!
-		//FIXME this fix is probably not needed after the license-manager was created!
+		//FIXME this fix is probably not needed after the license-manager was created,
+		// this is also present in the license manager ticket to remove this: LOADUI-1029
 		String username = System.getProperty( "user.name" );
 		System.setProperty( "user.name.original", username );
 		System.setProperty( "user.name", username.toLowerCase() );

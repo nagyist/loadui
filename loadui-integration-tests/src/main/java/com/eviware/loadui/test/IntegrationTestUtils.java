@@ -15,15 +15,19 @@
  */
 package com.eviware.loadui.test;
 
+import com.google.common.collect.Lists;
+import com.google.common.io.Files;
+
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.ServerSocket;
-
-import com.google.common.io.Files;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * A collection of static utility methods for simplifying some tasks.
- * 
+ *
  * @author dain.nilsson
  */
 public class IntegrationTestUtils
@@ -60,7 +64,7 @@ public class IntegrationTestUtils
 	public static int getAvailablePort()
 	{
 
-		try (ServerSocket ss = new ServerSocket( 0 ))
+		try( ServerSocket ss = new ServerSocket( 0 ) )
 		{
 			ss.setReuseAddress( true );
 			return ss.getLocalPort();
@@ -86,14 +90,14 @@ public class IntegrationTestUtils
 	public static int getAvailablePort( int start )
 	{
 		while( !isPortAvailable( start ) )
-			start++ ;
+			start++;
 
 		return start;
 	}
 
 	public static boolean isPortAvailable( int port )
 	{
-		try (ServerSocket ss = new ServerSocket( port ))
+		try( ServerSocket ss = new ServerSocket( port ) )
 		{
 			ss.setReuseAddress( true );
 			return true;
@@ -103,5 +107,12 @@ public class IntegrationTestUtils
 		}
 
 		return false;
+	}
+
+	public static <T> T[] getTailAsArray( Collection<T> collection, Class<T> type )
+	{
+		List<T> list = Lists.newArrayList( collection );
+		list.remove( 0 );
+		return list.toArray( ( T[] )Array.newInstance( type, list.size() ) );
 	}
 }

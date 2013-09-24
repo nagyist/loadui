@@ -15,11 +15,11 @@
  */
 package com.eviware.loadui.test.states;
 
-import java.io.File;
-
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.test.TestState;
+
+import java.io.File;
 
 public class ProjectCreatedState extends TestState
 {
@@ -40,9 +40,16 @@ public class ProjectCreatedState extends TestState
 	}
 
 	@Override
-	protected void exitToParent() throws Exception
+	protected void exitToParent()
 	{
-		project.delete();
+		try
+		{
+			project.delete();
+		}
+		catch( Exception e )
+		{
+			e.printStackTrace();
+		}
 		project = null;
 	}
 

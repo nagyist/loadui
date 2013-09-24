@@ -15,6 +15,7 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
+import org.loadui.testfx.MouseMotion;
 import org.loadui.testfx.categories.TestFX;
 import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
 import org.loadui.testfx.FXScreenController;
@@ -93,7 +94,7 @@ public class DragNodeTest
 	{
 		assertFalse( dragNode.isDragging() );
 
-		GuiTest.MouseMotion dragging = controller.drag( dragNode.getDragSource() ).by( 200, 50 );
+		MouseMotion dragging = controller.drag( dragNode.getDragSource() ).by( 200, 50 );
 
 		assertTrue( dragNode.isDragging() );
 
@@ -128,7 +129,7 @@ public class DragNodeTest
 
 		assertFalse( dragNode.isAcceptable() );
 
-		GuiTest.MouseMotion dragging = controller.drag( dragNode.getDragSource() ).via( dropArea );
+		MouseMotion dragging = controller.drag( dragNode.getDragSource() ).via( dropArea );
 
 		assertTrue( dragNode.isAcceptable() );
 
