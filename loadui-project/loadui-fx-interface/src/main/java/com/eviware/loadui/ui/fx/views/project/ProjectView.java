@@ -330,44 +330,75 @@ public class ProjectView extends AnchorPane
 			}
 		} );
 
-		final TestExecutionTask testExecutionTask = new TestExecutionTask()
+		initTasks();
+	}
+
+	private void initTasks()
+	{
+		final TestExecutionTask preStartTask = new TestExecutionTask()
 		{
 			@Override
 			public void invoke( final TestExecution execution, Phase phase )
 			{
-				if( phase == Phase.PRE_START )
+				Platform.runLater( new Runnable()
 				{
-					Platform.runLater( new Runnable()
+					@Override
+					public void run()
 					{
-						@Override
-						public void run()
-						{
-							summaryButton.setDisable( true );
-						}
-					} );
-				}
-				else
-				{
-					Platform.runLater( new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							summaryButton.setDisable( false );
-						}
-					} );
-				}
+						summaryButton.setDisable( true );
+						getPlaybackPanel().getPlayButton().setDisable( true );
+					}
+				} );
 			}
 		};
-		BeanInjector.getBean( TestRunner.class ).registerTask( testExecutionTask, Phase.PRE_START, Phase.POST_STOP );
+
+		final TestExecutionTask postStartTask = new TestExecutionTask()
+		{
+			@Override
+			public void invoke( TestExecution execution, Phase phase )
+			{
+				Platform.runLater( new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						getPlaybackPanel().getPlayButton().setDisable( false );
+					}
+				} );
+			}
+		};
+
+		final TestExecutionTask postStopTask = new TestExecutionTask()
+		{
+			@Override
+			public void invoke( TestExecution execution, Phase phase )
+			{
+				Platform.runLater( new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						summaryButton.setDisable( false );
+					}
+				} );
+			}
+		};
+
+		BeanInjector.getBean( TestRunner.class ).registerTask( preStartTask, Phase.PRE_START );
+		BeanInjector.getBean( TestRunner.class ).registerTask( postStartTask, Phase.POST_START );
 		BeanInjector.getBean( TestRunner.class ).registerTask( blockWindowTask, Phase.PRE_STOP );
+		BeanInjector.getBean( TestRunner.class ).registerTask( postStopTask, Phase.POST_STOP );
 
 		projectReleased.addListener( new InvalidationListener()
 		{
 			@Override
 			public void invalidated( Observable arg0 )
 			{
-				BeanInjector.getBean( TestRunner.class ).unregisterTask( testExecutionTask, Phase.values() );
+				BeanInjector.getBean( TestRunner.class ).unregisterTask( preStartTask, Phase.PRE_START );
+				BeanInjector.getBean( TestRunner.class ).unregisterTask( postStartTask, Phase.POST_START );
+				BeanInjector.getBean( TestRunner.class ).unregisterTask( blockWindowTask, Phase.PRE_STOP );
+				BeanInjector.getBean( TestRunner.class ).unregisterTask( postStopTask, Phase.POST_STOP );
+				projectReleased.removeListener( this );
 			}
 		} );
 	}

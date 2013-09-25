@@ -27,7 +27,7 @@ public interface TestExecutionTask
 	/**
 	 * Called when the given Phase is initiated.
 	 * 
-	 * @param context
+	 * @param execution
 	 * @param phase
 	 */
 	public void invoke( TestExecution execution, Phase phase );
