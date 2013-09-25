@@ -15,20 +15,15 @@
  */
 package com.eviware.loadui.util.test;
 
-import static com.eviware.loadui.util.test.CustomMatchers.mockObject;
-import static com.eviware.loadui.util.test.CustomMatchers.notMockObject;
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import com.eviware.loadui.util.BeanInjector;
+import org.junit.Test;
 
 import java.util.Collections;
 
-import org.junit.Test;
-
-import com.eviware.loadui.util.BeanInjector;
+import static com.eviware.loadui.util.test.CustomMatchers.mockObject;
+import static com.eviware.loadui.util.test.CustomMatchers.notMockObject;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
 
 public class BeanInjectorMockerTest
 {
@@ -61,7 +56,7 @@ public class BeanInjectorMockerTest
 		assertThat( beanOne, mockObject() );
 		assertThat( beanOne, instanceOf( TestInterface.class ) );
 
-		assertThat( beanTwo, allOf( mockObject(), is( TestInterface.class ) ) );
+		assertThat( beanTwo, allOf( mockObject(), isA( TestInterface.class ) ) );
 
 		assertThat( beanOne, sameInstance( beanTwo ) );
 	}
@@ -83,7 +78,7 @@ public class BeanInjectorMockerTest
 		assertThat( beanOne, is( instanceOf( TestInterface.class ) ) );
 		assertThat( beanOne, is( sameInstance( testBean ) ) );
 
-		assertThat( beanTwo, allOf( notMockObject(), is( TestInterface.class ), sameInstance( testBean ) ) );
+		assertThat( beanTwo, allOf( notMockObject(), isA( TestInterface.class ), sameInstance( testBean ) ) );
 	}
 
 	@Test
@@ -99,10 +94,10 @@ public class BeanInjectorMockerTest
 		TestInterface beanTwo = BeanInjector.getBean( TestInterface.class );
 
 		assertThat( beanOne, notMockObject() );
-		assertThat( beanOne, is( TestInterface.class ) );
+		assertThat( beanOne, isA( TestInterface.class ) );
 		assertThat( beanOne, sameInstance( testBean ) );
 
-		assertThat( beanTwo, allOf( notMockObject(), is( TestInterface.class ), sameInstance( testBean ) ) );
+		assertThat( beanTwo, allOf( notMockObject(), isA( TestInterface.class ), sameInstance( testBean ) ) );
 	}
 
 	@Test

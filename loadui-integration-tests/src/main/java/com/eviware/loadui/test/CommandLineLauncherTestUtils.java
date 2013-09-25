@@ -16,6 +16,7 @@
 
 package com.eviware.loadui.test;
 
+import com.google.common.collect.ObjectArrays;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
@@ -24,9 +25,14 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
+import static com.eviware.loadui.test.IntegrationTestUtils.getTailAsArray;
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Arrays.asList;
 
 /**
  * Author: maximilian.skog
@@ -40,7 +46,7 @@ public class CommandLineLauncherTestUtils
 	public static final String CMD_RUNNER_NAME_OSX = "loadUI-cmd.command";
 	public static final String CMD_RUNNER_NAME_UNIX = "loadUI-cmd.sh";
 
-	private static synchronized int launchCommandLineRunner( String[] commands )
+	private synchronized int launchCommandLineRunner( String[] commands )
 	{
 		int exitValue = -1;
 
@@ -52,7 +58,7 @@ public class CommandLineLauncherTestUtils
 		{
 			proc = procBuilder
 					.inheritIO()
-					.directory( new File( getPathToCommandLineRunnerFile() ) )
+					.directory( new File( getMainFolderLocation() ) )
 					.start();
 
 			attachStreamPrinter( proc );
@@ -67,7 +73,8 @@ public class CommandLineLauncherTestUtils
 		{
 			//  thrown if waitFor() gets interrupted
 			throw new RuntimeException( "command line runner was interrupted unexpectedly", e );
-		} finally
+		}
+		finally
 		{
 			if( proc != null )
 			{
@@ -85,7 +92,7 @@ public class CommandLineLauncherTestUtils
 		return exitValue;
 	}
 
-	private static void attachStreamPrinter( Process proc )
+	private void attachStreamPrinter( Process proc )
 	{
 		StreamPrinter errorListener = new StreamPrinter( proc.getErrorStream(), "ERROR" );
 		StreamPrinter inputListener = new StreamPrinter( proc.getInputStream(), "INPUT" );
@@ -94,7 +101,7 @@ public class CommandLineLauncherTestUtils
 		inputListener.start();
 	}
 
-	public static Collection<File> getFilesAt( String path ) throws NullPointerException
+	public Collection<File> getFilesAt( String path ) throws NullPointerException
 	{
 		File folder = new File( path );
 
@@ -102,27 +109,16 @@ public class CommandLineLauncherTestUtils
 
 		ArrayList<File> filesInPath = new ArrayList<>();
 
-		if( folder.isDirectory() )
-		{
-			for( File file : folder.listFiles() )
-			{
-				if( file.isFile() )
-				{
-					filesInPath.add( file );
-				}
-			}
-		}
-		else
-		{
-			throw new RuntimeException( "The path " + path + " is not a directory" );
-		}
+		for( File file : folder.listFiles() )
+			if( file.isFile() )
+				filesInPath.add( file );
 
 		return filesInPath;
 	}
 
-	public static String getXMLFrom( File summaryFile ) throws RuntimeException
+	public String getXMLFrom( File summaryFile ) throws RuntimeException
 	{
-		try(FileInputStream inputStream = new FileInputStream( summaryFile ))
+		try( FileInputStream inputStream = new FileInputStream( summaryFile ) )
 		{
 			return IOUtils.toString( inputStream );
 		}
@@ -132,7 +128,7 @@ public class CommandLineLauncherTestUtils
 		}
 	}
 
-	public static String getCmdRunnerFileName()
+	public String getCmdRunnerFileName()
 	{
 		if( SystemUtils.IS_OS_WINDOWS )
 		{
@@ -148,12 +144,12 @@ public class CommandLineLauncherTestUtils
 		}
 	}
 
-	public static int launchCommandLineRunnerWithCommands( String... Commands )
+	public int launchCommandLineRunnerWithCommands( String... commands )
 	{
-		return launchCommandLineRunner( concat( getLaunchCommands(), Commands ) );
+		return launchCommandLineRunner( ObjectArrays.concat( getLaunchCommands(), commands, String.class ) );
 	}
 
-	private static String[] getLaunchCommands()
+	private String[] getLaunchCommands()
 	{
 
 		if( SystemUtils.IS_OS_WINDOWS )
@@ -167,9 +163,9 @@ public class CommandLineLauncherTestUtils
 
 	}
 
-	private static String getLauncherPath()
+	private String getLauncherPath()
 	{
-		return getPathToCommandLineRunnerFile() + File.separator + getCmdRunnerFileName();
+		return Paths.get( getMainFolderLocation(), getCmdRunnerFileName() ).toFile().getAbsolutePath();
 	}
 
 	static class StreamPrinter extends Thread
@@ -185,7 +181,7 @@ public class CommandLineLauncherTestUtils
 
 		public void run()
 		{
-			try(BufferedReader br = new BufferedReader( new InputStreamReader( is ) ))
+			try( BufferedReader br = new BufferedReader( new InputStreamReader( is ) ) )
 			{
 				String line;
 				while( ( line = br.readLine() ) != null )
@@ -198,31 +194,24 @@ public class CommandLineLauncherTestUtils
 		}
 	}
 
-	public static String getPathToCommandLineRunnerFile()
+	public String getMainFolderLocation()
 	{
-		Path pathA = Paths.get( "", "loadui-installers", "loadui-controller-installer", "target", "main", getCmdRunnerFileName() );
-		Path pathB = Paths.get( "", "..", "loadui-installers", "loadui-controller-installer", "target", "main", getCmdRunnerFileName() );
-
-		if( pathA.toFile().exists() )
+		for( List<String> candidateMainFolder : getCandidateLocationsForMainFolder() )
 		{
-			return pathA.getParent().toFile().getAbsolutePath();
+			Path path = Paths.get( candidateMainFolder.get( 0 ), getTailAsArray( candidateMainFolder, String.class ) );
+			if( path.toFile().exists() )
+			{
+				return path.toFile().getAbsolutePath();
+			}
 		}
-
-		if( pathB.toFile().exists() )
-		{
-			return pathB.getParent().toFile().getAbsolutePath();
-		}
-
-		throw new RuntimeException( "Could not find path to the command line runner (" + getCmdRunnerFileName() + ").  File at: " + pathA.toAbsolutePath().toString() + " or " + pathB.toAbsolutePath().toString() + " does not exist!" );
+		throw new RuntimeException( "Could not find main folder, tried the following locations: " +
+				getCandidateLocationsForMainFolder() );
 	}
 
-	private static String[] concat( String[] first, String[] second )
+	protected List<List<String>> getCandidateLocationsForMainFolder()
 	{
-		List<String> both = new ArrayList<>( first.length + second.length );
-		Collections.addAll( both, first );
-		Collections.addAll( both, second );
-		return both.toArray( new String[both.size()] );
+		return asList( asList( "loadui-installers", "loadui-controller-installer", "target", "main" ),
+				asList( "..", "loadui-installers", "loadui-controller-installer", "target", "main" ) );
 	}
-
 
 }

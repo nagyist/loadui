@@ -15,19 +15,7 @@
  */
 package com.eviware.loadui.ui.fx.input;
 
-import static javafx.beans.binding.Bindings.when;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import org.loadui.testfx.categories.TestFX;
-import org.loadui.testfx.FXTestUtils;
-import org.loadui.testfx.GuiTest;
+import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
@@ -36,13 +24,21 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
-
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
+import org.loadui.testfx.MouseMotion;
+import org.loadui.testfx.categories.TestFX;
 
-import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import static javafx.beans.binding.Bindings.when;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
 
 @Category( TestFX.class )
 public class MovableTest extends GuiTest

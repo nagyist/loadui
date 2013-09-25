@@ -15,17 +15,6 @@
  */
 package com.eviware.loadui.impl.model;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-
-import com.eviware.loadui.api.model.*;
-import org.apache.xmlbeans.XmlException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.discovery.AgentDiscovery.AgentReference;
 import com.eviware.loadui.api.events.BaseEvent;
@@ -34,18 +23,27 @@ import com.eviware.loadui.api.events.EventHandler;
 import com.eviware.loadui.api.events.PropertyEvent;
 import com.eviware.loadui.api.execution.TestExecution;
 import com.eviware.loadui.api.execution.TestRunner;
+import com.eviware.loadui.api.model.*;
 import com.eviware.loadui.api.property.Property;
-import com.eviware.loadui.config.AgentItemConfig;
-import com.eviware.loadui.config.LoaduiProjectDocumentConfig;
-import com.eviware.loadui.config.LoaduiWorkspaceDocumentConfig;
-import com.eviware.loadui.config.ProjectReferenceConfig;
-import com.eviware.loadui.config.WorkspaceItemConfig;
+import com.eviware.loadui.config.*;
 import com.eviware.loadui.impl.XmlBeansUtils;
 import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.ReleasableUtils;
 import com.eviware.loadui.util.collections.CollectionEventSupport;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import org.apache.xmlbeans.XmlException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implements WorkspaceItem
 {
@@ -59,19 +57,23 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 	private final AgentListener agentListener = new AgentListener();
 	private final Property<Boolean> localMode;
 	private final Property<Long> numberOfAutosaves;
+	private final AgentFactory agentFactory;
+	private final ScheduledExecutorService agentReseter = Executors.newSingleThreadScheduledExecutor();
 
-	public static WorkspaceItemImpl loadWorkspace( File workspaceFile ) throws XmlException, IOException
+	public static WorkspaceItemImpl loadWorkspace( File workspaceFile, AgentFactory agentFactory )
+			throws XmlException, IOException
 	{
 		WorkspaceItemImpl object = new WorkspaceItemImpl( workspaceFile,
 				workspaceFile.exists() ? LoaduiWorkspaceDocumentConfig.Factory.parse( workspaceFile )
-						: LoaduiWorkspaceDocumentConfig.Factory.newInstance() );
+						: LoaduiWorkspaceDocumentConfig.Factory.newInstance(),
+				agentFactory );
 		object.init();
 		object.postInit();
 
 		return object;
 	}
 
-	private WorkspaceItemImpl( File workspaceFile, LoaduiWorkspaceDocumentConfig doc )
+	private WorkspaceItemImpl( File workspaceFile, LoaduiWorkspaceDocumentConfig doc, AgentFactory agentFactory )
 	{
 		super( doc.getLoaduiWorkspace() == null ? doc.addNewLoaduiWorkspace() : doc.getLoaduiWorkspace() );
 
@@ -79,6 +81,7 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 		agentList = CollectionEventSupport.of( this, AGENTS );
 
 		this.doc = doc;
+		this.agentFactory = agentFactory;
 		this.workspaceFile = workspaceFile;
 
 		localMode = createProperty( LOCAL_MODE_PROPERTY, Boolean.class, true );
@@ -104,7 +107,7 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 		{
 			for( AgentItemConfig agentConfig : getConfig().getAgentList() )
 			{
-				AgentItemImpl agent = AgentItemImpl.newInstance( this, agentConfig );
+				AgentItemImpl agent = agentFactory.newInstance( this, agentConfig );
 				agent.addEventListener( BaseEvent.class, agentListener );
 				agentList.addItem( agent );
 			}
@@ -222,7 +225,7 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 		AgentItemConfig agentConfig = getConfig().addNewAgent();
 		agentConfig.setUrl( url );
 		agentConfig.setLabel( label );
-		AgentItemImpl agent = AgentItemImpl.newInstance( this, agentConfig );
+		AgentItemImpl agent = agentFactory.newInstance( this, agentConfig );
 		agent.addEventListener( BaseEvent.class, agentListener );
 		agentList.addItem( agent );
 		return agent;
@@ -235,7 +238,7 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 		agentConfig.setUrl( ref.getUrl() );
 		agentConfig.setId( ref.getId() );
 		agentConfig.setLabel( label );
-		AgentItemImpl agent = AgentItemImpl.newInstance( this, agentConfig );
+		AgentItemImpl agent = agentFactory.newInstance( this, agentConfig );
 		agent.addEventListener( BaseEvent.class, agentListener );
 		agentList.addItem( agent );
 		return agent;
@@ -254,7 +257,7 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 	@Override
 	public Collection<ProjectRef> getProjectRefs()
 	{
-		return ImmutableSet.<ProjectRef> copyOf( projectList.getItems() );
+		return ImmutableSet.<ProjectRef>copyOf( projectList.getItems() );
 	}
 
 	@Override
@@ -410,7 +413,26 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 		@Override
 		public void handleEvent( BaseEvent event )
 		{
-			if( event.getKey().equals( DELETED ) )
+			if( AgentItem.READY.equals( event.getKey() ) )
+			{
+				final AgentItem agent = ( AgentItem )event.getSource();
+				if( !agent.isReady() && agent.isEnabled() )
+				{
+					log.info( "Will reset connection to agent" );
+					agent.close();
+					agentReseter.schedule( new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							log.info( "Reopening agent" );
+							agent.open();
+						}
+					}, 5, TimeUnit.SECONDS );
+
+				}
+			}
+			else if( event.getKey().equals( DELETED ) )
 			{
 				removeAgent( ( AgentItem )event.getSource() );
 			}

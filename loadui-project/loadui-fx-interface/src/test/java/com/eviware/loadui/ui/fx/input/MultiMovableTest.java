@@ -15,40 +15,33 @@
  */
 package com.eviware.loadui.ui.fx.input;
 
-import static org.loadui.testfx.GuiTest.offset;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
-import java.util.concurrent.TimeUnit;
-
-import org.loadui.testfx.categories.TestFX;
-import org.loadui.testfx.FXScreenController;
-import org.loadui.testfx.FXTestUtils;
-import org.loadui.testfx.GuiTest;
+import com.eviware.loadui.ui.fx.api.input.Selectable;
+import com.google.common.util.concurrent.SettableFuture;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
 import javafx.scene.SceneBuilder;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.PaneBuilder;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.StackPaneBuilder;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.VBoxBuilder;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
 import javafx.stage.Stage;
-
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.loadui.testfx.FXScreenController;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
+import org.loadui.testfx.MouseMotion;
+import org.loadui.testfx.categories.TestFX;
 
-import com.eviware.loadui.ui.fx.api.input.Selectable;
-import org.loadui.testfx.GuiTest.MouseMotion;
-import com.google.common.util.concurrent.SettableFuture;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.loadui.testfx.GuiTest.offset;
 
 @Category( TestFX.class )
 public class MultiMovableTest
@@ -136,7 +129,7 @@ public class MultiMovableTest
 		final Node rectangle1 = selectable1.getNode();
 		final Node rectangle2 = selectable2.getNode();
 
-		controller.drag( offset( background, 220, 170 ) ).to( offset( background, 0, 0 ) );
+		controller.drag( offset( background, 220, 170 ) ).to( background );
 		assertThat( selectable1.isSelected(), is( true ) );
 		assertThat( selectable2.isSelected(), is( true ) );
 
