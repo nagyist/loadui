@@ -23,7 +23,6 @@
  * @nonBlocking true
  */
 
-import com.eviware.loadui.ui.fx.util.Properties
 import javafx.scene.control.Slider
 import javafx.beans.InvalidationListener
 
@@ -164,8 +163,6 @@ onAction( "RESET" ) {
 	resetValues = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
 	totalReset = 0
 }
-
-//slider.valueProperty().bindBidirectional( Properties.convert( numOutputs ) )
 
 refreshLayout = {
 	layout ( layout:'gap 10 5' ) {
