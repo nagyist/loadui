@@ -17,60 +17,62 @@ import java.util.concurrent.Callable;
  * Date: 8/22/13
  * Time: 12:55 PM
  */
-@Category( IntegrationTest.class )
+@Category(IntegrationTest.class)
 
 public class AssertionTest extends FxIntegrationTestBase
 {
-    private static GuiTest controller;
-    private static final String ASSERTION_INSPECTOR = "Assertions";
-    private static final String ASSERTABLE = ".assertion-inspector-view .items";
-    private static final String DROPZONE = "#assertionList";
-    private static final String DIALOG = ".dialog";
-    private static final String CREATE = "#default";
-    private static final String ASSERTION_VIEW = ".assertion-view";
+	private static GuiTest controller;
+	private static final String ASSERTION_INSPECTOR = "Assertions";
+	private static final String ASSERTABLE = ".assertion-inspector-view .items";
+	private static final String DROPZONE = "#assertionList";
+	private static final String DIALOG = ".dialog";
+	private static final String CREATE = "#default";
+	private static final String ASSERTION_VIEW = ".assertion-view";
 
-    @Test
-    public void shouldBeAbleToAddComponentAssertion()
-    {
-        //given
-        doubleClick( ASSERTION_INSPECTOR );
-        drag( ASSERTABLE ).to( DROPZONE );
-        waitForDialogToAppear();
+	@Test
+	public void shouldBeAbleToAddComponentAssertion()
+	{
+		//given
+		doubleClick( ASSERTION_INSPECTOR );
+		drag( ASSERTABLE ).to( DROPZONE );
+		waitForDialogToAppear();
 
-        //when
-        click( "#sent" ).click( "#total" );
-        click( "#min" ).type( "1" );
-        click( "#max" ).type( "10000" );
+		//when
+		click( "#sent" ).click( "#total" );
+		click( "#min" ).type( "1" );
+		click( "#max" ).type( "10000" );
 
-        click( CREATE );
+		click( CREATE );
 
-        //Then
-        assert( exists( ASSERTION_VIEW ) );
-    }
+		//Then
+		assert ( exists( ASSERTION_VIEW ) );
+	}
 
-    private boolean exists(String query)
-    {
-        return find( query ) != null;
-    }
+	private boolean exists( String query )
+	{
+		return find( query ) != null;
+	}
 
-    @Override
-    public SimpleWebTestState getStartingState()
-    {
-        return SimpleWebTestState.STATE;
-    }
+	@Override
+	public SimpleWebTestState getStartingState()
+	{
+		return SimpleWebTestState.STATE;
+	}
 
-    private void waitForDialogToAppear()
-    {
-        TestUtils.awaitCondition(new Callable<Boolean>() {
-        @Override
-        public Boolean call() throws Exception {
-            Set<Node> nodes = GuiTest.findAll(".dialog");
-            boolean dialogOpen = nodes.size() == 1;
-            return dialogOpen;
-            }
-        }, 2000);
-        assert( exists(DIALOG) );
-    }
+	private void waitForDialogToAppear()
+	{
+		TestUtils.awaitCondition( new Callable<Boolean>()
+		{
+			@Override
+			public Boolean call() throws Exception
+			{
+				Set<Node> nodes = GuiTest.findAll( ".dialog" );
+				boolean dialogOpen = nodes.size() == 1;
+				return dialogOpen;
+			}
+		}, 2 );
+		assert ( exists( DIALOG ) );
+	}
 
 
 }

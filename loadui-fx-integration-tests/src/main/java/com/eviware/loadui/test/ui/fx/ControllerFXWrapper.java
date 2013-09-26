@@ -15,20 +15,18 @@
  */
 package com.eviware.loadui.test.ui.fx;
 
-import java.io.File;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-
-import javafx.stage.Stage;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.test.IntegrationTestUtils;
 import com.eviware.loadui.util.test.TestUtils;
+import javafx.stage.Stage;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 /**
  * An loadUI Controller which can be used for testing.
@@ -47,14 +45,14 @@ public class ControllerFXWrapper
 	public ControllerFXWrapper() throws Exception
 	{
 		if( baseDir.exists() && !IntegrationTestUtils.deleteRecursive( baseDir ) )
-			throw new RuntimeException( "Test directory already exists and cannot be deleted! " + baseDir.getAbsolutePath() );
+			throw new RuntimeException( "Test directory already exists and cannot be deleted! at " + baseDir.getAbsolutePath() );
 
 		log.info( "Test Basedir: " + baseDir.getAbsolutePath() );
 		if( !baseDir.mkdir() )
-			throw new RuntimeException( "Could not create test directory!" );
+			throw new RuntimeException( "Could not create test directory! at " + baseDir.getAbsolutePath() );
 
 		if( !homeDir.mkdir() )
-			throw new RuntimeException( "Could not create home directory!" );
+			throw new RuntimeException( "Could not create home directory! at " + baseDir.getAbsolutePath() );
 
 		System.setProperty( LoadUI.LOADUI_HOME, homeDir.getAbsolutePath() );
 		System.setProperty( LoadUI.LOADUI_WORKING, baseDir.getAbsolutePath() );
