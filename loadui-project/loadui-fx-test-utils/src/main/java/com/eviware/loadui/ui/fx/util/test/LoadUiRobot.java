@@ -2,13 +2,11 @@ package com.eviware.loadui.ui.fx.util.test;
 
 import com.eviware.loadui.util.test.TestUtils;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.stage.Window;
-import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.internal.matchers.TypeSafeMatcher;
@@ -54,7 +52,8 @@ public class LoadUiRobot
 		this.controller = controller;
 	}
 
-	public void resetPredefinedPoints() {
+	public void resetPredefinedPoints()
+	{
 		predefinedPoints = Lists.newLinkedList( ImmutableList.of( new Point( 250, 250 ), new Point(
 				450, 450 ) ) );
 	}
@@ -92,7 +91,7 @@ public class LoadUiRobot
 			{
 				return GuiTest.findAll( ".canvas-object-view" ).size() == numberOfComponents + 1;
 			}
-		}, 25000 );
+		}, 25 );
 
 		Set<Node> outputs = findAll( ".canvas-object-view .terminal-view.output-terminal" );
 		Set<Node> inputs = findAll( ".canvas-object-view .terminal-view.input-terminal" );
@@ -104,24 +103,24 @@ public class LoadUiRobot
 
 	public Matcher<Node> matcherForIconOf( final Component component )
 	{
-		 return new TypeSafeMatcher<Node>()
-		 {
-			 @Override
-			 public boolean matchesSafely( Node node )
-			 {
-				 if( node.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
-				 {
-					 return node.toString().equals( component.name );
-				 }
-				 return false;
-			 }
+		return new TypeSafeMatcher<Node>()
+		{
+			@Override
+			public boolean matchesSafely( Node node )
+			{
+				if( node.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
+				{
+					return node.toString().equals( component.name );
+				}
+				return false;
+			}
 
-			 @Override
-			 public void describeTo( Description description )
-			 {
-				 //To change body of implemented methods use File | Settings | File Templates.
-			 }
-		 };
+			@Override
+			public void describeTo( Description description )
+			{
+				//To change body of implemented methods use File | Settings | File Templates.
+			}
+		};
 	}
 
 	public void expandCategoryOf( Component component )
