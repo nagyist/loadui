@@ -21,25 +21,26 @@ import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.FXAppLoadedState;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import org.loadui.testfx.GuiTest;
 import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.test.TestUtils;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Region;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.loadui.testfx.GuiTest;
 
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static org.junit.Assert.*;
 import static org.loadui.testfx.Assertions.assertNodeExists;
 import static org.loadui.testfx.FXTestUtils.getOrFail;
-import static org.loadui.testfx.GuiTest.waitUntil;
 import static org.loadui.testfx.Matchers.hasLabel;
-import static org.junit.Assert.*;
 
 @Category( IntegrationTest.class )
 public class NotificationPanelTest extends FxIntegrationTestBase
@@ -119,7 +120,7 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 		waitUntil( msgLabel, hasLabel( "A message" ) );
 
 		assertEquals( "A message", msgLabel.getText() );
-		assertEquals( "2", msgCountLabel.getText() );
+		waitUntil( msgCountLabel, hasLabel( "2" ) );
 		click( "#hide-notification-panel" );
 
 	}

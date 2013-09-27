@@ -2,13 +2,11 @@ package com.eviware.loadui.ui.fx.util.test;
 
 import com.eviware.loadui.util.test.TestUtils;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.stage.Window;
-import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.internal.matchers.TypeSafeMatcher;
@@ -20,10 +18,11 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.loadui.testfx.GuiTest.find;
-import static org.loadui.testfx.GuiTest.findAll;
+import static org.loadui.testfx.GuiTest.*;
 import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
+import static org.loadui.testfx.matchers.EnabledMatcher.enabled;
 
 public class LoadUiRobot
 {
@@ -54,7 +53,8 @@ public class LoadUiRobot
 		this.controller = controller;
 	}
 
-	public void resetPredefinedPoints() {
+	public void resetPredefinedPoints()
+	{
 		predefinedPoints = Lists.newLinkedList( ImmutableList.of( new Point( 250, 250 ), new Point(
 				450, 450 ) ) );
 	}
@@ -104,24 +104,24 @@ public class LoadUiRobot
 
 	public Matcher<Node> matcherForIconOf( final Component component )
 	{
-		 return new TypeSafeMatcher<Node>()
-		 {
-			 @Override
-			 public boolean matchesSafely( Node node )
-			 {
-				 if( node.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
-				 {
-					 return node.toString().equals( component.name );
-				 }
-				 return false;
-			 }
+		return new TypeSafeMatcher<Node>()
+		{
+			@Override
+			public boolean matchesSafely( Node node )
+			{
+				if( node.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
+				{
+					return node.toString().equals( component.name );
+				}
+				return false;
+			}
 
-			 @Override
-			 public void describeTo( Description description )
-			 {
-				 //To change body of implemented methods use File | Settings | File Templates.
-			 }
-		 };
+			@Override
+			public void describeTo( Description description )
+			{
+				//To change body of implemented methods use File | Settings | File Templates.
+			}
+		};
 	}
 
 	public void expandCategoryOf( Component component )
@@ -177,7 +177,9 @@ public class LoadUiRobot
 
 	public void clickPlayStopButton()
 	{
-		controller.click( ".project-playback-panel .play-button" );
+		Node playButton = find( ".project-playback-panel .play-button" );
+		waitUntil( playButton, is( enabled() ) );
+		controller.click( playButton );
 	}
 
 	public void pointAtPlayStopButton()

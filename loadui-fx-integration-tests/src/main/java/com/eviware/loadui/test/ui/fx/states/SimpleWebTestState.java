@@ -20,9 +20,6 @@ import com.eviware.loadui.test.ui.fx.FxTestState;
 
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.WEB_PAGE_RUNNER;
-import static org.junit.Assert.assertThat;
-import static org.loadui.testfx.GuiTest.findAll;
-import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
 
 public class SimpleWebTestState extends FxTestState
 {
@@ -51,4 +48,5 @@ public class SimpleWebTestState extends FxTestState
 	{
 		robot.deleteAllComponentsFromProjectView();
 	}
+
 }
