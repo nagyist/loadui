@@ -17,6 +17,10 @@ package com.eviware.loadui.ui.fx.views.assertions;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
+import com.eviware.loadui.ui.fx.control.ConfirmationDialog;
+import javafx.event.EventHandler;
+import javafx.scene.input.MouseEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,7 +116,7 @@ public class AssertableTree extends TreeView<Labeled> implements Validatable
 			@Override
 			public TreeCell<Labeled> call( TreeView<Labeled> treeView )
 			{
-				return new LabeledTreeCell();
+                return LabeledTreeCell.newInstance();
 			}
 		} );
 	}
