@@ -130,7 +130,13 @@ public class ComponentLayoutUtils
 			}
 		} else if( component.has( "component" ) )
 		{
-			Callable c = (Callable) component.get( "component" );
+            Object o = component.get( "component" );
+            if( o instanceof Node )
+            {
+                return ( Node )o;
+            }
+
+			Callable c = (Callable) o;
 			AtomicReference ref = (AtomicReference) component.get( "handle" );
 
 			if( ref.get() == null )
@@ -144,10 +150,9 @@ public class ComponentLayoutUtils
 					e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
 					return null;
 				}
-			} else
-			{
-				return (Node) ref.get();
 			}
+				return (Node) ref.get();
+
 
 
 		} else if( component.has( "fString" ) )
