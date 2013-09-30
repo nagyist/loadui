@@ -15,20 +15,22 @@
  */
 package com.eviware.loadui.test.ui.fx;
 
-import java.io.File;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-
-import javafx.stage.Stage;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.test.IntegrationTestUtils;
-import com.eviware.loadui.util.test.TestUtils;
+import com.google.code.tempusfugit.temporal.Condition;
+import javafx.stage.Stage;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import static com.google.code.tempusfugit.temporal.Duration.seconds;
+import static com.google.code.tempusfugit.temporal.Timeout.timeout;
+import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 
 /**
  * An loadUI Controller which can be used for testing.
@@ -39,8 +41,9 @@ public class ControllerFXWrapper
 {
 	private static final Logger log = LoggerFactory.getLogger( ControllerFXWrapper.class );
 
-	private final File baseDir = new File( "target/controllerTest" );
-	private final File homeDir = new File( baseDir, ".loadui" );
+	static final File baseDir = new File( "target/controllerTest" );
+	static final File bundleDir = new File( baseDir, "bundle" );
+	static final File homeDir = new File( baseDir, ".loadui" );
 	private final OSGiFXLauncher launcher;
 	private final BundleContext context;
 
@@ -59,33 +62,66 @@ public class ControllerFXWrapper
 		System.setProperty( LoadUI.LOADUI_HOME, homeDir.getAbsolutePath() );
 		System.setProperty( LoadUI.LOADUI_WORKING, baseDir.getAbsolutePath() );
 
+		copyRuntimeDirectories( baseDir );
+
 		new Thread( new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				log.info( "Calling OSGiFXLauncher.main(..) to start LoadUI bundles" );
-				OSGiFXLauncher.main( baseDir, new String[] { "-nolock", "--nofx=false" } );
+				callLauncherMainMethod();
 			}
 		} ).start();
 
-		TestUtils.awaitCondition( new Callable<Boolean>()
+		waitOrTimeout( new Condition()
 		{
 			@Override
-			public Boolean call() throws Exception
+			public boolean isSatisfied()
 			{
-				return OSGiFXLauncher.getInstance() != null;
+				return getLauncherInstance() != null;
 			}
-		}, 30 );
 
-		launcher = OSGiFXLauncher.getInstance();
+		}, timeout( seconds( 45 ) ) );
+
+		launcher = getLauncherInstance();
 
 		context = launcher.getBundleContext();
 	}
 
-	public Future<Stage> getStageFuture()
+	protected void callLauncherMainMethod()
 	{
-		return OSGiFXLauncher.getStageFuture();
+		OSGiFXLauncher.main( new String[] { "-nolock", "--nofx=false" } );
+	}
+
+	protected OSGiFXLauncher getLauncherInstance()
+	{
+		return OSGiFXLauncher.getInstance();
+	}
+
+	protected void copyRuntimeDirectories( File baseDir )
+	{
+		try
+		{
+			IntegrationTestUtils.copyDirectory( new File(
+					"../loadui-installers/loadui-controller-installer/target/main" ), baseDir );
+			IntegrationTestUtils.copyDirectory( new File( "target/bundle" ), bundleDir );
+		}
+		catch( IOException e1 )
+		{
+			throw new RuntimeException( e1 );
+		}
+	}
+
+	public Stage getStage()
+	{
+		try
+		{
+			return OSGiFXLauncher.getStageFuture().get( 10, TimeUnit.SECONDS );
+		}
+		catch( Exception e )
+		{
+			throw new RuntimeException( "Could not get the Stage", e );
+		}
 	}
 
 	public void stop() throws BundleException
@@ -93,7 +129,8 @@ public class ControllerFXWrapper
 		try
 		{
 			launcher.stop();
-		} finally
+		}
+		finally
 		{
 			IntegrationTestUtils.deleteRecursive( baseDir );
 		}

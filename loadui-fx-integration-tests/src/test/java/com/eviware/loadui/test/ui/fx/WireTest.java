@@ -17,25 +17,23 @@ package com.eviware.loadui.test.ui.fx;
 
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
-import org.loadui.testfx.GuiTest;
 import com.eviware.loadui.util.test.TestUtils;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.loadui.testfx.GuiTest;
 
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import static org.loadui.testfx.GuiTest.findAll;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -67,7 +65,7 @@ public class WireTest extends GuiTest
 	{
 		ProjectLoadedWithoutAgentsState.STATE.enter();
 
-		controller = GUI.getController();
+		controller = GUI.getInstance().getController();
 
 		controller.drag( "#Assertions" ).by( 0, 250 ).drop();
 

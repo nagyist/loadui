@@ -30,17 +30,23 @@ public class FXAppLoadedState extends TestState
 
 	private FXAppLoadedState()
 	{
-		super( "FX App Loaded", TestState.ROOT );
+		super( "FX App Loaded" );
+	}
+
+	@Override
+	protected TestState parentState()
+	{
+		return TestState.ROOT;
 	}
 
 	@Override
 	protected void enterFromParent() throws Exception
 	{
-		GUI.getBundleContext();
+		GUI.getInstance().getBundleContext();
 		closeWindow("Welcome to LoadUI");
 		closeWindow("New version available");
 
-		GUI.getController().click( "#mainButton" ).click( "#mainButton" ).sleep( 500 );
+		GUI.getInstance().getController().click( "#mainButton" ).click( "#mainButton" ).sleep( 500 );
 	}
 
 	private void closeWindow( final String windowTitle ) throws Exception

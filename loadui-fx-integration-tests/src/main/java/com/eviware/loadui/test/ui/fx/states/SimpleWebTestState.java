@@ -27,12 +27,18 @@ public class SimpleWebTestState extends FxTestState
 
 	private SimpleWebTestState()
 	{
-		this( "Simple Web Test", ProjectLoadedWithoutAgentsState.STATE );
+		this( "Simple Web Test" );
 	}
 
-	protected SimpleWebTestState( String name, TestState parent )
+	protected SimpleWebTestState( String name )
 	{
-		super( name, parent );
+		super( name );
+	}
+
+	@Override
+	protected TestState parentState()
+	{
+		return ProjectLoadedWithoutAgentsState.STATE;
 	}
 
 	@Override

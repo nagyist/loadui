@@ -53,7 +53,7 @@ public class EventsHandlingTest
 	public static void enterState() throws Exception
 	{
 
-		controller = GUI.getController();
+		controller = GUI.getInstance().getController();
 
 		log.info( "Asking to enter ProjectLoadedState" );
 		ProjectLoadedWithoutAgentsState.STATE.enter();

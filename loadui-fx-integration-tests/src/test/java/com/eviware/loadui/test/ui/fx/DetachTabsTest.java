@@ -15,21 +15,20 @@
  */
 package com.eviware.loadui.test.ui.fx;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
-import java.util.concurrent.Callable;
-
-import org.loadui.testfx.GuiTest;
+import com.eviware.loadui.test.categories.IntegrationTest;
+import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
+import com.eviware.loadui.util.test.TestUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.loadui.testfx.GuiTest;
 
-import com.eviware.loadui.test.categories.IntegrationTest;
-import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import com.eviware.loadui.util.test.TestUtils;
+import java.util.concurrent.Callable;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * 
@@ -47,7 +46,7 @@ public class DetachTabsTest
 	public static void enterState() throws Exception
 	{
 		ProjectLoadedWithoutAgentsState.STATE.enter();
-		controller = GUI.getController();
+		controller = GUI.getInstance().getController();
 
 		TestUtils.awaitCondition( new Callable<Boolean>()
 		{

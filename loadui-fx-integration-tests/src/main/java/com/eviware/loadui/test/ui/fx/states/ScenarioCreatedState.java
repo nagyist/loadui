@@ -18,6 +18,7 @@ package com.eviware.loadui.test.ui.fx.states;
 
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.model.SceneItem;
+import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.ui.fx.FxTestState;
 import com.eviware.loadui.test.ui.fx.GUI;
 
@@ -31,7 +32,13 @@ public class ScenarioCreatedState extends FxTestState
 
 	private ScenarioCreatedState()
 	{
-		super( "Scenario 1 Created", ProjectLoadedWithoutAgentsState.STATE );
+		super( "Scenario 1 Created" );
+	}
+
+	@Override
+	protected TestState parentState()
+	{
+		return ProjectLoadedWithoutAgentsState.STATE;
 	}
 
 	public SceneItem getScenario()
@@ -43,7 +50,7 @@ public class ScenarioCreatedState extends FxTestState
 	protected void enterFromParent()
 	{
 		log.debug( "Creating scenario." );
-		GUI.getController().drag( "#newScenarioIcon" ).by( 300, 0 ).drop();
+		GUI.getInstance().getController().drag( "#newScenarioIcon" ).by( 300, 0 ).drop();
 
 		waitForNode( ".scenario-view" );
 
@@ -56,7 +63,7 @@ public class ScenarioCreatedState extends FxTestState
 	{
 		log.debug( "Deleting scenario." );
 
-		GUI.getController().click( ".scenario-view #menu" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
+		GUI.getInstance().getController().click( ".scenario-view #menu" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
 
 		waitForNodeToDisappear( ".scenario-view" );
 
