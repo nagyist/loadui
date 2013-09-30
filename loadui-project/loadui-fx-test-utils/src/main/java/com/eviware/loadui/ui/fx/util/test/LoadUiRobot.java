@@ -18,10 +18,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.collect.Lists.newLinkedList;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.loadui.testfx.GuiTest.find;
-import static org.loadui.testfx.GuiTest.findAll;
+import static org.loadui.testfx.GuiTest.*;
 import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
+import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 
 public class LoadUiRobot
 {
@@ -195,6 +197,7 @@ public class LoadUiRobot
 		controller.sleep( unit.toMillis( number ) );
 		clickPlayStopButton();
 		controller.sleep( 2000 );
+		waitUntil( "task-progress-indicator", is( not( visible() ) ) );
 	}
 
 	public void deleteAllComponentsFromProjectView()

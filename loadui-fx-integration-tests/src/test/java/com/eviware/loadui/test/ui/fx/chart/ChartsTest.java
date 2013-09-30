@@ -19,7 +19,6 @@ import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.FxIntegrationTestBase;
 import com.eviware.loadui.test.ui.fx.states.SimpleWebTestState;
-import com.google.common.base.Predicate;
 import javafx.scene.Node;
 import org.hamcrest.Description;
 import org.junit.Test;
@@ -66,6 +65,24 @@ public class ChartsTest extends FxIntegrationTestBase
 		click( "#default" );
 
 		assertThat( allChartLines().size(), is( 2 ) );
+
+		click( "Chart 1" ).click( "Delete" ).click( "#default" );
+
+	}
+
+	@Test
+	public void statisticTree_should_acceptDoubleClicks()
+	{
+		runTestFor( 5, SECONDS );
+
+		click( "#statsTab" );
+		drag( WEB_RUNNER ).by( 150, 150 ).drop().sleep( 1000 );
+		doubleClick( "Max" );
+
+		assertThat( allChartLines().size(), is( 1 ) );
+
+		click( "Chart 1" ).click( "Delete" ).click( "#default" );
+
 	}
 
 	@Override
