@@ -32,6 +32,11 @@ public class ProjectCreatedState extends TestState
 		super( "Project Created" );
 	}
 
+	protected ProjectCreatedState( String name )
+	{
+		super( name );
+	}
+
 	@Override
 	protected TestState parentState()
 	{

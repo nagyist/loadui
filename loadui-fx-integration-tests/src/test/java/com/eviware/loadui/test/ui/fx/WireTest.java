@@ -65,7 +65,7 @@ public class WireTest extends GuiTest
 	{
 		ProjectLoadedWithoutAgentsState.STATE.enter();
 
-		controller = GUI.getInstance().getController();
+		controller = GUI.getOpenSourceGui().getController();
 
 		controller.drag( "#Assertions" ).by( 0, 250 ).drop();
 

@@ -33,6 +33,11 @@ public class TwoScenariosCreatedState extends TestState
 		super( "Scenario Created" );
 	}
 
+	protected TwoScenariosCreatedState( String name )
+	{
+		super( name );
+	}
+
 	@Override
 	protected TestState parentState()
 	{
@@ -43,9 +48,13 @@ public class TwoScenariosCreatedState extends TestState
 	protected void enterFromParent() throws Exception
 	{
 		log.debug( "Creating scenarios." );
-		GUI.getInstance().getController().drag( "#newScenarioIcon" ).by( 300, 0 ).drop().sleep( 100 ).click( "#scenario-name" )
+		GUI.getOpenSourceGui().getController().drag( "#newScenarioIcon" ).by( 300, 0 ).drop();
+		System.out.println( "Will now click on the Scenario Name" );
+		GUI.getOpenSourceGui().getController()
+				.sleep( 10000 )
+				.click( "#scenario-name" )
 				.type( SCENARIO_NAME[0] ).click( "#default" );
-		GUI.getInstance().getController().drag( "#newScenarioIcon" ).by( 400, 100 ).drop().sleep( 100 ).click( "#scenario-name" )
+		GUI.getOpenSourceGui().getController().drag( "#newScenarioIcon" ).by( 400, 100 ).drop().sleep( 100 ).click( "#scenario-name" )
 				.type( SCENARIO_NAME[1] ).click( "#default" );
 
 		TestUtils.awaitCondition( new Callable<Boolean>()
@@ -64,8 +73,8 @@ public class TwoScenariosCreatedState extends TestState
 	{
 		log.debug( "Deleting scenarios." );
 
-		GUI.getInstance().getController().click( ".scenario-view #menu" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
-		GUI.getInstance().getController().click( ".scenario-view #menu" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
+		GUI.getOpenSourceGui().getController().click( ".scenario-view #menu" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
+		GUI.getOpenSourceGui().getController().click( ".scenario-view #menu" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
 
 		TestUtils.awaitCondition( new Callable<Boolean>()
 		{

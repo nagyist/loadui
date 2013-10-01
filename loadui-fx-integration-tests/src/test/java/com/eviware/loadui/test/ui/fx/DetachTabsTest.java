@@ -46,7 +46,7 @@ public class DetachTabsTest
 	public static void enterState() throws Exception
 	{
 		ProjectLoadedWithoutAgentsState.STATE.enter();
-		controller = GUI.getInstance().getController();
+		controller = GUI.getOpenSourceGui().getController();
 
 		TestUtils.awaitCondition( new Callable<Boolean>()
 		{

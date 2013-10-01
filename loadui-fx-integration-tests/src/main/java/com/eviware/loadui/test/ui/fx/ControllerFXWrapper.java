@@ -16,7 +16,6 @@
 package com.eviware.loadui.test.ui.fx;
 
 import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.test.IntegrationTestUtils;
 import com.google.code.tempusfugit.temporal.Condition;
 import javafx.stage.Stage;
 import org.osgi.framework.BundleContext;
@@ -28,6 +27,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import static com.eviware.loadui.test.IntegrationTestUtils.copyDirectory;
+import static com.eviware.loadui.test.IntegrationTestUtils.deleteRecursive;
 import static com.google.code.tempusfugit.temporal.Duration.seconds;
 import static com.google.code.tempusfugit.temporal.Timeout.timeout;
 import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
@@ -41,15 +42,15 @@ public class ControllerFXWrapper
 {
 	private static final Logger log = LoggerFactory.getLogger( ControllerFXWrapper.class );
 
-	static final File baseDir = new File( "target/controllerTest" );
-	static final File bundleDir = new File( baseDir, "bundle" );
-	static final File homeDir = new File( baseDir, ".loadui" );
+	public static final File baseDir = new File( "target/controllerTest" );
+	public static final File bundleDir = new File( baseDir, "bundle" );
+	public static final File homeDir = new File( baseDir, ".loadui" );
 	private final OSGiFXLauncher launcher;
 	private final BundleContext context;
 
-	public ControllerFXWrapper() throws Exception
+	public ControllerFXWrapper()
 	{
-		if( baseDir.exists() && !IntegrationTestUtils.deleteRecursive( baseDir ) )
+		if( baseDir.exists() && !deleteRecursive( baseDir ) )
 			throw new RuntimeException( "Test directory already exists and cannot be deleted! " + baseDir.getAbsolutePath() );
 
 		log.info( "Test Basedir: " + baseDir.getAbsolutePath() );
@@ -62,7 +63,7 @@ public class ControllerFXWrapper
 		System.setProperty( LoadUI.LOADUI_HOME, homeDir.getAbsolutePath() );
 		System.setProperty( LoadUI.LOADUI_WORKING, baseDir.getAbsolutePath() );
 
-		copyRuntimeDirectories( baseDir );
+		copyRuntimeDirectories();
 
 		new Thread( new Runnable()
 		{
@@ -73,15 +74,22 @@ public class ControllerFXWrapper
 			}
 		} ).start();
 
-		waitOrTimeout( new Condition()
+		try
 		{
-			@Override
-			public boolean isSatisfied()
+			waitOrTimeout( new Condition()
 			{
-				return getLauncherInstance() != null;
-			}
+				@Override
+				public boolean isSatisfied()
+				{
+					return getLauncherInstance() != null;
+				}
 
-		}, timeout( seconds( 45 ) ) );
+			}, timeout( seconds( 45 ) ) );
+		}
+		catch( Exception e )
+		{
+			throw new RuntimeException( "Could not get the launcher instance", e );
+		}
 
 		launcher = getLauncherInstance();
 
@@ -98,13 +106,13 @@ public class ControllerFXWrapper
 		return OSGiFXLauncher.getInstance();
 	}
 
-	protected void copyRuntimeDirectories( File baseDir )
+	protected void copyRuntimeDirectories()
 	{
 		try
 		{
-			IntegrationTestUtils.copyDirectory( new File(
+			copyDirectory( new File(
 					"../loadui-installers/loadui-controller-installer/target/main" ), baseDir );
-			IntegrationTestUtils.copyDirectory( new File( "target/bundle" ), bundleDir );
+			copyDirectory( new File( "target/bundle" ), bundleDir );
 		}
 		catch( IOException e1 )
 		{
@@ -132,7 +140,7 @@ public class ControllerFXWrapper
 		}
 		finally
 		{
-			IntegrationTestUtils.deleteRecursive( baseDir );
+			deleteRecursive( baseDir );
 		}
 	}
 

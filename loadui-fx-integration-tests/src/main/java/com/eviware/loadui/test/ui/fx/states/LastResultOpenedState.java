@@ -34,6 +34,11 @@ public class LastResultOpenedState extends TestState
 		super( "Last Result Opened" );
 	}
 
+	protected LastResultOpenedState( String name )
+	{
+		super( name );
+	}
+
 	@Override
 	protected TestState parentState()
 	{
@@ -45,7 +50,7 @@ public class LastResultOpenedState extends TestState
 	{
 		fxHelper.runTestFor( 2, TimeUnit.SECONDS );
 
-		GUI.getInstance().getController().click( "#statsTab" )
+		GUI.getOpenSourceGui().getController().click( "#statsTab" )
 				.click( "#open-execution" ).doubleClick( "#result-0" );
 	}
 
@@ -55,8 +60,8 @@ public class LastResultOpenedState extends TestState
 		Set<Node> resultViewSet = GuiTest.findAll( ".result-view" );
 		if( !resultViewSet.isEmpty() )
 		{
-			GUI.getInstance().getController().closeCurrentWindow();
+			GUI.getOpenSourceGui().getController().closeCurrentWindow();
 		}
-		GUI.getInstance().getController().click( "#designTab" );
+		GUI.getOpenSourceGui().getController().click( "#designTab" );
 	}
 }

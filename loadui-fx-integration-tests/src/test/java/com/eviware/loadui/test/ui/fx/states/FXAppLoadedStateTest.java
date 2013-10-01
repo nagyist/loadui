@@ -35,13 +35,13 @@ public class FXAppLoadedStateTest
 	@BeforeClass
 	public static void enterState() throws Exception
 	{
-		FXAppLoadedState.STATE.enter();
+		OpenSourceFxLoadedState.STATE.enter();
 	}
 
 	@Test
 	public void shouldHaveNoFailedBundles()
 	{
-		Bundle[] bundles = GUI.getInstance().getBundleContext().getBundles();
+		Bundle[] bundles = GUI.getOpenSourceGui().getBundleContext().getBundles();
 
 		for( Bundle bundle : bundles )
 		{

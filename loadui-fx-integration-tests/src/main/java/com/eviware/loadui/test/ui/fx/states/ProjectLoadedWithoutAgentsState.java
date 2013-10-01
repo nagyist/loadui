@@ -59,7 +59,7 @@ public class ProjectLoadedWithoutAgentsState extends TestState
 	protected void enterFromParent() throws Exception
 	{
 		log.debug( "Opening project." );
-		GUI.getInstance().getController().click( ".project-ref-view #menuButton" ).click( "#open-item" );
+		GUI.getOpenSourceGui().getController().click( ".project-ref-view #menuButton" ).click( "#open-item" );
 
 		TestUtils.awaitCondition( new Callable<Boolean>()
 		{
@@ -80,11 +80,11 @@ public class ProjectLoadedWithoutAgentsState extends TestState
 	{
 		log.debug( "Closing project." );
 		project = null;
-		GUI.getInstance().getController().click( "#closeProjectButton" );
+		GUI.getOpenSourceGui().getController().click( "#closeProjectButton" );
 		//If there is a save dialog, do not save:
 		try
 		{
-			GUI.getInstance().getController().click( "#no" ).target( GuiTest.getWindowByIndex( 0 ) );
+			GUI.getOpenSourceGui().getController().click( "#no" ).target( GuiTest.getWindowByIndex( 0 ) );
 		}
 		catch( Exception e )
 		{

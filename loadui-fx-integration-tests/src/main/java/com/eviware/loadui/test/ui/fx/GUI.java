@@ -28,13 +28,13 @@ import static com.google.code.tempusfugit.temporal.Timeout.timeout;
 
 public class GUI
 {
-	private static GUI instance;
+	protected static GUI instance;
 
 	private ControllerFXWrapper controller;
 	private Stage stage;
 	private GuiTest robot;
 
-	private GUI()
+	protected GUI()
 	{
 		ControllerFXWrapper localController = null;
 		Stage localStage = null;
@@ -42,7 +42,7 @@ public class GUI
 
 		try
 		{
-			localController = new ControllerFXWrapper();
+			localController = createController();
 
 			localStage = localController.getStage();
 			final Stage finalStage = localStage;
@@ -74,7 +74,12 @@ public class GUI
 		robot = localRobot;
 	}
 
-	public static GUI getInstance()
+	protected ControllerFXWrapper createController()
+	{
+		return new ControllerFXWrapper();
+	}
+
+	public static synchronized GUI getOpenSourceGui()
 	{
 		if( instance == null )
 		{

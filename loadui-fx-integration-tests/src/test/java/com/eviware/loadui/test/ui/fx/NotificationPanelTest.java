@@ -19,7 +19,7 @@ import com.eviware.loadui.api.testevents.MessageLevel;
 import com.eviware.loadui.api.testevents.TestEventManager;
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
-import com.eviware.loadui.test.ui.fx.states.FXAppLoadedState;
+import com.eviware.loadui.test.ui.fx.states.OpenSourceFxLoadedState;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.test.TestUtils;
@@ -70,7 +70,7 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 	@Test
 	public void notificationShowsUpInWorkspaceView() throws Exception
 	{
-		FXAppLoadedState.STATE.enter();
+		OpenSourceFxLoadedState.STATE.enter();
 		Node panelNode = notificationPanel();
 
 		assertFalse( panelNode.isVisible() );
@@ -90,7 +90,7 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 	@Test
 	public void notificationDoesNotChangeWithMultipleQuickMessages() throws Exception
 	{
-		FXAppLoadedState.STATE.enter();
+		OpenSourceFxLoadedState.STATE.enter();
 		Node panelNode = notificationPanel();
 
 		sendMsgToNotificationPanel( "A message" );
@@ -260,7 +260,7 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 	@Test
 	public void notificationPanelWontGoAwayIfMouseIsOnIt() throws Exception
 	{
-		FXAppLoadedState.STATE.enter();
+		OpenSourceFxLoadedState.STATE.enter();
 
 		Node panelNode = notificationPanel();
 
