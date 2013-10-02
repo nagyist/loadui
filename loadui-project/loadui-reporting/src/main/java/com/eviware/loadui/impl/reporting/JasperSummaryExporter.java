@@ -1,50 +1,34 @@
-/*
- * Copyright 2013 SmartBear Software
- * 
- * Licensed under the EUPL, Version 1.1 or - as soon they will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the Licence.
- * You may obtain a copy of the Licence at:
- * 
- * http://ec.europa.eu/idabc/eupl
- * 
- * Unless required by applicable law or agreed to in writing, software distributed under the Licence is
- * distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the Licence for the specific language governing permissions and limitations
- * under the Licence.
- */
-package com.eviware.loadui.api.reporting;
+package com.eviware.loadui.impl.reporting;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+import com.eviware.loadui.LoadUI;
+import com.eviware.loadui.api.reporting.ReportingManager;
+import com.eviware.loadui.api.reporting.SummaryExporter;
+import com.eviware.loadui.api.summary.Chapter;
+import com.eviware.loadui.api.summary.MutableSummary;
+import com.eviware.loadui.api.summary.Section;
+import com.eviware.loadui.util.BeanInjector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.swing.SwingWorker;
+import javax.swing.*;
 import javax.swing.table.TableModel;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import java.io.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.api.summary.Chapter;
-import com.eviware.loadui.api.summary.MutableSummary;
-import com.eviware.loadui.api.summary.Section;
-import com.eviware.loadui.impl.reporting.ReportEngine.ReportFormats;
-import com.eviware.loadui.util.BeanInjector;
-
-public class SummaryExportUtils
+/**
+ * @author renato
+ */
+public class JasperSummaryExporter implements SummaryExporter
 {
-	public static final Logger log = LoggerFactory.getLogger( SummaryExportUtils.class );
 
-	public static void saveSummary( MutableSummary summary, String reportFolder, String reportFormat, String label )
+	public static final Logger log = LoggerFactory.getLogger( SummaryExporter.class );
+
+	public void saveSummary( MutableSummary summary, String reportFolder, String reportFormat, String label )
 	{
 		File outputDir;
-		if( reportFolder == null || reportFolder.length() < 1 )
+		if( reportFolder == null || reportFolder.isEmpty() )
 			outputDir = new File( System.getProperty( LoadUI.LOADUI_HOME ) );
 		else
 			outputDir = new File( reportFolder );
@@ -57,7 +41,7 @@ public class SummaryExportUtils
 		{
 			reportFormat = reportFormat.toUpperCase();
 			boolean formatSupported = false;
-			for( ReportFormats rf : ReportFormats.values() )
+			for( ReportEngine.ReportFormats rf : ReportEngine.ReportFormats.values() )
 			{
 				if( rf.toString().equals( reportFormat ) )
 				{
@@ -75,14 +59,14 @@ public class SummaryExportUtils
 		}
 	}
 
-	private static File createOutputFile( File outputDir, String format, String label )
+	private File createOutputFile( File outputDir, String format, String label )
 	{
 		String fileName = label + "-summary-" + System.currentTimeMillis() + "." + format.toLowerCase();
 		return new File( outputDir, fileName );
 	}
 
 	@SuppressWarnings( "rawtypes" )
-	private static void saveSummaryAsXML( final MutableSummary summary, final File out )
+	private void saveSummaryAsXML( final MutableSummary summary, final File out )
 	{
 		SwingWorker worker = new XmlExporter( summary, out );
 		worker.execute();

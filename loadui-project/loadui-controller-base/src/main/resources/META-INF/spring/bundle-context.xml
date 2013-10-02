@@ -29,6 +29,7 @@
 		<constructor-arg ref="executionManager" />
 		<constructor-arg ref="workspaceProvider" />
 		<constructor-arg ref="reportingManager" />
+        <constructor-arg ref="summaryExporter" />
 	</bean>
 	
 	<bean id="agentTestExecutionAddonFactory" class="com.eviware.loadui.impl.execution.AgentTestExecutionAddon$Factory" />

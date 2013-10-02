@@ -15,21 +15,6 @@
  */
 package com.eviware.loadui.impl.statistics;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.addon.Addon;
 import com.eviware.loadui.api.addon.Addon.Context;
@@ -43,7 +28,7 @@ import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.api.model.WorkspaceProvider;
 import com.eviware.loadui.api.reporting.ReportingManager;
-import com.eviware.loadui.api.reporting.SummaryExportUtils;
+import com.eviware.loadui.api.reporting.SummaryExporter;
 import com.eviware.loadui.api.statistics.ExecutionAddon;
 import com.eviware.loadui.api.statistics.ProjectExecutionManager;
 import com.eviware.loadui.api.statistics.store.Execution;
@@ -56,6 +41,13 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Releasable
 {
@@ -64,15 +56,17 @@ public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Rel
 	private final ExecutionManager executionManager;
 	private final WorkspaceProvider workspaceProvider;
 	private final ReportingManager reportingManager;
+	private final SummaryExporter summaryExporter;
 	private final Set<SummaryTask> summaryAttachers = new HashSet<>();
 	private final RunningExecutionTask runningExecutionTask = new RunningExecutionTask();
 
 	ProjectExecutionManagerImpl( final ExecutionManager executionManager, final WorkspaceProvider workspaceProvider,
-			final ReportingManager reportingManager )
+										  final ReportingManager reportingManager, SummaryExporter summaryExporter )
 	{
 		this.executionManager = executionManager;
 		this.workspaceProvider = workspaceProvider;
 		this.reportingManager = reportingManager;
+		this.summaryExporter = summaryExporter;
 
 		BeanInjector.getBean( AddonRegistry.class ).registerFactory( ExecutionAddon.class,
 				new Addon.Factory<ExecutionAddon>()
@@ -176,14 +170,14 @@ public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Rel
 
 			switch( phase )
 			{
-			case START :
-				startExecution( runningProject );
-				break;
-			case POST_STOP :
-				stopExecution( runningProject );
-				break;
-			default :
-				break;
+				case START:
+					startExecution( runningProject );
+					break;
+				case POST_STOP:
+					stopExecution( runningProject );
+					break;
+				default:
+					break;
 			}
 		}
 
@@ -291,7 +285,7 @@ public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Rel
 				label = project.getLabel() + "-" + scene.getLabel();
 				log.debug( "scene.getSummary(): {}", summary );
 			}
-			SummaryExportUtils.saveSummary( ( MutableSummary )summary, project.getReportFolder(),
+			summaryExporter.saveSummary( ( MutableSummary )summary, project.getReportFolder(),
 					project.getReportFormat(), label );
 		}
 	}
