@@ -27,7 +27,6 @@ import static org.mockito.Mockito.*;
 public class AgentDataAggregatorTest
 {
 
-
 	private AgentDataAggregator aggregator;
 	private ExecutionManager executionManagerMock;
 	private final String VAR_STAT_NAME = "a very special statistic";
@@ -231,7 +230,6 @@ public class AgentDataAggregatorTest
 		//then
 		verify( executionManagerMock, times( 2 ) ).writeEntry( trackIdCaptor.capture(), entryCaptor.capture(), sourceCaptor.capture() );
 
-		List<String> trackIdCaptors = trackIdCaptor.getAllValues();
 		List<Entry> capturedEntries = entryCaptor.getAllValues();
 
 		assertThat( capturedEntries.get( 0 ).getTimestamp(), equalTo( 777l ) );
@@ -346,8 +344,6 @@ public class AgentDataAggregatorTest
 		Entry entry4 = newEntry( 3333, VAR_STAT_NAME, 3 );
 		Entry entry5 = newEntry( 4444, VAR_STAT_NAME, 7 );
 		Entry entry6 = newEntry( 5555, VAR_STAT_NAME, 7 );
-		Entry entry7 = newEntry( 6666, VAR_STAT_NAME, 7 );
-		Entry entry8 = newEntry( 6666, VAR_STAT_NAME, 7 );
 
 		//when
 		aggregator.updateAndAggregate( entry1, trackId1, agentId1, twoAgents );

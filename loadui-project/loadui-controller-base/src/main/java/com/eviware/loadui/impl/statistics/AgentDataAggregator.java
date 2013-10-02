@@ -53,25 +53,20 @@ public class AgentDataAggregator implements StatisticsAggregator
 	{
 		Collection<? extends SceneItem> assignedScenes = project.getScenesAssignedTo( agent );
 
-		HashSet<StatisticHolder> assignedHolders = getStatisticHolders( assignedScenes );
+		Iterable<StatisticHolder> assignedHolders = getStatisticHolders( assignedScenes );
 
 		for( StatisticHolder holder : assignedHolders )
 		{
+			SceneItem scene = toScene( holder );
+			if( scene == null ) continue;
+
 			for( StatisticVariable variable : holder.getStatisticVariables() )
 			{
 				for( TrackDescriptor descriptor : variable.getTrackDescriptors() )
 				{
-					if( descriptor.getId().equalsIgnoreCase( trackId ) )
+					if( descriptor.getId().equals( trackId ) )
 					{
-						if( holder instanceof SceneItem )
-						{
-							return ( SceneItem )holder;
-						}
-						else
-						{
-							return ( SceneItem )holder.getCanvas();
-						}
-
+						return scene;
 					}
 				}
 			}
@@ -80,8 +75,17 @@ public class AgentDataAggregator implements StatisticsAggregator
 		throw new RuntimeException( "Could not find trackId during data aggregation" );
 	}
 
+	private SceneItem toScene( StatisticHolder holder )
+	{
+		if( holder instanceof SceneItem )
+			return ( SceneItem )holder;
+		if( holder.getCanvas() instanceof SceneItem )
+			return ( SceneItem )holder.getCanvas();
+		return null;
+	}
 
-	private HashSet<StatisticHolder> getStatisticHolders( Collection<? extends SceneItem> assignedScenes )
+
+	private Iterable<StatisticHolder> getStatisticHolders( Collection<? extends SceneItem> assignedScenes )
 	{
 		HashSet<StatisticHolder> assignedHolders = new HashSet<>();
 
@@ -153,7 +157,7 @@ public class AgentDataAggregator implements StatisticsAggregator
 		Iterable<Long> copyOfTimes = new TreeSet<>( flushableTimes );
 		for( Long flushableTime : copyOfTimes )
 		{
-			flushAndRemove( flushableTime.longValue() );
+			flushAndRemove( flushableTime );
 		}
 	}
 
@@ -186,6 +190,7 @@ public class AgentDataAggregator implements StatisticsAggregator
 		{
 			// could be related to agents sending data from runs not started by this machine?
 			log.warn( "Track does not exist, entries discarded" );
+			return;
 		}
 
 		EntryAggregator aggregator = track.getEntryAggregator();
