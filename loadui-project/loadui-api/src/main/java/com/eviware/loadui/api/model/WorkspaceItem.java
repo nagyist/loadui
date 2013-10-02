@@ -15,18 +15,17 @@
  */
 package com.eviware.loadui.api.model;
 
+import com.eviware.loadui.api.discovery.AgentDiscovery.AgentReference;
+import com.eviware.loadui.api.property.Property;
+
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 
-import javax.annotation.Nonnull;
-
-import com.eviware.loadui.api.discovery.AgentDiscovery.AgentReference;
-import com.eviware.loadui.api.property.Property;
-
 /**
  * A loadUI workspace. It holds references to projects and agents.
- * 
+ *
  * @author dain.nilsson
  */
 public interface WorkspaceItem extends ModelItem
@@ -55,14 +54,14 @@ public interface WorkspaceItem extends ModelItem
 
 	/**
 	 * Gets the version of loadUI which was used to create the workspace.
-	 * 
+	 *
 	 * @return The String representation of the version number.
 	 */
 	public String getLoaduiVersion();
 
 	/**
 	 * Gets the File for this workspace.
-	 * 
+	 *
 	 * @return The File containing the workspace.
 	 */
 	public File getWorkspaceFile();
@@ -74,7 +73,7 @@ public interface WorkspaceItem extends ModelItem
 
 	/**
 	 * Gets all the currently loaded Projects.
-	 * 
+	 *
 	 * @return A Collection of the loaded ProjectItems.
 	 */
 	@Nonnull
@@ -83,7 +82,7 @@ public interface WorkspaceItem extends ModelItem
 	/**
 	 * Gets all the referenced projects, as ProjectRefs. This will get both
 	 * loaded/enabled ProjectRefs and unloaded/disabled ones.
-	 * 
+	 *
 	 * @return A Collection of all the ProjectRefs in the WorkspaceItem.
 	 */
 	@Nonnull
@@ -91,25 +90,20 @@ public interface WorkspaceItem extends ModelItem
 
 	/**
 	 * Creates a new project in the workspace using the given non-existing File.
-	 * 
-	 * @param projectFile
-	 *           The file to store the project in. Must not already exist!
-	 * @param label
-	 *           The name to give the new project.
-	 * @param enabled
-	 *           The initial state of the ProjectItem.
+	 *
+	 * @param projectFile The file to store the project in. Must not already exist!
+	 * @param label The name to give the new project.
+	 * @param enabled The initial state of the ProjectItem.
 	 * @return The added ProjectRef pointing to the newly created ProjectItem.
 	 */
 	public ProjectRef createProject( File projectFile, String label, boolean enabled );
 
 	/**
 	 * Imports an existing project into the workspace.
-	 * 
-	 * @param projectFile
-	 *           The File in which the project is stored.
-	 * @param enabled
-	 *           Whether to enable the ProjectRef (and load the ProjectItem)
-	 *           initially or not.
+	 *
+	 * @param projectFile The File in which the project is stored.
+	 * @param enabled Whether to enable the ProjectRef (and load the ProjectItem)
+	 * initially or not.
 	 * @return A ProjectRef referencing the newly imported project.
 	 * @throws IOException
 	 */
@@ -117,23 +111,21 @@ public interface WorkspaceItem extends ModelItem
 
 	/**
 	 * Removes a project from the workspace.
-	 * 
-	 * @param project
-	 *           A ProjectRef in the workspace.
+	 *
+	 * @param project A ProjectRef in the workspace.
 	 */
 	public void removeProject( ProjectRef project );
 
 	/**
 	 * Removes a project from the workspace.
-	 * 
-	 * @param project
-	 *           A ProjectItem in the workspace.
+	 *
+	 * @param project A ProjectItem in the workspace.
 	 */
 	public void removeProject( ProjectItem project );
 
 	/**
 	 * Gets all the contained AgentItems.
-	 * 
+	 *
 	 * @return A Collection of contained AgentItems.
 	 */
 	@Nonnull
@@ -141,31 +133,26 @@ public interface WorkspaceItem extends ModelItem
 
 	/**
 	 * Creates a new AgentItem in the workspace.
-	 * 
-	 * @param url
-	 *           The target URL of the remote loadUI agent.
-	 * @param label
-	 *           The name to give the local AgentItem.
+	 *
+	 * @param url The target URL of the remote loadUI agent.
+	 * @param label The name to give the local AgentItem.
 	 * @return The newly created AgentItem.
 	 */
 	public AgentItem createAgent( String url, String label );
 
 	/**
 	 * Creates a new AgentItem in the workspace.
-	 * 
-	 * @param ref
-	 *           The AgentReference to create a agent from.
-	 * @param label
-	 *           The name to give the local AgentItem.
+	 *
+	 * @param ref The AgentReference to create a agent from.
+	 * @param label The name to give the local AgentItem.
 	 * @return The newly created AgentItem.
 	 */
 	public AgentItem createAgent( AgentReference ref, String label );
 
 	/**
 	 * Removes a AgentItem from the workspace.
-	 * 
-	 * @param agent
-	 *           The AgentItem to remove.
+	 *
+	 * @param agent The AgentItem to remove.
 	 */
 	public void removeAgent( AgentItem agent );
 
@@ -176,18 +163,17 @@ public interface WorkspaceItem extends ModelItem
 
 	/**
 	 * Gets the localMode property value.
-	 * 
+	 *
 	 * @return
 	 */
 	public boolean isLocalMode();
 
 	/**
 	 * Sets the localMode property value.
-	 * 
 	 * When in local mode, any SceneItems on the controller will act as if they
 	 * were deployed on a local AgentItem. TerminalMessages and ActionEvents will
 	 * not be propagated to any remote Agents when in this state.
-	 * 
+	 *
 	 * @param localMode
 	 */
 	public void setLocalMode( boolean localMode );
@@ -195,7 +181,7 @@ public interface WorkspaceItem extends ModelItem
 	/**
 	 * Gets the maximum number of executions for all projects that are
 	 * automatically saved before the oldest one is deleted.
-	 * 
+	 *
 	 * @return
 	 */
 	long getNumberOfAutosaves();
@@ -203,9 +189,16 @@ public interface WorkspaceItem extends ModelItem
 	/**
 	 * Sets the maximum number of executions for all projects that are
 	 * automatically saved before the oldest one is deleted.
-	 * 
+	 *
 	 * @return
 	 */
 	void setNumberOfAutosaves( long n );
+
+	/**
+	 * Gets the currently open project or null if no project is open
+	 *
+	 * @return the opened project.
+	 */
+	public ProjectItem getCurrentProject();
 
 }

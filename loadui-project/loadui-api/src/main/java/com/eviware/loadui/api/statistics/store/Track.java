@@ -15,33 +15,34 @@
  */
 package com.eviware.loadui.api.statistics.store;
 
+import com.eviware.loadui.api.statistics.EntryAggregator;
 import com.eviware.loadui.api.traits.Deletable;
 
 /**
  * Represents a value set which changes over time, allowing sequential reading
  * and writing.
- * 
+ *
  * @author dain.nilsson
  */
 public interface Track extends Deletable
 {
 	/**
 	 * Gets the Tracks ID, which needs to be unique within the Execution.
-	 * 
+	 *
 	 * @return
 	 */
 	public String getId();
 
 	/**
 	 * Gets the parent Execution for the Track.
-	 * 
+	 *
 	 * @return
 	 */
 	public Execution getExecution();
 
 	/**
 	 * Gets the TrackDescriptor describing the structure of this Track.
-	 * 
+	 *
 	 * @return
 	 */
 	public TrackDescriptor getTrackDescriptor();
@@ -49,7 +50,7 @@ public interface Track extends Deletable
 	/**
 	 * Gets the closest succeeding Entry to the given time, for a source in the
 	 * Track, measured in milliseconds since the start of the Execution.
-	 * 
+	 *
 	 * @param timestamp
 	 * @return
 	 */
@@ -64,9 +65,8 @@ public interface Track extends Deletable
 	 * Gets an Iterable over the specified range, including all Entries with a
 	 * startTime <= timestamp <= endTime for the given source, where the times
 	 * are given as milliseconds since the start of the Execution.
-	 * 
 	 * Interpolationlevel defaults to 0.
-	 * 
+	 *
 	 * @param source
 	 * @param startTime
 	 * @param endTime
@@ -78,4 +78,11 @@ public interface Track extends Deletable
 	 * @see getRange(String, int, int)
 	 */
 	public Iterable<Entry> getRange( String source, long startTime, long endTime, int interpolationLevel );
+
+	/**
+	 * Gets the EntryAggregator associated with the TrackDescriptor of this Track
+	 *
+	 * @return
+	 */
+	public EntryAggregator getEntryAggregator();
 }

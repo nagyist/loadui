@@ -15,16 +15,16 @@
  */
 package com.eviware.loadui.api.statistics;
 
-import java.util.Set;
-
-import javax.annotation.Nonnull;
-
+import com.eviware.loadui.api.statistics.store.TrackDescriptor;
 import com.eviware.loadui.api.traits.Describable;
 import com.eviware.loadui.api.traits.Labeled;
 
+import javax.annotation.Nonnull;
+import java.util.Set;
+
 /**
  * A Statistical Variable containing several Statistics, for several instances.
- * 
+ *
  * @author dain.nilsson
  */
 public interface StatisticVariable extends Labeled, Describable.Mutable
@@ -42,28 +42,28 @@ public interface StatisticVariable extends Labeled, Describable.Mutable
 
 	/**
 	 * Gets the StatisticHolder which this StatisticVariable belongs to.
-	 * 
+	 *
 	 * @return
 	 */
 	public StatisticHolder getStatisticHolder();
 
 	/**
 	 * Gets the available sources of the StatisticVariable.
-	 * 
+	 *
 	 * @return
 	 */
 	public Set<String> getSources();
 
 	/**
 	 * Gets the available Statistic names for the StatisticVariable.
-	 * 
+	 *
 	 * @return
 	 */
 	public Set<String> getStatisticNames();
 
 	/**
 	 * Gets the Statistic corresponding to the given statistic name and source.
-	 * 
+	 *
 	 * @param statisticName
 	 * @param source
 	 * @return
@@ -74,7 +74,7 @@ public interface StatisticVariable extends Labeled, Describable.Mutable
 	 * A mutable version of StatisticVariable. Its values are controlled by one
 	 * or more attached StatisticWriters, which receive data from the update
 	 * method.
-	 * 
+	 *
 	 * @author dain.nilsson
 	 */
 	public interface Mutable extends StatisticVariable
@@ -82,7 +82,7 @@ public interface StatisticVariable extends Labeled, Describable.Mutable
 		/**
 		 * Updates the StatisticVariable.Mutable with new data, which will be
 		 * passed to the attached StatisticsWriters.
-		 * 
+		 *
 		 * @param timestamp
 		 * @param value
 		 */
@@ -90,10 +90,17 @@ public interface StatisticVariable extends Labeled, Describable.Mutable
 	}
 
 	/**
-	 * Gets the description for this a specific statistic.
-	 * 
+	 * Gets the description for a specific statistic.
+	 *
 	 * @param statisticName
 	 * @return
 	 */
 	public String getDescriptionForStatistic( @Nonnull String statisticName );
+
+	/**
+	 * Gets the TrackDescriptors for all Statistic´s in this StatisticVariable.
+	 *
+	 * @return
+	 */
+	public Iterable<TrackDescriptor> getTrackDescriptors();
 }

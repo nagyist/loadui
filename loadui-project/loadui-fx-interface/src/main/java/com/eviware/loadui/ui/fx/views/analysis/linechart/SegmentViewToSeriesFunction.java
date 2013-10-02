@@ -15,29 +15,6 @@
  */
 package com.eviware.loadui.ui.fx.views.analysis.linechart;
 
-import static com.eviware.loadui.ui.fx.util.ObservableLists.fromExpression;
-import static javafx.collections.FXCollections.observableArrayList;
-
-import java.util.LinkedList;
-import java.util.concurrent.Callable;
-
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.scene.Node;
-import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Series;
-import javafx.scene.shape.CircleBuilder;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.LineBuilder;
-import javafx.scene.shape.Path;
-import javafx.scene.shape.StrokeType;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.statistics.DataPoint;
 import com.eviware.loadui.api.statistics.model.chart.line.LineSegment;
 import com.eviware.loadui.api.statistics.model.chart.line.TestEventSegment;
@@ -49,6 +26,22 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.Node;
+import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Series;
+import javafx.scene.shape.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.LinkedList;
+import java.util.concurrent.Callable;
+
+import static com.eviware.loadui.ui.fx.util.ObservableLists.fromExpression;
+import static javafx.collections.FXCollections.observableArrayList;
 
 public final class SegmentViewToSeriesFunction implements Function<SegmentView<?>, XYChart.Series<Long, Number>>
 {
@@ -64,7 +57,7 @@ public final class SegmentViewToSeriesFunction implements Function<SegmentView<?
 	protected static final Logger log = LoggerFactory.getLogger( SegmentViewToSeriesFunction.class );
 
 	public SegmentViewToSeriesFunction( ObservableValue<Execution> execution,
-			Group<Observable> observablesUpdatedByUser, Observable timePulse, Observable position, ExecutionChart chart )
+													Group<Observable> observablesUpdatedByUser, Observable timePulse, Observable position, ExecutionChart chart )
 	{
 		this.execution = execution;
 		this.observablesUpdatedByUser = observablesUpdatedByUser;
@@ -245,9 +238,8 @@ public final class SegmentViewToSeriesFunction implements Function<SegmentView<?
 	}
 
 	private void updateLineFromDB( final LineSegment segment, final XYChart.Series<Long, Number> series,
-			final Function<XYChart.Data<Long, Number>, XYChart.Data<Long, Number>> chartdataToScaledChartdata )
+											 final Function<XYChart.Data<Long, Number>, XYChart.Data<Long, Number>> chartdataToScaledChartdata )
 	{
-		log.debug( "Reading from database" );
 		Iterable<XYChart.Data<Long, Number>> chartdata = Iterables.transform(
 				segment.getStatistic().getPeriod( ( long )chart.getPosition() - 2000,
 						( long )chart.getPosition() + chart.getSpan() + 2000, chart.getTickZoomLevel().getLevel(),
