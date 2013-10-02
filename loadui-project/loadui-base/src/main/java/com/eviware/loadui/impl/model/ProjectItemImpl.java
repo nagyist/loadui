@@ -92,13 +92,13 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 	public static ProjectItemImpl loadProject( WorkspaceItem workspace, File projectFile ) throws XmlException,
 			IOException
 	{
-		ProjectItemImpl object = new ProjectItemImpl( workspace, projectFile,
+		ProjectItemImpl project = new ProjectItemImpl( workspace, projectFile,
 				projectFile.exists() ? LoaduiProjectDocumentConfig.Factory.parse( projectFile )
 						: LoaduiProjectDocumentConfig.Factory.newInstance() );
-		object.init();
-		object.postInit();
+		project.init();
+		project.postInit();
 
-		return object;
+		return project;
 	}
 
 	private ProjectItemImpl( WorkspaceItem workspace, File projectFile, LoaduiProjectDocumentConfig doc )

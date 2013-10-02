@@ -15,14 +15,7 @@
  */
 package com.eviware.loadui.impl.statistics.store;
 
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.eviware.loadui.api.statistics.EntryAggregator;
 import com.eviware.loadui.api.statistics.store.Entry;
 import com.eviware.loadui.api.statistics.store.Execution;
 import com.eviware.loadui.api.statistics.store.Track;
@@ -32,6 +25,13 @@ import com.eviware.loadui.util.statistics.store.EntryImpl;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class TrackImpl implements Track
 {
@@ -141,6 +141,12 @@ public class TrackImpl implements Track
 		{
 			throw new RuntimeException( "Unable to retrieve next track entry!", e );
 		}
+	}
+
+	@Override
+	public EntryAggregator getEntryAggregator()
+	{
+		return getTrackDescriptor().getEntryAggregator();
 	}
 
 	@Override
