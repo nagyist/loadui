@@ -21,6 +21,7 @@ import com.eviware.loadui.test.ui.fx.FxIntegrationTestBase;
 import com.eviware.loadui.test.ui.fx.states.SimpleWebTestState;
 import javafx.scene.Node;
 import org.hamcrest.Description;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.internal.matchers.TypeSafeMatcher;
@@ -65,9 +66,6 @@ public class ChartsTest extends FxIntegrationTestBase
 		click( "#default" );
 
 		assertThat( allChartLines().size(), is( 2 ) );
-
-		click( "Chart 1" ).click( "Delete" ).click( "#default" );
-
 	}
 
 	@Test
@@ -80,9 +78,12 @@ public class ChartsTest extends FxIntegrationTestBase
 		doubleClick( "Max" );
 
 		assertThat( allChartLines().size(), is( 1 ) );
+	}
 
+	@After
+	public void removeChart()
+	{
 		click( "Chart 1" ).click( "Delete" ).click( "#default" );
-
 	}
 
 	@Override
