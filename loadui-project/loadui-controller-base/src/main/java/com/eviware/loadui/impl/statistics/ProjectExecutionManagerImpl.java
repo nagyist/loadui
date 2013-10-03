@@ -36,7 +36,6 @@ import com.eviware.loadui.api.statistics.store.ExecutionManager;
 import com.eviware.loadui.api.summary.MutableSummary;
 import com.eviware.loadui.api.summary.Summary;
 import com.eviware.loadui.api.traits.Releasable;
-import com.eviware.loadui.util.BeanInjector;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -53,36 +52,41 @@ public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Rel
 {
 	private static Logger log = LoggerFactory.getLogger( ProjectExecutionManagerImpl.class );
 
+	private final TestRunner testRunner;
 	private final ExecutionManager executionManager;
 	private final WorkspaceProvider workspaceProvider;
 	private final ReportingManager reportingManager;
 	private final SummaryExporter summaryExporter;
-	private final Set<SummaryTask> summaryAttachers = new HashSet<>();
 	private final RunningExecutionTask runningExecutionTask = new RunningExecutionTask();
 
-	ProjectExecutionManagerImpl( final ExecutionManager executionManager, final WorkspaceProvider workspaceProvider,
+	ProjectExecutionManagerImpl( AddonRegistry addonRegistry, TestRunner testRunner,
+										  final ExecutionManager executionManager, final WorkspaceProvider workspaceProvider,
 										  final ReportingManager reportingManager, SummaryExporter summaryExporter )
 	{
+		this.testRunner = testRunner;
 		this.executionManager = executionManager;
 		this.workspaceProvider = workspaceProvider;
 		this.reportingManager = reportingManager;
 		this.summaryExporter = summaryExporter;
 
-		BeanInjector.getBean( AddonRegistry.class ).registerFactory( ExecutionAddon.class,
+		addonRegistry.registerFactory( ExecutionAddon.class,
 				new Addon.Factory<ExecutionAddon>()
 				{
+					@Nonnull
 					@Override
 					public Class<ExecutionAddon> getType()
 					{
 						return ExecutionAddon.class;
 					}
 
+					@Nonnull
 					@Override
-					public ExecutionAddon create( Context context )
+					public ExecutionAddon create( @Nonnull Context context )
 					{
 						return new ExecutionAddonImpl( context );
 					}
 
+					@Nonnull
 					@Override
 					public Set<Class<?>> getEagerTypes()
 					{
@@ -90,7 +94,7 @@ public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Rel
 					}
 				} );
 
-		BeanInjector.getBean( TestRunner.class ).registerTask( runningExecutionTask, Phase.START, Phase.POST_STOP );
+		testRunner.registerTask( runningExecutionTask, Phase.START, Phase.POST_STOP );
 	}
 
 	@Override
@@ -131,7 +135,7 @@ public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Rel
 	@Override
 	public void release()
 	{
-		BeanInjector.getBean( TestRunner.class ).unregisterTask( runningExecutionTask, Phase.values() );
+		testRunner.unregisterTask( runningExecutionTask, Phase.values() );
 	}
 
 	private class ExecutionAddonImpl implements ExecutionAddon
@@ -201,7 +205,8 @@ public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Rel
 				return;
 			}
 
-			summaryAttachers.add( new SummaryTask( runningProject, executionManager.getCurrentExecution() ) );
+			SummaryTask postStopTask = new SummaryTask( runningProject, executionManager.getCurrentExecution() );
+			testRunner.runTaskOnce( postStopTask, Phase.POST_STOP );
 
 		}
 
@@ -242,7 +247,6 @@ public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Rel
 		{
 			this.project = project;
 			this.execution = execution;
-			BeanInjector.getBean( TestRunner.class ).registerTask( this, Phase.POST_STOP );
 		}
 
 		@Override
@@ -265,15 +269,13 @@ public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Rel
 			{
 				saveSummaryAsFile( canvas, summary );
 			}
-
-			BeanInjector.getBean( TestRunner.class ).unregisterTask( this, Phase.POST_STOP );
 		}
 
 		private void saveSummaryAsFile( CanvasItem canvas, Summary summary )
 		{
 			log.debug( "SUMMARY EXPORTED SENT FROM SummaryListener.handleEvent" );
 
-			String label = null;
+			String label;
 			if( canvas instanceof ProjectItem )
 			{
 				label = project.getLabel();

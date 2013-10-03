@@ -26,7 +26,9 @@
 	
 	<bean id="projectExecutionManager"
 		class="com.eviware.loadui.impl.statistics.ProjectExecutionManagerImpl">
-		<constructor-arg ref="executionManager" />
+        <constructor-arg ref="addonRegistry" />
+        <constructor-arg ref="testRunner" />
+        <constructor-arg ref="executionManager" />
 		<constructor-arg ref="workspaceProvider" />
 		<constructor-arg ref="reportingManager" />
         <constructor-arg ref="summaryExporter" />
@@ -37,6 +39,5 @@
 	<bean id="testExecutionAddonFactory" class="com.eviware.loadui.impl.execution.TestExecutionAddon$Factory" />
 	
 	<bean id="messageAwaiterFactory" class="com.eviware.loadui.impl.messaging.Factory" />
-	
-	<!-- <bean id="demoEventFactory" class="com.eviware.loadui.impl.eventlog.DemoEvent$Factory" /> -->
+
 </beans>
