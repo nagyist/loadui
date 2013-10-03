@@ -26,6 +26,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
@@ -59,22 +60,27 @@ public class ReportingManagerImpl implements ReportingManager
 	}
 
 	@Override
-	public void createReport( Summary summary )
+	public void createReport( @Nullable Summary summary )
 	{
-		reportEngine.generateJasperReport( new SummaryDataSource( summary ), SUMMARY_REPORT, summary.getChapters()
-				.keySet().iterator().next() );
+		if( summary == null )
+			log.warn( "Summary not provided, cannot create report" );
+		else
+			reportEngine.generateJasperReport( new SummaryDataSource( summary ), SUMMARY_REPORT, summary.getChapters()
+					.keySet().iterator().next() );
 	}
 
 	@Override
-	public void createReport( Summary summary, File file, String format )
+	public void createReport( @Nullable Summary summary, File file, String format )
 	{
-		try
+		if( summary == null )
+			log.warn( "Summary not provided, cannot create report" );
+		else try
 		{
 			reportEngine.generateJasperReport( new SummaryDataSource( summary ), SUMMARY_REPORT, file, format );
 		}
 		catch( JRException e )
 		{
-			e.printStackTrace();
+			log.error( "Problem creating report", e );
 		}
 	}
 

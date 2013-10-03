@@ -6,16 +6,16 @@ import com.eviware.loadui.api.reporting.SummaryExporter;
 import com.eviware.loadui.api.summary.Chapter;
 import com.eviware.loadui.api.summary.MutableSummary;
 import com.eviware.loadui.api.summary.Section;
-import com.eviware.loadui.util.BeanInjector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
 import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 
 /**
  * @author renato
@@ -24,6 +24,13 @@ public class JasperSummaryExporter implements SummaryExporter
 {
 
 	public static final Logger log = LoggerFactory.getLogger( SummaryExporter.class );
+
+	private final ReportingManager reportingManager;
+
+	public JasperSummaryExporter( ReportingManager reportingManager )
+	{
+		this.reportingManager = reportingManager;
+	}
 
 	public void saveSummary( MutableSummary summary, String reportFolder, String reportFormat, String label )
 	{
@@ -47,7 +54,7 @@ public class JasperSummaryExporter implements SummaryExporter
 				{
 					formatSupported = true;
 					File out = createOutputFile( outputDir, reportFormat, label );
-					BeanInjector.getBean( ReportingManager.class ).createReport( summary, out, reportFormat );
+					reportingManager.createReport( summary, out, reportFormat );
 					break;
 				}
 			}
@@ -65,7 +72,7 @@ public class JasperSummaryExporter implements SummaryExporter
 		return new File( outputDir, fileName );
 	}
 
-	@SuppressWarnings( "rawtypes" )
+	@SuppressWarnings("rawtypes")
 	private void saveSummaryAsXML( final MutableSummary summary, final File out )
 	{
 		SwingWorker worker = new XmlExporter( summary, out );
@@ -201,20 +208,9 @@ public class JasperSummaryExporter implements SummaryExporter
 				xmlw.flush();
 				xmlw.close();
 			}
-			catch( XMLStreamException e )
+			catch( Exception e )
 			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			catch( FileNotFoundException e )
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			catch( IOException e )
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error( "Failed to write XML report", e );
 			}
 			return null;
 		}

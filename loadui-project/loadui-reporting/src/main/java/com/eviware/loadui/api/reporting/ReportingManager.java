@@ -15,36 +15,36 @@
  */
 package com.eviware.loadui.api.reporting;
 
-import java.awt.Image;
-import java.io.File;
-import java.util.Collection;
-import java.util.Map;
-
 import com.eviware.loadui.api.statistics.model.StatisticPage;
 import com.eviware.loadui.api.statistics.store.Execution;
 import com.eviware.loadui.api.summary.Summary;
 
+import java.awt.*;
+import java.io.File;
+import java.util.Collection;
+import java.util.Map;
+
 /**
  * Generates reports.
- * 
+ *
  * @author dain.nilsson
  */
 public interface ReportingManager
 {
 	/**
 	 * Creates a report for the given Summary and displays it to the user.
-	 * 
-	 * @param summary
+	 *
+	 * @param summary summary
 	 */
 	public void createReport( Summary summary );
 
 	/**
 	 * Creates a report for the given Summary and saves it to the specified file,
 	 * using the specified format.
-	 * 
-	 * @param summary
-	 * @param file
-	 * @param format
+	 *
+	 * @param summary summary
+	 * @param file out file
+	 * @param format format
 	 */
 	public void createReport( Summary summary, File file, String format );
 
@@ -52,11 +52,11 @@ public interface ReportingManager
 	 * Creates a Statistics Report using the given label, for the given
 	 * StatisticPages. The report is based in the Execution data and the given
 	 * charts. The report is shown to the user.
-	 * 
-	 * @param label
-	 * @param execution
-	 * @param pages
-	 * @param charts
+	 *
+	 * @param label stats report label
+	 * @param execution execution
+	 * @param pages stats pages
+	 * @param charts charts
 	 */
 	public void createReport( String label, Execution execution, Collection<StatisticPage> pages,
 			Map<Object, Image> charts );
@@ -65,46 +65,46 @@ public interface ReportingManager
 	 * Creates a Statistics Report using the given label, for the given
 	 * StatisticPages. The report is based in the Execution data and the given
 	 * charts. The report is saved to the given file using the format specified.
-	 * 
-	 * @param label
-	 * @param execution
-	 * @param pages
-	 * @param charts
-	 * @param file
-	 * @param format
+	 *
+	 * @param label stats report label
+	 * @param execution execution
+	 * @param pages stats pages
+	 * @param charts charts
+	 * @param file out file
+	 * @param format format
 	 */
 	public void createReport( String label, Execution execution, Collection<StatisticPage> pages,
-			Map<? extends Object, Image> charts, File file, String format );
+			Map<?, Image> charts, File file, String format );
 
 	/**
 	 * Creates a Statistics Report (and prepends another report to it) using the
 	 * given label, for the given StatisticPages. The report is based in the
 	 * Execution data and the given charts. The report is shown to the user.
-	 * 
-	 * @param label
-	 * @param execution
-	 * @param pages
-	 * @param charts
-	 * @param jpFileToPrepend
+	 *
+	 * @param label stats report label
+	 * @param execution execution
+	 * @param pages stats pages
+	 * @param charts charts
+	 * @param jpFileToPrepend jp file to prepend
 	 */
 	public void createReport( String label, Execution execution, Collection<StatisticPage> pages,
-			Map<? extends Object, Image> charts, File jpFileToPrepend );
+			Map<?, Image> charts, File jpFileToPrepend );
 
 	/**
 	 * Creates a Statistics Report (and prepends another report to it) using the
 	 * given label, for the given StatisticPages. The report is based in the
 	 * Execution data and the given charts. The report is saved to the given file
 	 * using the format specified.
-	 * 
-	 * @param label
-	 * @param execution
-	 * @param pages
-	 * @param charts
-	 * @param file
-	 * @param format
-	 * @param jpFileToPrepend
+	 *
+	 * @param label stats report label
+	 * @param execution execution
+	 * @param pages stats pages
+	 * @param charts charts
+	 * @param file out file
+	 * @param format format
+	 * @param jpFileToPrepend jp file to prepend
 	 */
 	public void createReport( String label, Execution execution, Collection<StatisticPage> pages,
-			Map<? extends Object, Image> charts, File file, String format, File jpFileToPrepend );
+			Map<?, Image> charts, File file, String format, File jpFileToPrepend );
 
 }
