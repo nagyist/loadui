@@ -13,25 +13,7 @@
  * express or implied. See the Licence for the specific language governing permissions and limitations
  * under the Licence.
  */
-package com.eviware.loadui.impl.model;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package com.eviware.loadui.impl.model.canvas;
 
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.component.ComponentCreationException;
@@ -39,12 +21,7 @@ import com.eviware.loadui.api.component.ComponentDescriptor;
 import com.eviware.loadui.api.component.ComponentRegistry;
 import com.eviware.loadui.api.counter.Counter;
 import com.eviware.loadui.api.counter.CounterHolder;
-import com.eviware.loadui.api.events.ActionEvent;
-import com.eviware.loadui.api.events.BaseEvent;
-import com.eviware.loadui.api.events.CounterEvent;
-import com.eviware.loadui.api.events.EventFirer;
-import com.eviware.loadui.api.events.EventHandler;
-import com.eviware.loadui.api.events.TerminalConnectionEvent;
+import com.eviware.loadui.api.events.*;
 import com.eviware.loadui.api.execution.Phase;
 import com.eviware.loadui.api.execution.TestExecution;
 import com.eviware.loadui.api.execution.TestExecutionTask;
@@ -56,7 +33,6 @@ import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.api.statistics.Statistic;
 import com.eviware.loadui.api.statistics.StatisticVariable;
-import com.eviware.loadui.api.summary.MutableSummary;
 import com.eviware.loadui.api.summary.Summary;
 import com.eviware.loadui.api.terminal.Connection;
 import com.eviware.loadui.api.terminal.InputTerminal;
@@ -66,9 +42,11 @@ import com.eviware.loadui.config.ComponentItemConfig;
 import com.eviware.loadui.config.ConnectionConfig;
 import com.eviware.loadui.impl.counter.AggregatedCounterSupport;
 import com.eviware.loadui.impl.counter.CounterSupport;
+import com.eviware.loadui.impl.model.ComponentItemImpl;
+import com.eviware.loadui.impl.model.ModelItemImpl;
 import com.eviware.loadui.impl.statistics.CounterStatisticsWriter;
 import com.eviware.loadui.impl.statistics.StatisticHolderSupport;
-import com.eviware.loadui.impl.summary.MutableSummaryImpl;
+import com.eviware.loadui.impl.summary.SummaryCreator;
 import com.eviware.loadui.impl.terminal.ConnectionImpl;
 import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.ReleasableUtils;
@@ -77,9 +55,19 @@ import com.eviware.loadui.util.events.EventFuture;
 import com.eviware.loadui.util.statistics.CounterStatisticSupport;
 import com.eviware.loadui.util.statistics.StatisticDescriptorImpl;
 import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.Futures;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.*;
 
 public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends ModelItemImpl<Config> implements
 		CanvasItem
@@ -102,11 +90,10 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 	private ScheduledFuture<?> timeLimitFuture;
 	private long time = 0;
 	protected Summary summary = null;
-	protected Date startTime = null;
-	protected Date endTime = null;
+	private Date startTime;
+	private Date endTime;
 	private boolean hasStarted = false;
 	private String lastSavedHash;
-
 	private boolean loadingErrors = false;
 
 	protected final Map<String, Long> limits = new HashMap<>();
@@ -242,7 +229,7 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		{
 			int cnt = 0;
 			boolean found = false;
-			for( ; cnt < getConfig().getConnectionList().size(); cnt++ )
+			for(; cnt < getConfig().getConnectionList().size(); cnt++ )
 				if( getConfig().getConnectionArray( cnt ).equals( badConnection ) )
 				{
 					found = true;
@@ -259,7 +246,7 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		{
 			int cnt = 0;
 			boolean found = false;
-			for( ; cnt < getConfig().getComponentList().size(); cnt++ )
+			for(; cnt < getConfig().getComponentList().size(); cnt++ )
 				if( getConfig().getComponentArray( cnt ).equals( badComponent ) )
 				{
 					found = true;
@@ -285,14 +272,13 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		return counterSupport.getCounterNames();
 	}
 
+	@Nonnull
 	@Override
-	public ComponentItem createComponent( String label, ComponentDescriptor descriptor )
+	public ComponentItem createComponent( @Nonnull String label, @Nonnull ComponentDescriptor descriptor )
 			throws ComponentCreationException
 	{
-		if( label == null )
-			throw new IllegalArgumentException( "label is null!" );
-		if( descriptor == null )
-			throw new IllegalArgumentException( "descriptor is null!" );
+		Preconditions.checkNotNull( label, "label is null!" );
+		Preconditions.checkNotNull( descriptor, "descriptor is null!" );
 
 		ComponentItemConfig config = getConfig().addNewComponent();
 		config.setType( descriptor.getType() );
@@ -365,6 +351,7 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		}
 	}
 
+	@Nonnull
 	@Override
 	public Collection<ComponentItem> getComponents()
 	{
@@ -372,7 +359,7 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 	}
 
 	@Override
-	public ComponentItem getComponentByLabel( String label )
+	public ComponentItem getComponentByLabel( @Nonnull String label )
 	{
 		for( ComponentItem component : componentList.getItems() )
 			if( component.getLabel().equals( label ) )
@@ -381,14 +368,16 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		return null;
 	}
 
+	@Nonnull
 	@Override
 	public Collection<Connection> getConnections()
 	{
 		return connectionList.getItems();
 	}
 
+	@Nonnull
 	@Override
-	public Connection connect( OutputTerminal output, InputTerminal input )
+	public Connection connect( @Nonnull OutputTerminal output, @Nonnull InputTerminal input )
 	{
 		// Locate the correct CanvasItem for the Connection.
 		CanvasItem canvas = output.getTerminalHolder().getCanvas();
@@ -399,7 +388,7 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		}
 		// If the two Terminals are in separate CanvasItems, the connection should
 		// be made in the ProjectItem.
-		else if( !( this instanceof ProjectItem && canvas.getProject() == ( ProjectItem )this ) )
+		else if( !( this instanceof ProjectItem && canvas.getProject() == this ) )
 			return canvas.getProject().connect( output, input );
 
 		// Make sure an identical Connection doesn't already exist.
@@ -468,13 +457,13 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 	}
 
 	@Override
-	public long getLimit( String counterName )
+	public long getLimit( @Nonnull String counterName )
 	{
 		return limits.containsKey( counterName ) ? limits.get( counterName ) : -1;
 	}
 
 	@Override
-	public void setLimit( String counterName, long counterValue )
+	public void setLimit( @Nonnull String counterName, long counterValue )
 	{
 		if( counterValue > 0 )
 			limits.put( counterName, counterValue );
@@ -492,13 +481,22 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 	}
 
 	@Override
+	@Nullable
 	public Summary getSummary()
 	{
-		return summary;
+		if( startTime != null && endTime != null )
+		{
+			log.info( "Generating summary report for CavasItem {}", getLabel() );
+			Summary summary = getSummaryCreator().createSummary( startTime, endTime );
+			fireBaseEvent( SUMMARY );
+			return summary;
+		}
+		log.error( "Unable to create summary report: startTime: {}, endTime: {}", startTime, endTime );
+		return null;
 	}
 
-	@Override
-	public CanvasObjectItem duplicate( CanvasObjectItem obj )
+	@Nonnull
+	public CanvasObjectItem duplicate( @Nonnull CanvasObjectItem obj )
 	{
 		if( !( obj instanceof ComponentItemImpl ) )
 			throw new IllegalArgumentException( obj + " needs to be an instance of: " + ComponentItemImpl.class.getName() );
@@ -519,27 +517,9 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		}
 	}
 
-	abstract void onComplete( EventFirer source );
+	public abstract void onComplete( EventFirer source );
 
-	/**
-	 * Called on a CanvasItem to append its summary chapters to a common summary
-	 * object.
-	 * 
-	 * @param mutableSummary
-	 */
-	abstract void appendToSummary( MutableSummary mutableSummary );
-
-	@Override
-	public void generateSummary()
-	{
-		log.debug( "Generating summary for: {}", CanvasItemImpl.this );
-		endTime = new Date();
-		MutableSummary generatedSummary = new MutableSummaryImpl( getStartTime(), getEndTime() );
-		appendToSummary( generatedSummary );
-		summary = generatedSummary;
-		fireBaseEvent( SUMMARY );
-		triggerAction( READY_ACTION );
-	}
+	public abstract SummaryCreator getSummaryCreator();
 
 	private void fixTimeLimit()
 	{
@@ -558,9 +538,17 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 
 	protected void reset()
 	{
-		startTime = isRunning() ? new Date() : null;
-		endTime = null;
-		hasStarted = isRunning();
+		boolean isRunning = isRunning();
+		if( isRunning )
+		{
+			startTime = new Date();
+			endTime = null;
+		}
+		else
+		{
+			startTime = null;
+		}
+		hasStarted = isRunning;
 		setTime( 0 );
 		fixTimeLimit();
 	}
@@ -580,17 +568,21 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		}
 	}
 
-	protected void setCompleted( boolean completed )
+	public void setCompleted( boolean completed )
 	{
 		if( this.completed != completed )
 		{
+			log.debug( "Canvas completed state changed to {}", completed );
 			this.completed = completed;
 			if( completed )
 			{
 				endTime = new Date();
+				triggerAction( READY_ACTION );
 				fireBaseEvent( ON_COMPLETE_DONE );
 			}
 		}
+		else
+			log.debug( "Ignoring request to set Canvas completed state to {}", completed );
 	}
 
 	public Date getStartTime()
@@ -603,7 +595,7 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		return new Date( endTime.getTime() );
 	}
 
-	protected void markClean()
+	public void markClean()
 	{
 		lastSavedHash = DigestUtils.md5Hex( getConfig().xmlText() );
 	}
@@ -640,12 +632,14 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		return statisticHolderSupport.getStatisticVariable( statisticVariableName );
 	}
 
+	@Nonnull
 	@Override
 	public Set<String> getStatisticVariableNames()
 	{
 		return statisticHolderSupport.getStatisticVariableNames();
 	}
 
+	@Nonnull
 	@Override
 	public Collection<? extends StatisticVariable> getStatisticVariables()
 	{
@@ -670,10 +664,11 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		abortOnFinish.setValue( abort );
 	}
 
+	@Nonnull
 	@Override
 	public Set<Statistic.Descriptor> getDefaultStatistics()
 	{
-		return ImmutableSet.<Statistic.Descriptor> of( new StatisticDescriptorImpl( this, REQUEST_VARIABLE, "PER_SECOND",
+		return ImmutableSet.<Statistic.Descriptor>of( new StatisticDescriptorImpl( this, REQUEST_VARIABLE, "PER_SECOND",
 				StatisticVariable.MAIN_SOURCE ) );
 	}
 
@@ -773,7 +768,7 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		public Future<BaseEvent> apply( ComponentItem component )
 		{
 			return component.isBusy() ? EventFuture.forKey( component, ComponentItem.BUSY ) : Futures
-					.<BaseEvent> immediateFuture( null );
+					.<BaseEvent>immediateFuture( null );
 		}
 	};
 
@@ -783,49 +778,46 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		{
 			switch( phase )
 			{
-			case START :
-				setRunning( true );
-				setTime( 0 );
-				startTime = new Date();
-				timerFuture = scheduler.scheduleAtFixedRate( new TimeUpdateTask(), 250, 250, TimeUnit.MILLISECONDS );
-				fixTimeLimit();
-				hasStarted = true;
-				setCompleted( false );
-				break;
-			case PRE_STOP :
-				hasStarted = false;
-				if( timeLimitFuture != null )
-					timeLimitFuture.cancel( true );
+				case START:
+					setRunning( true );
+					setTime( 0 );
+					startTime = new Date();
+					timerFuture = scheduler.scheduleAtFixedRate( new TimeUpdateTask(), 250, 250, TimeUnit.MILLISECONDS );
+					fixTimeLimit();
+					hasStarted = true;
+					setCompleted( false );
+					break;
+				case PRE_STOP:
+					hasStarted = false;
+					if( timeLimitFuture != null )
+						timeLimitFuture.cancel( true );
 
-				if( isAbortOnFinish() )
-				{
-					cancelComponents();
-				}
-				else
-				{
-					for( Future<BaseEvent> future : Iterables.transform( getComponents(), busyFuture ) )
+					if( isAbortOnFinish() )
 					{
-						try
+						cancelComponents();
+					}
+					else
+					{
+						for( Future<BaseEvent> future : Iterables.transform( getComponents(), busyFuture ) )
 						{
-							future.get();
-						}
-						catch( InterruptedException e )
-						{
-							log.error( "Failed waiting for a Component", e );
-						}
-						catch( ExecutionException e )
-						{
-							log.error( "Failed waiting for a Component", e );
+							try
+							{
+								future.get();
+							}
+							catch( InterruptedException | ExecutionException e )
+							{
+								log.error( "Failed waiting for a Component", e );
+							}
 						}
 					}
-				}
-				onComplete( execution.getCanvas() );
-				break;
-			case STOP :
-				if( timerFuture != null )
-					timerFuture.cancel( true );
-				setRunning( false );
-				break;
+					log.debug( "Calling onComplete on execution canvas" );
+					onComplete( execution.getCanvas() );
+					break;
+				case STOP:
+					if( timerFuture != null )
+						timerFuture.cancel( true );
+					setRunning( false );
+					break;
 			}
 		}
 	}

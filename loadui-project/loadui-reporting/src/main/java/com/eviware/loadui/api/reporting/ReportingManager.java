@@ -19,6 +19,7 @@ import com.eviware.loadui.api.statistics.model.StatisticPage;
 import com.eviware.loadui.api.statistics.store.Execution;
 import com.eviware.loadui.api.summary.Summary;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.io.File;
 import java.util.Collection;
@@ -36,7 +37,7 @@ public interface ReportingManager
 	 *
 	 * @param summary summary
 	 */
-	public void createReport( Summary summary );
+	public void createReport( @Nullable Summary summary );
 
 	/**
 	 * Creates a report for the given Summary and saves it to the specified file,
@@ -46,7 +47,7 @@ public interface ReportingManager
 	 * @param file out file
 	 * @param format format
 	 */
-	public void createReport( Summary summary, File file, String format );
+	public void createReport( @Nullable Summary summary, File file, String format );
 
 	/**
 	 * Creates a Statistics Report using the given label, for the given

@@ -18,8 +18,8 @@ package com.eviware.loadui.impl.summary.sections;
 import javax.swing.table.TableModel;
 
 import com.eviware.loadui.api.model.CanvasItem;
-import com.eviware.loadui.impl.model.ProjectItemImpl;
-import com.eviware.loadui.impl.model.SceneItemImpl;
+import com.eviware.loadui.impl.model.canvas.project.ProjectItemImpl;
+import com.eviware.loadui.impl.model.canvas.SceneItemImpl;
 import com.eviware.loadui.impl.summary.MutableSectionImpl;
 import com.eviware.loadui.impl.summary.sections.tablemodels.TestCaseDataTableModel;
 import com.eviware.loadui.util.summary.CalendarUtils;

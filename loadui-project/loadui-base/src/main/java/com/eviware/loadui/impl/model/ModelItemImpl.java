@@ -58,7 +58,7 @@ public abstract class ModelItemImpl<Config extends ModelItemConfig> implements M
 	protected final AddressableRegistry addressableRegistry;
 	private final AddonHolderSupportImpl addonSupport;
 
-	ModelItemImpl( @Nonnull Config config )
+	protected ModelItemImpl( @Nonnull Config config )
 	{
 		this.config = config;
 
@@ -136,9 +136,9 @@ public abstract class ModelItemImpl<Config extends ModelItemConfig> implements M
 	}
 
 	@Override
-	public void setLabel( String label )
+	public void setLabel( @Nonnull String label )
 	{
-		if( label != null && !label.equals( getLabel() ) )
+		if( !label.equals( getLabel() ) )
 		{
 			config.setLabel( label );
 			this.label = label;
@@ -193,8 +193,9 @@ public abstract class ModelItemImpl<Config extends ModelItemConfig> implements M
 
 	}
 
+	@Nonnull
 	@Override
-	public <T extends Addon> T getAddon( Class<T> type )
+	public <T extends Addon> T getAddon( @Nonnull Class<T> type )
 	{
 		return addonSupport.getAddon( type );
 	}
@@ -217,12 +218,14 @@ public abstract class ModelItemImpl<Config extends ModelItemConfig> implements M
 		attributeHolderSupport.removeAttribute( key );
 	}
 
+	@Nonnull
 	@Override
 	public Collection<String> getAttributes()
 	{
 		return attributeHolderSupport.getAttributes();
 	}
 
+	@Nonnull
 	@Override
 	public final Collection<Property<?>> getProperties()
 	{
@@ -249,7 +252,7 @@ public abstract class ModelItemImpl<Config extends ModelItemConfig> implements M
 
 	@Override
 	public final <T> Property<T> createProperty( String propertyName, Class<T> propertyType, Object initialValue,
-			boolean propagates )
+																boolean propagates )
 	{
 		return properties.createProperty( propertyName, propertyType, initialValue, propagates );
 	}
@@ -280,7 +283,7 @@ public abstract class ModelItemImpl<Config extends ModelItemConfig> implements M
 	}
 
 	@Override
-	public void triggerAction( String actionName )
+	public void triggerAction( @Nonnull String actionName )
 	{
 		log.debug( "Triggering action '{}' on ModelItem '{}'", actionName, this );
 		fireEvent( new ActionEvent( this, actionName ) );
@@ -308,11 +311,6 @@ public abstract class ModelItemImpl<Config extends ModelItemConfig> implements M
 	{
 		log.debug( this.getClass().getName() + "  fireCollectionEvent  " + event );
 		fireEvent( new CollectionEvent( this, collection, event, element ) );
-	}
-
-	public void firePropertyEvent( Property<?> property, PropertyEvent.Event event, Object argument )
-	{
-		fireEvent( new PropertyEvent( this, property, event, argument ) );
 	}
 
 	@Override
@@ -355,7 +353,7 @@ public abstract class ModelItemImpl<Config extends ModelItemConfig> implements M
 	}
 
 	@Override
-	public void setDescription( String description )
+	public void setDescription( @Nonnull String description )
 	{
 		if( !Objects.equal( this.description.getValue(), description ) )
 		{

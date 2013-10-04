@@ -20,7 +20,7 @@ import org.springframework.core.convert.converter.Converter;
 import com.eviware.loadui.api.addressable.AddressableRegistry;
 import com.eviware.loadui.api.model.ComponentItem;
 import com.eviware.loadui.config.LoaduiComponentDocumentConfig;
-import com.eviware.loadui.impl.model.CanvasItemImpl;
+import com.eviware.loadui.impl.model.canvas.CanvasItemImpl;
 
 public class StringToComponentItemConverter implements Converter<String, ComponentItem>
 {

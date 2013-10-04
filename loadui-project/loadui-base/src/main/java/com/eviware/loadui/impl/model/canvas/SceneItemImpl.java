@@ -13,8 +13,36 @@
  * express or implied. See the Licence for the specific language governing permissions and limitations
  * under the Licence.
  */
-package com.eviware.loadui.impl.model;
+package com.eviware.loadui.impl.model.canvas;
 
+import com.eviware.loadui.LoadUI;
+import com.eviware.loadui.api.component.ComponentContext;
+import com.eviware.loadui.api.component.categories.OnOffCategory;
+import com.eviware.loadui.api.component.categories.SchedulerCategory;
+import com.eviware.loadui.api.counter.CounterSynchronizer;
+import com.eviware.loadui.api.events.*;
+import com.eviware.loadui.api.execution.Phase;
+import com.eviware.loadui.api.execution.TestExecution;
+import com.eviware.loadui.api.messaging.MessageEndpoint;
+import com.eviware.loadui.api.messaging.SceneCommunication;
+import com.eviware.loadui.api.model.*;
+import com.eviware.loadui.api.property.Property;
+import com.eviware.loadui.api.terminal.*;
+import com.eviware.loadui.config.SceneItemConfig;
+import com.eviware.loadui.impl.counter.AggregatedCounterSupport;
+import com.eviware.loadui.impl.counter.RemoteAggregatedCounterSupport;
+import com.eviware.loadui.impl.summary.SceneSummaryCreator;
+import com.eviware.loadui.impl.summary.SummaryCreator;
+import com.eviware.loadui.impl.terminal.ConnectionImpl;
+import com.eviware.loadui.impl.terminal.InputTerminalImpl;
+import com.eviware.loadui.impl.terminal.TerminalHolderSupport;
+import com.eviware.loadui.util.BeanInjector;
+import com.google.common.collect.ImmutableList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,53 +50,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
-import com.eviware.loadui.api.model.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.api.component.ComponentContext;
-import com.eviware.loadui.api.component.categories.OnOffCategory;
-import com.eviware.loadui.api.component.categories.SchedulerCategory;
-import com.eviware.loadui.api.counter.CounterSynchronizer;
-import com.eviware.loadui.api.events.ActionEvent;
-import com.eviware.loadui.api.events.BaseEvent;
-import com.eviware.loadui.api.events.CollectionEvent;
-import com.eviware.loadui.api.events.EventFirer;
-import com.eviware.loadui.api.events.EventHandler;
-import com.eviware.loadui.api.events.PropertyEvent;
-import com.eviware.loadui.api.events.RemoteActionEvent;
-import com.eviware.loadui.api.events.TerminalEvent;
-import com.eviware.loadui.api.events.TerminalMessageEvent;
-import com.eviware.loadui.api.execution.Phase;
-import com.eviware.loadui.api.execution.TestExecution;
-import com.eviware.loadui.api.messaging.MessageEndpoint;
-import com.eviware.loadui.api.messaging.SceneCommunication;
-import com.eviware.loadui.api.property.Property;
-import com.eviware.loadui.api.summary.MutableSummary;
-import com.eviware.loadui.api.terminal.Connection;
-import com.eviware.loadui.api.terminal.InputTerminal;
-import com.eviware.loadui.api.terminal.OutputTerminal;
-import com.eviware.loadui.api.terminal.Terminal;
-import com.eviware.loadui.api.terminal.TerminalMessage;
-import com.eviware.loadui.config.SceneItemConfig;
-import com.eviware.loadui.impl.counter.AggregatedCounterSupport;
-import com.eviware.loadui.impl.counter.RemoteAggregatedCounterSupport;
-import com.eviware.loadui.impl.summary.MutableChapterImpl;
-import com.eviware.loadui.impl.summary.sections.TestCaseDataSection;
-import com.eviware.loadui.impl.summary.sections.TestCaseDataSummarySection;
-import com.eviware.loadui.impl.summary.sections.TestCaseExecutionDataSection;
-import com.eviware.loadui.impl.summary.sections.TestCaseExecutionMetricsSection;
-import com.eviware.loadui.impl.summary.sections.TestCaseExecutionNotablesSection;
-import com.eviware.loadui.impl.terminal.ConnectionImpl;
-import com.eviware.loadui.impl.terminal.InputTerminalImpl;
-import com.eviware.loadui.impl.terminal.TerminalHolderSupport;
-import com.eviware.loadui.util.BeanInjector;
-import com.google.common.collect.ImmutableList;
 
 public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements SceneItem
 {
@@ -94,7 +75,7 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 	private final WorkspaceListener workspaceListener;
 	private final TerminalHolderSupport terminalHolderSupport;
 	private final InputTerminal stateTerminal;
-	private final Map<AgentItem, Map<Object, Object>> remoteStatistics = new ConcurrentHashMap<>();
+	private final Map<AgentItem, Map<?, ?>> remoteStatistics = new ConcurrentHashMap<>();
 	private long version;
 	private boolean propagate = true;
 	private boolean wasLocalModeWhenStarted = true;
@@ -193,6 +174,13 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 		super.release();
 	}
 
+	@Nonnull
+	@Override
+	public CanvasObjectItem duplicate( @Nonnull CanvasObjectItem obj )
+	{
+		return super.duplicate( obj );
+	}
+
 	@Override
 	public void delete()
 	{
@@ -282,7 +270,7 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 	}
 
 	@Override
-	protected void onComplete( EventFirer source )
+	public void onComplete( EventFirer source )
 	{
 		//		if( LoadUI.CONTROLLER.equals( System.getProperty( "loadui.instance" ) ) && source.equals( this ) )
 		//		{
@@ -313,6 +301,10 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 		//			} );
 		//		}
 
+		log.debug( "Scene onComplete method called, was local mode when started? {}", wasLocalModeWhenStarted );
+		log.debug( "Project ran in local mode? {}", project.getWorkspace().isLocalMode() );
+		log.debug( "" );
+
 		if( !LoadUI.isController() )
 		{
 			// on agent, application is running in distributed mode, so send
@@ -326,7 +318,10 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 			messageEndpoint.sendMessage( AgentItem.AGENT_CHANNEL, data );
 			log.debug( "Sending statistics data from {}", this );
 		}
-		else if( wasLocalModeWhenStarted || ( !project.getWorkspace().isLocalMode() && getActiveAgents().isEmpty() ) )
+		// FIXME switch getActiveAgents().isEmpty() negation fixed the problem of no report being
+		// generated, but it seems that setCompleted should be called only AFTER the agent returns something
+		// More investigation needed!!!
+		else if( wasLocalModeWhenStarted || ( !project.getWorkspace().isLocalMode() && !getActiveAgents().isEmpty() ) )
 		{
 			// on controller, in local mode or in distributed mode with no active
 			// agents
@@ -340,6 +335,12 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 			// top of this method to generate summary
 			setCompleted( true );
 		}
+	}
+
+	@Override
+	public SummaryCreator getSummaryCreator()
+	{
+		return new SceneSummaryCreator( this );
 	}
 
 	@Override
@@ -389,7 +390,7 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 		return remoteStatistics.size();
 	}
 
-	public void handleStatisticsData( AgentItem source, Map<Object, Object> data )
+	public void handleStatisticsData( AgentItem source, Map<?, ?> data )
 	{
 		remoteStatistics.put( source, data );
 		log.debug( "{} got statistics data from {}", this, source );
@@ -400,7 +401,7 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 		{
 			String cId = component.getId();
 			Map<AgentItem, Object> cData = new HashMap<>();
-			for( Entry<AgentItem, Map<Object, Object>> e : remoteStatistics.entrySet() )
+			for( Entry<AgentItem, Map<?, ?>> e : remoteStatistics.entrySet() )
 				cData.put( e.getKey(), e.getValue().get( cId ) );
 			component.getBehavior().handleStatisticsData( cData );
 		}
@@ -408,20 +409,6 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 		setCompleted( true );
 	}
 
-	@Override
-	public void appendToSummary( MutableSummary mutableSummary )
-	{
-		MutableChapterImpl chap = ( MutableChapterImpl )mutableSummary.addChapter( getLabel() );
-		chap.addSection( new TestCaseDataSummarySection( this ) );
-		chap.addSection( new TestCaseExecutionDataSection( this ) );
-		chap.addSection( new TestCaseExecutionMetricsSection( this ) );
-		chap.addSection( new TestCaseExecutionNotablesSection( this ) );
-		chap.addSection( new TestCaseDataSection( this ) );
-		chap.setDescription( getDescription() );
-
-		for( ComponentItem component : getComponents() )
-			component.generateSummary( chap );
-	}
 
 	@Override
 	protected void reset()

@@ -21,7 +21,7 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
 import com.eviware.loadui.api.model.CanvasItem;
-import com.eviware.loadui.impl.model.SceneItemImpl;
+import com.eviware.loadui.impl.model.canvas.SceneItemImpl;
 import com.eviware.loadui.util.summary.CalendarUtils;
 
 public class TestCaseDataTableModel extends AbstractTableModel

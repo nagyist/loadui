@@ -15,14 +15,6 @@
  */
 package com.eviware.loadui.impl.execution;
 
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.addon.Addon;
 import com.eviware.loadui.api.events.BaseEvent;
 import com.eviware.loadui.api.execution.Phase;
@@ -39,6 +31,13 @@ import com.eviware.loadui.util.events.EventFuture;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Fires expected events during test execution, and keeps execution in sync with
@@ -127,7 +126,7 @@ public class TestExecutionAddon implements Addon
 					{
 						try
 						{
-							readyFuture.get( 10, TimeUnit.SECONDS );
+							readyFuture.get( 1, TimeUnit.MINUTES );
 						}
 						catch( InterruptedException e )
 						{

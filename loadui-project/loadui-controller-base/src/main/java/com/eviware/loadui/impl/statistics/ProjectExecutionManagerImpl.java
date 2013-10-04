@@ -254,7 +254,6 @@ public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Rel
 		{
 			CanvasItem canvas = testExecution.getCanvas();
 
-			canvas.generateSummary();
 			Summary summary = canvas.getSummary();
 
 			long totalRequests = canvas.getCounter( CanvasItem.SAMPLE_COUNTER ).get();
