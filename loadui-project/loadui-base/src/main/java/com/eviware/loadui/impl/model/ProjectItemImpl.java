@@ -769,7 +769,7 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 		}
 
 		@Override
-		@SuppressWarnings( "unchecked" )
+		@SuppressWarnings("unchecked")
 		public void handleMessage( String channel, MessageEndpoint endpoint, Object data )
 		{
 			Preconditions.checkArgument( endpoint instanceof AgentItem, "Endpoint: %s is not an AgentItem", endpoint );
