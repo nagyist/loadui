@@ -15,18 +15,6 @@
  */
 package com.eviware.loadui.ui.fx.views.projectref;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.ReadOnlyStringProperty;
-import javafx.fxml.FXML;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.Tooltip;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.StackPane;
-
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.model.ProjectRef;
 import com.eviware.loadui.api.traits.Labeled;
@@ -40,6 +28,17 @@ import com.eviware.loadui.ui.fx.util.Properties;
 import com.eviware.loadui.ui.fx.util.UIUtils;
 import com.eviware.loadui.ui.fx.views.workspace.WorkspaceView;
 import com.google.common.base.Preconditions;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.fxml.FXML;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.StackPane;
 
 public class ProjectRefView extends StackPane implements Labeled
 {
@@ -47,12 +46,15 @@ public class ProjectRefView extends StackPane implements Labeled
 			.create( ProjectItem.class, WorkspaceView.CREATE_PROJECT );
 
 	@FXML
+	@SuppressWarnings("unused")
 	private ToggleButton onOffSwitch;
 
 	@FXML
+	@SuppressWarnings( "unused" )
 	private MenuButton menuButton;
 
 	@FXML
+	@SuppressWarnings( "unused" )
 	private ImageView miniature;
 
 	private final ProjectRef projectRef;
@@ -70,6 +72,7 @@ public class ProjectRefView extends StackPane implements Labeled
 	}
 
 	@FXML
+	@SuppressWarnings( "unused" )
 	private void initialize()
 	{
 		setPrefWidth( 130 );
@@ -125,6 +128,7 @@ public class ProjectRefView extends StackPane implements Labeled
 	}
 
 	@FXML
+	@SuppressWarnings( "unused" )
 	public void regionClickHandler( MouseEvent event )
 	{
 		if( event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2 )
