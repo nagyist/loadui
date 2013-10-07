@@ -794,10 +794,12 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 
 					if( isAbortOnFinish() )
 					{
+						log.debug( "Cancelling all components running on {}", this );
 						cancelComponents();
 					}
 					else
 					{
+						log.debug( "Waiting for all components to complete on {}", this );
 						waitForComponentsToComplete();
 					}
 					log.debug( "Calling onComplete on execution canvas" );

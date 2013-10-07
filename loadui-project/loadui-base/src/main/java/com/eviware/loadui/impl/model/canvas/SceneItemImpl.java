@@ -64,7 +64,7 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 		@Override
 		public boolean apply( @Nullable AgentItem input )
 		{
-			return input != null && input.isReady();
+			return input != null && input.isEnabled() && input.isReady();
 		}
 	};
 
@@ -300,7 +300,7 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 			messageEndpoint.sendMessage( AgentItem.AGENT_CHANNEL, data );
 			log.debug( "Sending statistics data from {}", this );
 		}
-		else if( isRunningInLocalMode || !getActiveAgentsRunningThis().isEmpty() )
+		else if( isRunningInLocalMode || getActiveAgentsRunningThis().isEmpty() )
 		{
 			setCompleted( true );
 		}

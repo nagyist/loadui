@@ -34,6 +34,7 @@ import com.google.common.collect.ImmutableSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +43,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * Fires expected events during test execution, and keeps execution in sync with
  * existing events.
- * 
+ *
  * @author dain.nilsson
  */
 public class TestExecutionAddon implements Addon
@@ -68,25 +69,25 @@ public class TestExecutionAddon implements Addon
 				final CanvasItem canvas = execution.getCanvas();
 				switch( phase )
 				{
-				case PRE_START :
-					canvas.triggerAction( CanvasItem.COUNTER_RESET_ACTION );
-					break;
-				case START :
-					canvas.triggerAction( CanvasItem.START_ACTION );
-					BeanInjector.getBean( TestEventManager.class ).logMessage( MessageLevel.NOTIFICATION, "Test started" );
-					//TestExecutionEvent.logExecutionEvent( TestExecutionEvent.ExecutionAction.STARTED );
-					break;
-				case PRE_STOP :
-					canvas.triggerAction( CanvasItem.STOP_ACTION );
-					canvas.triggerAction( CanvasItem.COMPLETE_ACTION );
-					BeanInjector.getBean( TestEventManager.class ).logMessage( MessageLevel.NOTIFICATION, "Test completed" );
-					//TestExecutionEvent.logExecutionEvent( TestExecutionEvent.ExecutionAction.COMPLETED );
-					break;
+					case PRE_START:
+						canvas.triggerAction( CanvasItem.COUNTER_RESET_ACTION );
+						break;
+					case START:
+						canvas.triggerAction( CanvasItem.START_ACTION );
+						BeanInjector.getBean( TestEventManager.class ).logMessage( MessageLevel.NOTIFICATION, "Test started" );
+						//TestExecutionEvent.logExecutionEvent( TestExecutionEvent.ExecutionAction.STARTED );
+						break;
+					case PRE_STOP:
+						canvas.triggerAction( CanvasItem.STOP_ACTION );
+						canvas.triggerAction( CanvasItem.COMPLETE_ACTION );
+						BeanInjector.getBean( TestEventManager.class ).logMessage( MessageLevel.NOTIFICATION, "Test completed" );
+						//TestExecutionEvent.logExecutionEvent( TestExecutionEvent.ExecutionAction.COMPLETED );
+						break;
 				}
 			}
 		};
 
-		private WorkspaceTestExecutionAddon( WorkspaceItem workspace )
+		private WorkspaceTestExecutionAddon()
 		{
 			testRunner.registerTask( actionTask, Phase.PRE_START, Phase.START, Phase.PRE_STOP );
 		}
@@ -128,15 +129,7 @@ public class TestExecutionAddon implements Addon
 						{
 							readyFuture.get( 1, TimeUnit.MINUTES );
 						}
-						catch( InterruptedException e )
-						{
-							log.error( "Failed waiting for READY event", e );
-						}
-						catch( ExecutionException e )
-						{
-							log.error( "Failed waiting for READY event", e );
-						}
-						catch( TimeoutException e )
+						catch( InterruptedException | ExecutionException | TimeoutException e )
 						{
 							log.error( "Failed waiting for READY event", e );
 						}
@@ -160,21 +153,23 @@ public class TestExecutionAddon implements Addon
 
 	public static class Factory implements Addon.Factory<TestExecutionAddon>
 	{
-		private final Set<Class<?>> eagerTypes = ImmutableSet.<Class<?>> of( WorkspaceItem.class, CanvasItem.class );
+		private final Set<Class<?>> eagerTypes = ImmutableSet.<Class<?>>of( WorkspaceItem.class, CanvasItem.class );
 
+		@Nonnull
 		@Override
 		public Class<TestExecutionAddon> getType()
 		{
 			return TestExecutionAddon.class;
 		}
 
+		@Nonnull
 		@Override
-		public TestExecutionAddon create( Addon.Context context )
+		public TestExecutionAddon create( @Nonnull Addon.Context context )
 		{
 			Object owner = Preconditions.checkNotNull( context.getOwner() );
 			if( owner instanceof WorkspaceItem )
 			{
-				return new WorkspaceTestExecutionAddon( ( WorkspaceItem )owner );
+				return new WorkspaceTestExecutionAddon();
 			}
 			else if( owner instanceof CanvasItem )
 			{
@@ -183,6 +178,7 @@ public class TestExecutionAddon implements Addon
 			throw new IllegalArgumentException();
 		}
 
+		@Nonnull
 		@Override
 		public Set<Class<?>> getEagerTypes()
 		{

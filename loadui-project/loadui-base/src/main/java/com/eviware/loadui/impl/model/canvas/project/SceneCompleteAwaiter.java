@@ -53,8 +53,11 @@ class SceneCompleteAwaiter implements EventHandler<BaseEvent>
 
 	void start()
 	{
-		startTimeoutScheduler();
 		tryComplete();
+		if( !projectItem.isCompleted() )
+		{
+			startTimeoutScheduler();
+		}
 	}
 
 	@Override
@@ -69,6 +72,7 @@ class SceneCompleteAwaiter implements EventHandler<BaseEvent>
 
 	private void tryComplete()
 	{
+		log.debug( "Trying to complete all scenes" );
 		boolean allScenesCompleted = true;
 		for( SceneItemImpl scene : projectItem.getScenes() )
 		{
@@ -76,6 +80,7 @@ class SceneCompleteAwaiter implements EventHandler<BaseEvent>
 			{
 				if( !scene.isCompleted() )
 				{
+					log.debug( "Scene {} is not completed yet", scene.getLabel() );
 					scene.addEventListener( BaseEvent.class, this );
 					allScenesCompleted = false;
 				}
@@ -83,6 +88,7 @@ class SceneCompleteAwaiter implements EventHandler<BaseEvent>
 		}
 		if( allScenesCompleted )
 		{
+			log.debug( "All scenes have completed! Project is completed!" );
 			if( awaitingSummaryTimeout != null )
 				awaitingSummaryTimeout.cancel( true );
 
@@ -101,6 +107,8 @@ class SceneCompleteAwaiter implements EventHandler<BaseEvent>
 	{
 		if( Iterables.any( projectItem.getChildren(), notAbortOnFinish ) )
 			return;
+
+		log.info( "Starting a scenario completion awaiter to wait until all scenarios have completed" );
 
 		awaitingSummaryTimeout = scheduler.schedule( new Runnable()
 		{
