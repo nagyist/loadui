@@ -42,6 +42,7 @@ import com.eviware.loadui.util.ReleasableUtils;
 import com.eviware.loadui.util.statistics.CounterStatisticSupport;
 import com.eviware.loadui.util.statistics.MathUtils;
 import com.eviware.loadui.util.statistics.StatisticDescriptorImpl;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.*;
@@ -619,30 +620,46 @@ public abstract class RunnerBase extends BaseCategory implements RunnerCategory,
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings( "unchecked" )
 	public void handleStatisticsData( Map<AgentItem, Object> statisticsData )
 	{
+		Preconditions.checkArgument( statisticsData.size() > 0, "Cannot process empty statistics data" );
 		long avgSum = 0;
 		for( Object data : statisticsData.values() )
 		{
-			Map<String, Object> map = ( Map<String, Object> )data;
-			long newMinTime = ( ( Number )map.get( "min" ) ).longValue();
-			minTime = minTime == -1 ? newMinTime : Math.min( minTime, newMinTime );
-			maxTime = Math.max( maxTime, ( ( Number )map.get( "max" ) ).longValue() );
-			sumTotalSquares += ( ( Number )map.get( "sumTotalSquares" ) ).longValue();
-			avgSum += ( ( Number )map.get( "avg" ) ).longValue();
-
-			if( map.containsKey( "samples" ) )
+			try
 			{
-				String[] entries = ( ( String )map.get( "samples" ) ).split( ";" );
-				for( String entry : entries )
-				{
-					String[] vals = entry.split( ":" );
-					addTopBottomSample( Long.parseLong( vals[0] ), Long.parseLong( vals[1] ), Long.parseLong( vals[2] ) );
-				}
+				avgSum = processStatistic( avgSum, data );
+			}
+			catch( Exception e )
+			{
+				log.error( "Could not handle stat {}", data);
+				log.error( "Reason:", e );
 			}
 		}
 		avgTime = avgSum / statisticsData.size();
+	}
+
+	private long processStatistic( long avgSum, Object data )
+	{
+		Preconditions.checkArgument( Map.class.isInstance( data ) );
+		Map<String, Object> map = ( Map<String, Object> )data;
+		long newMinTime = ( ( Number )map.get( "min" ) ).longValue();
+		minTime = minTime == -1 ? newMinTime : Math.min( minTime, newMinTime );
+		maxTime = Math.max( maxTime, ( ( Number )map.get( "max" ) ).longValue() );
+		sumTotalSquares += ( ( Number )map.get( "sumTotalSquares" ) ).longValue();
+		avgSum += ( ( Number )map.get( "avg" ) ).longValue();
+
+		if( map.containsKey( "samples" ) )
+		{
+			String[] entries = ( ( String )map.get( "samples" ) ).split( ";" );
+			for( String entry : entries )
+			{
+				String[] vals = entry.split( ":" );
+				addTopBottomSample( Long.parseLong( vals[0] ), Long.parseLong( vals[1] ), Long.parseLong( vals[2] ) );
+			}
+		}
+		return avgSum;
 	}
 
 	@Override
