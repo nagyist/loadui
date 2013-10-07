@@ -15,17 +15,11 @@
  */
 package com.eviware.loadui.impl.events;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
-import java.util.EventObject;
-
+import com.eviware.loadui.api.events.BaseEvent;
+import com.eviware.loadui.api.events.EventHandler;
+import com.eviware.loadui.api.events.PropertyEvent;
+import com.eviware.loadui.api.events.WeakEventHandler;
+import com.eviware.loadui.util.events.EventSupport;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,25 +27,27 @@ import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import com.eviware.loadui.api.events.BaseEvent;
-import com.eviware.loadui.api.events.EventHandler;
-import com.eviware.loadui.api.events.PropertyEvent;
-import com.eviware.loadui.util.events.EventSupport;
+import java.util.EventObject;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 public class EventSupportTest
 {
 	private EventSupport support;
 	private EventHandler<BaseEvent> mockListener;
+	private WeakEventHandler<BaseEvent> mockWeakListener;
 	private BaseEvent sameType;
 	private PropertyEvent subType;
 	private EventObject superType;
 
 	@Before
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	public void setup()
 	{
 		support = new EventSupport( this );
 		mockListener = mock( EventHandler.class );
+		mockWeakListener = mock( WeakEventHandler.class );
 
 		sameType = mock( BaseEvent.class );
 		subType = mock( PropertyEvent.class );
@@ -104,7 +100,7 @@ public class EventSupportTest
 	}
 
 	@Test
-	public void shouldNotReceiveEventsAfterBeingRemoved() throws InterruptedException
+	public void listener_shouldNot_receiveEventsAfterBeingRemoved() throws InterruptedException
 	{
 		support.addEventListener( BaseEvent.class, mockListener );
 
@@ -126,7 +122,29 @@ public class EventSupportTest
 	}
 
 	@Test
-	@SuppressWarnings( "unchecked" )
+	public void weakListener_shouldNot_receiveEventsAfterBeingRemoved() throws InterruptedException
+	{
+		support.addEventListener( BaseEvent.class, mockWeakListener );
+
+		support.fireEvent( subType );
+
+		Thread.sleep( 100 );
+
+		verify( mockWeakListener ).handleEvent( subType );
+
+		support.removeEventListener( BaseEvent.class, mockWeakListener );
+
+		support.fireEvent( subType );
+		support.fireEvent( sameType );
+		support.fireEvent( superType );
+
+		Thread.sleep( 100 );
+
+		verifyNoMoreInteractions( mockWeakListener );
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
 	public void shouldWorkWithSeveralListeners() throws InterruptedException
 	{
 		support.addEventListener( BaseEvent.class, mockListener );
@@ -159,7 +177,7 @@ public class EventSupportTest
 	}
 
 	@Test
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	public void shouldDeliverEventsInCorrectOrder() throws InterruptedException
 	{
 		EventHandler<EventObject> handler1 = mock( EventHandler.class );
