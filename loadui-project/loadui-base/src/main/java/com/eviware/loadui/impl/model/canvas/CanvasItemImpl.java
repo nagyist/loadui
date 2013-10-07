@@ -762,7 +762,7 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		}
 	}
 
-	private static final Function<ComponentItem, Future<BaseEvent>> busyFuture = new Function<ComponentItem, Future<BaseEvent>>()
+	private static final Function<ComponentItem, Future<BaseEvent>> busyComponentFuture = new Function<ComponentItem, Future<BaseEvent>>()
 	{
 		@Override
 		public Future<BaseEvent> apply( ComponentItem component )
@@ -774,7 +774,7 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 
 	protected void onExecutionTask( TestExecution execution, Phase phase )
 	{
-		if( execution.contains( CanvasItemImpl.this ) )
+		if( execution.contains( this ) )
 		{
 			switch( phase )
 			{
@@ -798,17 +798,7 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 					}
 					else
 					{
-						for( Future<BaseEvent> future : Iterables.transform( getComponents(), busyFuture ) )
-						{
-							try
-							{
-								future.get();
-							}
-							catch( InterruptedException | ExecutionException e )
-							{
-								log.error( "Failed waiting for a Component", e );
-							}
-						}
+						waitForComponentsToComplete();
 					}
 					log.debug( "Calling onComplete on execution canvas" );
 					onComplete( execution.getCanvas() );
@@ -818,6 +808,21 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 						timerFuture.cancel( true );
 					setRunning( false );
 					break;
+			}
+		}
+	}
+
+	private void waitForComponentsToComplete()
+	{
+		for( Future<BaseEvent> future : Iterables.transform( getComponents(), busyComponentFuture ) )
+		{
+			try
+			{
+				future.get( 15, TimeUnit.SECONDS );
+			}
+			catch( InterruptedException | ExecutionException | TimeoutException e )
+			{
+				log.error( "Failed waiting for a Component to complete", e );
 			}
 		}
 	}
