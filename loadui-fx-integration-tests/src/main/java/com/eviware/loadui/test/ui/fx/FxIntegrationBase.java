@@ -144,6 +144,19 @@ public class FxIntegrationBase extends GuiTest
 		return new KnobHandle( knob );
 	}
 
+	public void ensureResultViewWindowIsClosed()
+	{
+		if( isResultViewWindowIsOpen() )
+		{
+			closeCurrentWindow();
+		}
+	}
+
+	public boolean isResultViewWindowIsOpen()
+	{
+		return !GuiTest.findAll( ".analysis-view" ).isEmpty();
+	}
+
 	protected ProjectItem getProjectItem()
 	{
 		Collection<? extends ProjectItem> projects = BeanInjector.getBean( WorkspaceProvider.class ).getWorkspace()
