@@ -15,23 +15,24 @@
  */
 package com.eviware.loadui.ui.fx.views.assertions;
 
-import com.eviware.loadui.api.model.*;
+import com.eviware.loadui.api.model.CanvasItem;
+import com.eviware.loadui.api.model.ComponentItem;
 import com.eviware.loadui.api.statistics.Statistic;
 import com.eviware.loadui.api.statistics.StatisticHolder;
 import com.eviware.loadui.api.statistics.StatisticVariable;
 import com.eviware.loadui.api.traits.Labeled;
 import com.eviware.loadui.ui.fx.control.fields.Validatable;
 import com.eviware.loadui.ui.fx.util.TreeUtils;
-
 import com.eviware.loadui.util.StringUtils;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.control.*;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TreeCell;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,8 +108,8 @@ public class AssertableTree extends TreeView<Labeled> implements Validatable
 
 	public StatisticWrapper<Number> getSelectedAssertion()
 	{
-		Object selected =	getSelectionModel().getSelectedItem().getValue();
-		return  ( ( TreeUtils.LabeledKeyValue<String, StatisticWrapper<Number>> ) selected ).getValue();
+		Object selected = getSelectionModel().getSelectedItem().getValue();
+		return ( ( TreeUtils.LabeledKeyValue<String, StatisticWrapper<Number>> )selected ).getValue();
 	}
 
 	private void addVariablesToTree( StatisticHolder holder, TreeItem<Labeled> root )
@@ -140,8 +141,8 @@ public class AssertableTree extends TreeView<Labeled> implements Validatable
 			for( String variableName : holder.getStatisticVariableNames() )
 			{
 				StatisticVariable variable = holder.getStatisticVariable( variableName );
-            TreeItem<Labeled> rootNode = treeNode( variable, root );
-            createSubItems( variable, rootNode );
+				TreeItem<Labeled> rootNode = treeNode( variable, root );
+				createSubItems( variable, rootNode );
 			}
 		}
 
@@ -189,21 +190,22 @@ public class AssertableTree extends TreeView<Labeled> implements Validatable
 				{
 					Statistic statistic = variable.getStatistic( statisticName, source );
 					TreeItem<Labeled> assertable = branchByLabel.get( statistic.getLabel() );
+					final StatisticWrapper wrapper = new StatisticWrapper( statistic );
 
 					if( assertable == null )
 					{
-						assertable = treeNode( new StatisticWrapper( statistic ), parent );
+						assertable = treeNode( new TreeUtils.LabeledKeyValue( wrapper.getLabel(), wrapper ), parent );
 						branchByLabel.put( statistic.getLabel(), assertable );
 					}
 					branchBySource.put( source, assertable );
-				}
 
-				for( String source : variable.getSources() )
 					if( !source.equals( StatisticVariable.MAIN_SOURCE ) )
 					{
-						TreeItem currentBranch = branchBySource.get( source );
-						treeNode( new TreeUtils.LabeledKeyValue( source, currentBranch.getValue() ), currentBranch );
+						// creating leafs
+						treeNode( new TreeUtils.LabeledKeyValue( source, wrapper ), assertable );
 					}
+				}
+
 			}
 		}
 	}
