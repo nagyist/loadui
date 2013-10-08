@@ -15,8 +15,13 @@
  */
 package com.eviware.loadui.ui.fx.views.workspace;
 
-import java.io.File;
-
+import com.eviware.loadui.LoadUI;
+import com.eviware.loadui.api.model.ProjectRef;
+import com.eviware.loadui.api.model.WorkspaceItem;
+import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
+import com.eviware.loadui.ui.fx.control.ConfirmationDialog;
+import com.eviware.loadui.ui.fx.control.fields.ValidatableStringField;
+import com.eviware.loadui.ui.fx.util.UIUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -30,13 +35,7 @@ import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooserBuilder;
 
-import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.api.model.ProjectRef;
-import com.eviware.loadui.api.model.WorkspaceItem;
-import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
-import com.eviware.loadui.ui.fx.control.ConfirmationDialog;
-import com.eviware.loadui.ui.fx.control.fields.ValidatableStringField;
-import com.eviware.loadui.ui.fx.util.UIUtils;
+import java.io.File;
 
 public class CreateNewProjectDialog extends ConfirmationDialog
 {
@@ -64,7 +63,10 @@ public class CreateNewProjectDialog extends ConfirmationDialog
 								new File( workspace.getAttribute( UIUtils.LATEST_DIRECTORY,
 										System.getProperty( LoadUI.LOADUI_HOME ) ) ) )
 						.extensionFilters( UIUtils.XML_EXTENSION_FILTER ).build();
-				fileNameField.setText( fileChooser.showSaveDialog( getScene().getWindow() ).getPath() );
+
+				File chosenFile = fileChooser.showSaveDialog( getScene().getWindow() );
+				if( chosenFile != null )
+					fileNameField.setText( chosenFile.getPath() );
 			}
 		} ).build();
 		final CheckBox openNewProject = new CheckBox( "Open project after creation" );
@@ -98,7 +100,7 @@ public class CreateNewProjectDialog extends ConfirmationDialog
 		int projectNumber = 1;
 		while( !isValidFileName( "project-" + projectNumber + ".xml" ) )
 		{
-			projectNumber++ ;
+			projectNumber++;
 		}
 		return projectNumber;
 	}
