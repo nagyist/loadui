@@ -16,15 +16,19 @@
 package com.eviware.loadui.test.ui.fx.states;
 
 import com.eviware.loadui.test.TestState;
+import com.eviware.loadui.test.ui.fx.FxIntegrationBase;
 import com.eviware.loadui.test.ui.fx.GUI;
-import org.loadui.testfx.GuiTest;
 import javafx.scene.Node;
+import org.loadui.testfx.GuiTest;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class LastResultOpenedState extends TestState
 {
 	public static final LastResultOpenedState STATE = new LastResultOpenedState();
+
+	private FxIntegrationBase integrationBase = new FxIntegrationBase();
 
 	private LastResultOpenedState()
 	{
@@ -34,17 +38,21 @@ public class LastResultOpenedState extends TestState
 	@Override
 	protected void enterFromParent() throws Exception
 	{
-		GUI.getController().click( ".project-playback-panel .play-button" ).sleep( 1500 )
-				.click( ".project-playback-panel .play-button" ).sleep( 5000 ).click( "#statsTab" )
-				.click( "#open-execution" ).doubleClick( "#result-0" );
+		integrationBase.runTestFor( 2, TimeUnit.SECONDS );
+		GUI.getController().click( "#statsTab" )
+				.click( "#open-execution" )
+				.doubleClick( "#result-0" );
+		integrationBase.waitForNodeToDisappear( ".result-view" );
 	}
 
 	@Override
 	protected void exitToParent() throws Exception
 	{
+		GUI.getController().sleep( 500 );
 		Set<Node> resultViewSet = GuiTest.findAll( ".result-view" );
 		if( !resultViewSet.isEmpty() )
 		{
+			System.out.println( "CLOSING THE RESULT VIEW WINDOW! Should be already closed." );
 			GUI.getController().closeCurrentWindow();
 		}
 		GUI.getController().click( "#designTab" );
