@@ -3,7 +3,7 @@
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<template><![CDATA["reports/styles.jrtx"]]></template>
+	<template><![CDATA[com.eviware.loadui.LoadUI.getWorkingDir().getAbsolutePath() + "/reports/styles.jrtx"]]></template>
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["D:\\Documents\\Eclipse Workspaces\\eviware\\loadui-project\\loadui-installer\\src\\controller\\resources\\reports\\"]]></defaultValueExpression>
 	</parameter>
