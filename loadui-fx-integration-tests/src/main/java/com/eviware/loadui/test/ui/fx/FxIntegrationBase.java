@@ -1,5 +1,6 @@
 package com.eviware.loadui.test.ui.fx;
 
+import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.ui.fx.util.test.ComponentHandle;
 import com.eviware.loadui.ui.fx.util.test.LoadUiRobot;
 import com.eviware.loadui.util.test.TestUtils;
@@ -7,6 +8,9 @@ import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 import org.loadui.testfx.GuiTest;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -25,10 +29,12 @@ public class FxIntegrationBase extends GuiTest
 	public FxIntegrationBase()
 	{
 		robot = LoadUiRobot.usingController( this );
+		System.out.println( "This is the groovy home - " + System.getProperty( "groovy.root" ) );
 	}
 
 	public void create( LoadUiRobot.Component component )
 	{
+		System.setProperty( "groovy.root", System.getProperty( LoadUI.LOADUI_WORKING ) + File.separator + ".groovy" );
 		robot.createComponent( component );
 	}
 
@@ -93,6 +99,18 @@ public class FxIntegrationBase extends GuiTest
 		Node knob = find( ".knob", componentNode );
 		return new KnobHandle( knob );
 	}
+
+	public KnobHandle turnKnobIn( LoadUiRobot.Component component, int number )
+	{
+		final Node componentNode = robot.getComponentNode( component );
+		System.out.println( "Component node: " + componentNode );
+		Set<Node> knobs = findAll( ".knob", componentNode );
+
+		Node knob = ( Node )Arrays.asList( knobs.toArray() ).get( number + 1 );
+
+		return new KnobHandle( knob );
+	}
+
 
 	public class KnobHandle
 	{
