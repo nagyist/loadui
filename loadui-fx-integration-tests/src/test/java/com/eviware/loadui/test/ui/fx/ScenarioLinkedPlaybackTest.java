@@ -15,90 +15,117 @@
  */
 package com.eviware.loadui.test.ui.fx;
 
-import static org.junit.Assert.assertTrue;
-
-import org.loadui.testfx.GuiTest;
-import javafx.scene.input.KeyCode;
-
+import com.eviware.loadui.api.model.ProjectItem;
+import com.eviware.loadui.api.model.SceneItem;
+import com.eviware.loadui.test.TestState;
+import com.eviware.loadui.test.categories.IntegrationTest;
+import com.eviware.loadui.test.ui.fx.states.ScenarioCreatedState;
+import com.google.code.tempusfugit.temporal.Condition;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.api.model.SceneItem;
-import com.eviware.loadui.test.categories.IntegrationTest;
-import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import com.eviware.loadui.test.ui.fx.states.ScenarioCreatedState;
+import java.util.concurrent.TimeoutException;
+
+import static com.google.code.tempusfugit.temporal.Duration.seconds;
+import static com.google.code.tempusfugit.temporal.Timeout.timeout;
+import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
+import static junit.framework.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @Category( IntegrationTest.class )
-public class ScenarioLinkedPlaybackTest
+public class ScenarioLinkedPlaybackTest extends FxIntegrationTestBase
 {
-	private static GuiTest controller;
-
-	@Before
-	public void enterState() throws Exception
-	{
-		ScenarioCreatedState.STATE.enter();
-		controller = GUI.getController();
-	}
 
 	@After
-	public void leaveState() throws Exception
+	public void teardown() throws Exception
 	{
-		ScenarioCreatedState.STATE.getParent().enter();
+		ensureProjectIsNotRunning();
+		super.teardown();
 	}
 
 	@Test
 	public void shouldFollowProject_when_linked() throws Exception
 	{
-		SceneItem scenario = ScenarioCreatedState.STATE.getScenario();
-		assertTrue( scenario.isFollowProject() );
+		SceneItem scenario = ensureScenarioIsLinkedIs( true );
 
-		for( int i = 0; i < 5; i++ )
+		for( int i = 0; i < 3; i++ )
 		{
-			clickPlayStopButton();
+			robot.clickPlayStopButton();
+
 			assertTrue( scenario.isRunning() );
 
-			clickPlayStopButton();
-			assertTrue( !scenario.isRunning() );
+			robot.clickPlayStopButton();
+			waitForNodeToDisappear( "#abort-requests" );
+
+			assertFalse( scenario.isRunning() );
 		}
 	}
 
 	@Test
 	public void shouldNotFollowProject_when_unLinked() throws Exception
 	{
-		SceneItem scenario = ScenarioCreatedState.STATE.getScenario();
-		assertTrue( scenario.isFollowProject() );
+		SceneItem scenario = ensureScenarioIsLinkedIs( false );
 
-		controller.click( "#link-scenario" ).sleep( 500 );
-
-		for( int i = 0; i < 3; i++ )
+		for( int i = 0; i < 4; i++ )
 		{
-			clickPlayStopButton();
-			assertTrue( !scenario.isRunning() );
+			robot.clickPlayStopButton();
+			// using a very long timeout because of bug: LOADUI-1152
+			waitForNodeToDisappear( "#abort-requests", timeout( seconds( 20 ) ) );
 
-			clickPlayStopButton();
-			assertTrue( !scenario.isRunning() );
+			assertFalse( scenario.isRunning() );
 		}
 	}
 
 	@Test
 	public void shouldStopOnLimit_when_isLinked() throws Exception
 	{
-		ProjectItem project = ProjectLoadedWithoutAgentsState.STATE.getProject();
+		ProjectItem project = getProjectItem();
+		ensureScenarioIsLinkedIs( true );
 
-		controller.click( "#set-limits" ).click( "#time-limit" ).press( KeyCode.CONTROL, KeyCode.A )
-				.release( KeyCode.CONTROL, KeyCode.A ).sleep( 100 ).type( "6" ).sleep( 100 ).click( "#default" )
-				.sleep( 1000 ).click( ".project-playback-panel .play-button" ).sleep( 2000 );
-		assertTrue( project.isRunning() );
+		setTestTimeLimitTo( 2 );
+		robot.clickPlayStopButton();
 
-		controller.sleep( 4000 );
-		assertTrue( !project.isRunning() );
+		waitOrTimeout( new IsProjectRunning( project, true ), timeout( seconds( 2 ) ) );
+
+		waitOrTimeout( new IsProjectRunning( project, false ), timeout( seconds( 4 ) ) );
 	}
 
-	protected void clickPlayStopButton()
+	private void clickOnLinkScenarioButton()
 	{
-		controller.click( ".project-playback-panel .play-button" ).sleep( 2000 );
+		click( "#link-scenario" ).sleep( 500 );
+	}
+
+	private SceneItem ensureScenarioIsLinkedIs( final boolean follow )
+	{
+		final SceneItem scenario = ScenarioCreatedState.STATE.getScenario();
+		if( scenario.isFollowProject() != follow )
+		{
+			clickOnLinkScenarioButton();
+		}
+		try
+		{
+			waitOrTimeout( new Condition()
+			{
+				@Override
+				public boolean isSatisfied()
+				{
+					return scenario.isFollowProject() == follow;
+				}
+			}, timeout( seconds( 2 ) ) );
+		}
+		catch( InterruptedException | TimeoutException e )
+		{
+			e.printStackTrace();
+			fail( "Problem while waiting for scenario to be in Linked Mode" );
+		}
+		return scenario;
+	}
+
+	@Override
+	public TestState getStartingState()
+	{
+		return ScenarioCreatedState.STATE;
 	}
 }

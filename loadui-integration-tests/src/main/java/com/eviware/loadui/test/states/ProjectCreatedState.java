@@ -29,7 +29,18 @@ public class ProjectCreatedState extends TestState
 
 	private ProjectCreatedState()
 	{
-		super( "Project Created", WorkspaceLoadedState.STATE );
+		super( "Project Created" );
+	}
+
+	protected ProjectCreatedState( String name )
+	{
+		super( name );
+	}
+
+	@Override
+	protected TestState parentState()
+	{
+		return WorkspaceLoadedState.STATE;
 	}
 
 	@Override

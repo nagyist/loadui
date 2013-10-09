@@ -15,12 +15,6 @@
  */
 package com.eviware.loadui.impl.statistics.store;
 
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.osgi.service.importer.OsgiServiceLifecycleListener;
-
 import com.eviware.loadui.api.execution.Phase;
 import com.eviware.loadui.api.execution.TestExecution;
 import com.eviware.loadui.api.execution.TestExecutionTask;
@@ -28,6 +22,11 @@ import com.eviware.loadui.api.execution.TestRunner;
 import com.eviware.loadui.api.testevents.TestEvent;
 import com.eviware.loadui.api.traits.Releasable;
 import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.osgi.service.importer.OsgiServiceLifecycleListener;
+
+import java.util.Map;
 
 /**
  * Aggregates TestEvents for use with different interpolation levels, for data
@@ -45,7 +44,7 @@ public class TestEventInterpolator implements Releasable, OsgiServiceLifecycleLi
 
 	protected static final Logger log = LoggerFactory.getLogger( TestEventInterpolator.class );
 
-	private final StartStopTask task = new StartStopTask();
+	private final StartStopTask startStopTask = new StartStopTask();
 	private final ExecutionManagerImpl manager;
 	private final Map<InterpolationKey, InterpolationLevel> interpolators = Maps.newConcurrentMap();
 	private TestRunner testRunner;
@@ -104,7 +103,7 @@ public class TestEventInterpolator implements Releasable, OsgiServiceLifecycleLi
 		this.testRunner = testRunner;
 		if( testRunner != null )
 		{
-			testRunner.registerTask( task, Phase.PRE_START, Phase.STOP );
+			testRunner.registerTask( startStopTask, Phase.PRE_START, Phase.STOP );
 		}
 	}
 
@@ -126,7 +125,7 @@ public class TestEventInterpolator implements Releasable, OsgiServiceLifecycleLi
 	{
 		if( testRunner != null )
 		{
-			testRunner.unregisterTask( task, Phase.values() );
+			testRunner.unregisterTask( startStopTask, Phase.values() );
 		}
 		interpolators.clear();
 	}

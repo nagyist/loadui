@@ -16,26 +16,41 @@
 package com.eviware.loadui.test.ui.fx.states;
 
 import com.eviware.loadui.test.TestState;
+import com.eviware.loadui.test.ui.fx.FxIntegrationBase;
 import com.eviware.loadui.test.ui.fx.GUI;
-import org.loadui.testfx.GuiTest;
 import javafx.scene.Node;
+import org.loadui.testfx.GuiTest;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class LastResultOpenedState extends TestState
 {
 	public static final LastResultOpenedState STATE = new LastResultOpenedState();
+	protected FxIntegrationBase fxHelper = new FxIntegrationBase();
 
 	private LastResultOpenedState()
 	{
-		super( "Last Result Opened", ProjectLoadedWithoutAgentsState.STATE );
+		super( "Last Result Opened" );
+	}
+
+	protected LastResultOpenedState( String name )
+	{
+		super( name );
+	}
+
+	@Override
+	protected TestState parentState()
+	{
+		return ProjectLoadedWithoutAgentsState.STATE;
 	}
 
 	@Override
 	protected void enterFromParent() throws Exception
 	{
-		GUI.getController().click( ".project-playback-panel .play-button" ).sleep( 1500 )
-				.click( ".project-playback-panel .play-button" ).sleep( 5000 ).click( "#statsTab" )
+		fxHelper.runTestFor( 2, TimeUnit.SECONDS );
+
+		GUI.getOpenSourceGui().getController().click( "#statsTab" )
 				.click( "#open-execution" ).doubleClick( "#result-0" );
 	}
 
@@ -45,8 +60,8 @@ public class LastResultOpenedState extends TestState
 		Set<Node> resultViewSet = GuiTest.findAll( ".result-view" );
 		if( !resultViewSet.isEmpty() )
 		{
-			GUI.getController().closeCurrentWindow();
+			GUI.getOpenSourceGui().getController().closeCurrentWindow();
 		}
-		GUI.getController().click( "#designTab" );
+		GUI.getOpenSourceGui().getController().click( "#designTab" );
 	}
 }

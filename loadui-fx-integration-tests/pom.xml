@@ -76,6 +76,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <version>${hamcrestVersion}</version>
+        </dependency>
+        <dependency>
             <groupId>com.eviware.loadui</groupId>
             <artifactId>loadui-api</artifactId>
             <version>${project.parent.version}</version>
@@ -94,6 +99,11 @@
             <groupId>org.loadui</groupId>
             <artifactId>testFx</artifactId>
             <version>2.7.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.tempus-fugit</groupId>
+            <artifactId>tempus-fugit</artifactId>
+            <version>1.1</version>
         </dependency>
     </dependencies>
 </project>
