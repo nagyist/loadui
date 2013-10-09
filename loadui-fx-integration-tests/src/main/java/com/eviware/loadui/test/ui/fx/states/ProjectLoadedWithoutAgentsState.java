@@ -15,15 +15,11 @@
  */
 package com.eviware.loadui.test.ui.fx.states;
 
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.api.model.WorkspaceProvider;
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.ui.fx.GUI;
-import com.eviware.loadui.util.BeanInjector;
 import org.loadui.testfx.GuiTest;
 import org.loadui.testfx.TestUtils;
 
-import java.util.Collection;
 import java.util.concurrent.Callable;
 
 import static org.loadui.testfx.GuiTest.findAll;
@@ -31,8 +27,6 @@ import static org.loadui.testfx.GuiTest.findAll;
 public class ProjectLoadedWithoutAgentsState extends TestState
 {
 	public static final ProjectLoadedWithoutAgentsState STATE = new ProjectLoadedWithoutAgentsState();
-
-	private ProjectItem project = null;
 
 	private ProjectLoadedWithoutAgentsState()
 	{
@@ -50,11 +44,6 @@ public class ProjectLoadedWithoutAgentsState extends TestState
 		return ProjectCreatedWithoutAgentsState.STATE;
 	}
 
-	public ProjectItem getProject()
-	{
-		return project;
-	}
-
 	@Override
 	protected void enterFromParent() throws Exception
 	{
@@ -70,16 +59,12 @@ public class ProjectLoadedWithoutAgentsState extends TestState
 			}
 		} );
 
-		Collection<? extends ProjectItem> projects = BeanInjector.getBean( WorkspaceProvider.class ).getWorkspace()
-				.getProjects();
-		project = projects.iterator().next();
 	}
 
 	@Override
 	protected void exitToParent() throws Exception
 	{
 		log.debug( "Closing project." );
-		project = null;
 		GUI.getOpenSourceGui().getController().click( "#closeProjectButton" );
 		//If there is a save dialog, do not save:
 		try

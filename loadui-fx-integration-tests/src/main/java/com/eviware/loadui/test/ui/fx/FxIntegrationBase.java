@@ -12,7 +12,6 @@ import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 import org.loadui.testfx.GuiTest;
 
-import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -157,11 +156,10 @@ public class FxIntegrationBase extends GuiTest
 		return !GuiTest.findAll( ".analysis-view" ).isEmpty();
 	}
 
-	protected ProjectItem getProjectItem()
+	public static ProjectItem getProjectItem()
 	{
-		Collection<? extends ProjectItem> projects = BeanInjector.getBean( WorkspaceProvider.class ).getWorkspace()
-				.getProjects();
-		return projects.iterator().next();
+		return BeanInjector.getBean( WorkspaceProvider.class ).getWorkspace()
+				.getProjects().iterator().next();
 	}
 
 	public class KnobHandle

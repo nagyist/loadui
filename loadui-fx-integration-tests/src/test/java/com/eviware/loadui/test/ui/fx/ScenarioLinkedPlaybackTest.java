@@ -20,23 +20,20 @@ import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ScenarioCreatedState;
-import com.google.code.tempusfugit.temporal.Condition;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-
-import java.util.concurrent.TimeoutException;
 
 import static com.google.code.tempusfugit.temporal.Duration.seconds;
 import static com.google.code.tempusfugit.temporal.Timeout.timeout;
 import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 import static junit.framework.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 @Category( IntegrationTest.class )
 public class ScenarioLinkedPlaybackTest extends FxIntegrationTestBase
 {
+	HasScenarios helper = new HasScenarios();
 
 	@After
 	public void teardown() throws Exception
@@ -48,7 +45,7 @@ public class ScenarioLinkedPlaybackTest extends FxIntegrationTestBase
 	@Test
 	public void shouldFollowProject_when_linked() throws Exception
 	{
-		SceneItem scenario = ensureScenarioIsLinkedIs( true );
+		SceneItem scenario = helper.ensureScenarioIsLinkedIs( true );
 
 		for( int i = 0; i < 3; i++ )
 		{
@@ -66,7 +63,7 @@ public class ScenarioLinkedPlaybackTest extends FxIntegrationTestBase
 	@Test
 	public void shouldNotFollowProject_when_unLinked() throws Exception
 	{
-		SceneItem scenario = ensureScenarioIsLinkedIs( false );
+		SceneItem scenario = helper.ensureScenarioIsLinkedIs( false );
 
 		for( int i = 0; i < 4; i++ )
 		{
@@ -82,7 +79,7 @@ public class ScenarioLinkedPlaybackTest extends FxIntegrationTestBase
 	public void shouldStopOnLimit_when_isLinked() throws Exception
 	{
 		ProjectItem project = getProjectItem();
-		ensureScenarioIsLinkedIs( true );
+		helper.ensureScenarioIsLinkedIs( true );
 
 		setTestTimeLimitTo( 2 );
 		robot.clickPlayStopButton();
@@ -90,37 +87,6 @@ public class ScenarioLinkedPlaybackTest extends FxIntegrationTestBase
 		waitOrTimeout( new IsProjectRunning( project, true ), timeout( seconds( 2 ) ) );
 
 		waitOrTimeout( new IsProjectRunning( project, false ), timeout( seconds( 4 ) ) );
-	}
-
-	private void clickOnLinkScenarioButton()
-	{
-		click( "#link-scenario" ).sleep( 500 );
-	}
-
-	private SceneItem ensureScenarioIsLinkedIs( final boolean follow )
-	{
-		final SceneItem scenario = ScenarioCreatedState.STATE.getScenario();
-		if( scenario.isFollowProject() != follow )
-		{
-			clickOnLinkScenarioButton();
-		}
-		try
-		{
-			waitOrTimeout( new Condition()
-			{
-				@Override
-				public boolean isSatisfied()
-				{
-					return scenario.isFollowProject() == follow;
-				}
-			}, timeout( seconds( 2 ) ) );
-		}
-		catch( InterruptedException | TimeoutException e )
-		{
-			e.printStackTrace();
-			fail( "Problem while waiting for scenario to be in Linked Mode" );
-		}
-		return scenario;
 	}
 
 	@Override

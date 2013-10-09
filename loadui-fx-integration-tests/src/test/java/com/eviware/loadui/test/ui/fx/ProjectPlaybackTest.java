@@ -17,7 +17,6 @@ package com.eviware.loadui.test.ui.fx;
 
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.test.categories.IntegrationTest;
-import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -46,7 +45,7 @@ public class ProjectPlaybackTest extends SimpleWebTestBase
 	@Test
 	public void shouldStopOnLimit() throws Exception
 	{
-		ProjectItem project = ProjectLoadedWithoutAgentsState.STATE.getProject();
+		ProjectItem project = getProjectItem();
 
 		long veryHighLoad = 10_000;
 		turnKnobIn( FIXED_RATE_GENERATOR ).to( veryHighLoad );

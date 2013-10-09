@@ -20,7 +20,6 @@ import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.FxIntegrationTestBase;
 import com.eviware.loadui.test.ui.fx.states.LastResultOpenedState;
-import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import org.junit.Test;
@@ -44,7 +43,7 @@ public class StatisticTabsTest extends FxIntegrationTestBase
 	@Test
 	public void testTabs()
 	{
-		pages = ProjectLoadedWithoutAgentsState.STATE.getProject().getStatisticPages();
+		pages = getProjectItem().getStatisticPages();
 		assertThat( pageCount(), is( 1 ) );
 
 		click( "#plus-button" ).click( "Untitled Page 2" ).click( "#untitled-page-1" ).click( "#plus-button" );

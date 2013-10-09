@@ -16,21 +16,17 @@
 package com.eviware.loadui.test.ui.fx.states;
 
 
-import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.test.TestState;
+import com.eviware.loadui.test.ui.fx.FxIntegrationBase;
 import com.eviware.loadui.test.ui.fx.FxTestState;
 import com.eviware.loadui.test.ui.fx.GUI;
-import com.google.common.base.Preconditions;
 
 
 public class ScenarioCreatedState extends FxTestState
 {
 	public static final ScenarioCreatedState STATE = new ScenarioCreatedState();
 	public static final String SCENARIO_NAME = "Scenario 1";
-	private ProjectItem project;
-
-	private SceneItem scenario = null;
 
 	private ScenarioCreatedState()
 	{
@@ -50,8 +46,7 @@ public class ScenarioCreatedState extends FxTestState
 
 	public SceneItem getScenario()
 	{
-		Preconditions.checkArgument( project != null, "Project is null" );
-		return project.getSceneByLabel( SCENARIO_NAME );
+		return FxIntegrationBase.getProjectItem().getSceneByLabel( SCENARIO_NAME );
 	}
 
 	@Override
@@ -61,9 +56,6 @@ public class ScenarioCreatedState extends FxTestState
 		GUI.getOpenSourceGui().getController().drag( "#newScenarioIcon" ).by( 300, 0 ).drop();
 
 		waitForNode( ".scenario-view" );
-
-		project = ( ( ProjectLoadedWithoutAgentsState )parentState() ).getProject();
-		Preconditions.checkArgument( project != null, "Project is null" );
 	}
 
 	@Override
@@ -74,7 +66,5 @@ public class ScenarioCreatedState extends FxTestState
 		GUI.getOpenSourceGui().getController().click( ".scenario-view #menu" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
 
 		waitForNodeToDisappear( ".scenario-view" );
-
-		scenario = null;
 	}
 }
