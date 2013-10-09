@@ -15,14 +15,13 @@
  */
 package com.eviware.loadui.test;
 
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * TestStates are used for integration testing where it is undesirable to
@@ -30,7 +29,7 @@ import com.google.common.collect.Lists;
  * Instead, TestStates can serve as good known states to use as a starting point
  * for tests. TestStates are arranged in a tree structure, with each state
  * holding a pointer to its parent.
- * 
+ *
  * @author dain.nilsson
  */
 public abstract class TestState
@@ -56,6 +55,12 @@ public abstract class TestState
 		{
 			throw new UnsupportedOperationException( "ROOT node has no parent!" );
 		}
+
+		@Override
+		protected TestState parentState()
+		{
+			return null;
+		}
 	};
 
 	public TestState STATE;
@@ -72,11 +77,11 @@ public abstract class TestState
 		parent = null;
 	}
 
-	protected TestState( String name, TestState parent )
+	protected TestState( String name )
 	{
 		log = LoggerFactory.getLogger( getClass() );
 		this.name = Preconditions.checkNotNull( name );
-		this.parent = Preconditions.checkNotNull( parent );
+		this.parent = Preconditions.checkNotNull( parentState() );
 	}
 
 	public final String getName()
@@ -91,7 +96,7 @@ public abstract class TestState
 
 	/**
 	 * Transitions into the TestState, regardless of previous state.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public final void enter()
@@ -108,6 +113,8 @@ public abstract class TestState
 	protected abstract void enterFromParent() throws Exception;
 
 	protected abstract void exitToParent() throws Exception;
+
+	protected abstract TestState parentState();
 
 	private static void transitionTo( TestState newState )
 	{

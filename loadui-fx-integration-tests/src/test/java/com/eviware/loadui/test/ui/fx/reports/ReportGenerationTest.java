@@ -8,10 +8,10 @@ import com.eviware.loadui.test.ui.fx.FxIntegrationTestBase;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import com.eviware.loadui.util.BeanInjector;
 import com.google.common.collect.Sets;
-import groovy.lang.Category;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.awt.*;
 import java.io.File;

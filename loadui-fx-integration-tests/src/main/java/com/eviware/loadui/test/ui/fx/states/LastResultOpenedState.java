@@ -32,14 +32,25 @@ public class LastResultOpenedState extends TestState
 
 	private LastResultOpenedState()
 	{
-		super( "Last Result Opened", ProjectLoadedWithoutAgentsState.STATE );
+		super( "Last Result Opened" );
+	}
+
+	protected LastResultOpenedState( String name )
+	{
+		super( name );
+	}
+
+	@Override
+	protected TestState parentState()
+	{
+		return ProjectLoadedWithoutAgentsState.STATE;
 	}
 
 	@Override
 	protected void enterFromParent() throws Exception
 	{
 		integrationBase.runTestFor( 2, TimeUnit.SECONDS );
-		GUI.getController().click( "#statsTab" )
+		GUI.getOpenSourceGui().getController().click( "#statsTab" )
 				.click( "#open-execution" )
 				.doubleClick( "#result-0" );
 		integrationBase.waitForNodeToDisappear( ".result-view" );
@@ -48,13 +59,11 @@ public class LastResultOpenedState extends TestState
 	@Override
 	protected void exitToParent() throws Exception
 	{
-		GUI.getController().sleep( 500 );
 		Set<Node> resultViewSet = GuiTest.findAll( ".result-view" );
 		if( !resultViewSet.isEmpty() )
 		{
-			System.out.println( "CLOSING THE RESULT VIEW WINDOW! Should be already closed." );
-			GUI.getController().closeCurrentWindow();
+			GUI.getOpenSourceGui().getController().closeCurrentWindow();
 		}
-		GUI.getController().click( "#designTab" );
+		GUI.getOpenSourceGui().getController().click( "#designTab" );
 	}
 }

@@ -21,7 +21,7 @@
 <?import javafx.scene.control.SeparatorMenuItem?>
 
 <fx:root type="javafx.scene.layout.AnchorPane" styleClass="project-view"
-	xmlns:fx="http://javafx.com/fxml">
+   	xmlns:fx="http://javafx.com/fxml">
 	<stylesheets>
 		<URL value="@ProjectView.css" />
 	</stylesheets>
@@ -58,7 +58,7 @@
 				<Region styleClass="graphic"/>
 			</graphic>
 		</Button>
-	</HBox>	
+	</HBox>
 	<MenuButton maxWidth="170" fx:id="menuButton" styleClass="title"
 		AnchorPane.topAnchor="8" AnchorPane.leftAnchor="75">
 		<items>
