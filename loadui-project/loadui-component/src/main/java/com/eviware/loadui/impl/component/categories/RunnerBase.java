@@ -513,6 +513,10 @@ public abstract class RunnerBase extends BaseCategory implements RunnerCategory,
 				// manually call sampleCompleted (for asynchronous runners).
 				sampleCompleted( result, startTime );
 			}
+			else
+			{
+				log.warn( "Runner returned null on sample(), will have to wait for it to complete!" );
+			}
 		}
 	}
 
@@ -620,7 +624,7 @@ public abstract class RunnerBase extends BaseCategory implements RunnerCategory,
 	}
 
 	@Override
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	public void handleStatisticsData( Map<AgentItem, Object> statisticsData )
 	{
 		Preconditions.checkArgument( statisticsData.size() > 0, "Cannot process empty statistics data" );
@@ -633,7 +637,7 @@ public abstract class RunnerBase extends BaseCategory implements RunnerCategory,
 			}
 			catch( Exception e )
 			{
-				log.error( "Could not handle stat {}", data);
+				log.error( "Could not handle stat {}", data );
 				log.error( "Reason:", e );
 			}
 		}

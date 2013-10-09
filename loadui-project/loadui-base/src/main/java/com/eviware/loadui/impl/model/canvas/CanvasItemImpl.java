@@ -767,6 +767,7 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		@Override
 		public Future<BaseEvent> apply( ComponentItem component )
 		{
+			log.debug( "Component {} is BUSY, will create busy future to wait for it", component.getLabel() );
 			return component.isBusy() ? EventFuture.forKey( component, ComponentItem.BUSY ) : Futures
 					.<BaseEvent>immediateFuture( null );
 		}
@@ -779,6 +780,7 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 			switch( phase )
 			{
 				case START:
+					log.debug( "Starting canvas {}", getLabel() );
 					setRunning( true );
 					setTime( 0 );
 					startTime = new Date();
@@ -788,6 +790,7 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 					setCompleted( false );
 					break;
 				case PRE_STOP:
+					log.debug( "Pre-stopping canvas {}", getLabel() );
 					hasStarted = false;
 					if( timeLimitFuture != null )
 						timeLimitFuture.cancel( true );
@@ -806,6 +809,7 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 					onComplete( execution.getCanvas() );
 					break;
 				case STOP:
+					log.debug( "Stopping canvas {}", getLabel() );
 					if( timerFuture != null )
 						timerFuture.cancel( true );
 					setRunning( false );
@@ -827,6 +831,7 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 				log.error( "Failed waiting for a Component to complete", e );
 			}
 		}
+		log.debug( "All components completed in canvas {}", getLabel() );
 	}
 
 	private class TimeLimitTask implements Runnable
