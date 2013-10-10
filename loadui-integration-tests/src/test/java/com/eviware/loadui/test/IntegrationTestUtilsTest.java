@@ -1,8 +1,12 @@
 package com.eviware.loadui.test;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
 import org.junit.Test;
 
+import javax.annotation.Nullable;
 import java.io.File;
+import java.util.Arrays;
 import java.util.Random;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -47,7 +51,7 @@ public class IntegrationTestUtilsTest
 	@Test
 	public void testNewestDirectoryIn_WithFilesAndDirectories()
 	{
-		final int numberOfFilesToTestWith = 6;
+		final int numberOfFilesToTestWith = 20;
 
 		for( int run = 0; run < 10; run++ )
 		{
@@ -62,6 +66,16 @@ public class IntegrationTestUtilsTest
 				when( file.isDirectory() ).thenReturn( random.nextBoolean() );
 				files[i] = file;
 			}
+
+			assertThat( Collections2.transform( Arrays.asList( files ), new Function<File, Boolean>()
+			{
+				@Nullable
+				@Override
+				public Boolean apply( @Nullable File input )
+				{
+					return input != null && input.isDirectory();
+				}
+			} ), not( contains( false ) ) );
 
 			when( mockDir.listFiles() ).thenReturn( files );
 
