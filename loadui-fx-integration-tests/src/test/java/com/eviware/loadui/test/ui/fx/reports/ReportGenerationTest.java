@@ -19,11 +19,11 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 /**
  * @author renato
  */
-@Category( IntegrationTest.class )
+@Category(IntegrationTest.class)
 public class ReportGenerationTest extends FxIntegrationTestBase
 {
-	HasScenarios helper = new HasScenarios();
-	CanRunLoadUITests tester = new CanRunLoadUITests();
+	HasScenarios hasScenarios = new HasScenarios();
+	CanRunLoadUITests testRunner = new CanRunLoadUITests();
 
 	@Test
 	public void shouldGenerateReportAfterRunningATestInMainCanvas()
@@ -31,14 +31,14 @@ public class ReportGenerationTest extends FxIntegrationTestBase
 		Set<Window> existingSwingWindows = Sets.newHashSet( Window.getWindows() );
 
 		runTestFor( 2, SECONDS );
-		tester.clickOnCreateReportButton();
+		testRunner.clickOnCreateReportButton();
 
-		tester.assertNewWindowOpenWithReport( existingSwingWindows );
+		testRunner.assertNewWindowOpenWithReport( existingSwingWindows );
 
-		tester.focusOnReportWindow();
+		testRunner.focusOnReportWindow();
 		closeCurrentWindow();
 
-		tester.assertReportFileCreated();
+		testRunner.assertReportFileCreated();
 
 	}
 
@@ -47,10 +47,10 @@ public class ReportGenerationTest extends FxIntegrationTestBase
 	{
 		Set<Window> existingSwingWindows = Sets.newHashSet( Window.getWindows() );
 
-		helper.createScenario( 300, 0 );
-		helper.createScenario( 600, 0 );
+		hasScenarios.createScenario( 300, 0 );
+		hasScenarios.createScenario( 600, 0 );
 
-		helper.clickOnLinkScenarioButton();
+		hasScenarios.clickOnLinkScenarioButton();
 
 		try
 		{
@@ -59,17 +59,17 @@ public class ReportGenerationTest extends FxIntegrationTestBase
 		catch( RuntimeException e )
 		{
 			// required here because of bug LOADUI-1152
-			tester.abortRequestsIfPossible();
+			testRunner.abortRequestsIfPossible();
 		}
 
-		tester.clickOnCreateReportButton();
+		testRunner.clickOnCreateReportButton();
 
-		tester.assertNewWindowOpenWithReport( existingSwingWindows );
+		testRunner.assertNewWindowOpenWithReport( existingSwingWindows );
 
-		tester.focusOnReportWindow();
+		testRunner.focusOnReportWindow();
 		closeCurrentWindow();
 
-		tester.assertReportFileCreated();
+		testRunner.assertReportFileCreated();
 
 	}
 
@@ -82,6 +82,13 @@ public class ReportGenerationTest extends FxIntegrationTestBase
 	@After
 	public void cleanup()
 	{
-		tester.abortRequestsIfPossible();
+		try
+		{
+			testRunner.abortRequestsIfPossible();
+		}
+		catch( Exception e )
+		{
+			e.printStackTrace();
+		}
 	}
 }

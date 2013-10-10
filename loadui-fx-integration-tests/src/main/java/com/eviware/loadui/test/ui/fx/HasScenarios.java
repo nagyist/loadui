@@ -67,6 +67,7 @@ public class HasScenarios extends FxIntegrationBase
 
 	public void createScenario( int x, int y )
 	{
+		waitForNode( "#newScenarioIcon" );
 		drag( "#newScenarioIcon" ).by( x, y ).drop();
 		waitForNode( ".scenario-view" );
 	}
