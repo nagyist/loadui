@@ -16,6 +16,7 @@
 package com.eviware.loadui.impl.summary.sections;
 
 import com.eviware.loadui.api.model.CanvasItem;
+import com.eviware.loadui.api.summary.MutableSummary;
 import com.eviware.loadui.impl.model.canvas.SceneItemImpl;
 import com.eviware.loadui.impl.summary.MutableSectionImpl;
 import com.eviware.loadui.util.summary.CalendarUtils;
@@ -23,12 +24,14 @@ import com.eviware.loadui.util.summary.CalendarUtils;
 public class TestCaseDataSummarySection extends MutableSectionImpl
 {
 
-	SceneItemImpl testcase;
+	private final SceneItemImpl testcase;
+	private final MutableSummary summary;
 
-	public TestCaseDataSummarySection( SceneItemImpl testcase )
+	public TestCaseDataSummarySection( SceneItemImpl testcase, MutableSummary summary )
 	{
 		super( testcase.getLabel() );
 		this.testcase = testcase;
+		this.summary = summary;
 		addValue( "duration", getTime() );
 		addValue( "requests", getNumberOfSamples() );
 		addValue( "failures", getNumberOfFailures() );
@@ -52,7 +55,7 @@ public class TestCaseDataSummarySection extends MutableSectionImpl
 
 	public final String getTime()
 	{
-		return CalendarUtils.formatInterval( testcase.getStartTime(), testcase.getEndTime() );
+		return CalendarUtils.formatInterval( summary.getStartTime(), summary.getEndTime() );
 	}
 
 	public final String getNumberOfSamples()

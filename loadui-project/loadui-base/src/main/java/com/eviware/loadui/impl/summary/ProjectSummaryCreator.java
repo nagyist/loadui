@@ -33,8 +33,8 @@ public class ProjectSummaryCreator extends SummaryCreator
 		}
 
 		// fill project chapter
-		projectChapter.addSection( new ProjectDataSummarySection( projectItem ) );
-		projectChapter.addSection( new ProjectExecutionDataSection( projectItem ) );
+		projectChapter.addSection( new ProjectDataSummarySection( projectItem, mutableSummary ) );
+		projectChapter.addSection( new ProjectExecutionDataSection( projectItem, mutableSummary ) );
 		projectChapter.addSection( new ProjectExecutionMetricsSection( projectItem ) );
 		projectChapter.addSection( new ProjectExecutionNotablesSection( projectItem ) );
 		projectChapter.addSection( new ProjectDataSection( projectItem ) );

@@ -21,8 +21,8 @@ public class SceneSummaryCreator extends SummaryCreator
 	public void appendToSummary( MutableSummary mutableSummary )
 	{
 		MutableChapterImpl chap = ( MutableChapterImpl )mutableSummary.addChapter( sceneItem.getLabel() );
-		chap.addSection( new TestCaseDataSummarySection( sceneItem ) );
-		chap.addSection( new TestCaseExecutionDataSection( sceneItem ) );
+		chap.addSection( new TestCaseDataSummarySection( sceneItem, mutableSummary ) );
+		chap.addSection( new TestCaseExecutionDataSection( sceneItem, mutableSummary ) );
 		chap.addSection( new TestCaseExecutionMetricsSection( sceneItem ) );
 		chap.addSection( new TestCaseExecutionNotablesSection( sceneItem ) );
 		chap.addSection( new TestCaseDataSection( sceneItem ) );

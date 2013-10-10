@@ -75,6 +75,7 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 	private static final Logger log = LoggerFactory.getLogger( CanvasItemImpl.class );
 
 	private static final String LIMITS_ATTRIBUTE = "limits";
+	private final Object datesLock = new Object();
 
 	protected final CounterSupport counterSupport;
 	private final CollectionEventSupport<ComponentItem, Void> componentList;
@@ -484,14 +485,17 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 	@Nullable
 	public Summary getSummary()
 	{
-		if( startTime != null && endTime != null )
+		synchronized( datesLock )
 		{
-			log.info( "Generating summary report for CavasItem {}", getLabel() );
-			Summary summary = getSummaryCreator().createSummary( startTime, endTime );
-			fireBaseEvent( SUMMARY );
-			return summary;
+			if( startTime != null && endTime != null )
+			{
+				log.info( "Generating summary report for CavasItem {}", getLabel() );
+				Summary summary = getSummaryCreator().createSummary( startTime, endTime );
+				fireBaseEvent( SUMMARY );
+				return summary;
+			}
+			log.error( "Unable to create summary report: startTime: {}, endTime: {}", startTime, endTime );
 		}
-		log.error( "Unable to create summary report: startTime: {}, endTime: {}", startTime, endTime );
 		return null;
 	}
 
@@ -539,14 +543,17 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 	protected void reset()
 	{
 		boolean isRunning = isRunning();
-		if( isRunning )
+		synchronized( datesLock )
 		{
-			startTime = new Date();
-			endTime = null;
-		}
-		else
-		{
-			startTime = null;
+			if( isRunning )
+			{
+				startTime = new Date();
+				endTime = null;
+			}
+			else
+			{
+				startTime = null;
+			}
 		}
 		hasStarted = isRunning;
 		setTime( 0 );
@@ -576,23 +583,16 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 			this.completed = completed;
 			if( completed )
 			{
-				endTime = new Date();
+				synchronized( datesLock )
+				{
+					endTime = new Date();
+				}
 				triggerAction( READY_ACTION );
 				fireBaseEvent( ON_COMPLETE_DONE );
 			}
 		}
 		else
 			log.debug( "Ignoring request to set Canvas completed state to {}", completed );
-	}
-
-	public Date getStartTime()
-	{
-		return new Date( startTime.getTime() );
-	}
-
-	public Date getEndTime()
-	{
-		return new Date( endTime.getTime() );
 	}
 
 	public void markClean()
@@ -796,7 +796,11 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		log.debug( "Starting canvas {}", getLabel() );
 		setRunning( true );
 		setTime( 0 );
-		startTime = new Date();
+		synchronized( datesLock )
+		{
+			startTime = new Date();
+			endTime = null;
+		}
 		timerFuture = scheduler.scheduleAtFixedRate( new TimeUpdateTask(), 250, 250, TimeUnit.MILLISECONDS );
 		fixTimeLimit();
 		hasStarted = true;

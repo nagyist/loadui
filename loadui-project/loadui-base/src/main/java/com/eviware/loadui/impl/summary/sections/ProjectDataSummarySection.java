@@ -16,6 +16,7 @@
 package com.eviware.loadui.impl.summary.sections;
 
 import com.eviware.loadui.api.model.CanvasItem;
+import com.eviware.loadui.api.summary.MutableSummary;
 import com.eviware.loadui.impl.model.canvas.project.ProjectItemImpl;
 import com.eviware.loadui.impl.summary.MutableSectionImpl;
 import com.eviware.loadui.util.summary.CalendarUtils;
@@ -23,10 +24,12 @@ import com.eviware.loadui.util.summary.CalendarUtils;
 public class ProjectDataSummarySection extends MutableSectionImpl
 {
 	private final ProjectItemImpl project;
+	final MutableSummary summary;
 
-	public ProjectDataSummarySection( ProjectItemImpl projectItemImpl )
+	public ProjectDataSummarySection( ProjectItemImpl projectItemImpl, MutableSummary summary )
 	{
 		super( projectItemImpl.getLabel() );
+		this.summary = summary;
 
 		project = projectItemImpl;
 
@@ -53,7 +56,7 @@ public class ProjectDataSummarySection extends MutableSectionImpl
 
 	public final String getTime()
 	{
-		return CalendarUtils.formatInterval( project.getStartTime(), project.getEndTime() );
+		return CalendarUtils.formatInterval( summary.getStartTime(), summary.getEndTime() );
 	}
 
 	public final String getNumberOfSamples()

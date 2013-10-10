@@ -78,7 +78,7 @@ class SceneCompleteAwaiter implements EventHandler<BaseEvent>
 		{
 			synchronized( scene )
 			{
-				if( !scene.isCompleted() )
+				if( scene.isActive() && !scene.isCompleted() )
 				{
 					log.debug( "Scene {} is not completed yet", scene.getLabel() );
 					scene.addEventListener( BaseEvent.class, this );
