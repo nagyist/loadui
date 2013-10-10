@@ -52,8 +52,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 
 import java.util.*;
@@ -61,8 +59,6 @@ import java.util.concurrent.ExecutorService;
 
 public class ComponentItemImpl extends ModelItemImpl<ComponentItemConfig> implements ComponentItem
 {
-	static final Logger log = LoggerFactory.getLogger( ComponentItemImpl.class );
-
 	public static ComponentItemImpl newInstance( CanvasItem canvas, ComponentItemConfig config )
 	{
 		ComponentItemImpl object = new ComponentItemImpl( canvas, config );
@@ -365,7 +361,6 @@ public class ComponentItemImpl extends ModelItemImpl<ComponentItemConfig> implem
 		if( busy != state )
 		{
 			busy = state;
-			log.debug( "Component '{}'.setBusy( {} ), firing BUSY event", getLabel(), busy );
 			fireBaseEvent( BUSY );
 		}
 	}

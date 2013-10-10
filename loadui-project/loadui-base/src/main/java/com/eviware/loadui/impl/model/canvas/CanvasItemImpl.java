@@ -767,9 +767,8 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		@Override
 		public Future<BaseEvent> apply( ComponentItem component )
 		{
-			log.debug( "Component {} is BUSY, will create busy future to wait for it", component.getLabel() );
-			return component.isBusy() ? EventFuture.forKey( component, ComponentItem.BUSY ) : Futures
-					.<BaseEvent>immediateFuture( null );
+			EventFuture<BaseEvent> busyEventFuture = EventFuture.forKey( component, ComponentItem.BUSY );
+			return component.isBusy() ? busyEventFuture : Futures.<BaseEvent>immediateFuture( null );
 		}
 	};
 
@@ -780,42 +779,57 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 			switch( phase )
 			{
 				case START:
-					log.debug( "Starting canvas {}", getLabel() );
-					setRunning( true );
-					setTime( 0 );
-					startTime = new Date();
-					timerFuture = scheduler.scheduleAtFixedRate( new TimeUpdateTask(), 250, 250, TimeUnit.MILLISECONDS );
-					fixTimeLimit();
-					hasStarted = true;
-					setCompleted( false );
+					onStartExecution();
 					break;
 				case PRE_STOP:
-					log.debug( "Pre-stopping canvas {}", getLabel() );
-					hasStarted = false;
-					if( timeLimitFuture != null )
-						timeLimitFuture.cancel( true );
-
-					if( isAbortOnFinish() )
-					{
-						log.debug( "Cancelling all components running on {}", this );
-						cancelComponents();
-					}
-					else
-					{
-						log.debug( "Waiting for all components to complete on {}", this );
-						waitForComponentsToComplete();
-					}
-					log.debug( "Calling onComplete on execution canvas" );
-					onComplete( execution.getCanvas() );
+					onPreStopExecution( execution );
 					break;
 				case STOP:
-					log.debug( "Stopping canvas {}", getLabel() );
-					if( timerFuture != null )
-						timerFuture.cancel( true );
-					setRunning( false );
+					onStopExecution();
 					break;
 			}
 		}
+	}
+
+	private void onStartExecution()
+	{
+		log.debug( "Starting canvas {}", getLabel() );
+		setRunning( true );
+		setTime( 0 );
+		startTime = new Date();
+		timerFuture = scheduler.scheduleAtFixedRate( new TimeUpdateTask(), 250, 250, TimeUnit.MILLISECONDS );
+		fixTimeLimit();
+		hasStarted = true;
+		setCompleted( false );
+	}
+
+	private void onPreStopExecution( TestExecution execution )
+	{
+		log.debug( "Pre-stopping canvas {}", getLabel() );
+		hasStarted = false;
+		if( timeLimitFuture != null )
+			timeLimitFuture.cancel( true );
+
+		if( isAbortOnFinish() )
+		{
+			log.debug( "Cancelling all components running on {}", this );
+			cancelComponents();
+		}
+		else
+		{
+			log.debug( "Waiting for all components to complete on {}", this );
+			waitForComponentsToComplete();
+		}
+		log.debug( "Calling onComplete on execution canvas" );
+		onComplete( execution.getCanvas() );
+	}
+
+	private void onStopExecution()
+	{
+		log.debug( "Stopping canvas {}", getLabel() );
+		if( timerFuture != null )
+			timerFuture.cancel( true );
+		setRunning( false );
 	}
 
 	private void waitForComponentsToComplete()
@@ -824,12 +838,16 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		{
 			try
 			{
-				future.get( 15, TimeUnit.SECONDS );
+				future.get( 1, TimeUnit.MINUTES );
 			}
 			catch( InterruptedException | ExecutionException | TimeoutException e )
 			{
 				log.error( "Failed waiting for a Component to complete", e );
 			}
+		}
+		for( ComponentItem component : getComponents() )
+		{
+			component.setBusy( false );
 		}
 		log.debug( "All components completed in canvas {}", getLabel() );
 	}
