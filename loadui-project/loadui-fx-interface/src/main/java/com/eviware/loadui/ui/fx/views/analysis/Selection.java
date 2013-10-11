@@ -15,7 +15,6 @@
  */
 package com.eviware.loadui.ui.fx.views.analysis;
 
-import com.eviware.loadui.api.model.AgentItem;
 import com.eviware.loadui.api.statistics.StatisticHolder;
 import com.eviware.loadui.api.traits.Labeled;
 import com.eviware.loadui.ui.fx.util.TreeUtils;
@@ -30,6 +29,7 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public class Selection
 {
+	@SuppressWarnings( "unused" )
 	private static final Logger log = LoggerFactory.getLogger( Selection.class );
 
 	public final String source;
@@ -44,13 +44,18 @@ public class Selection
 		if( nodeDepth == 3 )
 		{
 			// selected is agent or tree is having 3 levels ex weblogic, tomcat
-			TreeUtils.LabeledKeyValue label = ( TreeUtils.LabeledKeyValue<String, ?> ) selected.getValue() ;
+			TreeUtils.LabeledKeyValue label = ( TreeUtils.LabeledKeyValue<String, ?> )selected.getValue();
 
-			if( label.getValue() instanceof String ){
-			    source = ( String )label.getValue();
-			}else if( label.getValue() instanceof Labeled ) {
-				 source = ( ( Labeled ) label.getValue() ).getLabel();
-			}else{
+			if( label.getValue() instanceof String )
+			{
+				source = ( String )label.getValue();
+			}
+			else if( label.getValue() instanceof Labeled )
+			{
+				source = ( ( Labeled )label.getValue() ).getLabel();
+			}
+			else
+			{
 				throw new IllegalArgumentException( " Cannot create Selection for " + label.getValue().getClass().getSimpleName() + " yet." );
 			}
 

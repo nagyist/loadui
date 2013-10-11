@@ -48,11 +48,6 @@ public class AssertionTest extends FxIntegrationTestBase
 		assert ( exists( ASSERTION_VIEW ) );
 	}
 
-	private boolean exists( String query )
-	{
-		return find( query ) != null;
-	}
-
 	@Override
 	public SimpleWebTestState getStartingState()
 	{

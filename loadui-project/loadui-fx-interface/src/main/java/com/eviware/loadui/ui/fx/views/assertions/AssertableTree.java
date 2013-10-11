@@ -108,15 +108,16 @@ public class AssertableTree extends TreeView<Labeled> implements Validatable
 
 	public StatisticWrapper<Number> getSelectedAssertion()
 	{
-		Object selected = getSelectionModel().getSelectedItem().getValue();
-		return ( ( TreeUtils.LabeledKeyValue<String, StatisticWrapper<Number>> )selected ).getValue();
+		TreeUtils.LabeledKeyValue<String, StatisticWrapper<Number>> selected =
+				( TreeUtils.LabeledKeyValue<String, StatisticWrapper<Number>> )getSelectionModel().getSelectedItem().getValue();
+		return selected.getValue();
 	}
 
 	private void addVariablesToTree( StatisticHolder holder, TreeItem<Labeled> root )
 	{
 		log.debug( "Adding variables to tree, StatisticHolder: " + holder );
-		TreeCreator creator = ( root.getValue() instanceof CanvasItem || root.getValue() instanceof ComponentItem ) ? new AssertableComponentTreeCreator()
-				: new AssertableMonitorTreeCreator();
+		TreeCreator creator = ( root.getValue() instanceof CanvasItem || root.getValue() instanceof ComponentItem ) ?
+				new AssertableComponentTreeCreator() : new AssertableMonitorTreeCreator();
 		creator.createTree( holder, root );
 	}
 
@@ -151,10 +152,10 @@ public class AssertableTree extends TreeView<Labeled> implements Validatable
 			for( String statisticName : variable.getStatisticNames() )
 			{
 				Statistic statistic = variable.getStatistic( statisticName, StatisticVariable.MAIN_SOURCE );
-				String statisticLabel = StringUtils.capitalizeEachWord( StringUtils.replaceUnderscoreWithSpace( statistic.getLabel() ) );
+				String statisticLabel = StringUtils.capitalizeEachWord( StringUtils.replaceAllUnderscoreWithSpace( statistic.getLabel() ) );
 
 				TreeUtils.LabeledKeyValue<String, StatisticWrapper> assertable =
-						new TreeUtils.LabeledKeyValue<String, StatisticWrapper>(
+						new TreeUtils.LabeledKeyValue<>(
 								statisticLabel,
 								new StatisticWrapper( statistic )
 						);
@@ -183,32 +184,40 @@ public class AssertableTree extends TreeView<Labeled> implements Validatable
 		{
 			for( String statisticName : variable.getStatisticNames() )
 			{
-				Map<String, TreeItem<Labeled>> branchBySource = new HashMap<>();
+
 				Map<String, TreeItem<Labeled>> branchByLabel = new HashMap<>();
 
 				for( String source : variable.getSources() )
 				{
 					Statistic statistic = variable.getStatistic( statisticName, source );
-					TreeItem<Labeled> assertable = branchByLabel.get( statistic.getLabel() );
-					final StatisticWrapper wrapper = new StatisticWrapper( statistic );
-
-					if( assertable == null )
-					{
-						assertable = treeNode( new TreeUtils.LabeledKeyValue( wrapper.getLabel(), wrapper ), parent );
-						branchByLabel.put( statistic.getLabel(), assertable );
-					}
-					branchBySource.put( source, assertable );
+					StatisticWrapper wrapper = new StatisticWrapper( statistic );
+					TreeItem<Labeled> assertable = getOrCreateAssertableTreeItem( wrapper, branchByLabel, parent );
 
 					if( !source.equals( StatisticVariable.MAIN_SOURCE ) )
 					{
-						// creating leafs
+						// creating leaf
 						treeNode( new TreeUtils.LabeledKeyValue( source, wrapper ), assertable );
 					}
 				}
 
 			}
 		}
+
+		private TreeItem<Labeled> getOrCreateAssertableTreeItem( StatisticWrapper wrapper, Map<String, TreeItem<Labeled>> alreadyCreatedBranches, TreeItem<Labeled> parent )
+		{
+			if( alreadyCreatedBranches.containsKey( wrapper.getLabel() ) )
+			{
+				return alreadyCreatedBranches.get( wrapper.getLabel() );
+			}
+			else
+			{
+				TreeItem<Labeled> assertable = treeNode( new TreeUtils.LabeledKeyValue( wrapper.getLabel(), wrapper ), parent );
+				alreadyCreatedBranches.put( wrapper.getLabel(), assertable );
+				return assertable;
+			}
+		}
 	}
+
 
 	@Override
 	public ReadOnlyBooleanProperty isValidProperty()
