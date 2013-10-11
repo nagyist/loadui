@@ -19,4 +19,5 @@ public abstract class FxIntegrationTestBase extends FxIntegrationBase
 	{
 		getStartingState().getParent().enter();
 	}
+
 }

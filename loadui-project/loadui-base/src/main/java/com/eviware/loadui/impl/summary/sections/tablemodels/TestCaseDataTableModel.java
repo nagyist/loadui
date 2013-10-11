@@ -15,14 +15,14 @@
  */
 package com.eviware.loadui.impl.summary.sections.tablemodels;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.eviware.loadui.api.model.CanvasItem;
+import com.eviware.loadui.api.summary.MutableSummary;
+import com.eviware.loadui.impl.model.canvas.SceneItemImpl;
+import com.eviware.loadui.util.summary.CalendarUtils;
 
 import javax.swing.table.AbstractTableModel;
-
-import com.eviware.loadui.api.model.CanvasItem;
-import com.eviware.loadui.impl.model.SceneItemImpl;
-import com.eviware.loadui.util.summary.CalendarUtils;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestCaseDataTableModel extends AbstractTableModel
 {
@@ -83,11 +83,11 @@ public class TestCaseDataTableModel extends AbstractTableModel
 		String numberOfAssertions;
 		String numberOfFailedAssertions;
 
-		public TestCaseDataModel( SceneItemImpl tc )
+		public TestCaseDataModel( SceneItemImpl tc, MutableSummary summary )
 		{
 			this.name = tc.getLabel();
 
-			this.execTime = CalendarUtils.formatInterval( tc.getStartTime(), tc.getEndTime() );
+			this.execTime = CalendarUtils.formatInterval( summary.getStartTime(), summary.getEndTime() );
 
 			this.numberOfSamples = String.valueOf( tc.getCounter( CanvasItem.SAMPLE_COUNTER ).get() );
 

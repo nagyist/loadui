@@ -22,6 +22,7 @@ import java.util.EventObject;
 
 import javax.annotation.Nonnull;
 
+import com.eviware.loadui.impl.model.canvas.project.ProjectItemImpl;
 import org.apache.xmlbeans.XmlException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

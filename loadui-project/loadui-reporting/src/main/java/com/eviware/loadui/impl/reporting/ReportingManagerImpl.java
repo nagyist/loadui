@@ -15,7 +15,19 @@
  */
 package com.eviware.loadui.impl.reporting;
 
-import java.awt.Image;
+import com.eviware.loadui.api.reporting.ReportingManager;
+import com.eviware.loadui.api.statistics.model.StatisticPage;
+import com.eviware.loadui.api.statistics.store.Execution;
+import com.eviware.loadui.api.summary.Summary;
+import com.eviware.loadui.impl.reporting.statistics.ExecutionDataSource;
+import com.eviware.loadui.impl.reporting.summary.SummaryDataSource;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperPrint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -23,68 +35,58 @@ import java.io.ObjectInputStream;
 import java.util.Collection;
 import java.util.Map;
 
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperPrint;
-
-import com.eviware.loadui.api.reporting.ReportingManager;
-import com.eviware.loadui.api.statistics.model.StatisticPage;
-import com.eviware.loadui.api.statistics.store.Execution;
-import com.eviware.loadui.api.summary.Summary;
-import com.eviware.loadui.impl.reporting.statistics.ExecutionDataSource;
-import com.eviware.loadui.impl.reporting.summary.SummaryDataSource;
-import com.google.common.io.Closeables;
-
 public class ReportingManagerImpl implements ReportingManager
 {
+	static final Logger log = LoggerFactory.getLogger( ReportingManagerImpl.class );
 	private static final String SUMMARY_REPORT = "SummaryReport";
 	private static final String RESULTS_REPORT = "ResultsReport";
 	private final ReportEngine reportEngine = new ReportEngine();
 
 	private static JasperPrint getJpFromFile( File file )
 	{
-		ObjectInputStream ois = null;
-		try
+		try( ObjectInputStream ois = new ObjectInputStream( new FileInputStream( file ) ) )
 		{
-			ois = new ObjectInputStream( new FileInputStream( file ) );
 			return ( JasperPrint )ois.readObject();
 		}
 		catch( IOException e )
 		{
-			return null;
+			log.warn( "Problem reading Jasper file", e );
 		}
 		catch( ClassNotFoundException e )
 		{
-			return null;
+			log.warn( "The class of the Object in file {} cannot be found", file.getAbsolutePath() );
 		}
-		finally
-		{
-			Closeables.closeQuietly( ois );
-		}
+		return null;
 	}
 
 	@Override
-	public void createReport( Summary summary )
+	public void createReport( @Nullable Summary summary )
 	{
-		reportEngine.generateJasperReport( new SummaryDataSource( summary ), SUMMARY_REPORT, summary.getChapters()
-				.keySet().iterator().next() );
+		if( summary == null )
+			log.warn( "Summary not provided, cannot create report" );
+		else
+			reportEngine.generateJasperReport( new SummaryDataSource( summary ), SUMMARY_REPORT, summary.getChapters()
+					.keySet().iterator().next() );
 	}
 
 	@Override
-	public void createReport( Summary summary, File file, String format )
+	public void createReport( @Nullable Summary summary, File file, String format )
 	{
-		try
+		if( summary == null )
+			log.warn( "Summary not provided, cannot create report" );
+		else try
 		{
 			reportEngine.generateJasperReport( new SummaryDataSource( summary ), SUMMARY_REPORT, file, format );
 		}
 		catch( JRException e )
 		{
-			e.printStackTrace();
+			log.error( "Problem creating report", e );
 		}
 	}
 
 	@Override
 	public void createReport( String label, Execution execution, Collection<StatisticPage> pages,
-			Map<Object, Image> charts )
+									  Map<Object, Image> charts )
 	{
 		reportEngine.generateJasperReport( new ExecutionDataSource( label, execution, pages, charts ), RESULTS_REPORT,
 				execution.getLabel() );
@@ -92,7 +94,7 @@ public class ReportingManagerImpl implements ReportingManager
 
 	@Override
 	public void createReport( String label, Execution execution, Collection<StatisticPage> pages,
-			Map<? extends Object, Image> charts, File file, String format )
+									  Map<?, Image> charts, File file, String format )
 	{
 		try
 		{
@@ -107,13 +109,13 @@ public class ReportingManagerImpl implements ReportingManager
 
 	@Override
 	public void createReport( String label, Execution execution, Collection<StatisticPage> pages,
-			Map<? extends Object, Image> charts, File jpFileToPrepend )
+									  Map<?, Image> charts, File jpFileToPrepend )
 	{
 		createReport( label, execution, pages, charts, getJpFromFile( jpFileToPrepend ) );
 	}
 
 	public void createReport( String label, Execution execution, Collection<StatisticPage> pages,
-			Map<? extends Object, Image> charts, JasperPrint jpToPrepend )
+									  Map<?, Image> charts, JasperPrint jpToPrepend )
 	{
 		reportEngine.generateJasperReport( new ExecutionDataSource( label, execution, pages, charts ), RESULTS_REPORT,
 				execution.getLabel(), jpToPrepend );
@@ -121,13 +123,13 @@ public class ReportingManagerImpl implements ReportingManager
 
 	@Override
 	public void createReport( String label, Execution execution, Collection<StatisticPage> pages,
-			Map<? extends Object, Image> charts, File file, String format, File jpFileToPrepend )
+									  Map<?, Image> charts, File file, String format, File jpFileToPrepend )
 	{
 		createReport( label, execution, pages, charts, file, format, getJpFromFile( jpFileToPrepend ) );
 	}
 
 	public void createReport( String label, Execution execution, Collection<StatisticPage> pages,
-			Map<? extends Object, Image> charts, File file, String format, JasperPrint jpToPrepend )
+									  Map<?, Image> charts, File file, String format, JasperPrint jpToPrepend )
 	{
 		try
 		{

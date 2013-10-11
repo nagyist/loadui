@@ -15,44 +15,40 @@
  */
 package com.eviware.loadui.test.ui.fx.states;
 
-import static org.loadui.testfx.GuiTest.findAll;
-
-import java.util.Collection;
-import java.util.concurrent.Callable;
-
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.api.model.WorkspaceProvider;
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.ui.fx.GUI;
-import com.eviware.loadui.util.BeanInjector;
 import org.loadui.testfx.GuiTest;
 import org.loadui.testfx.TestUtils;
+
+import java.util.concurrent.Callable;
+
+import static org.loadui.testfx.GuiTest.findAll;
 
 public class ProjectLoadedWithoutAgentsState extends TestState
 {
 	public static final ProjectLoadedWithoutAgentsState STATE = new ProjectLoadedWithoutAgentsState();
 
-	private ProjectItem project = null;
-
 	private ProjectLoadedWithoutAgentsState()
 	{
-		this( "Project Loaded", ProjectCreatedWithoutAgentsState.STATE );
-	}
-	
-	protected ProjectLoadedWithoutAgentsState( String name, TestState parent ) {
-		super( name, parent );
+		this( "Project Loaded" );
 	}
 
-	public ProjectItem getProject()
+	protected ProjectLoadedWithoutAgentsState( String name )
 	{
-		return project;
+		super( name );
+	}
+
+	@Override
+	protected TestState parentState()
+	{
+		return ProjectCreatedWithoutAgentsState.STATE;
 	}
 
 	@Override
 	protected void enterFromParent() throws Exception
 	{
 		log.debug( "Opening project." );
-		GUI.getController().click( ".project-ref-view #menuButton" ).click( "#open-item" );
+		GUI.getOpenSourceGui().getController().click( ".project-ref-view #menuButton" ).click( "#open-item" );
 
 		TestUtils.awaitCondition( new Callable<Boolean>()
 		{
@@ -63,21 +59,17 @@ public class ProjectLoadedWithoutAgentsState extends TestState
 			}
 		} );
 
-		Collection<? extends ProjectItem> projects = BeanInjector.getBean( WorkspaceProvider.class ).getWorkspace()
-				.getProjects();
-		project = projects.iterator().next();
 	}
 
 	@Override
 	protected void exitToParent() throws Exception
 	{
 		log.debug( "Closing project." );
-		project = null;
-		GUI.getController().click( "#closeProjectButton" );
+		GUI.getOpenSourceGui().getController().click( "#closeProjectButton" );
 		//If there is a save dialog, do not save:
 		try
 		{
-			GUI.getController().click( "#no" ).target( GuiTest.getWindowByIndex( 0 ) );
+			GUI.getOpenSourceGui().getController().click( "#no" ).target( GuiTest.getWindowByIndex( 0 ) );
 		}
 		catch( Exception e )
 		{

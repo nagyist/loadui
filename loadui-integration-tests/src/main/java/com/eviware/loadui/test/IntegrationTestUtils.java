@@ -18,6 +18,8 @@ package com.eviware.loadui.test;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
@@ -41,6 +43,25 @@ public class IntegrationTestUtils
 					return false;
 		}
 		return target.delete();
+	}
+
+	@Nullable
+	public static File newestDirectoryIn( @Nonnull File directory )
+	{
+		File[] files = directory.listFiles();
+		if( files == null || files.length == 0 )
+			return null;
+		File newest = null;
+		long newestTime = Long.MIN_VALUE;
+		for( File file : files )
+		{
+			if( file.isDirectory() && file.lastModified() > newestTime )
+			{
+				newest = file;
+				newestTime = file.lastModified();
+			}
+		}
+		return newest;
 	}
 
 	public static void copyDirectory( File sourceLocation, File targetLocation ) throws IOException

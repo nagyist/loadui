@@ -3,7 +3,7 @@
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<template><![CDATA["reports/styles.jrtx"]]></template>
+	<template><![CDATA[com.eviware.loadui.LoadUI.getWorkingDir().getAbsolutePath() + "/reports/styles.jrtx"]]></template>
 	<field name="group" class="net.sf.jasperreports.engine.JRDataSource"/>
 	<field name="groupName" class="java.lang.String"/>
 	<background>

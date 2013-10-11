@@ -15,21 +15,6 @@
  */
 package com.eviware.loadui.impl.statistics;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.addon.Addon;
 import com.eviware.loadui.api.addon.Addon.Context;
@@ -43,7 +28,7 @@ import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.api.model.WorkspaceProvider;
 import com.eviware.loadui.api.reporting.ReportingManager;
-import com.eviware.loadui.api.reporting.SummaryExportUtils;
+import com.eviware.loadui.api.reporting.SummaryExporter;
 import com.eviware.loadui.api.statistics.ExecutionAddon;
 import com.eviware.loadui.api.statistics.ProjectExecutionManager;
 import com.eviware.loadui.api.statistics.store.Execution;
@@ -51,44 +36,57 @@ import com.eviware.loadui.api.statistics.store.ExecutionManager;
 import com.eviware.loadui.api.summary.MutableSummary;
 import com.eviware.loadui.api.summary.Summary;
 import com.eviware.loadui.api.traits.Releasable;
-import com.eviware.loadui.util.BeanInjector;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Releasable
 {
 	private static Logger log = LoggerFactory.getLogger( ProjectExecutionManagerImpl.class );
 
+	private final TestRunner testRunner;
 	private final ExecutionManager executionManager;
 	private final WorkspaceProvider workspaceProvider;
 	private final ReportingManager reportingManager;
-	private final Set<SummaryTask> summaryAttachers = new HashSet<>();
+	private final SummaryExporter summaryExporter;
 	private final RunningExecutionTask runningExecutionTask = new RunningExecutionTask();
 
-	ProjectExecutionManagerImpl( final ExecutionManager executionManager, final WorkspaceProvider workspaceProvider,
-			final ReportingManager reportingManager )
+	ProjectExecutionManagerImpl( AddonRegistry addonRegistry, TestRunner testRunner,
+										  final ExecutionManager executionManager, final WorkspaceProvider workspaceProvider,
+										  final ReportingManager reportingManager, SummaryExporter summaryExporter )
 	{
+		this.testRunner = testRunner;
 		this.executionManager = executionManager;
 		this.workspaceProvider = workspaceProvider;
 		this.reportingManager = reportingManager;
+		this.summaryExporter = summaryExporter;
 
-		BeanInjector.getBean( AddonRegistry.class ).registerFactory( ExecutionAddon.class,
+		addonRegistry.registerFactory( ExecutionAddon.class,
 				new Addon.Factory<ExecutionAddon>()
 				{
+					@Nonnull
 					@Override
 					public Class<ExecutionAddon> getType()
 					{
 						return ExecutionAddon.class;
 					}
 
+					@Nonnull
 					@Override
-					public ExecutionAddon create( Context context )
+					public ExecutionAddon create( @Nonnull Context context )
 					{
 						return new ExecutionAddonImpl( context );
 					}
 
+					@Nonnull
 					@Override
 					public Set<Class<?>> getEagerTypes()
 					{
@@ -96,7 +94,7 @@ public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Rel
 					}
 				} );
 
-		BeanInjector.getBean( TestRunner.class ).registerTask( runningExecutionTask, Phase.START, Phase.POST_STOP );
+		testRunner.registerTask( runningExecutionTask, Phase.START, Phase.POST_STOP );
 	}
 
 	@Override
@@ -137,7 +135,7 @@ public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Rel
 	@Override
 	public void release()
 	{
-		BeanInjector.getBean( TestRunner.class ).unregisterTask( runningExecutionTask, Phase.values() );
+		testRunner.unregisterTask( runningExecutionTask, Phase.values() );
 	}
 
 	private class ExecutionAddonImpl implements ExecutionAddon
@@ -176,14 +174,14 @@ public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Rel
 
 			switch( phase )
 			{
-			case START :
-				startExecution( runningProject );
-				break;
-			case POST_STOP :
-				stopExecution( runningProject );
-				break;
-			default :
-				break;
+				case START:
+					startExecution( runningProject );
+					break;
+				case POST_STOP:
+					stopExecution( runningProject );
+					break;
+				default:
+					break;
 			}
 		}
 
@@ -207,7 +205,8 @@ public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Rel
 				return;
 			}
 
-			summaryAttachers.add( new SummaryTask( runningProject, executionManager.getCurrentExecution() ) );
+			SummaryTask postStopTask = new SummaryTask( runningProject, executionManager.getCurrentExecution() );
+			testRunner.runTaskOnce( postStopTask, Phase.POST_STOP );
 
 		}
 
@@ -248,7 +247,6 @@ public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Rel
 		{
 			this.project = project;
 			this.execution = execution;
-			BeanInjector.getBean( TestRunner.class ).registerTask( this, Phase.POST_STOP );
 		}
 
 		@Override
@@ -256,7 +254,6 @@ public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Rel
 		{
 			CanvasItem canvas = testExecution.getCanvas();
 
-			canvas.generateSummary();
 			Summary summary = canvas.getSummary();
 
 			long totalRequests = canvas.getCounter( CanvasItem.SAMPLE_COUNTER ).get();
@@ -271,15 +268,13 @@ public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Rel
 			{
 				saveSummaryAsFile( canvas, summary );
 			}
-
-			BeanInjector.getBean( TestRunner.class ).unregisterTask( this, Phase.POST_STOP );
 		}
 
 		private void saveSummaryAsFile( CanvasItem canvas, Summary summary )
 		{
 			log.debug( "SUMMARY EXPORTED SENT FROM SummaryListener.handleEvent" );
 
-			String label = null;
+			String label;
 			if( canvas instanceof ProjectItem )
 			{
 				label = project.getLabel();
@@ -291,7 +286,7 @@ public class ProjectExecutionManagerImpl implements ProjectExecutionManager, Rel
 				label = project.getLabel() + "-" + scene.getLabel();
 				log.debug( "scene.getSummary(): {}", summary );
 			}
-			SummaryExportUtils.saveSummary( ( MutableSummary )summary, project.getReportFolder(),
+			summaryExporter.saveSummary( ( MutableSummary )summary, project.getReportFolder(),
 					project.getReportFormat(), label );
 		}
 	}
