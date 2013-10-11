@@ -15,23 +15,29 @@
  */
 package com.eviware.loadui.ui.fx.views.workspace;
 
-import static com.eviware.loadui.ui.fx.util.ObservableLists.bindSorted;
-import static javafx.beans.binding.Bindings.bindContent;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-
-import javafx.application.Platform;
+import com.eviware.loadui.LoadUI;
+import com.eviware.loadui.api.model.ProjectItem;
+import com.eviware.loadui.api.model.ProjectRef;
+import com.eviware.loadui.api.model.WorkspaceItem;
+import com.eviware.loadui.ui.fx.MenuItemsProvider;
+import com.eviware.loadui.ui.fx.MenuItemsProvider.Options;
+import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
+import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
+import com.eviware.loadui.ui.fx.control.Carousel;
+import com.eviware.loadui.ui.fx.control.ToolBox;
+import com.eviware.loadui.ui.fx.util.*;
+import com.eviware.loadui.ui.fx.views.projectref.ProjectRefView;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Ordering;
+import com.google.common.io.Files;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ReadOnlyStringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ContextMenuBuilder;
 import javafx.scene.control.Label;
@@ -45,36 +51,17 @@ import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.FileChooserBuilder;
-import javafx.stage.Window;
-import javafx.stage.WindowEvent;
 import javafx.util.Callback;
-
-import javax.annotation.Nullable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.api.model.ProjectRef;
-import com.eviware.loadui.api.model.WorkspaceItem;
-import com.eviware.loadui.ui.fx.MenuItemsProvider;
-import com.eviware.loadui.ui.fx.MenuItemsProvider.Options;
-import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
-import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
-import com.eviware.loadui.ui.fx.control.Carousel;
-import com.eviware.loadui.ui.fx.control.ToolBox;
-import com.eviware.loadui.ui.fx.util.FXMLUtils;
-import com.eviware.loadui.ui.fx.util.NodeUtils;
-import com.eviware.loadui.ui.fx.util.ObservableLists;
-import com.eviware.loadui.ui.fx.util.Observables;
-import com.eviware.loadui.ui.fx.util.UIUtils;
-import com.eviware.loadui.ui.fx.views.projectref.ProjectRefView;
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Ordering;
-import com.google.common.io.Files;
+import javax.annotation.Nullable;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
+import static com.eviware.loadui.ui.fx.util.ObservableLists.bindSorted;
+import static javafx.beans.binding.Bindings.bindContent;
 
 public class WorkspaceView extends StackPane
 {
@@ -86,7 +73,7 @@ public class WorkspaceView extends StackPane
 	private static final ExtensionFilter XML_EXTENSION_FILTER = new FileChooser.ExtensionFilter( "loadUI project file",
 			"*.xml" );
 	private static final String HELPER_PAGE_URL = "http://www.loadui.org/Working-with-loadUI/workspace-overview.html";
-	private static final String PROP_FILE = "res/application.properties";
+	private static final File PROP_FILE = LoadUI.relativeFile( "res/application.properties" );
 
 	private final WorkspaceItem workspace;
 	private final ObservableList<ProjectRef> projectRefList;
@@ -157,7 +144,7 @@ public class WorkspaceView extends StackPane
 
 		java.util.Properties props = new java.util.Properties();
 
-		try (InputStream propsStream = Files.newInputStreamSupplier( new File( PROP_FILE ) ).getInput())
+		try (InputStream propsStream = Files.newInputStreamSupplier( PROP_FILE ).getInput())
 		{
 			props.load( propsStream );
 		}

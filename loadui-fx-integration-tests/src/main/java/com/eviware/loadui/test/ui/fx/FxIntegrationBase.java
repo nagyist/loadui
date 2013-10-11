@@ -1,14 +1,24 @@
 package com.eviware.loadui.test.ui.fx;
 
+import com.eviware.loadui.api.model.ProjectItem;
+import com.eviware.loadui.api.model.WorkspaceProvider;
 import com.eviware.loadui.ui.fx.util.test.ComponentHandle;
 import com.eviware.loadui.ui.fx.util.test.LoadUiRobot;
+import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.test.TestUtils;
+import com.google.code.tempusfugit.temporal.Condition;
+import com.google.code.tempusfugit.temporal.Timeout;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 import org.loadui.testfx.GuiTest;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import static com.google.code.tempusfugit.temporal.Duration.seconds;
+import static com.google.code.tempusfugit.temporal.Timeout.timeout;
+import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 
 /**
  * @Author Henrik
@@ -57,6 +67,26 @@ public class FxIntegrationBase extends GuiTest
 
 	}
 
+	protected void ensureProjectIsNotRunning()
+	{
+		final ProjectItem project = getProjectItem();
+		if( project.isRunning() )
+		{
+			try
+			{
+				waitOrTimeout( new IsProjectRunning( project, false ), timeout( seconds( 5 ) ) );
+				System.out.println( "Project stopped running" );
+			}
+			catch( InterruptedException | TimeoutException e )
+			{
+				e.printStackTrace();
+				robot.clickPlayStopButton();
+				ensureProjectIsNotRunning();
+			}
+		}
+		waitForNodeToDisappear( "#abort-requests" );
+	}
+
 	public ComponentHandle connect( LoadUiRobot.Component component )
 	{
 		return robot.createComponent( component );
@@ -74,16 +104,35 @@ public class FxIntegrationBase extends GuiTest
 		} );
 	}
 
+	public void waitForNodeToDisappear( final String domQuery, Timeout timeout )
+	{
+		try
+		{
+			waitOrTimeout( new Condition()
+			{
+				@Override
+				public boolean isSatisfied()
+				{
+					return findAll( domQuery ).isEmpty();
+				}
+			}, timeout );
+		}
+		catch( Exception e )
+		{
+			throw new RuntimeException( e );
+		}
+
+	}
+
 	public void waitForNodeToDisappear( final String domQuery )
 	{
-		TestUtils.awaitCondition( new Callable<Boolean>()
-		{
-			@Override
-			public Boolean call() throws Exception
-			{
-				return findAll( domQuery ).isEmpty();
-			}
-		} );
+		waitForNodeToDisappear( domQuery, timeout( seconds( 5 ) ) );
+	}
+
+	public void setTestTimeLimitTo( int seconds )
+	{
+		click( "#set-limits" ).click( "#time-limit" ).doubleClick()
+				.type( Integer.toString( seconds ) ).click( "#default" );
 	}
 
 	public KnobHandle turnKnobIn( LoadUiRobot.Component component )
@@ -92,6 +141,25 @@ public class FxIntegrationBase extends GuiTest
 		System.out.println( "Component node: " + componentNode );
 		Node knob = find( ".knob", componentNode );
 		return new KnobHandle( knob );
+	}
+
+	public void ensureResultViewWindowIsClosed()
+	{
+		if( isResultViewWindowIsOpen() )
+		{
+			closeCurrentWindow();
+		}
+	}
+
+	public boolean isResultViewWindowIsOpen()
+	{
+		return !GuiTest.findAll( ".analysis-view" ).isEmpty();
+	}
+
+	public static ProjectItem getProjectItem()
+	{
+		return BeanInjector.getBean( WorkspaceProvider.class ).getWorkspace()
+				.getProjects().iterator().next();
 	}
 
 	public class KnobHandle

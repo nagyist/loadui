@@ -33,12 +33,18 @@ public class ProjectCreatedWithoutAgentsState extends TestState
 
 	private ProjectCreatedWithoutAgentsState()
 	{
-		this( "Project without agents created", FXAppLoadedState.STATE );
+		this( "Project without agents created" );
 	}
 
-	protected ProjectCreatedWithoutAgentsState( String name, TestState parent )
+	protected ProjectCreatedWithoutAgentsState( String name )
 	{
-		super( name, parent );
+		super( name );
+	}
+
+	@Override
+	protected TestState parentState()
+	{
+		return OpenSourceFxLoadedState.STATE;
 	}
 
 	@Override
@@ -48,7 +54,7 @@ public class ProjectCreatedWithoutAgentsState extends TestState
 		System.out.println( "ProjectCreateWithoutAgentsState - Creating new project." );
 		waitUntil( "#newProjectIcon", is( visible() ) );
 
-		GUI.getController().drag( "#newProjectIcon" ).to( projectCarousel ).type( "Project 1" )
+		GUI.getOpenSourceGui().getController().drag( "#newProjectIcon" ).to( projectCarousel ).type( "Project 1" )
 				.type( KeyCode.TAB ).type( "project-1.xml" ).click( ".check-box" ).click( "#default" );
 
 		waitUntil( ".project-ref-view", is( visible() ) );
@@ -58,7 +64,7 @@ public class ProjectCreatedWithoutAgentsState extends TestState
 	protected void exitToParent() throws Exception
 	{
 		log.debug( "Deleting project." );
-		GUI.getController().click( "#projectRefCarousel .project-ref-view .menu-button" ).click( "#delete-item" )
+		GUI.getOpenSourceGui().getController().click( "#projectRefCarousel .project-ref-view .menu-button" ).click( "#delete-item" )
 				.click( ".confirmation-dialog #default" );
 		waitUntil( ".project-ref-view", is( not( visible() ) ) );
 	}

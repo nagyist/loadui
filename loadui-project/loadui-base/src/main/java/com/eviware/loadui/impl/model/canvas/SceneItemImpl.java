@@ -13,8 +13,40 @@
  * express or implied. See the Licence for the specific language governing permissions and limitations
  * under the Licence.
  */
-package com.eviware.loadui.impl.model;
+package com.eviware.loadui.impl.model.canvas;
 
+import com.eviware.loadui.LoadUI;
+import com.eviware.loadui.api.component.ComponentContext;
+import com.eviware.loadui.api.component.categories.OnOffCategory;
+import com.eviware.loadui.api.component.categories.SchedulerCategory;
+import com.eviware.loadui.api.counter.CounterSynchronizer;
+import com.eviware.loadui.api.events.*;
+import com.eviware.loadui.api.execution.Phase;
+import com.eviware.loadui.api.execution.TestExecution;
+import com.eviware.loadui.api.messaging.MessageEndpoint;
+import com.eviware.loadui.api.messaging.SceneCommunication;
+import com.eviware.loadui.api.model.*;
+import com.eviware.loadui.api.property.Property;
+import com.eviware.loadui.api.terminal.*;
+import com.eviware.loadui.config.SceneItemConfig;
+import com.eviware.loadui.impl.counter.AggregatedCounterSupport;
+import com.eviware.loadui.impl.counter.RemoteAggregatedCounterSupport;
+import com.eviware.loadui.impl.summary.SceneSummaryCreator;
+import com.eviware.loadui.impl.summary.SummaryCreator;
+import com.eviware.loadui.impl.terminal.ConnectionImpl;
+import com.eviware.loadui.impl.terminal.InputTerminalImpl;
+import com.eviware.loadui.impl.terminal.TerminalHolderSupport;
+import com.eviware.loadui.util.BeanInjector;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,56 +55,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
-import com.eviware.loadui.api.model.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.api.component.ComponentContext;
-import com.eviware.loadui.api.component.categories.OnOffCategory;
-import com.eviware.loadui.api.component.categories.SchedulerCategory;
-import com.eviware.loadui.api.counter.CounterSynchronizer;
-import com.eviware.loadui.api.events.ActionEvent;
-import com.eviware.loadui.api.events.BaseEvent;
-import com.eviware.loadui.api.events.CollectionEvent;
-import com.eviware.loadui.api.events.EventFirer;
-import com.eviware.loadui.api.events.EventHandler;
-import com.eviware.loadui.api.events.PropertyEvent;
-import com.eviware.loadui.api.events.RemoteActionEvent;
-import com.eviware.loadui.api.events.TerminalEvent;
-import com.eviware.loadui.api.events.TerminalMessageEvent;
-import com.eviware.loadui.api.execution.Phase;
-import com.eviware.loadui.api.execution.TestExecution;
-import com.eviware.loadui.api.messaging.MessageEndpoint;
-import com.eviware.loadui.api.messaging.SceneCommunication;
-import com.eviware.loadui.api.property.Property;
-import com.eviware.loadui.api.summary.MutableSummary;
-import com.eviware.loadui.api.terminal.Connection;
-import com.eviware.loadui.api.terminal.InputTerminal;
-import com.eviware.loadui.api.terminal.OutputTerminal;
-import com.eviware.loadui.api.terminal.Terminal;
-import com.eviware.loadui.api.terminal.TerminalMessage;
-import com.eviware.loadui.config.SceneItemConfig;
-import com.eviware.loadui.impl.counter.AggregatedCounterSupport;
-import com.eviware.loadui.impl.counter.RemoteAggregatedCounterSupport;
-import com.eviware.loadui.impl.summary.MutableChapterImpl;
-import com.eviware.loadui.impl.summary.sections.TestCaseDataSection;
-import com.eviware.loadui.impl.summary.sections.TestCaseDataSummarySection;
-import com.eviware.loadui.impl.summary.sections.TestCaseExecutionDataSection;
-import com.eviware.loadui.impl.summary.sections.TestCaseExecutionMetricsSection;
-import com.eviware.loadui.impl.summary.sections.TestCaseExecutionNotablesSection;
-import com.eviware.loadui.impl.terminal.ConnectionImpl;
-import com.eviware.loadui.impl.terminal.InputTerminalImpl;
-import com.eviware.loadui.impl.terminal.TerminalHolderSupport;
-import com.eviware.loadui.util.BeanInjector;
-import com.google.common.collect.ImmutableList;
-
 public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements SceneItem
 {
 	private static final Logger log = LoggerFactory.getLogger( CanvasItemImpl.class );
+
+	private static final Predicate<AgentItem> ACTIVE_AGENTS_FUNCTION = new Predicate<AgentItem>()
+	{
+		@Override
+		public boolean apply( @Nullable AgentItem input )
+		{
+			return input != null && input.isEnabled() && input.isReady();
+		}
+	};
 
 	public static SceneItemImpl newInstance( ProjectItem project, SceneItemConfig config )
 	{
@@ -91,13 +85,12 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 	private final ProjectItem project;
 
 	private final ProjectListener projectListener;
-	private final WorkspaceListener workspaceListener;
 	private final TerminalHolderSupport terminalHolderSupport;
 	private final InputTerminal stateTerminal;
-	private final Map<AgentItem, Map<Object, Object>> remoteStatistics = new ConcurrentHashMap<>();
+	private final Map<AgentItem, Map<?, ?>> remoteStatistics = new ConcurrentHashMap<>();
 	private long version;
 	private boolean propagate = true;
-	private boolean wasLocalModeWhenStarted = true;
+	private boolean isRunningInLocalMode = true;
 
 	private MessageEndpoint messageEndpoint = null;
 
@@ -127,8 +120,6 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 
 		stateTerminal = stateTerminalImpl;
 
-		workspaceListener = LoadUI.isController() ? new WorkspaceListener() : null;
-
 		projectListener = LoadUI.isController() ? new ProjectListener() : null;
 	}
 
@@ -138,8 +129,8 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 		super.init();
 		if( LoadUI.isController() )
 		{
+			Preconditions.checkNotNull( project, "Project must not be empty in LoadUI controller" );
 			project.addEventListener( ActionEvent.class, projectListener );
-			project.getWorkspace().addEventListener( PropertyEvent.class, workspaceListener );
 			propagate = project.getWorkspace().isLocalMode();
 		}
 	}
@@ -151,12 +142,14 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 		addEventListener( BaseEvent.class, new SelfListener() );
 	}
 
+	@Nonnull
 	@Override
 	public ProjectItem getProject()
 	{
 		return project;
 	}
 
+	@Nonnull
 	@Override
 	public Collection<SceneItem> getChildren()
 	{
@@ -186,11 +179,17 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 		if( LoadUI.isController() )
 		{
 			project.removeEventListener( ActionEvent.class, projectListener );
-			project.getWorkspace().removeEventListener( PropertyEvent.class, workspaceListener );
 		}
 		terminalHolderSupport.release();
 
 		super.release();
+	}
+
+	@Nonnull
+	@Override
+	public CanvasObjectItem duplicate( @Nonnull CanvasObjectItem obj )
+	{
+		return super.duplicate( obj );
 	}
 
 	@Override
@@ -221,12 +220,14 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 		return "#4B89E0";
 	}
 
+	@Nonnull
 	@Override
 	public CanvasItem getCanvas()
 	{
 		return getProject();
 	}
 
+	@Nonnull
 	@Override
 	public Collection<Terminal> getTerminals()
 	{
@@ -240,7 +241,7 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 	}
 
 	@Override
-	public void handleTerminalEvent( InputTerminal input, TerminalEvent event )
+	public void handleTerminalEvent( @Nonnull InputTerminal input, @Nonnull TerminalEvent event )
 	{
 		if( event instanceof TerminalMessageEvent && input == stateTerminal )
 		{
@@ -266,6 +267,7 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 		return followProject;
 	}
 
+	@Nonnull
 	@Override
 	public InputTerminal getStateTerminal()
 	{
@@ -273,7 +275,7 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 	}
 
 	@Override
-	public void broadcastMessage( String channel, Object data )
+	public void broadcastMessage( @Nonnull String channel, Object data )
 	{
 		if( LoadUI.isController() )
 			getProject().broadcastMessage( this, channel, data );
@@ -282,64 +284,39 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 	}
 
 	@Override
-	protected void onComplete( EventFirer source )
+	public void onComplete( EventFirer source )
 	{
-		//		if( LoadUI.CONTROLLER.equals( System.getProperty( "loadui.instance" ) ) && source.equals( this ) )
-		//		{
-		//			// on controller when source is this test case (for both local and
-		//			// distributed mode)...add ON_COMPLETE_DONE event listener to this test
-		//			// case to listen when it is completed
-		//
-		//			addEventListener( BaseEvent.class, new EventHandler<BaseEvent>()
-		//			{
-		//				@Override
-		//				public void handleEvent( BaseEvent event )
-		//				{
-		//					if( event.getKey().equals( ON_COMPLETE_DONE ) )
-		//					{
-		//						removeEventListener( BaseEvent.class, this );
-		//						// if test case is linked and project is not running then do
-		//						// generate summary. if project is running it will generate
-		//						// summary instead. if test case is not linked generate
-		//						// summary for it. (the scenario when project is running and
-		//						// the source is test case can occur when limit is set to a
-		//						// test case so it finishes before project)
-		//						if( !getProject().isRunning() && isFollowProject() || !isFollowProject() )
-		//						{
-		//							//							generateSummary();
-		//						}
-		//					}
-		//				}
-		//			} );
-		//		}
+		log.debug( "Scene onComplete method called, was local mode when started? {}", isRunningInLocalMode );
+		boolean isAgent = !LoadUI.isController();
 
-		if( !LoadUI.isController() )
+		if( isAgent )
 		{
-			// on agent, application is running in distributed mode, so send
-			// data to the controller
-
 			Map<String, Object> data = new HashMap<>();
 			data.put( AgentItem.SCENE_ID, getId() );
 
 			for( ComponentItem component : getComponents() )
 				data.put( component.getId(), component.getBehavior().collectStatisticsData() );
+
 			messageEndpoint.sendMessage( AgentItem.AGENT_CHANNEL, data );
 			log.debug( "Sending statistics data from {}", this );
 		}
-		else if( wasLocalModeWhenStarted || ( !project.getWorkspace().isLocalMode() && getActiveAgents().isEmpty() ) )
+		else if( isRunningInLocalMode || getActiveAgentsRunningThis().isEmpty() )
 		{
-			// on controller, in local mode or in distributed mode with no active
-			// agents
-			// NOTE: when in distributed mode and there are no active agents scene
-			// would never finish and controller won't receive info from it so mark
-			// this scene as completed immediately.
-
-			// if source is project, set completed will inform project (over
-			// SceneAwaiter) that this test case has finished.
-			// if source is this test case than inform its listener defined at the
-			// top of this method to generate summary
 			setCompleted( true );
 		}
+		// else set completed only after Agent(s) send statistics for this scene
+
+	}
+
+	private Collection<? extends AgentItem> getActiveAgentsRunningThis()
+	{
+		return Collections2.filter( project.getAgentsAssignedTo( this ), ACTIVE_AGENTS_FUNCTION );
+	}
+
+	@Override
+	public SummaryCreator getSummaryCreator()
+	{
+		return new SceneSummaryCreator( this );
 	}
 
 	@Override
@@ -359,7 +336,7 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 			}
 			else
 			{
-				if( getActiveAgents().size() > 0 )
+				if( getActiveAgentsRunningThis().size() > 0 )
 				{
 					// test cases is deployed to one or more agents so send message
 					// to all agents to cancel
@@ -376,31 +353,26 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 		}
 	}
 
-	public boolean isStatisticsReady()
+	private boolean haveAllActiveAgentsProvidedStats()
 	{
-		for( AgentItem agent : getActiveAgents() )
+		for( AgentItem agent : getActiveAgentsRunningThis() )
 			if( !remoteStatistics.containsKey( agent ) )
 				return false;
 		return true;
 	}
 
-	public int getRemoteStatisticsCount()
-	{
-		return remoteStatistics.size();
-	}
-
-	public void handleStatisticsData( AgentItem source, Map<Object, Object> data )
+	public void handleStatisticsData( AgentItem source, Map<?, ?> data )
 	{
 		remoteStatistics.put( source, data );
 		log.debug( "{} got statistics data from {}", this, source );
-		if( !isStatisticsReady() )
+		if( !haveAllActiveAgentsProvidedStats() )
 			return;
 
 		for( ComponentItem component : getComponents() )
 		{
 			String cId = component.getId();
 			Map<AgentItem, Object> cData = new HashMap<>();
-			for( Entry<AgentItem, Map<Object, Object>> e : remoteStatistics.entrySet() )
+			for( Entry<AgentItem, Map<?, ?>> e : remoteStatistics.entrySet() )
 				cData.put( e.getKey(), e.getValue().get( cId ) );
 			component.getBehavior().handleStatisticsData( cData );
 		}
@@ -408,20 +380,6 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 		setCompleted( true );
 	}
 
-	@Override
-	public void appendToSummary( MutableSummary mutableSummary )
-	{
-		MutableChapterImpl chap = ( MutableChapterImpl )mutableSummary.addChapter( getLabel() );
-		chap.addSection( new TestCaseDataSummarySection( this ) );
-		chap.addSection( new TestCaseExecutionDataSection( this ) );
-		chap.addSection( new TestCaseExecutionMetricsSection( this ) );
-		chap.addSection( new TestCaseExecutionNotablesSection( this ) );
-		chap.addSection( new TestCaseDataSection( this ) );
-		chap.setDescription( getDescription() );
-
-		for( ComponentItem component : getComponents() )
-			component.generateSummary( chap );
-	}
 
 	@Override
 	protected void reset()
@@ -443,7 +401,7 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 
 		if( running )
 		{
-			wasLocalModeWhenStarted = LoadUI.isController() ? project.getWorkspace().isLocalMode() : true;
+			isRunningInLocalMode = !LoadUI.isController() || project.getWorkspace().isLocalMode();
 		}
 
 		fireBaseEvent( ACTIVITY );
@@ -465,15 +423,6 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 	public ModelItemType getModelItemType()
 	{
 		return ModelItemType.SCENARIO;
-	}
-
-	private Collection<AgentItem> getActiveAgents()
-	{
-		ArrayList<AgentItem> agents = new ArrayList<>();
-		for( AgentItem agent : getProject().getAgentsAssignedTo( this ) )
-			if( agent.isReady() )
-				agents.add( agent );
-		return agents;
 	}
 
 	@Override
@@ -527,28 +476,6 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 				fireEvent( new RemoteActionEvent( SceneItemImpl.this, event ) );
 
 			fireEvent( event );
-		}
-	}
-
-	private class WorkspaceListener implements EventHandler<PropertyEvent>
-	{
-		@Override
-		public void handleEvent( PropertyEvent event )
-		{
-			if( WorkspaceItem.LOCAL_MODE_PROPERTY.equals( event.getProperty().getKey() ) )
-			{
-				propagate = ( Boolean )event.getProperty().getValue();
-				// if( isRunning() )
-				// {
-				// ActionEvent startAction = new ActionEvent( SceneItemImpl.this,
-				// START_ACTION );
-				// if( !propagate )
-				// fireEvent( new RemoteActionEvent( SceneItemImpl.this, startAction
-				// ) );
-				// else
-				// fireEvent( startAction );
-				// }
-			}
 		}
 	}
 

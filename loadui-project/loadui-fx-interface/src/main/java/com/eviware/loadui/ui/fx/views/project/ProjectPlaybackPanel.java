@@ -17,12 +17,16 @@ package com.eviware.loadui.ui.fx.views.project;
 
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.model.SceneItem;
+import com.eviware.loadui.ui.fx.views.canvas.PlayButton;
 import com.eviware.loadui.ui.fx.views.canvas.ToolbarPlaybackPanel;
 import javafx.beans.property.Property;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.HBoxBuilder;
+import javafx.scene.layout.VBoxBuilder;
 
 final public class ProjectPlaybackPanel extends ToolbarPlaybackPanel<ProjectItem>
 {
@@ -89,7 +93,13 @@ final public class ProjectPlaybackPanel extends ToolbarPlaybackPanel<ProjectItem
 		}
 	}
 
-	public HBox getPlaybackContainer(){
-		return playbackContainer;
+	public PlayButton getPlayButton()
+	{
+		return playButton;
+	}
+
+	public void addToPanel( Node node )
+	{
+		playbackContainer.getChildren().add( 3, node );
 	}
 }

@@ -43,7 +43,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.loadui.testfx.GuiTest.offset;
 
-@Category( TestFX.class )
+@Category(TestFX.class)
 public class MultiMovableTest
 {
 	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();
@@ -129,7 +129,7 @@ public class MultiMovableTest
 		final Node rectangle1 = selectable1.getNode();
 		final Node rectangle2 = selectable2.getNode();
 
-		controller.drag( offset( background, 220, 170 ) ).to( background );
+		controller.drag( offset( background, 220, 170 ) ).to( offset( background, 5, 5 ) );
 		assertThat( selectable1.isSelected(), is( true ) );
 		assertThat( selectable2.isSelected(), is( true ) );
 

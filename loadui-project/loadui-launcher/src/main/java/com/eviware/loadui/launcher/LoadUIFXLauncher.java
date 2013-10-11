@@ -40,7 +40,6 @@ public class LoadUIFXLauncher extends LoadUILauncher
 
 	public static void main( String[] args )
 	{
-
 		Application.launch( FXApplication.class, args );
 	}
 
@@ -143,13 +142,14 @@ public class LoadUIFXLauncher extends LoadUILauncher
 				{
 					System.setSecurityManager( null );
 
+					//FIXME Create an empty array ignoring any parameters? Why?
 					launcher = createLauncher( getParameters().getRaw().toArray( new String[0] ) );
 					launcher.init();
 					launcher.start();
 
 					if( "false".equals( noFx ) )
 					{
-						launcher.framework.getBundleContext().registerService( Stage.class, stage,
+						framework.getBundleContext().registerService( Stage.class, stage,
 								new Hashtable<String, Object>() );
 					}
 					return null;
@@ -167,7 +167,7 @@ public class LoadUIFXLauncher extends LoadUILauncher
 		@Override
 		public void stop() throws Exception
 		{
-			launcher.framework.getBundleContext().getBundle( 0 ).stop();
+			framework.getBundleContext().getBundle( 0 ).stop();
 		}
 	}
 }

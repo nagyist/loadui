@@ -18,33 +18,33 @@ public abstract class FxTestState extends TestState
 	protected LoadUiRobot robot = fxTestSupport.robot;
 	protected GuiTest controller = fxTestSupport;
 
-	protected FxTestState( String name, TestState parent )
+	protected FxTestState( String name )
 	{
-		super(name, parent);
+		super( name );
 	}
 
 	public void create( LoadUiRobot.Component component )
 	{
-		fxTestSupport.create(component);
+		fxTestSupport.create( component );
 	}
 
 	public void runTestFor( int number, TimeUnit unit )
 	{
-		fxTestSupport.runTestFor(number, unit);
+		fxTestSupport.runTestFor( number, unit );
 	}
 
 	public ComponentHandle connect( LoadUiRobot.Component component )
 	{
-		return fxTestSupport.connect(component);
+		return fxTestSupport.connect( component );
 	}
 
 	public void waitForNode( String domQuery )
 	{
-		fxTestSupport.waitForNode(domQuery);
+		fxTestSupport.waitForNode( domQuery );
 	}
 
 	public void waitForNodeToDisappear( String domQuery )
 	{
-		fxTestSupport.waitForNodeToDisappear(domQuery);
+		fxTestSupport.waitForNodeToDisappear( domQuery );
 	}
 }

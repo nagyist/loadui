@@ -15,17 +15,6 @@
  */
 package com.eviware.loadui.impl.statistics;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
-import javax.annotation.Nonnull;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.addressable.AddressableRegistry;
 import com.eviware.loadui.api.addressable.AddressableRegistry.DuplicateAddressException;
@@ -46,10 +35,19 @@ import com.eviware.loadui.api.traits.Releasable;
 import com.eviware.loadui.util.CacheMap;
 import com.eviware.loadui.util.ReleasableUtils;
 import com.eviware.loadui.util.statistics.StatisticImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.Callable;
 
 /**
  * Implementation of a StatisticVariable.
- * 
+ *
  * @author dain.nilsson
  */
 public class StatisticVariableImpl implements StatisticVariable.Mutable, Releasable
@@ -69,7 +67,7 @@ public class StatisticVariableImpl implements StatisticVariable.Mutable, Releasa
 	private String description;
 
 	public StatisticVariableImpl( ExecutionManager executionManager, StatisticHolder parent, String name,
-			AddressableRegistry addressableRegistry, String description )
+											AddressableRegistry addressableRegistry, String description )
 	{
 		this.manager = executionManager;
 		this.addressableRegistry = addressableRegistry;
@@ -151,7 +149,7 @@ public class StatisticVariableImpl implements StatisticVariable.Mutable, Releasa
 				new Callable<StatisticImpl<?>>()
 				{
 					@Override
-					@SuppressWarnings( { "unchecked", "rawtypes" } )
+					@SuppressWarnings({ "unchecked", "rawtypes" })
 					public StatisticImpl<?> call() throws Exception
 					{
 						for( TrackDescriptor descriptor : descriptors )
@@ -207,6 +205,12 @@ public class StatisticVariableImpl implements StatisticVariable.Mutable, Releasa
 
 		return getDescription();
 
+	}
+
+	@Override
+	public Iterable<TrackDescriptor> getTrackDescriptors()
+	{
+		return descriptors;
 	}
 
 	@Override

@@ -15,10 +15,9 @@
  */
 package com.eviware.loadui.api.execution;
 
-import java.util.EnumSet;
-import java.util.List;
-
 import com.eviware.loadui.api.model.CanvasItem;
+
+import java.util.List;
 
 /**
  * Schedules test executions. The TestRunner may have a single test execution
@@ -28,8 +27,6 @@ import com.eviware.loadui.api.model.CanvasItem;
  */
 public interface TestRunner
 {
-	public static final EnumSet<Phase> START_PHASES = EnumSet.of( Phase.PRE_START, Phase.START, Phase.POST_START );
-	public static final EnumSet<Phase> STOP_PHASES = EnumSet.of( Phase.PRE_STOP, Phase.STOP, Phase.POST_STOP );
 
 	/**
 	 * Enqueues a new TestExecution to run. As long as no TestExecution is
@@ -60,6 +57,18 @@ public interface TestRunner
 	 * @param phases
 	 */
 	public void registerTask( TestExecutionTask task, Phase... phases );
+
+	/**
+	 * Runs a TestExecutionTask during a Phase. All tasks registered
+	 * for a Phase will be invoked in parallel during that phase, and the phase
+	 * will not complete until all tasks have completed. Unlike with the registerTask
+	 * methods, a STRONG REFERENCE is kept to the task so it is guaranteed that the
+	 * task will be run exactly once, or never if the phase is never triggered.
+	 *
+	 * @param task
+	 * @param phase
+	 */
+	public void runTaskOnce( TestExecutionTask task, Phase phase );
 
 	/**
 	 * Unregisters a TestExecutionTask from a specific Phase.

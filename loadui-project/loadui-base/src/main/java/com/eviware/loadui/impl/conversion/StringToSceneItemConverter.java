@@ -24,7 +24,7 @@ import com.eviware.loadui.api.addressable.AddressableRegistry;
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.config.LoaduiSceneDocumentConfig;
-import com.eviware.loadui.impl.model.SceneItemImpl;
+import com.eviware.loadui.impl.model.canvas.SceneItemImpl;
 import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.StringUtils;
 

@@ -15,6 +15,17 @@
  */
 package com.eviware.loadui.test.ui.fx;
 
+import com.eviware.loadui.LoadUI;
+import com.eviware.loadui.launcher.LoadUIFXLauncher;
+import com.eviware.loadui.launcher.LoadUILauncher;
+import com.google.common.util.concurrent.SettableFuture;
+import javafx.application.Application;
+import javafx.stage.Stage;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
@@ -23,22 +34,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Future;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
-
-import javafx.application.Application;
-import javafx.stage.Stage;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-
-import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.launcher.LoadUIFXLauncher;
-import com.eviware.loadui.launcher.LoadUILauncher;
-import com.eviware.loadui.test.IntegrationTestUtils;
-import com.google.common.util.concurrent.SettableFuture;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class OSGiFXLauncher extends LoadUIFXLauncher
 {
@@ -46,12 +42,15 @@ public class OSGiFXLauncher extends LoadUIFXLauncher
 
 	private static volatile OSGiFXLauncher instance;
 	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();
-	private static File baseDir;
-	private static File bundleDir;
 
 	public static OSGiFXLauncher getInstance()
 	{
 		return instance;
+	}
+
+	private OSGiFXLauncher( String[] args )
+	{
+		super( args );
 	}
 
 	public static Future<Stage> getStageFuture()
@@ -59,30 +58,10 @@ public class OSGiFXLauncher extends LoadUIFXLauncher
 		return stageFuture;
 	}
 
-	public static void main( File baseDir, String[] args )
+	public static void main( String[] args )
 	{
-		OSGiFXLauncher.baseDir = baseDir;
-
-		bundleDir = new File( baseDir, "bundle" );
-
-		try
-		{
-			IntegrationTestUtils.copyDirectory( new File(
-					"../loadui-installers/loadui-controller-installer/target/main" ), baseDir );
-			IntegrationTestUtils.copyDirectory( new File( "target/bundle" ), bundleDir );
-		}
-		catch( IOException e1 )
-		{
-			throw new RuntimeException( e1 );
-		}
-
 		log.info( "Initializing with LoadUI Version: " + LoadUI.version() );
 		Application.launch( OSGiFXApplication.class, args );
-	}
-
-	private OSGiFXLauncher( String[] args )
-	{
-		super( args );
 	}
 
 	public Properties getConfig()
@@ -94,7 +73,7 @@ public class OSGiFXLauncher extends LoadUIFXLauncher
 	public void init()
 	{
 		Properties config = getConfig();
-		config.setProperty( "felix.cache.rootdir", baseDir.getAbsolutePath() );
+		config.setProperty( "felix.cache.rootdir", ControllerFXWrapper.baseDir.getAbsolutePath() );
 
 
 		//Add the required packages that should be in the OSGi config file.
@@ -102,16 +81,18 @@ public class OSGiFXLauncher extends LoadUIFXLauncher
 				"com.sun.crypto.provider,com.sun.net.ssl,com.sun.net.ssl.internal.ssl,org.w3c.dom.traversal,javax.transaction.xa;version=1.1.0,sun.io,org.antlr.runtime,org.antlr.runtime.tree" );
 
 		// Remove the API bundle.
-		for( File bundle : bundleDir.listFiles() )
-		{
-			if( bundle.getName().startsWith( "loadui-api" ) )
+		File[] bundles = ControllerFXWrapper.bundleDir.listFiles();
+		if( bundles != null )
+			for( File bundle : bundles )
 			{
-				extractApi( apiPackages, bundle );
+				if( bundle.getName().startsWith( "loadui-api" ) )
+				{
+					extractApi( apiPackages, bundle );
+				}
 			}
-		}
 
 		config.put( "org.osgi.framework.system.packages.extra", apiPackages.toString() );
-		config.setProperty( "felix.auto.deploy.dir", bundleDir.getAbsolutePath() );
+		config.setProperty( "felix.auto.deploy.dir", ControllerFXWrapper.bundleDir.getAbsolutePath() );
 
 		super.init();
 	}
@@ -120,7 +101,6 @@ public class OSGiFXLauncher extends LoadUIFXLauncher
 	public void start()
 	{
 		super.start();
-
 		OSGiFXLauncher.instance = this;
 	}
 
@@ -136,7 +116,7 @@ public class OSGiFXLauncher extends LoadUIFXLauncher
 
 	private static void extractApi( StringBuilder apiPackages, File bundle )
 	{
-		try(ZipFile api = new ZipFile( bundle ))
+		try( ZipFile api = new ZipFile( bundle ) )
 		{
 			Set<String> packages = new TreeSet<>();
 			for( Enumeration<? extends ZipEntry> e = api.entries(); e.hasMoreElements(); )
@@ -153,10 +133,6 @@ public class OSGiFXLauncher extends LoadUIFXLauncher
 			String version = dashIndex < 0 ? loaduiVersion : loaduiVersion.substring( 0, dashIndex );
 			for( String pkg : packages )
 				apiPackages.append( ", " ).append( pkg ).append( "; version=\"" ).append( version ).append( '"' );
-		}
-		catch( ZipException e )
-		{
-			throw new RuntimeException( e );
 		}
 		catch( IOException e )
 		{

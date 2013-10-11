@@ -20,21 +20,20 @@ import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.FxIntegrationTestBase;
 import com.eviware.loadui.test.ui.fx.states.LastResultOpenedState;
-import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import static org.loadui.testfx.Assertions.assertNodeExists;
-import static org.loadui.testfx.FXTestUtils.getOrFail;
-import static org.loadui.testfx.Matchers.hasLabel;
-import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 import static javafx.scene.input.KeyCode.ENTER;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.loadui.testfx.Assertions.assertNodeExists;
+import static org.loadui.testfx.FXTestUtils.getOrFail;
+import static org.loadui.testfx.Matchers.hasLabel;
+import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 
 @Category(IntegrationTest.class)
 public class StatisticTabsTest extends FxIntegrationTestBase
@@ -44,7 +43,7 @@ public class StatisticTabsTest extends FxIntegrationTestBase
 	@Test
 	public void testTabs()
 	{
-		pages = ProjectLoadedWithoutAgentsState.STATE.getProject().getStatisticPages();
+		pages = getProjectItem().getStatisticPages();
 		assertThat( pageCount(), is( 1 ) );
 
 		click( "#plus-button" ).click( "Untitled Page 2" ).click( "#untitled-page-1" ).click( "#plus-button" );
@@ -66,13 +65,13 @@ public class StatisticTabsTest extends FxIntegrationTestBase
 
 		// tab ID cannot be changed
 		Node tabPaneHeaderSkin = getOrFail( "#untitled-page-3" );
-		Label label = (Label) tabPaneHeaderSkin.lookup( "Label" );
-		assertThat( label, hasLabel("tabnewname") );
+		Label label = ( Label )tabPaneHeaderSkin.lookup( "Label" );
+		assertThat( label, hasLabel( "tabnewname" ) );
 		assertEquals( "tabnewname", pages.getChildAt( 0 ).getLabel() );
 
 		// test tab can be closed through the menu
 		rightClick( "#untitled-page-4" ).click( "#tab-delete" );
-		waitUntil( "#untitled-page-4", is( not( visible() )) );
+		waitUntil( "#untitled-page-4", is( not( visible() ) ) );
 
 		assertNodeExists( "#untitled-page-3" );
 		assertThat( pageCount(), is( 1 ) );

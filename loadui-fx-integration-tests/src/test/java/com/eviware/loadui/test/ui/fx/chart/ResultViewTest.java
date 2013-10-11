@@ -19,7 +19,6 @@ import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.FxIntegrationTestBase;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import org.loadui.testfx.GuiTest;
 import javafx.scene.Node;
 import javafx.scene.control.MenuButton;
 import javafx.scene.input.KeyCode;
@@ -27,17 +26,16 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import static org.loadui.testfx.FXTestUtils.awaitEvents;
-import static org.loadui.testfx.FXTestUtils.getOrFail;
-import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
-import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.loadui.testfx.FXTestUtils.getOrFail;
+import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
+import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 
-@Category( IntegrationTest.class )
+@Category(IntegrationTest.class)
 public class ResultViewTest extends FxIntegrationTestBase
 {
 	public static final String ARCHIVE = "#archive-node-list";
@@ -47,10 +45,7 @@ public class ResultViewTest extends FxIntegrationTestBase
 	@After
 	public void cleanup()
 	{
-		if( resultsViewWindowIsOpen() )
-		{
-			closeCurrentWindow();
-		}
+		ensureResultViewWindowIsClosed();
 	}
 
 	@Test
@@ -108,7 +103,7 @@ public class ResultViewTest extends FxIntegrationTestBase
 
 		// test rename function
 		renameTestRun();
-		MenuButton menuButton = ( MenuButton )getOrFail( "#archive-0 #menuButton" );
+		MenuButton menuButton = getOrFail( "#archive-0 #menuButton" );
 		assertEquals( "Renamed Execution", menuButton.textProperty().get() );
 
 		removeArchivedExecution();
@@ -142,11 +137,6 @@ public class ResultViewTest extends FxIntegrationTestBase
 	private void archiveResult( Node result0 )
 	{
 		drag( result0 ).to( "#archive-node-list" );
-	}
-
-	private boolean resultsViewWindowIsOpen()
-	{
-		return !GuiTest.findAll( ".analysis-view" ).isEmpty();
 	}
 
 	private void removeArchivedExecution()

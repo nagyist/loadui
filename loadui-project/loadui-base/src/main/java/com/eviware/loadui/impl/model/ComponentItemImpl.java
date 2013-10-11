@@ -15,50 +15,26 @@
  */
 package com.eviware.loadui.impl.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EventObject;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-
-import com.eviware.loadui.api.model.*;
-import org.springframework.core.convert.ConversionService;
-
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.component.ActivityStrategy;
 import com.eviware.loadui.api.component.ComponentBehavior;
 import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.counter.Counter;
 import com.eviware.loadui.api.counter.CounterSynchronizer;
-import com.eviware.loadui.api.events.ActionEvent;
-import com.eviware.loadui.api.events.ActivityEvent;
-import com.eviware.loadui.api.events.CollectionEvent;
+import com.eviware.loadui.api.events.*;
 import com.eviware.loadui.api.events.CollectionEvent.Event;
-import com.eviware.loadui.api.events.EventHandler;
-import com.eviware.loadui.api.events.PropertyEvent;
-import com.eviware.loadui.api.events.RemoteActionEvent;
-import com.eviware.loadui.api.events.TerminalConnectionEvent;
-import com.eviware.loadui.api.events.TerminalEvent;
-import com.eviware.loadui.api.events.TerminalMessageEvent;
-import com.eviware.loadui.api.events.TerminalSignatureEvent;
 import com.eviware.loadui.api.execution.Phase;
 import com.eviware.loadui.api.execution.TestExecution;
 import com.eviware.loadui.api.execution.TestExecutionTask;
 import com.eviware.loadui.api.execution.TestRunner;
 import com.eviware.loadui.api.layout.LayoutComponent;
 import com.eviware.loadui.api.layout.SettingsLayoutContainer;
+import com.eviware.loadui.api.model.*;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.api.statistics.Statistic;
 import com.eviware.loadui.api.statistics.StatisticVariable;
 import com.eviware.loadui.api.summary.MutableChapter;
-import com.eviware.loadui.api.terminal.Connection;
-import com.eviware.loadui.api.terminal.DualTerminal;
-import com.eviware.loadui.api.terminal.InputTerminal;
-import com.eviware.loadui.api.terminal.OutputTerminal;
-import com.eviware.loadui.api.terminal.Terminal;
-import com.eviware.loadui.api.terminal.TerminalMessage;
+import com.eviware.loadui.api.terminal.*;
 import com.eviware.loadui.config.ComponentItemConfig;
 import com.eviware.loadui.impl.counter.CounterSupport;
 import com.eviware.loadui.impl.counter.RemoteAggregatedCounterSupport;
@@ -76,6 +52,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.springframework.core.convert.ConversionService;
+
+import java.util.*;
+import java.util.concurrent.ExecutorService;
 
 public class ComponentItemImpl extends ModelItemImpl<ComponentItemConfig> implements ComponentItem
 {
@@ -660,7 +640,7 @@ public class ComponentItemImpl extends ModelItemImpl<ComponentItemConfig> implem
 
 		@Override
 		public <T> Property<T> createProperty( String propertyName, Class<T> propertyType, Object initialValue,
-				boolean propagates )
+															boolean propagates )
 		{
 			return ComponentItemImpl.this.createProperty( propertyName, propertyType, initialValue, propagates );
 		}
@@ -790,18 +770,18 @@ public class ComponentItemImpl extends ModelItemImpl<ComponentItemConfig> implem
 		{
 			switch( scope )
 			{
-			case COMPONENT :
-				ComponentItemImpl.this.triggerAction( actionName );
-				break;
-			case CANVAS :
-				getCanvas().triggerAction( actionName );
-				break;
-			case PROJECT :
-				getCanvas().getProject().triggerAction( actionName );
-				break;
-			case WORKSPACE :
-				getCanvas().getProject().getWorkspace().triggerAction( actionName );
-				break;
+				case COMPONENT:
+					ComponentItemImpl.this.triggerAction( actionName );
+					break;
+				case CANVAS:
+					getCanvas().triggerAction( actionName );
+					break;
+				case PROJECT:
+					getCanvas().getProject().triggerAction( actionName );
+					break;
+				case WORKSPACE:
+					getCanvas().getProject().getWorkspace().triggerAction( actionName );
+					break;
 			}
 		}
 
@@ -941,20 +921,20 @@ public class ComponentItemImpl extends ModelItemImpl<ComponentItemConfig> implem
 
 		@Override
 		public StatisticVariable.Mutable addStatisticVariable( String statisticVariableName, String description,
-				String... writerTypes )
+																				 String... writerTypes )
 		{
 			return addStatisticVariable( statisticVariableName, description, false, writerTypes );
 		}
 
 		@Override
 		public StatisticVariable.Mutable addListenableStatisticVariable( String statisticVariableName,
-				String description, String... writerTypes )
+																							  String description, String... writerTypes )
 		{
 			return addStatisticVariable( statisticVariableName, description, true, writerTypes );
 		}
 
 		private StatisticVariable.Mutable addStatisticVariable( String statisticVariableName, String description,
-				boolean listenable, String... writerTypes )
+																				  boolean listenable, String... writerTypes )
 		{
 			StatisticVariable.Mutable variable = statisticHolderSupport.addStatisticVariable( statisticVariableName,
 					description, listenable );
@@ -989,7 +969,7 @@ public class ComponentItemImpl extends ModelItemImpl<ComponentItemConfig> implem
 			this.type = type;
 		}
 
-		@SuppressWarnings( "unchecked" )
+		@SuppressWarnings("unchecked")
 		public void remove()
 		{
 			removeEventListener( type, ( EventHandler<T> )handler );
@@ -1040,14 +1020,14 @@ public class ComponentItemImpl extends ModelItemImpl<ComponentItemConfig> implem
 		{
 			switch( phase )
 			{
-			case PRE_START :
-				terminalsEnabled = true;
-				break;
-			case POST_STOP :
-				terminalsEnabled = false;
-				break;
-			default :
-				break;
+				case PRE_START:
+					terminalsEnabled = true;
+					break;
+				case POST_STOP:
+					terminalsEnabled = false;
+					break;
+				default:
+					break;
 			}
 		}
 	}

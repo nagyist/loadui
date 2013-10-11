@@ -18,10 +18,13 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
-import static org.loadui.testfx.GuiTest.find;
-import static org.loadui.testfx.GuiTest.findAll;
+import static org.loadui.testfx.GuiTest.*;
 import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
+import static org.loadui.testfx.matchers.EnabledMatcher.enabled;
+import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 
 public class LoadUiRobot
 {
@@ -176,7 +179,9 @@ public class LoadUiRobot
 
 	public void clickPlayStopButton()
 	{
-		controller.click( ".project-playback-panel .play-button" );
+		Node playButton = find( ".project-playback-panel .play-button" );
+		waitUntil( playButton, is( enabled() ) );
+		controller.click( playButton );
 	}
 
 	public void pointAtPlayStopButton()
@@ -189,7 +194,7 @@ public class LoadUiRobot
 		clickPlayStopButton();
 		controller.sleep( unit.toMillis( number ) );
 		clickPlayStopButton();
-		controller.sleep( 2000 );
+		waitUntil( "#abort-requests", is( not( visible() ) ) );
 	}
 
 	public void deleteAllComponentsFromProjectView()

@@ -16,7 +16,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
-import static org.loadui.testfx.matchers.EmptyMatcher.empty;
+import static com.eviware.loadui.test.matchers.EmptyMatcher.empty;
 
 @Category(IntegrationTest.class)
 public class TableLogTest extends FxIntegrationTestBase
