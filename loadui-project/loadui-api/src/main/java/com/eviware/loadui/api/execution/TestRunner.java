@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * Schedules test executions. The TestRunner may have a single test execution
  * running at any one time.
- * 
+ *
  * @author dain.nilsson
  */
 public interface TestRunner
@@ -31,7 +31,7 @@ public interface TestRunner
 	/**
 	 * Enqueues a new TestExecution to run. As long as no TestExecution is
 	 * running, the earliest queued TestExecution will be run, until completion.
-	 * 
+	 *
 	 * @param canvas
 	 * @return
 	 */
@@ -40,7 +40,7 @@ public interface TestRunner
 	/**
 	 * Returns an ordered List containing all the queued (and running)
 	 * TestExecutions. The TestExecutions will be run in sequential order.
-	 * 
+	 *
 	 * @return
 	 */
 	public List<TestExecution> getExecutionQueue();
@@ -52,7 +52,7 @@ public interface TestRunner
 	 * keep weak references to the registered tasks to avoid memory leaks, but
 	 * this means that callers need to keep at least one reference to the task
 	 * for as long as it is used, or it may be garbage collected.
-	 * 
+	 *
 	 * @param task
 	 * @param phases
 	 */
@@ -72,7 +72,7 @@ public interface TestRunner
 
 	/**
 	 * Unregisters a TestExecutionTask from a specific Phase.
-	 * 
+	 *
 	 * @param task
 	 * @param phases
 	 */

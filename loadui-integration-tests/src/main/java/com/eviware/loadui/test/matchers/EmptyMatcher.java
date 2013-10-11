@@ -12,7 +12,7 @@ public class EmptyMatcher extends BaseMatcher
 {
 	public void describeTo( Description desc )
 	{
-		desc.appendText("empty");
+		desc.appendText( "empty" );
 	}
 
 	@Factory
@@ -24,6 +24,6 @@ public class EmptyMatcher extends BaseMatcher
 	@Override
 	public boolean matches( Object o )
 	{
-		return ((Collection<?>) o).isEmpty();
+		return ( ( Collection<?> )o ).isEmpty();
 	}
 }

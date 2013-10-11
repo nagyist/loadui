@@ -116,7 +116,7 @@ public class OSGiFXLauncher extends LoadUIFXLauncher
 
 	private static void extractApi( StringBuilder apiPackages, File bundle )
 	{
-		try( ZipFile api = new ZipFile( bundle ) )
+		try(ZipFile api = new ZipFile( bundle ))
 		{
 			Set<String> packages = new TreeSet<>();
 			for( Enumeration<? extends ZipEntry> e = api.entries(); e.hasMoreElements(); )

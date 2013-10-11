@@ -15,11 +15,6 @@
  */
 package com.eviware.loadui.impl.conversion;
 
-import java.util.List;
-
-import org.apache.xmlbeans.XmlException;
-import org.springframework.core.convert.converter.Converter;
-
 import com.eviware.loadui.api.addressable.AddressableRegistry;
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.model.SceneItem;
@@ -27,6 +22,10 @@ import com.eviware.loadui.config.LoaduiSceneDocumentConfig;
 import com.eviware.loadui.impl.model.canvas.SceneItemImpl;
 import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.StringUtils;
+import org.apache.xmlbeans.XmlException;
+import org.springframework.core.convert.converter.Converter;
+
+import java.util.List;
 
 public class StringToSceneItemConverter implements Converter<String, SceneItem>
 {

@@ -137,8 +137,7 @@ public class ControllerFXWrapper
 		try
 		{
 			launcher.stop();
-		}
-		finally
+		} finally
 		{
 			deleteRecursive( baseDir );
 		}

@@ -144,7 +144,7 @@ public class WorkspaceView extends StackPane
 
 		java.util.Properties props = new java.util.Properties();
 
-		try (InputStream propsStream = Files.newInputStreamSupplier( PROP_FILE ).getInput())
+		try(InputStream propsStream = Files.newInputStreamSupplier( PROP_FILE ).getInput())
 		{
 			props.load( propsStream );
 		}

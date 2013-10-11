@@ -43,7 +43,7 @@ import static org.junit.Assert.assertThat;
 /**
  * @author renato
  */
-@Category( IntegrationTest.class )
+@Category(IntegrationTest.class)
 public class ExecutionTest extends SimpleWebTestBase
 {
 

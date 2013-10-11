@@ -31,7 +31,7 @@ import java.util.Map;
 /**
  * Aggregates TestEvents for use with different interpolation levels, for data
  * for large time ranges.
- * 
+ *
  * @author dain.nilsson
  */
 public class TestEventInterpolator implements Releasable, OsgiServiceLifecycleListener
@@ -61,20 +61,20 @@ public class TestEventInterpolator implements Releasable, OsgiServiceLifecycleLi
 	 */
 
 	@Override
-	public void bind( Object object, @SuppressWarnings( "rawtypes" ) Map properties ) throws Exception
+	public void bind( Object object, @SuppressWarnings("rawtypes") Map properties ) throws Exception
 	{
 		setTestRunner( ( TestRunner )object );
 	}
 
 	@Override
-	public void unbind( Object object, @SuppressWarnings( "rawtypes" ) Map properties ) throws Exception
+	public void unbind( Object object, @SuppressWarnings("rawtypes") Map properties ) throws Exception
 	{
 		testRunner = null;
 	}
 
 	/**
 	 * Should be called for each level 0 TestEvent which is being logged.
-	 * 
+	 *
 	 * @param typeLabel
 	 * @param source
 	 * @param testEvent
@@ -95,7 +95,7 @@ public class TestEventInterpolator implements Releasable, OsgiServiceLifecycleLi
 	/**
 	 * If a TestRunner is available, use it to schedule flushing at the end of a
 	 * Test, as well as clearing at the start of a Test.
-	 * 
+	 *
 	 * @param testRunner
 	 */
 	public void setTestRunner( TestRunner testRunner )
@@ -132,7 +132,7 @@ public class TestEventInterpolator implements Releasable, OsgiServiceLifecycleLi
 
 	/**
 	 * Used as a map key for any unique TestEvent type and Source.
-	 * 
+	 *
 	 * @author dain.nilsson
 	 */
 	private static class InterpolationKey
@@ -188,7 +188,7 @@ public class TestEventInterpolator implements Releasable, OsgiServiceLifecycleLi
 	/**
 	 * TestExecutionTask used to clear the buffer on start and flush buffered
 	 * data on stop.
-	 * 
+	 *
 	 * @author dain.nilsson
 	 */
 	private class StartStopTask implements TestExecutionTask
@@ -198,12 +198,12 @@ public class TestEventInterpolator implements Releasable, OsgiServiceLifecycleLi
 		{
 			switch( phase )
 			{
-			case PRE_START :
-				interpolators.clear();
-				break;
-			case STOP :
-				flush();
-				break;
+				case PRE_START:
+					interpolators.clear();
+					break;
+				case STOP:
+					flush();
+					break;
 			}
 		}
 	}
@@ -211,7 +211,7 @@ public class TestEventInterpolator implements Releasable, OsgiServiceLifecycleLi
 	/**
 	 * Recursive data structure holding a buffer for a single interpolation
 	 * level, as well as a pointer to the next one.
-	 * 
+	 *
 	 * @author dain.nilsson
 	 */
 	private class InterpolationLevel
@@ -227,7 +227,7 @@ public class TestEventInterpolator implements Releasable, OsgiServiceLifecycleLi
 		private long eventCount = 0;
 
 		public InterpolationLevel( String typeLabel, TestEvent.Source<? extends TestEvent> source,
-				TestEvent initialTestEvent, int level )
+											TestEvent initialTestEvent, int level )
 		{
 			this.level = level;
 			this.typeLabel = typeLabel;
@@ -241,7 +241,7 @@ public class TestEventInterpolator implements Releasable, OsgiServiceLifecycleLi
 
 		/**
 		 * Adds a TestEvent to this levels buffer, as well as any levels above it.
-		 * 
+		 *
 		 * @param testEvent
 		 */
 		public void add( TestEvent testEvent )
@@ -253,7 +253,7 @@ public class TestEventInterpolator implements Releasable, OsgiServiceLifecycleLi
 			}
 
 			timestampTotal += testEvent.getTimestamp();
-			eventCount++ ;
+			eventCount++;
 
 			if( nextLevel != null )
 			{

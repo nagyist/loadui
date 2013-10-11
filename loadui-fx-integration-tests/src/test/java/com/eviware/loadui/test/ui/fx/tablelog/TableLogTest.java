@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
+import static com.eviware.loadui.test.matchers.EmptyMatcher.empty;
 import static com.eviware.loadui.test.ui.fx.FxIntegrationBase.RunBlocking.NON_BLOCKING;
 import static com.eviware.loadui.test.ui.fx.tablelog.TableLogTestSupport.*;
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
@@ -16,7 +17,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
-import static com.eviware.loadui.test.matchers.EmptyMatcher.empty;
 
 @Category(IntegrationTest.class)
 public class TableLogTest extends FxIntegrationTestBase

@@ -60,18 +60,18 @@ public class TestCaseDataTableModel extends AbstractTableModel
 	{
 		switch( col )
 		{
-		case 0 :
-			return data.get( row ).getName();
-		case 1 :
-			return data.get( row ).getExecTime();
-		case 2 :
-			return data.get( row ).getNumberOfSamples();
-		case 3 :
-			return data.get( row ).getNumberOfAssertions();
-		case 4 :
-			return data.get( row ).getNumberOfFailedAssertions();
-		default :
-			return null;
+			case 0:
+				return data.get( row ).getName();
+			case 1:
+				return data.get( row ).getExecTime();
+			case 2:
+				return data.get( row ).getNumberOfSamples();
+			case 3:
+				return data.get( row ).getNumberOfAssertions();
+			case 4:
+				return data.get( row ).getNumberOfFailedAssertions();
+			default:
+				return null;
 		}
 	}
 

@@ -27,7 +27,7 @@ import static com.google.code.tempusfugit.temporal.Timeout.timeout;
 import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-@Category( IntegrationTest.class )
+@Category(IntegrationTest.class)
 public class ProjectPlaybackTest extends SimpleWebTestBase
 {
 

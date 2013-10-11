@@ -15,18 +15,6 @@
  */
 package com.eviware.loadui.impl.model;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.EventObject;
-
-import javax.annotation.Nonnull;
-
-import com.eviware.loadui.impl.model.canvas.project.ProjectItemImpl;
-import org.apache.xmlbeans.XmlException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.events.BaseEvent;
 import com.eviware.loadui.api.events.EventHandler;
 import com.eviware.loadui.api.events.WeakEventHandler;
@@ -35,9 +23,19 @@ import com.eviware.loadui.api.model.ProjectRef;
 import com.eviware.loadui.api.traits.Labeled;
 import com.eviware.loadui.api.traits.Releasable;
 import com.eviware.loadui.config.ProjectReferenceConfig;
+import com.eviware.loadui.impl.model.canvas.project.ProjectItemImpl;
 import com.eviware.loadui.impl.property.AttributeHolderSupport;
 import com.eviware.loadui.util.ReleasableUtils;
 import com.eviware.loadui.util.events.EventSupport;
+import org.apache.xmlbeans.XmlException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.EventObject;
 
 public final class ProjectRefImpl implements ProjectRef, Releasable
 {

@@ -97,7 +97,7 @@ class AgentListener implements EventHandler<BaseEvent>, MessageListener, Releasa
 	}
 
 	@Override
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	public void handleMessage( String channel, MessageEndpoint endpoint, Object data )
 	{
 		if( !( endpoint instanceof AgentItem ) || !( data instanceof Map ) )
