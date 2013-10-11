@@ -15,12 +15,14 @@
  */
 package com.eviware.loadui.test.ui.fx.states;
 
+import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.ui.fx.GUI;
 import javafx.stage.Stage;
 import org.loadui.testfx.FXTestUtils;
 import org.loadui.testfx.GuiTest;
 
+import java.io.File;
 import java.util.NoSuchElementException;
 
 public class OpenSourceFxLoadedState extends TestState
@@ -47,6 +49,7 @@ public class OpenSourceFxLoadedState extends TestState
 	protected void enterFromParent() throws Exception
 	{
 		getGui().getBundleContext();
+		System.setProperty( "groovy.root", new File( LoadUI.getWorkingDir(), ".groovy" ).getAbsolutePath() );
 		closeWindow( "Welcome to LoadUI" );
 		closeWindow( "New version available" );
 
