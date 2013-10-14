@@ -65,7 +65,7 @@ public class ExecutionTest extends SimpleWebTestBase
 		clickOnAbortButton();
 
 		// THEN
-		waitOrTimeout( new IsProjectRunning( getProjectItem(), false ), timeout( seconds( 2 ) ) );
+		waitOrTimeout( new IsCanvasRunning( getProjectItem(), false ), timeout( seconds( 2 ) ) );
 		assertThat( numberOfAbortedRequests(), greaterThan( 1 ) );
 
 	}

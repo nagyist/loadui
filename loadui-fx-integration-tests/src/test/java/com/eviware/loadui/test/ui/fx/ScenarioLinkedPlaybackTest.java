@@ -28,16 +28,24 @@ import static com.google.code.tempusfugit.temporal.Duration.seconds;
 import static com.google.code.tempusfugit.temporal.Timeout.timeout;
 import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 import static junit.framework.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 @Category( IntegrationTest.class )
 public class ScenarioLinkedPlaybackTest extends FxIntegrationTestBase
 {
 	HasScenarios helper = new HasScenarios();
+	CanRunLoadUITests testRunner = new CanRunLoadUITests();
 
 	@After
 	public void teardown() throws Exception
 	{
+		try
+		{
+			testRunner.abortRequestsIfPossible();
+		}
+		catch( Exception e )
+		{
+			e.printStackTrace();
+		}
 		ensureProjectIsNotRunning();
 		super.teardown();
 	}
@@ -51,12 +59,12 @@ public class ScenarioLinkedPlaybackTest extends FxIntegrationTestBase
 		{
 			robot.clickPlayStopButton();
 
-			assertTrue( scenario.isRunning() );
+			waitOrTimeout( new IsCanvasRunning( scenario, true ), timeout( seconds( 2 ) ) );
 
 			robot.clickPlayStopButton();
 			waitForNodeToDisappear( "#abort-requests" );
 
-			assertFalse( scenario.isRunning() );
+			waitOrTimeout( new IsCanvasRunning( scenario, false ), timeout( seconds( 2 ) ) );
 		}
 	}
 
@@ -84,9 +92,9 @@ public class ScenarioLinkedPlaybackTest extends FxIntegrationTestBase
 		setTestTimeLimitTo( 2 );
 		robot.clickPlayStopButton();
 
-		waitOrTimeout( new IsProjectRunning( project, true ), timeout( seconds( 2 ) ) );
+		waitOrTimeout( new IsCanvasRunning( project, true ), timeout( seconds( 2 ) ) );
 
-		waitOrTimeout( new IsProjectRunning( project, false ), timeout( seconds( 4 ) ) );
+		waitOrTimeout( new IsCanvasRunning( project, false ), timeout( seconds( 4 ) ) );
 	}
 
 	@Override

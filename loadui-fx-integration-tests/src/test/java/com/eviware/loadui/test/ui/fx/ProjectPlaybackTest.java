@@ -38,8 +38,8 @@ public class ProjectPlaybackTest extends SimpleWebTestBase
 
 		runTestFor( 3, SECONDS, NON_BLOCKING );
 
-		waitOrTimeout( new IsProjectRunning( project, true ), timeout( seconds( 5 ) ) );
-		waitOrTimeout( new IsProjectRunning( project, false ), timeout( seconds( 5 ) ) );
+		waitOrTimeout( new IsCanvasRunning( project, true ), timeout( seconds( 5 ) ) );
+		waitOrTimeout( new IsCanvasRunning( project, false ), timeout( seconds( 5 ) ) );
 	}
 
 	@Test
@@ -57,7 +57,7 @@ public class ProjectPlaybackTest extends SimpleWebTestBase
 		robot.clickPlayStopButton();
 
 		sleep( 4_000 );
-		waitOrTimeout( new IsProjectRunning( project, false ), timeout( seconds( 5 ) ) );
+		waitOrTimeout( new IsCanvasRunning( project, false ), timeout( seconds( 5 ) ) );
 	}
 
 }

@@ -74,7 +74,7 @@ public class FxIntegrationBase extends GuiTest
 		{
 			try
 			{
-				waitOrTimeout( new IsProjectRunning( project, false ), timeout( seconds( 5 ) ) );
+				waitOrTimeout( new IsCanvasRunning( project, false ), timeout( seconds( 5 ) ) );
 				System.out.println( "Project stopped running" );
 			}
 			catch( InterruptedException | TimeoutException e )
