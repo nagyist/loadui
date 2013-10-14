@@ -11,6 +11,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.internal.matchers.TypeSafeMatcher;
 import org.loadui.testfx.GuiTest;
+import org.loadui.testfx.exceptions.NoNodesFoundException;
 
 import java.awt.*;
 import java.util.Queue;
@@ -147,25 +148,19 @@ public class LoadUiRobot
 		}
 	}
 
-	public Node getComponentNode( Component component, String... optionalName )
+	public Node getComponentNode( Component component )
 	{
-		if( optionalName.length > 0 )
-		{
-			return findComponentByName( optionalName[0], true );
-		}
-		else
-		{
-			return findComponentByName( component.name, false );
-		}
+		return findComponentByName( component.name, false );
 	}
 
 	private Node findComponentByName( String name, boolean exactMatch )
 	{
 		for( Node compNode : findAll( ".canvas-object-view" ) )
 		{
-			Set<Node> textLabels = findAll( "Label", find( "#topBar", compNode ) );
+			Set<Node> textLabels = findAll( ".label", find( "#topBar", compNode ) );
 			for( Node label : textLabels )
 			{
+				if( !( label instanceof Label ) ) continue;
 				String componentLabel = ( ( Label )label ).getText();
 				boolean foundMatch = exactMatch ? componentLabel.equals( name ) : componentLabel.startsWith( name );
 				if( foundMatch )
@@ -174,7 +169,7 @@ public class LoadUiRobot
 				}
 			}
 		}
-		return null;
+		throw new NoNodesFoundException( "No component found matching name " + name );
 	}
 
 	public void clickPlayStopButton()
