@@ -37,7 +37,7 @@ public class FXFilePickerDialog extends ConfirmationDialog implements FilePicker
 			filter = ExtensionFilter.NO_FILTER;
 		}
 
-		picker = new FilePicker( scene.getWindow(), filePickerTitle, getExtensionFilter( filter ), workspace );
+		picker = new FilePicker( scene.getFocusOwner(), filePickerTitle, getExtensionFilter( filter ), workspace );
 
 		getItems().setAll(
 				LabelBuilder

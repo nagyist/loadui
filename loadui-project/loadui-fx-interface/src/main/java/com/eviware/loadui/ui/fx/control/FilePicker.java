@@ -27,13 +27,13 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFieldBuilder;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +42,6 @@ import java.io.File;
 /**
  * A form field that contains a TextField and a Browse button, that opens a
  * file chooser dialog.
- *
- * @author maximilian.skog
  */
 
 public class FilePicker extends HBox
@@ -65,7 +63,7 @@ public class FilePicker extends HBox
 		}
 	};
 
-	public FilePicker( final Window window, String title, ExtensionFilter filters, WorkspaceItem workspace )
+	public FilePicker( final Node parent, String title, ExtensionFilter filters, WorkspaceItem workspace )
 	{
 		final TextField textField = TextFieldBuilder.create().editable( false ).build();
 		selectedProperty.addListener( new ChangeListener<File>()
@@ -87,12 +85,13 @@ public class FilePicker extends HBox
 				.text( "Browse..." )
 				.build();
 
+		// parent.getScene().getWindow() will not cast a nullpointer exception if parent is added to scene (displayed in gui)
 		browse.setOnAction( new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle( ActionEvent arg0 )
 			{
-				setSelected( chooser.showOpenDialog( window ) );
+				setSelected( chooser.showOpenDialog( parent.getScene().getWindow() ) );
 			}
 		} );
 
@@ -129,7 +128,7 @@ public class FilePicker extends HBox
 		}
 		else
 		{
-			System.out.println( "tried to add a non-file, skipping." );
+			log.debug( "No file chosen in file picker" );
 		}
 	}
 }

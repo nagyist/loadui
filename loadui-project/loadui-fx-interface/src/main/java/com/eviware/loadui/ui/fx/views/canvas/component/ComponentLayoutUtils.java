@@ -71,7 +71,7 @@ public class ComponentLayoutUtils
 {
 	protected static final Logger log = LoggerFactory.getLogger( ComponentLayoutUtils.class );
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings( "unchecked" )
 	public static Node instantiateLayout( LayoutComponent component )
 	{
 		//Legacy rules that we need, that pre-emp anything else
@@ -265,7 +265,7 @@ public class ComponentLayoutUtils
 		return LabelBuilder.create().build();
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings( "unchecked" )
 	private static Node createCheckBox( PropertyLayoutComponent<?> propLayoutComp )
 	{
 		if( propLayoutComp.getProperty().getKey().equals( "enabledInDistMode" ) && !LoadUI.isPro() )
@@ -282,7 +282,7 @@ public class ComponentLayoutUtils
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings( "unchecked" )
 	private static Node createKnob( PropertyLayoutComponent<?> propLayoutComp )
 	{
 		Knob knob = new Knob( propLayoutComp.getLabel() );
@@ -309,7 +309,7 @@ public class ComponentLayoutUtils
 		return nodeWithProperty( knob, jfxProp );
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings( "unchecked" )
 	private static Node createTextNode( PropertyLayoutComponent<?> propLayoutComp, Label propertyLabel )
 	{
 		final TextField textField = new TextField();
@@ -329,24 +329,23 @@ public class ComponentLayoutUtils
 		return nodeWithProperty( VBoxBuilder.create().children( propertyLabel, textField ).build(), jfxProp );
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings( "unchecked" )
 	private static Node createFilePicker( PropertyLayoutComponent<?> propLayoutComp, Label propertyLabel )
 	{
 
-		ExtensionFilter filter = new ExtensionFilter( "Extension", "*" );
+		ExtensionFilter filter = new ExtensionFilter( "Any File", "*" );
 
 		if( propertyLabel.getText().contains( "Geb " ) )
 		{
-			filter = new ExtensionFilter( "Geb script file (*.groovy)", "*.groovy" );
+			filter = new ExtensionFilter( "Geb script file", "*.groovy" );
 		}
 		else if( propertyLabel.getText().contains( "Groovy" ) )
 		{
-			filter = new ExtensionFilter( "Groovy Script (*.groovy)", "*.groovy" );
-
+			filter = new ExtensionFilter( "Groovy Script", "*.groovy" );
 		}
 		else if( propertyLabel.getText().contains( "soapUI" ) )
 		{
-			filter = new ExtensionFilter( "SoapUI Project (*.xml)", "*.xml", "*.XML" );
+			filter = new ExtensionFilter( "SoapUI Project", "*.xml", "*.XML" );
 		}
 		//Just add more special cases here as we have more needs.
 
@@ -354,7 +353,7 @@ public class ComponentLayoutUtils
 
 		VBox container = VBoxBuilder.create().id( "component-file-picker" ).build();
 
-		FilePicker filePicker = new FilePicker( container.getScene().getWindow(), propertyLabel.getText(), filter, workspace );
+		FilePicker filePicker = new FilePicker( container, propertyLabel.getText(), filter, workspace );
 		javafx.beans.property.Property<File> jfxProp = Properties
 				.convert( ( Property<File> )propLayoutComp.getProperty() );
 		filePicker.selectedProperty().bindBidirectional( jfxProp );
@@ -364,7 +363,7 @@ public class ComponentLayoutUtils
 		return nodeWithProperty( container, jfxProp );
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings( "unchecked" )
 	private static Node createOptionsNode( PropertyLayoutComponent<?> propLayoutComp, Label propertyLabel )
 	{
 		log.debug( "OPTIONS NODE: " + propLayoutComp );
