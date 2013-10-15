@@ -22,6 +22,16 @@ import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.ui.fx.FxTestState;
 import com.eviware.loadui.test.ui.fx.GUI;
 import com.google.common.base.Preconditions;
+import javafx.scene.Node;
+import javafx.scene.control.ToggleButton;
+import org.loadui.testfx.exceptions.NoNodesFoundException;
+
+import java.util.concurrent.Callable;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.loadui.testfx.GuiTest.find;
+import static org.loadui.testfx.GuiTest.findAll;
+import static org.loadui.testfx.GuiTest.waitUntil;
 
 
 public class ScenarioCreatedState extends FxTestState
@@ -70,6 +80,25 @@ public class ScenarioCreatedState extends FxTestState
 	protected void exitToParent()
 	{
 		log.debug( "Deleting scenario." );
+
+		waitUntil( new Callable<Boolean>()
+		{
+			@Override
+			public Boolean call() throws Exception
+			{
+				ToggleButton playButton = find( ".play-button" );
+
+				boolean isStopping = true;
+				try{
+					find(".task-progress-indicator");
+				} catch( NoNodesFoundException e )
+				{
+					isStopping = false;
+				}
+
+				return !playButton.isSelected() && !isStopping;
+			}
+		}, is( true ) );
 
 		GUI.getOpenSourceGui().getController().click( ".scenario-view #menu" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
 

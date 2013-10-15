@@ -16,6 +16,7 @@
 package com.eviware.loadui.test.ui.fx.states;
 
 import com.eviware.loadui.test.TestState;
+import com.eviware.loadui.test.ui.fx.FxTestState;
 import com.eviware.loadui.test.ui.fx.GUI;
 import javafx.stage.Stage;
 import org.loadui.testfx.FXTestUtils;
@@ -23,7 +24,7 @@ import org.loadui.testfx.GuiTest;
 
 import java.util.NoSuchElementException;
 
-public class OpenSourceFxLoadedState extends TestState
+public class OpenSourceFxLoadedState extends FxTestState
 {
 	public static final TestState STATE = new OpenSourceFxLoadedState();
 
@@ -47,6 +48,7 @@ public class OpenSourceFxLoadedState extends TestState
 	protected void enterFromParent() throws Exception
 	{
 		getGui().getBundleContext();
+		waitForNode( ".getting-started-dialog" );
 		closeWindow( "Welcome to LoadUI" );
 		closeWindow( "New version available" );
 

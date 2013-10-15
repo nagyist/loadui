@@ -187,7 +187,9 @@ public class LoadUiRobot
 	{
 		Node playButton = find( ".project-playback-panel .play-button" );
 		waitUntil( playButton, is( enabled() ) );
+		System.out.println("      Clicking playbutton: " + playButton );
 		controller.click( playButton );
+		System.out.println("      There, I clicked it!");
 	}
 
 	public void pointAtPlayStopButton()
@@ -197,14 +199,18 @@ public class LoadUiRobot
 
 	public void runTestFor( int number, TimeUnit unit )
 	{
+		System.out.println("      aaa");
 		clickPlayStopButton();
 		controller.sleep( unit.toMillis( number ) );
+		System.out.println("      bbb");
 		clickPlayStopButton();
 		waitUntil( "#abort-requests", is( not( visible() ) ) );
 	}
 
 	public void deleteAllComponentsFromProjectView()
 	{
+		waitUntil( "#abort-requests", is( not( visible() ) ) );
+
 		controller.click( "#designTab" );
 
 		int maxTries = 20;

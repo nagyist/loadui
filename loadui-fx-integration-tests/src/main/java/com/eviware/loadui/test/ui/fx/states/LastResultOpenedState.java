@@ -48,7 +48,9 @@ public class LastResultOpenedState extends TestState
 	@Override
 	protected void enterFromParent() throws Exception
 	{
+		System.out.println("   11111");
 		fxHelper.runTestFor( 2, TimeUnit.SECONDS );
+		System.out.println("   22222");
 
 		GUI.getOpenSourceGui().getController().click( "#statsTab" )
 				.click( "#open-execution" ).doubleClick( "#result-0" );

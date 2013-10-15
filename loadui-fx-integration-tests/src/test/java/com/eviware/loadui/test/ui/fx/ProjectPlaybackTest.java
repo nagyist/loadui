@@ -58,7 +58,7 @@ public class ProjectPlaybackTest extends SimpleWebTestBase
 		robot.clickPlayStopButton();
 
 		sleep( 4_000 );
-		waitOrTimeout( new IsProjectRunning( project, false ), timeout( seconds( 5 ) ) );
+		waitOrTimeout( new IsProjectRunning( project, false ), timeout( seconds( 25 ) ) );
 	}
 
 }

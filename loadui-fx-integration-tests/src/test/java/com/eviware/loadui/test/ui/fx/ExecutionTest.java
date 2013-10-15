@@ -52,11 +52,12 @@ public class ExecutionTest extends SimpleWebTestBase
 	@Test
 	public void canRunWebRunnerAndAbortExecution() throws Exception
 	{
-
 		setWebPageRunnerUrlTo( NON_RESPONDING_VALID_IP_ADDRESS );
 
 		// WHEN
-		runTestFor( 2, SECONDS );
+		clickPlayStopButton();
+		sleep( 2000 );
+		clickPlayStopButton();
 
 		// THEN
 		assertEquals( 1, extraStages().size() );
@@ -72,7 +73,7 @@ public class ExecutionTest extends SimpleWebTestBase
 
 	private List<Stage> extraStages()
 	{
-		return ( List<Stage> )GuiTest.find( ".canvas-object-view" ).getScene().getRoot().getProperties()
+		return ( List<Stage> )find( ".canvas-object-view" ).getScene().getRoot().getProperties()
 				.get( "OTHER_STAGES" );
 	}
 

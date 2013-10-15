@@ -12,12 +12,10 @@ import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.WEB_PAGE_
 public abstract class SimpleWebTestBase extends FxIntegrationTestBase
 {
 
-	@Override
 	@After
-	public void teardown() throws Exception
+	public void after() throws Exception
 	{
 		ensureProjectIsNotRunning();
-		super.teardown();
 	}
 
 	public void setMaxConcurrentRequestsTo( int requests )

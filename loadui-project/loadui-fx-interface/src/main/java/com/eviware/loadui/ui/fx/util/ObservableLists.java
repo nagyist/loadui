@@ -299,13 +299,11 @@ public class ObservableLists
 						@SuppressWarnings( "unchecked" )
 						public void onChanged( ListChangeListener.Change change )
 						{
-							System.out.println( "contentListeners" );
 							while( change.next() )
 							{
 								list.removeAll( change.getRemoved() );
 								list.addAll( change.getAddedSubList() );
 							}
-							System.out.println( "contentListeners done" );
 						}
 					};
 				}
@@ -433,15 +431,11 @@ public class ObservableLists
 			{
 				if( list1 instanceof ObservableList )
 				{
-					System.out.println( "FXCollections.sort" );
 					FXCollections.sort( ( ObservableList<E> )list1, comparator );
-					System.out.println( "FXCollections.sort done" );
 				}
 				else
 				{
-					System.out.println( "Collections.sort" );
 					Collections.sort( list1, comparator );
-					System.out.println( "Collections.sort done" );
 				}
 			}
 		};

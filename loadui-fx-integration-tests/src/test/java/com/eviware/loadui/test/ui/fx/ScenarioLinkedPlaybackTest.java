@@ -39,10 +39,9 @@ public class ScenarioLinkedPlaybackTest extends FxIntegrationTestBase
 {
 
 	@After
-	public void teardown() throws Exception
+	public void after() throws Exception
 	{
 		ensureProjectIsNotRunning();
-		super.teardown();
 	}
 
 	@Test

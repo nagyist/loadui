@@ -54,6 +54,7 @@ public class FxIntegrationBase extends GuiTest
 
 	public void runTestFor( int number, TimeUnit unit )
 	{
+		System.out.println("     runTestFor");
 		runTestFor( number, unit, RunBlocking.BLOCKING );
 	}
 
@@ -61,6 +62,7 @@ public class FxIntegrationBase extends GuiTest
 	{
 		if( blocking == RunBlocking.NON_BLOCKING )
 		{
+			System.out.println("     NON_BLOCKING");
 			new Thread( new Runnable()
 			{
 				@Override
@@ -73,6 +75,7 @@ public class FxIntegrationBase extends GuiTest
 		else
 		{
 			robot.runTestFor( number, unit );
+			System.out.println("     BLOCKING");
 		}
 	}
 
@@ -83,7 +86,7 @@ public class FxIntegrationBase extends GuiTest
 
 	public void waitForBlockingTaskToComplete()
 	{
-		waitUntil( "task-progress-indicator", is( not( visible() ) ) );
+		waitUntil( ".task-progress-indicator", is( not( visible() ) ) );
 	}
 
 	protected void ensureProjectIsNotRunning()
@@ -172,7 +175,7 @@ public class FxIntegrationBase extends GuiTest
 
 	public boolean isResultViewWindowIsOpen()
 	{
-		return !GuiTest.findAll( ".analysis-view" ).isEmpty();
+		return !GuiTest.findAll( ".result-view" ).isEmpty();
 	}
 
 	protected ProjectItem getProjectItem()

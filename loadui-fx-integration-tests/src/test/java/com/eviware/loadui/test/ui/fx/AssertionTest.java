@@ -28,7 +28,6 @@ public class AssertionTest extends FxIntegrationTestBase
 				.click( "#statsTab" );
 		drag( ".item-holder" ).to( "StackPane" ); //TODO need an ID for the StackPane for the test to be more robust.
 
+		doubleClick( "#toggleInspector" );
 	}
-
-
 }

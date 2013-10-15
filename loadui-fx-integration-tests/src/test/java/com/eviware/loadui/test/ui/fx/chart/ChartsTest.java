@@ -34,6 +34,7 @@ import static org.junit.Assert.assertThat;
 /**
  * @author henrik.olsson
  */
+
 @Category(IntegrationTest.class)
 public class ChartsTest extends FxIntegrationTestBase
 {

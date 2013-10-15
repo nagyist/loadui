@@ -23,13 +23,13 @@
                             <groups>com.eviware.loadui.test.categories.IntegrationTest</groups>
                             <argLine>-Xms256m -Xmx1024m -XX:MaxPermSize=128M</argLine>
                         </configuration>
-                        <!--<executions>-->
-                            <!--<execution>-->
-                                <!--<goals>-->
-                                    <!--<goal>verify</goal>-->
-                                <!--</goals>-->
-                            <!--</execution>-->
-                        <!--</executions>-->
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
