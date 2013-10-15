@@ -80,4 +80,10 @@ public class CanRunLoadUITests extends FxIntegrationBase
 		}
 	}
 
+	public void letGuiReactToProjectStopping()
+	{
+		sleep( 100 );
+		waitForNodeToDisappear( "#abort-requests" );
+	}
+
 }

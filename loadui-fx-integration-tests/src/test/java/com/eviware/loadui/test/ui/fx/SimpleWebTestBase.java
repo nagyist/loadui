@@ -11,12 +11,14 @@ import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.WEB_PAGE_
  */
 public abstract class SimpleWebTestBase extends FxIntegrationTestBase
 {
+	public static final String VALID_URL_TO_HIT_ON_TESTS = "win-srvmontest";
 
 	@Override
 	@After
 	public void teardown() throws Exception
 	{
 		ensureProjectIsNotRunning();
+		robot.deleteAllComponentsFromProjectView();
 		super.teardown();
 	}
 
@@ -24,11 +26,6 @@ public abstract class SimpleWebTestBase extends FxIntegrationTestBase
 	{
 		click( ".web-page-runner .menu-button" ).click( "Settings" ).click( "#max-concurrent-requests" )
 				.doubleClick().type( Integer.toString( requests ) ).click( "#default" );
-	}
-
-	protected void clickOnAbortButton()
-	{
-		click( "#abort-requests" ).sleep( 1_000 );
 	}
 
 	protected void setWebPageRunnerUrlTo( String text )

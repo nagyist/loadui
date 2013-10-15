@@ -53,7 +53,7 @@ public class ScenarioCreatedState extends FxTestState
 	protected void enterFromParent()
 	{
 		log.debug( "Creating scenario." );
-		GUI.getOpenSourceGui().getController().drag( "#newScenarioIcon" ).by( 300, 0 ).drop();
+		GUI.getOpenSourceGui().getController().drag( "#newScenarioIcon" ).by( 500, -150 ).drop();
 
 		waitForNode( ".scenario-view" );
 	}
