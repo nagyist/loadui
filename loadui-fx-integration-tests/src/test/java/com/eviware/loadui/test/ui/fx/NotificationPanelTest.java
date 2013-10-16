@@ -41,9 +41,11 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.*;
 import static org.loadui.testfx.Assertions.assertNodeExists;
+import static org.loadui.testfx.Assertions.verifyThat;
 import static org.loadui.testfx.FXTestUtils.getOrFail;
 import static org.loadui.testfx.Matchers.hasLabel;
 
+@Ignore
 @Category( IntegrationTest.class )
 public class NotificationPanelTest extends FxIntegrationTestBase
 {
@@ -115,7 +117,7 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 		Label msgCountLabel = ( Label )msgCountNodes.iterator().next();
 
 		assertEquals( "A message", msgLabel.getText() );
-		assertEquals( "1", msgCountLabel.getText() );
+		verifyThat( msgCountLabel.getText(), is("1") );
 
 		sendMsgToNotificationPanel( "Second message" );
 

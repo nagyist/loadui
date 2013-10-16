@@ -22,6 +22,7 @@ import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ScenarioCreatedState;
 import com.google.code.tempusfugit.temporal.Condition;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -34,6 +35,7 @@ import static junit.framework.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+@Ignore
 @Category( IntegrationTest.class )
 public class ScenarioLinkedPlaybackTest extends FxIntegrationTestBase
 {

@@ -24,6 +24,7 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 
@@ -40,9 +41,13 @@ import com.eviware.loadui.util.StringUtils;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StatisticHolderToolBox extends ToolBox<Node>
 {
+	protected static final Logger log = LoggerFactory.getLogger( StatisticHolderToolBox.class );
+
 	private static final Predicate<ObservableList<StatisticVariable>> IS_EMPTY = new Predicate<ObservableList<StatisticVariable>>()
 	{
 		@Override

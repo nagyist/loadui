@@ -41,6 +41,11 @@ public class LoadUiRobot
 			this.category = category;
 			this.name = name;
 		}
+
+		public String cssClass()
+		{
+			return name.toLowerCase().replace( ' ', '-' );
+		}
 	}
 
 	private Queue<Point> predefinedPoints;
@@ -161,10 +166,11 @@ public class LoadUiRobot
 		}
 		else
 		{
-			return findComponentByName( component.name, false );
+			return find( "." + component.cssClass() );
 		}
 	}
 
+	@Deprecated
 	private Node findComponentByName( String name, boolean exactMatch )
 	{
 		for( Node compNode : findAll( ".canvas-object-view" ) )

@@ -36,9 +36,13 @@ import static com.google.code.tempusfugit.temporal.Timeout.timeout;
 import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 import static com.google.common.collect.Collections2.filter;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.loadui.testfx.Assertions.verifyThat;
+import static org.mockito.AdditionalMatchers.find;
+import static org.mockito.AdditionalMatchers.not;
 
 /**
  * @author renato
@@ -79,7 +83,8 @@ public class ExecutionTest extends SimpleWebTestBase
 
 	private int numberOfAbortedRequests()
 	{
-		Set<Node> allVBoxes = findAll( "VBox", robot.getComponentNode( WEB_PAGE_RUNNER ) );
+		Set<Node> allVBoxes = find( ".web-page-runner" ).lookupAll( "VBox" );
+		System.out.println(" size: "+allVBoxes.size());
 		Collection<Node> discardedBoxes = filter( allVBoxes, new Predicate<Node>()
 		{
 			@Override
@@ -95,13 +100,11 @@ public class ExecutionTest extends SimpleWebTestBase
 			}
 		} );
 
-		if( discardedBoxes.size() != 1 )
-			throw new RuntimeException( "Could not find the Discarded box in the Web Page Runner" );
-		else
-		{
-			Node discardedTextNode = ( ( VBox )discardedBoxes.iterator().next() ).getChildren().get( 1 );
-			return Integer.parseInt( ( ( Label )discardedTextNode ).getText() );
-		}
+		verifyThat( discardedBoxes.size(), is( 1 ) );
+
+		Node discardedTextNode = ( ( VBox )discardedBoxes.iterator().next() ).getChildren().get( 1 );
+		return Integer.parseInt( ( ( Label )discardedTextNode ).getText() );
+
 	}
 
 }
