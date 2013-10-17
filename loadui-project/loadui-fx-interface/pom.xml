@@ -25,6 +25,13 @@
                             <failIfNoTests>false</failIfNoTests>
                             <testFailureIgnore>false</testFailureIgnore>
                         </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
