@@ -179,7 +179,7 @@ public class ProjectView extends AnchorPane
 		getChildren().add( playbackPanel );
 
 		menuButton.textProperty().bind( Properties.forLabel( project ) );
-		designTab.setDetachableContent( this, new ProjectCanvasView( project ) );
+		designTab.setDetachableContent( this, ProjectCanvasView.forCanvas( project ) );
 		statsTab.setDetachableContent( this, new StatisticsView( project, executionsInfo ) );
 		summaryButton.setDisable( true );
 
@@ -243,7 +243,7 @@ public class ProjectView extends AnchorPane
 					linkButton.visibleProperty().bind( designTab.selectedProperty() );
 
 					StackPane.setAlignment( toolbar, Pos.TOP_CENTER );
-					CanvasView canvas = new CanvasView( scenario );
+					CanvasView canvas = CanvasView.forCanvas( scenario );
 					StackPane.setMargin( canvas, new Insets( 60, 0, 0, 0 ) );
 					StackPane pane = StackPaneBuilder.create().children( canvas, toolbar ).build();
 					designTab.setDetachableContent( ProjectView.this, pane );
@@ -286,7 +286,7 @@ public class ProjectView extends AnchorPane
 					SceneItem scenario = ( SceneItem )event.getArg();
 					scenario.setAttribute( "miniature_fx2", base64 );
 
-					designTab.setDetachableContent( ProjectView.this, new ProjectCanvasView( project ) );
+					designTab.setDetachableContent( ProjectView.this, ProjectCanvasView.forCanvas( project ) );
 					event.consume();
 				}
 				else if( event.getEventType() == IntentEvent.INTENT_CLONE )

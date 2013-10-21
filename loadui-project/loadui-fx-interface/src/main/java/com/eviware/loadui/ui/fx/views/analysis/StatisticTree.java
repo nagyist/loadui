@@ -23,6 +23,9 @@ import com.eviware.loadui.api.statistics.Statistic;
 import com.eviware.loadui.api.statistics.StatisticHolder;
 import com.eviware.loadui.api.statistics.StatisticVariable;
 import com.eviware.loadui.api.traits.Labeled;
+import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
+import com.eviware.loadui.ui.fx.control.ConfirmationDialog;
+import com.eviware.loadui.ui.fx.control.Dialog;
 import com.eviware.loadui.ui.fx.control.fields.Validatable;
 import com.eviware.loadui.ui.fx.util.TreeUtils.LabeledStringValue;
 import com.eviware.loadui.ui.fx.views.assertions.LabeledTreeCell;
@@ -33,10 +36,12 @@ import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,7 +118,7 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 			@Override
 			public TreeCell<Labeled> call( TreeView<Labeled> treeView )
 			{
-				return new LabeledTreeCell();
+                return LabeledTreeCell.newInstance();
 			}
 		} );
 	}

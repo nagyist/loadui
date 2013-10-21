@@ -12,7 +12,7 @@ public abstract class FxIntegrationTestBase extends FxIntegrationBase
 	public abstract TestState getStartingState();
 
 	@Before
-	public void setup() throws Exception
+	final public void setup() throws Exception
 	{
 		getStartingState().enter();
 		Node notificationPanel = getOrFail( ".notification-panel" );
@@ -21,7 +21,7 @@ public abstract class FxIntegrationTestBase extends FxIntegrationBase
 	}
 
 	@After
-	public void teardown() throws Exception
+	final public void teardown() throws Exception
 	{
 		getStartingState().getParent().enter();
 	}

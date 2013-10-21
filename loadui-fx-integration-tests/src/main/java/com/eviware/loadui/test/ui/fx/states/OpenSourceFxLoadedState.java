@@ -50,6 +50,7 @@ public class OpenSourceFxLoadedState extends TestState
 	{
 		getGui().getBundleContext();
 		System.setProperty( "groovy.root", new File( LoadUI.getWorkingDir(), ".groovy" ).getAbsolutePath() );
+		waitForNode( ".getting-started-dialog" );
 		closeWindow( "Welcome to LoadUI" );
 		closeWindow( "New version available" );
 

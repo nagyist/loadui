@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.assertThat;
 import static org.loadui.testfx.GuiTest.*;
 import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
@@ -32,7 +33,7 @@ public class LoadUiRobot
 	public enum Component
 	{
 		FIXED_RATE_GENERATOR( "generators", "Fixed Rate" ), TABLE_LOG( "output", "Table Log" ), WEB_PAGE_RUNNER(
-			"runners", "Web Page Runner" );
+			"runners", "Web Page Runner" ), SCENARIO( "vu-scenario", "VU Scenario" );
 
 		public final String category;
 		public final String name;
@@ -41,6 +42,11 @@ public class LoadUiRobot
 		{
 			this.category = category;
 			this.name = name;
+		}
+
+		public String cssClass()
+		{
+			return name.toLowerCase().replace( ' ', '-' );
 		}
 	}
 
@@ -58,7 +64,7 @@ public class LoadUiRobot
 
 	public void resetPredefinedPoints()
 	{
-		predefinedPoints = Lists.newLinkedList( ImmutableList.of( new Point( 250, 250 ), new Point(
+		predefinedPoints = newLinkedList( ImmutableList.of( new Point( 250, 250 ), new Point(
 				450, 450 ) ) );
 	}
 
@@ -69,6 +75,11 @@ public class LoadUiRobot
 
 	public ComponentHandle createComponent( final Component component )
 	{
+		if( findAll( ".canvas-object-view" ).isEmpty() )
+		{
+			resetPredefinedPoints();
+		}
+
 		Preconditions.checkNotNull( predefinedPoints.peek(),
 				"All predefined points (x,y) for component placement are used. Please add new ones." );
 		return createComponentAt( component, predefinedPoints.poll() );
@@ -112,7 +123,8 @@ public class LoadUiRobot
 			@Override
 			public boolean matchesSafely( Node node )
 			{
-				if( node.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
+				String className = node.getClass().getSimpleName();
+				if( className.equals( "ComponentDescriptorView" ) || className.equals( "NewScenarioIcon" ) )
 				{
 					return node.toString().equals( component.name );
 				}
@@ -147,7 +159,7 @@ public class LoadUiRobot
 			controller.move( "#runners.category" ).scroll( 10 );
 		}
 	}
-
+	
 	public Node getComponentNode( Component component )
 	{
 		return findComponentByName( component.name, false );
@@ -169,7 +181,7 @@ public class LoadUiRobot
 				}
 			}
 		}
-		throw new NoNodesFoundException( "No component found matching name " + name );
+		throw new NoNodesFoundException( "No component found matching name " + name )		throw new NoNodesFoundException( "No component found matching name " + name );
 	}
 
 	public void clickPlayStopButton()
@@ -194,6 +206,8 @@ public class LoadUiRobot
 
 	public void deleteAllComponentsFromProjectView()
 	{
+		waitUntil( "#abort-requests", is( not( visible() ) ) );
+
 		controller.click( "#designTab" );
 
 		int maxTries = 20;

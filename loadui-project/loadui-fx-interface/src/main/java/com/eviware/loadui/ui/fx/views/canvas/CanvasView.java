@@ -24,6 +24,7 @@ import com.eviware.loadui.api.terminal.Connection;
 import com.eviware.loadui.api.terminal.InputTerminal;
 import com.eviware.loadui.api.terminal.OutputTerminal;
 import com.eviware.loadui.api.terminal.Terminal;
+import com.eviware.loadui.api.traits.Releasable;
 import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
 import com.eviware.loadui.ui.fx.api.input.Selectable;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
@@ -79,9 +80,10 @@ import java.util.Arrays;
 import java.util.concurrent.Callable;
 
 import static com.eviware.loadui.ui.fx.util.ObservableLists.*;
+import static com.eviware.loadui.util.ReleasableUtils.releaseAll;
 import static com.google.common.collect.Lists.transform;
 
-public class CanvasView extends StackPane
+public class CanvasView extends StackPane implements Releasable
 {
 	protected static final Logger log = LoggerFactory.getLogger( CanvasView.class );
 
@@ -148,7 +150,7 @@ public class CanvasView extends StackPane
 			connectionView.fillProperty().bind(
 					Bindings.when( selectedProperty ).then( Color.web( "#00ADEE" ) ).otherwise( Color.GRAY ) );
 			connectionView.effectProperty().bind(
-					Bindings.when( selectedProperty ).then( selectedEffect ).otherwise( (Effect) null ) );
+					Bindings.when( selectedProperty ).then( selectedEffect ).otherwise( ( Effect )null ) );
 			selectedProperty.addListener( new ChangeListener<Boolean>()
 			{
 				@Override
@@ -195,7 +197,28 @@ public class CanvasView extends StackPane
 	private final Group componentLayer = GroupBuilder.create().styleClass( "component-layer" ).build();
 	private final Group connectionLayer = GroupBuilder.create().styleClass( "connection-layer" ).build();
 
-	public CanvasView( CanvasItem canvas )
+	protected static CanvasView instance = null;
+	private CollectionList<ComponentItem> componentItems = null;
+
+	public static CanvasView forCanvas( CanvasItem canvas )
+	{
+
+		if( instance != null )
+		{
+			instance.release();
+		}
+		instance = new CanvasView( canvas );
+		return instance;
+	}
+
+	public void release()
+	{
+		log.debug( "RELEASING " + this );
+
+		releaseAll( componentItems, canvasObjects );
+	}
+
+	protected CanvasView( CanvasItem canvas )
 	{
 		this.canvas = canvas;
 
@@ -216,10 +239,13 @@ public class CanvasView extends StackPane
 
 	protected ObservableList<? extends CanvasObjectView> createCanvasObjects()
 	{
+		log.debug( "   createCanvasObjects()" );
+		componentItems = ofCollectionReleasable( canvas, CanvasItem.COMPONENTS, ComponentItem.class, canvas.getComponents() );
 		return ObservableLists.transform(
-				fx( ofCollection( canvas, CanvasItem.COMPONENTS, ComponentItem.class, canvas.getComponents() ) ),
+				fx( componentItems.getReadOnlyList() ),
 				COMPONENT_TO_VIEW );
 	}
+
 
 	protected boolean shouldAccept( final Object data )
 	{
@@ -239,7 +265,8 @@ public class CanvasView extends StackPane
 			{
 				event.accept();
 				event.consume();
-			} else if( event.getEventType() == DraggableEvent.DRAGGABLE_DROPPED )
+			}
+			else if( event.getEventType() == DraggableEvent.DRAGGABLE_DROPPED )
 			{
 				handleDrop( event );
 				event.consume();
@@ -249,7 +276,7 @@ public class CanvasView extends StackPane
 
 	protected void createComponent( final DraggableEvent event )
 	{
-		final ComponentDescriptor descriptor = (ComponentDescriptor) event.getData();
+		final ComponentDescriptor descriptor = ( ComponentDescriptor )event.getData();
 
 		final Task<ComponentItem> createComponent = new Task<ComponentItem>()
 		{
@@ -260,8 +287,8 @@ public class CanvasView extends StackPane
 
 				ComponentItem component = CanvasView.this.canvas.createComponent( CanvasItemNameGenerator.generateComponentName( canvas, descriptor.getLabel() ), descriptor );
 				Point2D position = canvasLayer.sceneToLocal( event.getSceneX(), event.getSceneY() );
-				component.setAttribute( "gui.layoutX", String.valueOf( (int) position.getX() ) );
-				component.setAttribute( "gui.layoutY", String.valueOf( (int) position.getY() ) );
+				component.setAttribute( "gui.layoutX", String.valueOf( ( int )position.getX() ) );
+				component.setAttribute( "gui.layoutY", String.valueOf( ( int )position.getY() ) );
 
 				return component;
 			}
@@ -433,16 +460,19 @@ public class CanvasView extends StackPane
 			if( layoutX > minX )
 			{
 				canvasLayer.setLayoutX( minX );
-			} else if( layoutX < maxX )
+			}
+			else if( layoutX < maxX )
 			{
 				canvasLayer.setLayoutX( maxX );
 			}
-		} else
+		}
+		else
 		{
 			if( layoutX < minX )
 			{
 				canvasLayer.setLayoutX( minX );
-			} else if( layoutX > maxX )
+			}
+			else if( layoutX > maxX )
 			{
 				canvasLayer.setLayoutX( maxX );
 			}
@@ -453,16 +483,19 @@ public class CanvasView extends StackPane
 			if( layoutY > minY )
 			{
 				canvasLayer.setLayoutY( minY );
-			} else if( layoutY < maxY )
+			}
+			else if( layoutY < maxY )
 			{
 				canvasLayer.setLayoutY( maxY );
 			}
-		} else
+		}
+		else
 		{
 			if( layoutY < minY )
 			{
 				canvasLayer.setLayoutY( minY );
-			} else if( layoutY > maxY )
+			}
+			else if( layoutY > maxY )
 			{
 				canvasLayer.setLayoutY( maxY );
 			}
@@ -545,15 +578,15 @@ public class CanvasView extends StackPane
 				{
 					if( !newValue )
 					{
-						item.setAttribute( "gui.layoutX", String.valueOf( (int) view.getLayoutX() ) );
-						item.setAttribute( "gui.layoutY", String.valueOf( (int) view.getLayoutY() ) );
+						item.setAttribute( "gui.layoutX", String.valueOf( ( int )view.getLayoutX() ) );
+						item.setAttribute( "gui.layoutY", String.valueOf( ( int )view.getLayoutY() ) );
 						enforceCanvasBounds();
 					}
 				}
 			} );
 			Selectable selectable = SelectableImpl.installSelectable( view );
 			view.effectProperty().bind(
-					Bindings.when( selectable.selectedProperty() ).then( selectedEffect ).otherwise( (Effect) null ) );
+					Bindings.when( selectable.selectedProperty() ).then( selectedEffect ).otherwise( ( Effect )null ) );
 
 			MultiMovable.install( CanvasView.this, view );
 
@@ -588,11 +621,11 @@ public class CanvasView extends StackPane
 		{
 			if( event.getData() instanceof Terminal )
 			{
-				DragNode dragNode = (DragNode) event.getDraggable();
+				DragNode dragNode = ( DragNode )event.getDraggable();
 
 				if( event.getEventType() == DraggableEvent.DRAGGABLE_STARTED )
 				{
-					final Terminal draggedTerminal = (Terminal) event.getData();
+					final Terminal draggedTerminal = ( Terminal )event.getData();
 					connectionView = Iterables.find( connections, new Predicate<ConnectionView>()
 					{
 						@Override
@@ -614,18 +647,19 @@ public class CanvasView extends StackPane
 						Bounds startBounds = canvasLayer.sceneToLocal( otherTerminalView.localToScene( otherTerminalView
 								.getBoundsInLocal() ) );
 
-						startPoint = new Point2D( (startBounds.getMinX() + startBounds.getMaxX()) / 2,
-								(startBounds.getMinY() + startBounds.getMaxY()) / 2 );
+						startPoint = new Point2D( ( startBounds.getMinX() + startBounds.getMaxX() ) / 2,
+								( startBounds.getMinY() + startBounds.getMaxY() ) / 2 );
 
 						originalData = draggedTerminal;
 						dragNode.setData( otherTerminalView.getTerminal() );
-					} else
+					}
+					else
 					{
-						Node source = ((DragNode) event.getDraggable()).getDragSource();
+						Node source = ( ( DragNode )event.getDraggable() ).getDragSource();
 						Bounds startBounds = canvasLayer.sceneToLocal( source.localToScene( source.getBoundsInLocal() ) );
 
-						startPoint = new Point2D( (startBounds.getMinX() + startBounds.getMaxX()) / 2,
-								(startBounds.getMinY() + startBounds.getMaxY()) / 2 );
+						startPoint = new Point2D( ( startBounds.getMinX() + startBounds.getMaxX() ) / 2,
+								( startBounds.getMinY() + startBounds.getMaxY() ) / 2 );
 
 						originalData = null;
 						connectionView = null;
@@ -636,11 +670,13 @@ public class CanvasView extends StackPane
 					wire.updatePosition( startPoint.getX(), startPoint.getY(), endPoint.getX(), endPoint.getY() );
 					wire.setReversed( event.getData() instanceof InputTerminal );
 					wire.setVisible( true );
-				} else if( event.getEventType() == DraggableEvent.DRAGGABLE_DRAGGED )
+				}
+				else if( event.getEventType() == DraggableEvent.DRAGGABLE_DRAGGED )
 				{
 					Point2D endPoint = canvasLayer.sceneToLocal( event.getSceneX(), event.getSceneY() );
 					wire.updatePosition( startPoint.getX(), startPoint.getY(), endPoint.getX(), endPoint.getY() );
-				} else if( event.getEventType() == DraggableEvent.DRAGGABLE_STOPPED )
+				}
+				else if( event.getEventType() == DraggableEvent.DRAGGABLE_STOPPED )
 				{
 					wire.setVisible( false );
 					if( originalData != null )
@@ -650,17 +686,18 @@ public class CanvasView extends StackPane
 					if( connectionView != null )
 					{
 						//If dropped on (or near enough) the original TerminalView, do not delete the Connection:
-						Node source = ((DragNode) event.getDraggable()).getDragSource();
+						Node source = ( ( DragNode )event.getDraggable() ).getDragSource();
 						Bounds startBounds = source.localToScene( source.getBoundsInLocal() );
 						Point2D endPoint = new Point2D( event.getSceneX(), event.getSceneY() );
 						double distance = endPoint.distance( new Point2D(
-								(startBounds.getMinX() + startBounds.getMaxX()) / 2, (startBounds.getMinY() + startBounds
-								.getMaxY()) / 2 ) );
+								( startBounds.getMinX() + startBounds.getMaxX() ) / 2, ( startBounds.getMinY() + startBounds
+								.getMaxY() ) / 2 ) );
 
 						if( distance > 10 )
 						{
 							connectionView.delete();
-						} else
+						}
+						else
 						{
 							connectionView.setVisible( true );
 						}

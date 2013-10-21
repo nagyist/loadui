@@ -61,6 +61,8 @@ public class GettingStartedDialog extends ButtonDialog
 			}
 		} );
 
+		addStyleClass("getting-started-dialog");
+
 		getItems().setAll(
 				new Label( "Get started with one of the following options" ),
 				VBoxBuilder

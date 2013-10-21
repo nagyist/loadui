@@ -49,7 +49,8 @@ public class LastResultOpenedState extends TestState
 	@Override
 	protected void enterFromParent() throws Exception
 	{
-		integrationBase.runTestFor( 2, TimeUnit.SECONDS );
+		fxHelper.runTestFor( 2, TimeUnit.SECONDS );
+
 		GUI.getOpenSourceGui().getController().click( "#statsTab" )
 				.click( "#open-execution" )
 				.doubleClick( "#result-0" );

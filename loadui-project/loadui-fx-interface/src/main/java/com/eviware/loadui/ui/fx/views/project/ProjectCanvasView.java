@@ -39,7 +39,18 @@ import static com.eviware.loadui.ui.fx.util.ObservableLists.*;
 
 public class ProjectCanvasView extends CanvasView
 {
-	public ProjectCanvasView( CanvasItem canvas )
+	public static CanvasView forCanvas( CanvasItem canvas )
+	{
+
+		if( instance != null )
+		{
+			instance.release();
+		}
+		instance = new ProjectCanvasView( canvas );
+		return instance;
+	}
+
+	private ProjectCanvasView( CanvasItem canvas )
 	{
 		super( canvas );
 		getStyleClass().add( "project-canvas-view" );
@@ -86,14 +97,15 @@ public class ProjectCanvasView extends CanvasView
 
 			fireEvent( IntentEvent.create( IntentEvent.INTENT_RUN_BLOCKING, new CreateScenarioTask( position ) ) );
 			event.consume();
-		} else
+		}
+		else
 			super.handleDrop( event );
 	}
 
 	@Override
 	public ProjectItem getCanvas()
 	{
-		return (ProjectItem) super.getCanvas();
+		return ( ProjectItem )super.getCanvas();
 	}
 
 	public class CreateScenarioTask extends Task<Void>
@@ -111,8 +123,8 @@ public class ProjectCanvasView extends CanvasView
 			String name = CanvasItemNameGenerator.generateScenarioName( getCanvas() );
 			log.debug( "About to create scenario: " + name );
 			SceneItem scenario = getCanvas().createScene( name );
-			scenario.setAttribute( "gui.layoutX", String.valueOf( (int) position.getX() ) );
-			scenario.setAttribute( "gui.layoutY", String.valueOf( (int) position.getY() ) );
+			scenario.setAttribute( "gui.layoutX", String.valueOf( ( int )position.getX() ) );
+			scenario.setAttribute( "gui.layoutY", String.valueOf( ( int )position.getY() ) );
 			return null;
 		}
 	}

@@ -17,6 +17,7 @@ package com.eviware.loadui.test.ui.fx;
 
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.test.categories.IntegrationTest;
+import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 

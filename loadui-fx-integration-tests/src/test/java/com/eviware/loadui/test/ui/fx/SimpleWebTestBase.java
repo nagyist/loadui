@@ -28,9 +28,14 @@ public abstract class SimpleWebTestBase extends FxIntegrationTestBase
 				.doubleClick().type( Integer.toString( requests ) ).click( "#default" );
 	}
 
+	protected void clickOnAbortButton()
+	{
+		click( "#abort-requests" ).sleep( 1_000 );
+	}
+
 	protected void setWebPageRunnerUrlTo( String text )
 	{
-		doubleClick( find( ".text-input", robot.getComponentNode( WEB_PAGE_RUNNER ) ) ).type( text );
+		doubleClick( ".component-view .text-input" ).type( text );
 	}
 
 	@Override

@@ -41,7 +41,7 @@ import static org.loadui.testfx.Assertions.assertNodeExists;
 import static org.loadui.testfx.FXTestUtils.getOrFail;
 import static org.loadui.testfx.Matchers.hasLabel;
 
-@Category(IntegrationTest.class)
+@Category( IntegrationTest.class )
 public class NotificationPanelTest extends FxIntegrationTestBase
 {
 	@Override

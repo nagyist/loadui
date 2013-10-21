@@ -15,6 +15,8 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
+import static java.util.Arrays.*;
+import static org.loadui.testfx.Assertions.verifyThat;
 import static org.loadui.testfx.GuiTest.find;
 import static org.loadui.testfx.GuiTest.targetWindow;
 import static org.loadui.testfx.GuiTest.wrap;
@@ -24,6 +26,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.loadui.testfx.matchers.NodeExistsMatcher.exists;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,10 +72,10 @@ public class ToolBoxTest
 	private static Stage stage;
 	private static GuiTest controller;
 	static ToolBox<Rectangle> toolbox;
-	static final List<Rectangle> allRects = Arrays.asList( buildRect( Color.RED ), buildRect( Color.RED ),
+	static final List<Rectangle> allRects = asList( buildRect( Color.RED ), buildRect( Color.RED ),
 			buildRect( Color.BLUE ), buildRect( Color.GREEN ), buildRect( Color.RED ), buildRect( Color.YELLOW ),
 			buildRect( Color.BLUE ), buildRect( Color.ORANGE ) );
-	static final List<Rectangle> rectsToAdd = Arrays.asList( RectangleBuilder.create().fill( Color.AQUA ).build() );
+	static final List<Rectangle> rectsToAdd = asList( RectangleBuilder.create().fill( Color.AQUA ).build() );
 
 	public static class ToolboxTestApp extends Application
 	{
@@ -145,7 +148,7 @@ public class ToolBoxTest
 
 		controller.click( ".expander-button" ).click( rectangle2 ).click( rectangle0 ).click( rectangle1 );
 
-		assertThat( clicked, is( Arrays.asList( rectangle2, rectangle0, rectangle1 ) ) );
+		assertThat( clicked, is( asList( rectangle2, rectangle0, rectangle1 ) ) );
 
 		assertTrue( GuiTest.findAll( ".tool-box-expander" ).size() == 1 );
 
@@ -282,8 +285,9 @@ public class ToolBoxTest
 		assertFalse( addItemTest instanceof Exception );
 
 		assertTrue( ( ( Set<?> )clearTest ).isEmpty() );
-		assertTrue( ( ( Set<?> )addTwoItemsTest ).containsAll( Arrays.asList( red, blue ) ) );
-		assertTrue( ( ( Set<?> )addItemTest ).containsAll( Arrays.asList( red, blue ) ) ); // no change until clicking scroll button
+
+		assertTrue( ( ( Set<?> )addTwoItemsTest ).containsAll( asList( red, blue ) ) );
+		assertTrue( ( ( Set<?> )addItemTest ).containsAll( asList( red, blue ) ) ); // no change until clicking scroll button
 
 		controller.click( ".nav.down" );
 
@@ -299,7 +303,7 @@ public class ToolBoxTest
 		Object afterScrollingTest = results.afterScrollingTest.get( 1, TimeUnit.SECONDS );
 
 		assertFalse( afterScrollingTest instanceof Exception );
-		assertTrue( ( ( Set<?> )afterScrollingTest ).containsAll( Arrays.asList( blue, green ) ) );
+		assertTrue( ( ( Set<?> )afterScrollingTest ).containsAll( asList( blue, green ) ) );
 
 	}
 
@@ -357,18 +361,7 @@ public class ToolBoxTest
 		assertTrue( future.get( 1, TimeUnit.SECONDS ) );
 		controller.sleep( 500 ).click( nextButton );
 
-		boolean foundRenamed = false;
-		for( Node holder : GuiTest.findAll( "Label" ) )
-		{
-			if( ( ( Label )holder ).getText().equals( "Renamed" ) )
-			{
-				foundRenamed = true;
-				break;
-			}
-		}
-
-		assertTrue( foundRenamed );
-
+		verifyThat( "Renamed", exists() );
 	}
 
 	private void runLaterSettingRectangles( final Runnable runnable, final SettableFuture<Object> future )
@@ -404,7 +397,7 @@ public class ToolBoxTest
 				@Override
 				public void run()
 				{
-					future.set( GuiTest.findAll( "ToolBox Rectangle" ) );
+					future.set( GuiTest.findAll( ".tool-box .rectangle" ) );
 					System.out.println( "Set the future rectangles" );
 				}
 			} );
@@ -418,7 +411,7 @@ public class ToolBoxTest
 
 	private static Rectangle buildRect( Color color )
 	{
-		final Rectangle rectangle = RectangleBuilder.create().width( 50 ).height( 75 ).fill( color ).build();
+		final Rectangle rectangle = RectangleBuilder.create().width( 50 ).height( 75 ).fill( color ).styleClass( "rectangle" ).build();
 		ToolBox.setCategory( rectangle, color.toString() );
 
 		rectangle.addEventHandler( MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>()

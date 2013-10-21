@@ -26,7 +26,8 @@ public class SystemLogTest extends GuiTest
 	@Test
 	public void should_displayLogMessages()
 	{
-		doubleClick( "System Log" );
+		click( "System Log" ).drag(".inspector-view .tab-header-background").by(0, -400)
+				.drop();
 
 		click( "Clear").click( "Copy All" );
 
