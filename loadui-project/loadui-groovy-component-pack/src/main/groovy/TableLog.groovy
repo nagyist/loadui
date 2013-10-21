@@ -87,7 +87,7 @@ output = { message ->
 			addedColumns += message.keySet() - tableColumns
 			tableColumns += addedColumns
 		}
-		
+
 		if ( formatTimestamps.value ) {
 			message.each() { key, value ->
 				if ( key.toLowerCase().contains("timestamp") ) {
@@ -129,9 +129,20 @@ putMessageInWriteQueue = { message ->
 	writeQueue << entries
 }
 
-onAction( "START" ) { buildFileName(); startTableWriter() }
+duringPhase( "START" ) {
+	if(controller)
+	{
+		buildFileName()
+		startTableWriter()
+	}
+}
 
-onAction( "STOP" ) { stopTableWriter() }
+duringPhase( "STOP" ) {
+	if(controller)
+	{
+ 		stopTableWriter()
+ 	}
+ }
 
 onAction( "COMPLETE" ) { closeWriter() }
 
@@ -142,7 +153,10 @@ onAction( "RESET" ) {
 	refreshLayout()
 }
 
-onRelease = { closeWriter() }
+onRelease = {
+	stopTableWriter()
+	closeWriter()
+}
 
 closeWriter = {
 	withFileWriter( false ) { // TODO: Why do we do this?
