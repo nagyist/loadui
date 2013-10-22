@@ -39,6 +39,7 @@ import static com.eviware.loadui.ui.fx.util.ObservableLists.*;
 
 public class ProjectCanvasView extends CanvasView
 {
+
 	public static CanvasView forCanvas( CanvasItem canvas )
 	{
 

@@ -218,6 +218,8 @@ public final class AgentItemImpl extends ModelItemImpl<AgentItemConfig> implemen
 		return connected;
 	}
 
+
+
 	@Override
 	public int getUtilization()
 	{

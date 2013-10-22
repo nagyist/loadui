@@ -38,8 +38,7 @@ import com.eviware.loadui.ui.fx.util.Properties;
 import com.eviware.loadui.ui.fx.util.UIUtils;
 import com.eviware.loadui.ui.fx.views.analysis.FxExecutionsInfo;
 import com.eviware.loadui.ui.fx.views.analysis.reporting.LineChartUtils;
-import com.eviware.loadui.ui.fx.views.canvas.CanvasView;
-import com.eviware.loadui.ui.fx.views.scenario.ScenarioToolbar;
+import com.eviware.loadui.ui.fx.views.scenario.ScenarioCanvasView;
 import com.eviware.loadui.ui.fx.views.statistics.StatisticsView;
 import com.eviware.loadui.ui.fx.views.workspace.CloneProjectDialog;
 import com.eviware.loadui.ui.fx.views.workspace.CreateNewProjectDialog;
@@ -57,25 +56,26 @@ import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.SceneBuilder;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.WritableImage;
-import javafx.scene.layout.*;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.CheckForNull;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class ProjectView extends AnchorPane
 {
@@ -99,6 +99,9 @@ public class ProjectView extends AnchorPane
 	private Button summaryButton;
 
 	private ProjectPlaybackPanel playbackPanel;
+
+	@CheckForNull
+	private ScenarioCanvasView openSceneView;
 
 	private final FxExecutionsInfo executionsInfo;
 
@@ -145,7 +148,14 @@ public class ProjectView extends AnchorPane
 								@Override
 								public void run()
 								{
-									execution.abort( "Aborting running requests..." );
+									try
+									{
+										execution.complete().get( 5, TimeUnit.SECONDS );
+									}
+									catch( Exception e )
+									{
+										log.warn( "Problem waiting for execution to stop", e );
+									}
 									project.cancelScenes( false );
 									project.cancelComponents();
 								}
@@ -183,10 +193,10 @@ public class ProjectView extends AnchorPane
 		statsTab.setDetachableContent( this, new StatisticsView( project, executionsInfo ) );
 		summaryButton.setDisable( true );
 
-		addEventHandler( IntentEvent.ANY, new EventHandler<IntentEvent<? extends Object>>()
+		addEventHandler( IntentEvent.ANY, new EventHandler<IntentEvent<?>>()
 		{
 			@Override
-			public void handle( IntentEvent<? extends Object> event )
+			public void handle( IntentEvent<?> event )
 			{
 				if( event.getEventType() == IntentEvent.INTENT_CREATE )
 				{
@@ -199,7 +209,6 @@ public class ProjectView extends AnchorPane
 					else
 					{
 						log.debug( "Unhandled intent: %s", event );
-						return;
 					}
 				}
 				else if( event.getEventType() == IntentEvent.INTENT_SAVE )
@@ -212,7 +221,7 @@ public class ProjectView extends AnchorPane
 						Node grid = lookup( ".tool-box" );
 						grid.setVisible( false );
 
-						javafx.scene.SnapshotParameters parameters = new javafx.scene.SnapshotParameters();
+						SnapshotParameters parameters = new SnapshotParameters();
 						parameters.setViewport( new javafx.geometry.Rectangle2D( 100, 60, 620, 324 ) );
 						WritableImage fxImage = canvas.snapshot( parameters, null );
 						BufferedImage bimg = SwingFXUtils.fromFXImage( fxImage, null );
@@ -227,27 +236,12 @@ public class ProjectView extends AnchorPane
 					else
 					{
 						log.debug( "Unhandled intent: %s", event );
-						return;
 					}
 				}
 				else if( event.getEventType() == IntentEvent.INTENT_OPEN && event.getArg() instanceof SceneItem )
 				{
 					SceneItem scenario = ( SceneItem )event.getArg();
-
-					ToolBar projectToolbar = ( ( ToolBar )lookup( ".tool-bar" ) );
-					projectToolbar.setStyle( TOOLBAR_STYLE_WITH_SCENARIO );
-
-					ScenarioToolbar toolbar = new ScenarioToolbar( scenario );
-
-					ToggleButton linkButton = playbackPanel.addLinkButton( scenario );
-					linkButton.visibleProperty().bind( designTab.selectedProperty() );
-
-					StackPane.setAlignment( toolbar, Pos.TOP_CENTER );
-					CanvasView canvas = CanvasView.forCanvas( scenario );
-					StackPane.setMargin( canvas, new Insets( 60, 0, 0, 0 ) );
-					StackPane pane = StackPaneBuilder.create().children( canvas, toolbar ).build();
-					designTab.setDetachableContent( ProjectView.this, pane );
-
+					openScene( scenario );
 					event.consume();
 				}
 				else if( event.getEventType() == IntentEvent.INTENT_OPEN && event.getArg() instanceof Execution )
@@ -257,36 +251,8 @@ public class ProjectView extends AnchorPane
 				}
 				else if( event.getEventType() == IntentEvent.INTENT_CLOSE && event.getArg() instanceof SceneItem )
 				{
-					( ( ToolBar )lookup( ".tool-bar" ) ).setStyle( TOOLBAR_STYLE_WITHOUT_SCENARIO );
-
-					playbackPanel.removeLinkButton();
-
-					javafx.scene.layout.Pane canvas = ( javafx.scene.layout.Pane )lookup( ".pane" );
-					javafx.scene.layout.Region grid = ( javafx.scene.layout.Region )lookup( ".grid" );
-					StackPane parent = ( StackPane )grid.getParent();
-					parent.getChildren().remove( grid );
-					parent.getChildren().remove( canvas );
-
-					Region gridRegion = RegionBuilder.create().styleClass( "grid" ).style( "-fx-background-repeat: repeat;" )
-							.build();
-
-					//Hack for setting CSS resources within an OSGi framework
-					String gridUrl = CanvasView.class.getResource( "grid-box.png" ).toExternalForm();
-					gridRegion.setStyle( "-fx-background-image: url('" + gridUrl + "');" );
-
-					StackPane completeCanvas = StackPaneBuilder.create().children( gridRegion, canvas ).build();
-					SceneBuilder.create().root( completeCanvas ).width( canvas.getWidth() ).height( canvas.getHeight() )
-							.build();
-
-					WritableImage fxImage = completeCanvas.snapshot( null, null );
-					BufferedImage bimg = SwingFXUtils.fromFXImage( fxImage, null );
-					bimg = UIUtils.scaleImage( bimg, 332, 175 );
-					String base64 = NodeUtils.toBase64Image( bimg );
-
-					SceneItem scenario = ( SceneItem )event.getArg();
-					scenario.setAttribute( "miniature_fx2", base64 );
-
-					designTab.setDetachableContent( ProjectView.this, ProjectCanvasView.forCanvas( project ) );
+					lookup( ".tool-bar" ).setStyle( TOOLBAR_STYLE_WITHOUT_SCENARIO );
+					closeScene();
 					event.consume();
 				}
 				else if( event.getEventType() == IntentEvent.INTENT_CLONE )
@@ -294,7 +260,6 @@ public class ProjectView extends AnchorPane
 					ProjectRef projectRef = ProjectUtils.getProjectRef( project );
 					new CloneProjectDialog( project.getWorkspace(), projectRef, ProjectView.this ).show();
 					event.consume();
-					return;
 				}
 			}
 		} );
@@ -306,7 +271,7 @@ public class ProjectView extends AnchorPane
 			{
 				if( statsTab.selectedProperty().get() )
 				{
-					( ( ToolBar )lookup( ".tool-bar" ) ).setStyle( TOOLBAR_STYLE_WITH_SCENARIO );
+					lookup( ".tool-bar" ).setStyle( TOOLBAR_STYLE_WITH_SCENARIO );
 				}
 			}
 		} );
@@ -320,17 +285,48 @@ public class ProjectView extends AnchorPane
 				{
 					if( designTab.getContent().lookup( ".scenario-toolbar" ) != null )
 					{
-						( ( ToolBar )lookup( ".tool-bar" ) ).setStyle( TOOLBAR_STYLE_WITH_SCENARIO );
+						lookup( ".tool-bar" ).setStyle( TOOLBAR_STYLE_WITH_SCENARIO );
 					}
 					else
 					{
-						( ( ToolBar )lookup( ".tool-bar" ) ).setStyle( TOOLBAR_STYLE_WITHOUT_SCENARIO );
+						lookup( ".tool-bar" ).setStyle( TOOLBAR_STYLE_WITHOUT_SCENARIO );
 					}
 				}
 			}
 		} );
 
 		initTasks();
+	}
+
+	private void openScene( SceneItem scenario )
+	{
+		ToolBar projectToolbar = ( ( ToolBar )lookup( ".tool-bar" ) );
+		projectToolbar.setStyle( TOOLBAR_STYLE_WITH_SCENARIO );
+
+		openSceneView = new ScenarioCanvasView( scenario, playbackPanel,
+				designTab.selectedProperty() );
+
+		ProjectCanvasView projectCanvas = ( ProjectCanvasView )designTab.getDetachableContent();
+		projectCanvas.release();
+
+		designTab.setDetachableContent( this, openSceneView );
+	}
+
+	private void closeScene()
+	{
+		playbackPanel.removeLinkButton();
+
+		Region grid = ( Region )lookup( ".grid" );
+		StackPane parent = ( StackPane )grid.getParent();
+		boolean gridRemoved = parent.getChildren().remove( grid );
+		boolean sceneRemoved = parent.getChildren().remove( openSceneView );
+
+		log.info( "Removing SceneView, gridRemoved? {}, sceneRemoved? {}", gridRemoved, sceneRemoved );
+
+		openSceneView.release();
+		openSceneView = null;
+
+		designTab.setDetachableContent( this, ProjectCanvasView.forCanvas( project ) );
 	}
 
 	private void initTasks()
@@ -399,6 +395,7 @@ public class ProjectView extends AnchorPane
 				testRunner.unregisterTask( postStartTask, Phase.POST_START );
 				testRunner.unregisterTask( blockWindowTask, Phase.PRE_STOP );
 				testRunner.unregisterTask( postStopTask, Phase.POST_STOP );
+				getPlaybackPanel().release();
 				projectReleased.removeListener( this );
 			}
 		} );

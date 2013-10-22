@@ -42,7 +42,6 @@ public interface CanvasItem extends ModelItem, CounterHolder, StatisticHolder
 	public static final String SUMMARY = CanvasItem.class.getName() + "@summary";
 	public static final String LIMITS = CanvasItem.class.getName() + "@limits";
 	public static final String RUNNING = CanvasItem.class.getName() + "@running";
-	public static final String ON_COMPLETE_DONE = CanvasItem.class.getName() + "@onCompleteDone";
 
 	// properties
 	public static final String ABORT_ON_FINISH_PROPERTY = CanvasItem.class.getSimpleName() + ".abortOnFinish";

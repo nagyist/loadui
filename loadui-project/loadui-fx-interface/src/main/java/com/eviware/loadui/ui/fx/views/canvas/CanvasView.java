@@ -40,6 +40,7 @@ import com.eviware.loadui.ui.fx.views.canvas.terminal.ConnectionView;
 import com.eviware.loadui.ui.fx.views.canvas.terminal.TerminalView;
 import com.eviware.loadui.ui.fx.views.canvas.terminal.Wire;
 import com.eviware.loadui.util.CanvasItemNameGenerator;
+import com.eviware.loadui.util.ReleasableUtils;
 import com.eviware.loadui.util.collections.SafeExplicitOrdering;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
@@ -83,7 +84,7 @@ import static com.eviware.loadui.ui.fx.util.ObservableLists.*;
 import static com.eviware.loadui.util.ReleasableUtils.releaseAll;
 import static com.google.common.collect.Lists.transform;
 
-public class CanvasView extends StackPane implements Releasable
+public abstract class CanvasView extends StackPane implements Releasable
 {
 	protected static final Logger log = LoggerFactory.getLogger( CanvasView.class );
 
@@ -190,7 +191,7 @@ public class CanvasView extends StackPane implements Releasable
 	};
 
 	private final CanvasItem canvas;
-	private final ObservableList<? extends CanvasObjectView> canvasObjects;
+	protected final ObservableList<? extends CanvasObjectView> canvasObjects;
 	private final ObservableList<ConnectionView> connections;
 
 	protected final Group canvasLayer = GroupBuilder.create().styleClass( "canvas-layer" ).build();
@@ -199,17 +200,6 @@ public class CanvasView extends StackPane implements Releasable
 
 	protected static CanvasView instance = null;
 	private CollectionList<ComponentItem> componentItems = null;
-
-	public static CanvasView forCanvas( CanvasItem canvas )
-	{
-
-		if( instance != null )
-		{
-			instance.release();
-		}
-		instance = new CanvasView( canvas );
-		return instance;
-	}
 
 	public void release()
 	{
@@ -245,7 +235,6 @@ public class CanvasView extends StackPane implements Releasable
 				fx( componentItems.getReadOnlyList() ),
 				COMPONENT_TO_VIEW );
 	}
-
 
 	protected boolean shouldAccept( final Object data )
 	{
@@ -546,10 +535,10 @@ public class CanvasView extends StackPane implements Releasable
 			{
 				for( CanvasObjectView component : ObservableLists.getActuallyRemoved( change ) )
 				{
-					log.debug( "UNINSTALL" );
+					log.debug( "Removing {} from canvas {}", component, canvas.getLabel() );
 					MovableImpl.uninstall( component );
-					//Selectable.uninstall( component );
 					MultiMovable.uninstall( CanvasView.this, component );
+					ReleasableUtils.release( component );
 				}
 			}
 		}

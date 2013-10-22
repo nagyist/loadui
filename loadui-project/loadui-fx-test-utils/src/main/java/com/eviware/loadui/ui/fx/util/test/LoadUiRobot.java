@@ -3,7 +3,6 @@ package com.eviware.loadui.ui.fx.util.test;
 import com.eviware.loadui.util.test.TestUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.stage.Window;
@@ -19,9 +18,9 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import static com.google.common.collect.Lists.newLinkedList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
-import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.assertThat;
 import static org.loadui.testfx.GuiTest.*;
 import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
@@ -181,7 +180,7 @@ public class LoadUiRobot
 				}
 			}
 		}
-		throw new NoNodesFoundException( "No component found matching name " + name )		throw new NoNodesFoundException( "No component found matching name " + name );
+		throw new NoNodesFoundException( "No component found matching name " + name );
 	}
 
 	public void clickPlayStopButton()

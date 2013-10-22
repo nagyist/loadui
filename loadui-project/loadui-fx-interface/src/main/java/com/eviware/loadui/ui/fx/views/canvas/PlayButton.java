@@ -15,16 +15,16 @@
  */
 package com.eviware.loadui.ui.fx.views.canvas;
 
-import com.eviware.loadui.api.execution.Phase;
-import com.eviware.loadui.api.execution.TestExecution;
-import com.eviware.loadui.api.execution.TestExecutionTask;
+import com.eviware.loadui.api.events.BaseEvent;
+import com.eviware.loadui.api.events.EventHandler;
 import com.eviware.loadui.api.model.CanvasItem;
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.api.model.SceneItem;
+import com.eviware.loadui.api.traits.Releasable;
 import com.eviware.loadui.util.execution.TestExecutionUtils;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -42,8 +42,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.List;
 
-public class PlayButton extends StackPane
+public class PlayButton extends StackPane implements Releasable
 {
 	private final ToggleButton toggleButton = ToggleButtonBuilder
 			.create()
@@ -56,39 +58,10 @@ public class PlayButton extends StackPane
 
 	private final CanvasItem canvas;
 	private final BooleanProperty playingProperty = new SimpleBooleanProperty();
+	private final BoundPropertiesManager selectedPropManager = new BoundPropertiesManager();
+	private final CanvasRunningListener canvasRunningListener;
 
 	protected static final Logger log = LoggerFactory.getLogger( PlayButton.class );
-
-	private final TestExecutionTask executionTask = new TestExecutionTask()
-	{
-		@Override
-		public void invoke( final TestExecution execution, final Phase phase )
-		{
-			Platform.runLater( new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					CanvasItem startedCanvas = execution.getCanvas();
-
-					if( canvas instanceof SceneItem )
-					{
-						if( ((SceneItem) canvas).isAffectedByExecutionTask( execution ) )
-						{
-							playingProperty.set( phase == Phase.PRE_START );
-						}
-					} else if( canvas instanceof ProjectItem )
-					{
-						if( ((ProjectItem) canvas).getCanvas() == startedCanvas )
-							playingProperty.set( phase == Phase.PRE_START );
-					} else
-					{
-						log.warn( "Unsupported CanvasItem: " + canvas.toString() );
-					}
-				}
-			} );
-		}
-	};
 
 	protected final ChangeListener<Boolean> playCanvas = new ChangeListener<Boolean>()
 	{
@@ -98,24 +71,18 @@ public class PlayButton extends StackPane
 			log.debug( "Play Button state changed, isPlaying? " + isPlaying + ", isCanvasRunning? " + canvas.isRunning() );
 			if( isPlaying && !canvas.isRunning() )
 			{
-				//canvas.triggerAction( CanvasItem.COUNTER_RESET_ACTION );
-				canvas.triggerAction( CanvasItem.START_ACTION );
 				TestExecutionUtils.startCanvas( canvas );
-			} else if( canvas.isRunning() && !isPlaying )
+			}
+			else if( canvas.isRunning() && !isPlaying )
 			{
-				canvas.triggerAction( CanvasItem.STOP_ACTION );
 				TestExecutionUtils.stopCanvas( canvas );
 			}
 		}
 	};
 
-	public PlayButton( @Nonnull final CanvasItem canvas )
+	private PlayButton( @Nonnull final CanvasItem canvas )
 	{
 		this.canvas = canvas;
-
-		maxHeight( 27 );
-		maxWidth( 27 );
-
 		playingProperty.addListener( playCanvas );
 		playingProperty.setValue( canvas.isRunning() );
 		toggleButton.selectedProperty().bindBidirectional( playingProperty );
@@ -130,14 +97,128 @@ public class PlayButton extends StackPane
 		indicator.visibleProperty().bind( toggleButton.selectedProperty() );
 		border.visibleProperty().bind( toggleButton.selectedProperty().not() );
 
-		TestExecutionUtils.testRunner.registerTask( executionTask, Phase.PRE_START, Phase.POST_STOP );
-		getChildren().setAll( outer, indicator, inner, border, toggleButton );
+		canvasRunningListener = new CanvasRunningListener();
+		canvas.addEventListener( BaseEvent.class, canvasRunningListener );
 
+		getChildren().setAll( outer, indicator, inner, border, toggleButton );
 		setMaxSize( 27, 27 );
 	}
 
-	public Property<Boolean> selectedProperty()
+	public void bindToSelectedProperty( BooleanProperty property )
 	{
-		return toggleButton.selectedProperty();
+		selectedPropManager.bindToSelectedProperty( property );
 	}
+
+	@Override
+	public void release()
+	{
+		canvas.removeEventListener( BaseEvent.class, canvasRunningListener );
+		selectedPropManager.removeAllBindings();
+		log.debug( "Trying to delete button on canvas {}", canvas.getLabel() );
+		PlayButtonFactory.release( this );
+	}
+
+	private class CanvasRunningListener implements EventHandler<BaseEvent>
+	{
+
+		@Override
+		public void handleEvent( BaseEvent event )
+		{
+			if( event.getKey().equals( CanvasItem.RUNNING ) )
+				Platform.runLater( new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						playingProperty.set( canvas.isRunning() );
+					}
+				} );
+		}
+	}
+
+	private class BoundPropertiesManager
+	{
+
+		List<BooleanProperty> boundProps = Lists.newArrayList();
+
+		public void bindToSelectedProperty( BooleanProperty property )
+		{
+			boundProps.add( property );
+			property.bind( toggleButton.selectedProperty() );
+		}
+
+		public void removeAllBindings()
+		{
+			for( BooleanProperty property : boundProps )
+				property.unbind();
+			boundProps.clear();
+		}
+
+	}
+
+	public static final class PlayButtonFactory
+	{
+
+		private static PlayButtonFactory instance;
+
+		private final ChangeListener<? super Boolean> buttonListener = new ChangeListener<Boolean>()
+		{
+			@Override
+			public void changed( ObservableValue<? extends Boolean> observable, Boolean wasOn, Boolean isOn )
+			{
+				disableAllExcept( observable, isOn );
+			}
+		};
+
+		public static synchronized PlayButtonFactory getInstance()
+		{
+			if( instance == null )
+			{
+				instance = new PlayButtonFactory();
+			}
+			return instance;
+		}
+
+		private List<PlayButton> buttons = Lists.newArrayList();
+
+		private Predicate<PlayButton> isButtonSelected = new Predicate<PlayButton>()
+		{
+			@Override
+			public boolean apply( @Nullable PlayButton input )
+			{
+				return input != null && input.toggleButton.selectedProperty().get();
+			}
+		};
+
+		public PlayButton createButtonFor( CanvasItem canvas )
+		{
+			log.debug( "Creating PlayButton for canvas {}", canvas.getLabel() );
+			PlayButton button = new PlayButton( canvas );
+			button.toggleButton.selectedProperty().addListener( buttonListener );
+			if( Iterables.any( buttons, isButtonSelected ) )
+				button.toggleButton.setDisable( true );
+			buttons.add( button );
+			return button;
+		}
+
+		private static void release( PlayButton button )
+		{
+			boolean rem = instance.buttons.remove( button );
+			log.debug( "AFTER REMOVING BUTTON, THERE ARE {} BUTTONS, REMOVED ANY? {}", instance.buttons.size(), rem );
+		}
+
+		private void disableAllExcept( ObservableValue<?> observable, boolean disableOthers )
+		{
+			log.debug( "Disabling buttons, currently there are {} buttons", buttons.size() );
+			for( PlayButton button : buttons )
+			{
+				boolean isOther = button.toggleButton.selectedProperty() != observable;
+				if( isOther )
+					button.setDisable( disableOthers );
+			}
+		}
+
+	}
+
+
 }

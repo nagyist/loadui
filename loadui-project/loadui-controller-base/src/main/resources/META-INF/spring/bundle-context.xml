@@ -34,7 +34,13 @@
         <constructor-arg ref="summaryExporter" />
 	</bean>
 	
-	<bean id="agentTestExecutionAddonFactory" class="com.eviware.loadui.impl.execution.AgentTestExecutionAddon$Factory" />
+	<bean id="agentTestExecutionAddonFactory"
+          class="com.eviware.loadui.impl.execution.AgentTestExecutionAddon$Factory">
+        <constructor-arg ref="testRunner" />
+        <constructor-arg ref="messageAwaiterFactory" />
+        <constructor-arg ref="addressableRegistry" />
+        <constructor-arg ref="executorService" />
+    </bean>
 	
 	<bean id="testExecutionAddonFactory" class="com.eviware.loadui.impl.execution.TestExecutionAddon$Factory" />
 	

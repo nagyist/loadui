@@ -51,21 +51,17 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 	}
 
 	@Before
-	@Override
-	public void setup() throws Exception
+	public void start() throws Exception
 	{
-		super.setup();
 		ensureNotificationPanelIsNotVisible();
 		ensureInspectorViewIsClosed();
 	}
 
 	@After
-	@Override
-	public void teardown() throws Exception
+	public void cleanup() throws Exception
 	{
 		ensureNotificationPanelIsNotVisible();
 		ensureInspectorViewIsClosed();
-		super.teardown();
 	}
 
 	@Test

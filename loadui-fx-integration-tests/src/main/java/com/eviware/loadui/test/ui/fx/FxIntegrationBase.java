@@ -10,10 +10,11 @@ import com.google.code.tempusfugit.temporal.Condition;
 import com.google.code.tempusfugit.temporal.Timeout;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.Region;
 import org.loadui.testfx.GuiTest;
 
 import java.awt.*;
-import java.util.Collection;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -172,14 +173,68 @@ public class FxIntegrationBase extends GuiTest
 
 	public boolean isResultViewWindowIsOpen()
 	{
-		return !GuiTest.findAll( ".analysis-view" ).isEmpty();
+		return !GuiTest.findAll( ".result-view" ).isEmpty();
 	}
 
-	protected ProjectItem getProjectItem()
+	public boolean isInspectorViewOpen()
 	{
-		Collection<? extends ProjectItem> projects = BeanInjector.getBean( WorkspaceProvider.class ).getWorkspace()
-				.getProjects();
-		return projects.iterator().next();
+		final Set<Node> inspectorViews = findAll( ".inspector-view" );
+		if( inspectorViews.isEmpty() ) return false;
+
+		final Region view = ( Region )inspectorViews.iterator().next();
+		try
+		{
+			waitOrTimeout( new Condition()
+			{
+				@Override
+				public boolean isSatisfied()
+				{
+					return view.getHeight() > 150;
+				}
+			}, timeout( seconds( 2 ) ) );
+		}
+		catch( Exception e )
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public void ensureInspectorViewIsClosed()
+	{
+		final Set<Node> inspectorViews = findAll( ".inspector-view" );
+		if( inspectorViews.isEmpty() ) return;
+
+		final Region view = ( Region )inspectorViews.iterator().next();
+		double height = view.getHeight();
+		if( height > 50 )
+		{
+			drag( "#Assertions" ).by( 0, height ).drop();
+		}
+	}
+
+	public void ensureNotificationPanelIsNotVisible()
+	{
+		Set<Node> panels = findAll( ".notification-panel" );
+		if( panels.isEmpty() ) return;
+
+		Node panel = panels.iterator().next();
+		if( panel.isVisible() && panel.getOpacity() > 0.99 )
+		{
+			click( "#hide-notification-panel" );
+			waitUntil( panel, is( not( visible() ) ) );
+		}
+	}
+
+	protected void clickOnAbortButton()
+	{
+		click( "#abort-requests" ).sleep( 1_000 );
+	}
+
+	public static ProjectItem getProjectItem()
+	{
+		return BeanInjector.getBean( WorkspaceProvider.class ).getWorkspace()
+				.getProjects().iterator().next();
 	}
 
 	public class KnobHandle

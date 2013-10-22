@@ -22,7 +22,6 @@ import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ScenarioCreatedState;
 import com.google.code.tempusfugit.concurrency.IntermittentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Intermittent;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -45,16 +44,13 @@ public class ScenarioLinkedPlaybackTest extends SimpleWebTestBase
 
 
 	@Before
-	@Override
-	public void setup() throws Exception
+	public void start() throws Exception
 	{
-		super.setup();
 		ensureProjectIsNotRunning();
 	}
 
-	@After
 	@Override
-	public void teardown() throws Exception
+	public void cleanup() throws Exception
 	{
 		try
 		{
@@ -66,8 +62,8 @@ public class ScenarioLinkedPlaybackTest extends SimpleWebTestBase
 		}
 		hasScenarios.exitScenarioIfPossible();
 		ensureProjectIsNotRunning();
+		robot.deleteAllComponentsFromProjectView();
 		setTestTimeLimitTo( 0 );
-		super.teardown();
 	}
 
 	@Test

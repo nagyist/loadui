@@ -58,6 +58,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implements ProjectItem
 {
@@ -175,11 +176,6 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 		{
 			attachScene( SceneItemImpl.newInstance( this, conf ) );
 		}
-	}
-
-	Set<? extends SceneItemImpl> getScenes()
-	{
-		return scenes;
 	}
 
 	@Override
@@ -473,13 +469,28 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 	@Override
 	public void onComplete( EventFirer source )
 	{
+		Collection<? extends SceneItemImpl> children = getChildren();
 		// At this point all project components are finished. They are either
 		// canceled or finished normally which depends on project 'abortOnFinish'
 		// property. So here we have to wait for all test cases to finish which we
 		// do by listening for ON_COMPLETE_DONE event which is fired after
 		// 'onComplete' method was called in local mode and after controller
 		// received test case data in distributed mode.
-		new SceneCompleteAwaiter( this, scheduler ).start();
+		try
+		{
+			new CanvasCompleteAwaiter( children, scheduler ).startAndWait( 1, TimeUnit.MINUTES );
+		}
+		catch( Exception e )
+		{
+			for( CanvasItemImpl child : children )
+			{
+				child.setCompleted( true );
+			}
+		}
+		finally
+		{
+			setCompleted( true );
+		}
 	}
 
 	@Override

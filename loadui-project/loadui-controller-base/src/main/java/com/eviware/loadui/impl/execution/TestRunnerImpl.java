@@ -15,13 +15,6 @@
  */
 package com.eviware.loadui.impl.execution;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
 import com.eviware.loadui.api.execution.ExecutionResult;
 import com.eviware.loadui.api.execution.Phase;
 import com.eviware.loadui.api.execution.TestExecution;
@@ -29,25 +22,24 @@ import com.eviware.loadui.api.execution.TestState;
 import com.eviware.loadui.api.model.CanvasItem;
 import com.eviware.loadui.api.traits.Releasable;
 import com.eviware.loadui.util.execution.AbstractTestRunner;
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.MoreExecutors;
+
+import javax.annotation.CheckForNull;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import static java.util.Collections.singleton;
 
 public class TestRunnerImpl extends AbstractTestRunner implements Releasable
 {
-	private static final Function<TestController, TestExecution> getExecution = new Function<TestController, TestExecution>()
-	{
-		@Override
-		public TestExecution apply( TestController input )
-		{
-			return input.execution;
-		}
-	};
-
 	private final ExecutorService testExecutor = MoreExecutors.listeningDecorator( Executors.newSingleThreadExecutor() );
-	private final LinkedList<TestController> executionQueue = Lists.newLinkedList();
+	@CheckForNull
+	private TestController currentTestController;
 
 	public TestRunnerImpl( ExecutorService executor )
 	{
@@ -57,23 +49,19 @@ public class TestRunnerImpl extends AbstractTestRunner implements Releasable
 	@Override
 	public TestExecution enqueueExecution( CanvasItem canvas )
 	{
+		if( currentTestController != null && currentTestController.execution.getState() != TestState.COMPLETED )
+			log.warn( "Programmer error!! Should not try to enqueue execution while another is running" );
 		TestController controller = new TestController( new TestExecutionImpl( canvas ) );
-
-		synchronized( executionQueue )
-		{
-			executionQueue.add( controller );
-		}
-
+		currentTestController = controller;
 		return controller.execution;
 	}
 
 	@Override
 	public List<TestExecution> getExecutionQueue()
 	{
-		synchronized( executionQueue )
-		{
-			return ImmutableList.copyOf( Iterables.transform( executionQueue, getExecution ) );
-		}
+		//FIXME we should try to get rid of this method as it does not make sense since we removed execution queues
+		return ImmutableList.copyOf( ( currentTestController == null ) ?
+				Collections.<TestExecution>emptyList() : singleton( currentTestController.execution ) );
 	}
 
 	@Override
@@ -105,16 +93,6 @@ public class TestRunnerImpl extends AbstractTestRunner implements Releasable
 			synchronized( this )
 			{
 				stopping = true;
-				if( execution.isAborted() && execution.getState() == TestState.ENQUEUED )
-				{
-					if( resultFuture.cancel( false ) )
-					{
-						synchronized( executionQueue )
-						{
-							executionQueue.remove( this );
-						}
-					}
-				}
 				notifyAll();
 			}
 		}
@@ -152,41 +130,26 @@ public class TestRunnerImpl extends AbstractTestRunner implements Releasable
 		@Override
 		public ExecutionResult call()
 		{
-			try
-			{
-				if( !execution.isAborted() )
-				{
-					log.debug( "Starting TestExecution: {}", execution );
-					execution.setState( TestState.STARTING );
-					awaitFuture( runPhase( Phase.PRE_START, execution ) );
-					execution.setState( TestState.RUNNING );
-					awaitFuture( runPhase( Phase.START, execution ) );
-					awaitFuture( runPhase( Phase.POST_START, execution ) );
+			log.debug( "Starting TestExecution: {}", execution );
+			execution.setState( TestState.STARTING );
+			awaitFuture( runPhase( Phase.PRE_START, execution ) );
+			execution.setState( TestState.RUNNING );
+			awaitFuture( runPhase( Phase.START, execution ) );
+			awaitFuture( runPhase( Phase.POST_START, execution ) );
 
-					controller.awaitStopping();
+			controller.awaitStopping();
 
-					execution.setState( TestState.STOPPING );
-					awaitFuture( runPhase( Phase.PRE_STOP, execution ) );
-					awaitFuture( runPhase( Phase.STOP, execution ) );
-					awaitFuture( runPhase( Phase.POST_STOP, execution ) );
-					execution.setState( TestState.COMPLETED );
-					log.debug( "Completed TestExecution: {}", execution );
-				}
-				else
-				{
-					log.warn( "Will not start as Execution was aborted" );
-				}
+			execution.setState( TestState.STOPPING );
+			awaitFuture( runPhase( Phase.PRE_STOP, execution ) );
+			awaitFuture( runPhase( Phase.STOP, execution ) );
+			awaitFuture( runPhase( Phase.POST_STOP, execution ) );
+			execution.setState( TestState.COMPLETED );
+			log.debug( "Completed TestExecution: {}", execution );
 
-				//TODO: Create ExecutionResult
-				return null;
-			}
-			finally
-			{
-				synchronized( executionQueue )
-				{
-					executionQueue.remove( controller );
-				}
-			}
+			//TODO: Create ExecutionResult
+			return null;
 		}
+
 	}
+
 }

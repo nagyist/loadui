@@ -4,7 +4,6 @@ import com.eviware.loadui.api.addressable.Addressable;
 import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.events.BaseEvent;
 import com.eviware.loadui.api.events.EventHandler;
-import com.eviware.loadui.api.execution.Phase;
 import com.eviware.loadui.api.messaging.MessageAwaiterFactory;
 import com.eviware.loadui.api.messaging.MessageEndpoint;
 import com.eviware.loadui.api.messaging.MessageListener;
@@ -15,17 +14,14 @@ import com.eviware.loadui.api.terminal.TerminalMessage;
 import com.eviware.loadui.api.traits.Releasable;
 import com.eviware.loadui.impl.model.ComponentItemImpl;
 import com.eviware.loadui.impl.model.canvas.SceneItemImpl;
-import com.eviware.loadui.util.BeanInjector;
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 
 class AgentListener implements EventHandler<BaseEvent>, MessageListener, Releasable
 {
@@ -152,25 +148,25 @@ class AgentListener implements EventHandler<BaseEvent>, MessageListener, Releasa
 				if( assignment != null )
 					assignment.setLoaded( true );
 
-				if( scene.isRunning() && !projectItem.getWorkspace().isLocalMode() )
-				{
-
-					if( scene.isRunning() && !scene.getProject().getWorkspace().isLocalMode() )
-					{
-						final String canvasId = ( String )agentStarted;
-						BeanInjector.getBean( ExecutorService.class ).execute( new Runnable()
-						{
-							@Override
-							public void run()
-							{
-								for( Phase phase : Arrays.asList( Phase.PRE_START, Phase.START, Phase.POST_START ) )
-								{
-									messageAwaiterFactory.create( agent, canvasId, phase ).await();
-								}
-							}
-						} );
-					}
-				}
+//				if( scene.isRunning() && !projectItem.getWorkspace().isLocalMode() )
+//				{
+//
+//					if( scene.isRunning() && !scene.getProject().getWorkspace().isLocalMode() )
+//					{
+//						final String canvasId = ( String )agentStarted;
+//						BeanInjector.getBean( ExecutorService.class ).execute( new Runnable()
+//						{
+//							@Override
+//							public void run()
+//							{
+//								for( Phase phase : Arrays.asList( Phase.PRE_START, Phase.START, Phase.POST_START ) )
+//								{
+//									messageAwaiterFactory.create( agent, canvasId, phase ).await();
+//								}
+//							}
+//						} );
+//					}
+//				}
 
 				if( scene.isRunning() && !projectItem.getWorkspace().isLocalMode() )
 				{
