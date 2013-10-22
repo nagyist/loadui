@@ -148,7 +148,7 @@ public class FxIntegrationBase extends GuiTest
 		System.out.println( "Component node: " + componentNode );
 		Set<Node> knobs = findAll( ".knob", componentNode );
 
-		Node knob = ( Node )Arrays.asList( knobs.toArray() ).get( number + 1 );
+		Node knob = ( Node )Arrays.asList( knobs.toArray() ).get( number - 1 );
 
 		return new KnobHandle( knob );
 	}

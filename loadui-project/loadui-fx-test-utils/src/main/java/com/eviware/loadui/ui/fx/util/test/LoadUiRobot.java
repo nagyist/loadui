@@ -39,10 +39,6 @@ public class LoadUiRobot
 		INTERVAL("scheduler", "Interval"), SCHEDULER("scheduler", "Scheduler"),
 		SOUPUI_MOCKSERVICE("misc", "soupUI MockService");
 
-
-
-
-
 		public final String category;
 		public final String name;
 
@@ -50,6 +46,11 @@ public class LoadUiRobot
 		{
 			this.category = category;
 			this.name = name;
+		}
+
+		public String cssClass()
+		{
+			return name.toLowerCase().replace( ' ', '-' );
 		}
 	}
 
@@ -165,7 +166,7 @@ public class LoadUiRobot
 		}
 		else
 		{
-			return findComponentByName( component.name, false );
+			return find( "." + component.cssClass() );
 		}
 	}
 
