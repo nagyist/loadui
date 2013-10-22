@@ -14,6 +14,7 @@ import javafx.scene.layout.Region;
 import org.loadui.testfx.GuiTest;
 
 import java.awt.*;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -157,9 +158,17 @@ public class FxIntegrationBase extends GuiTest
 
 	public KnobHandle turnKnobIn( LoadUiRobot.Component component )
 	{
+		return turnKnobIn( component, 1 );
+	}
+
+	public KnobHandle turnKnobIn( LoadUiRobot.Component component, int number )
+	{
 		final Node componentNode = robot.getComponentNode( component );
 		System.out.println( "Component node: " + componentNode );
-		Node knob = find( ".knob", componentNode );
+		Set<Node> knobs = findAll( ".knob", componentNode );
+
+		Node knob = ( Node )Arrays.asList( knobs.toArray() ).get( number - 1 );
+
 		return new KnobHandle( knob );
 	}
 
