@@ -31,11 +31,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 /**
- * 
  * @author OSTEN
- * 
  */
-@Category( IntegrationTest.class )
+@Category(IntegrationTest.class)
 @Ignore(value = "Feature disabled until further notice. See LOADUI-869 and LOADUI-871")
 public class DetachTabsTest
 {

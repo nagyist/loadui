@@ -15,6 +15,8 @@
  */
 package com.eviware.loadui.components.soapui.layout;
 
+import com.eviware.loadui.api.ui.dialog.FilePickerDialogFactory;
+import com.eviware.loadui.util.BeanInjector;
 import com.google.common.base.Objects;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
@@ -27,12 +29,14 @@ import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFieldBuilder;
 import javafx.scene.layout.HBox;
-import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.stage.FileChooserBuilder;
 import javafx.stage.Window;
 
 import java.io.File;
+
+/**
+ * a file picker dialog used by the SoapUI Runner
+ */
 
 public class FilePicker extends HBox
 {
@@ -51,10 +55,15 @@ public class FilePicker extends HBox
 		}
 	};
 
-	public FilePicker( final Window window, String title, ExtensionFilter filters )
+	public FilePicker( final Window window, final String title, final ExtensionFilter filter )
 	{
 		setSpacing( 4 );
-		final TextField textField = TextFieldBuilder.create().editable( false ).build();
+
+		final TextField textField = TextFieldBuilder
+				.create()
+				.editable( false )
+				.build();
+
 		selectedProperty.addListener( new ChangeListener<File>()
 		{
 			@Override
@@ -63,14 +72,20 @@ public class FilePicker extends HBox
 				textField.setText( Objects.firstNonNull( newFile, "" ).toString() );
 			}
 		} );
-		final FileChooser chooser = FileChooserBuilder.create().extensionFilters( filters ).title( title ).build();
-		final Button browse = ButtonBuilder.create().text( "Browse..." ).build();
+
+		final FilePickerDialogFactory filePickerDialogFactory = BeanInjector.getBean( FilePickerDialogFactory.class );
+
+		final Button browse = ButtonBuilder
+				.create()
+				.text( "Browse..." )
+				.build();
+
 		browse.setOnAction( new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle( ActionEvent arg0 )
 			{
-				setSelected( chooser.showOpenDialog( window ) );
+				setSelected( filePickerDialogFactory.showOpenDialog( window, title, filter ) );
 			}
 		} );
 

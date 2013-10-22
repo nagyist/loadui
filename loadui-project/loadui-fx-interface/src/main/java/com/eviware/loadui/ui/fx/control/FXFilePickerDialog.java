@@ -1,19 +1,19 @@
 package com.eviware.loadui.ui.fx.control;
 
 
+import com.eviware.loadui.api.model.WorkspaceItem;
 import com.eviware.loadui.api.ui.dialog.FilePickerDialog;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
-import com.eviware.loadui.util.BeanInjector;
 import com.sun.javafx.PlatformUtil;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.LabelBuilder;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.File;
 
 /**
@@ -21,7 +21,6 @@ import java.io.File;
  * User: osten
  * Date: 7/31/13
  * Time: 3:47 PM
- * To change this template use File | Settings | File Templates.
  */
 public class FXFilePickerDialog extends ConfirmationDialog implements FilePickerDialog
 {
@@ -29,31 +28,25 @@ public class FXFilePickerDialog extends ConfirmationDialog implements FilePicker
 
 	Logger log = LoggerFactory.getLogger( FXFilePickerDialog.class );
 
-	public FXFilePickerDialog( Stage stage, String dialogTitle, String filePickerTitle, ExtensionFilter filter )
+	public FXFilePickerDialog( Scene scene, String dialogTitle, String filePickerTitle, @Nullable ExtensionFilter filter, WorkspaceItem workspace )
 	{
-		super( stage.getScene().getRoot(), dialogTitle, "Set" );
+		super( scene.getRoot(), dialogTitle, "Set" );
 
-		picker = new FilePicker( stage, filePickerTitle, getExtensionFilter( filter ) );
+		if( filter == null )
+		{
+			filter = ExtensionFilter.NO_FILTER;
+		}
+
+		picker = new FilePicker( scene.getFocusOwner(), filePickerTitle, getExtensionFilter( filter ), workspace );
 
 		getItems().setAll(
-				LabelBuilder.create().
-						text( filePickerTitle )
+				LabelBuilder
+						.create()
+						.text( filePickerTitle )
 						.build(),
 				picker );
-	}
 
-	public FXFilePickerDialog( Stage stage, String dialogTitle, String filePickerTitle )
-	{
-		super( stage.getScene().getRoot(), dialogTitle,
-				"Set" );
 
-		picker = new FilePicker( stage, filePickerTitle, getExtensionFilter( ExtensionFilter.NO_FILTER ) );
-
-		getItems().setAll(
-				LabelBuilder.create().
-						text( filePickerTitle )
-						.build(),
-				picker );
 	}
 
 	private FileChooser.ExtensionFilter getExtensionFilter( ExtensionFilter filter )
@@ -92,7 +85,8 @@ public class FXFilePickerDialog extends ConfirmationDialog implements FilePicker
 	}
 
 	@Override
-	public void hide(){
+	public void hide()
+	{
 		super.hide();
 	}
 

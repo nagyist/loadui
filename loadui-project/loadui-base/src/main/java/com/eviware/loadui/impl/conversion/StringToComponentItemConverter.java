@@ -15,12 +15,11 @@
  */
 package com.eviware.loadui.impl.conversion;
 
-import org.springframework.core.convert.converter.Converter;
-
 import com.eviware.loadui.api.addressable.AddressableRegistry;
 import com.eviware.loadui.api.model.ComponentItem;
 import com.eviware.loadui.config.LoaduiComponentDocumentConfig;
 import com.eviware.loadui.impl.model.canvas.CanvasItemImpl;
+import org.springframework.core.convert.converter.Converter;
 
 public class StringToComponentItemConverter implements Converter<String, ComponentItem>
 {

@@ -15,53 +15,11 @@
  */
 package com.eviware.loadui.ui.fx.views.canvas.component;
 
-import java.io.File;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.concurrent.ExecutorService;
-
-import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.binding.Bindings;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Orientation;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBuilder;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.LabelBuilder;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Separator;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.VBoxBuilder;
-import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.util.Callback;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.tbee.javafx.scene.layout.MigPane;
-
 import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.api.layout.ActionLayoutComponent;
+import com.eviware.loadui.api.layout.*;
 import com.eviware.loadui.api.layout.ActionLayoutComponent.ActionEnabledListener;
-import com.eviware.loadui.api.layout.LabelLayoutComponent;
-import com.eviware.loadui.api.layout.LayoutComponent;
-import com.eviware.loadui.api.layout.LayoutContainer;
-import com.eviware.loadui.api.layout.OptionsProvider;
-import com.eviware.loadui.api.layout.PropertyLayoutComponent;
-import com.eviware.loadui.api.layout.SeparatorLayoutComponent;
-import com.eviware.loadui.api.layout.TableLayoutComponent;
+import com.eviware.loadui.api.model.WorkspaceItem;
+import com.eviware.loadui.api.model.WorkspaceProvider;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.impl.layout.OptionsProviderImpl;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
@@ -75,13 +33,38 @@ import com.eviware.loadui.util.layout.FormattedString;
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Orientation;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.VBoxBuilder;
+import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.util.Callback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.tbee.javafx.scene.layout.MigPane;
+
+import java.io.File;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Used to generate the component UI widgets (such as knobs and textfields) from
  * LayoutComponents.
- * 
+ *
  * @author maximilian.skog
- * 
  */
 
 public class ComponentLayoutUtils
@@ -350,27 +333,34 @@ public class ComponentLayoutUtils
 	private static Node createFilePicker( PropertyLayoutComponent<?> propLayoutComp, Label propertyLabel )
 	{
 
-		ExtensionFilter filter = new ExtensionFilter( "Extension", "*" );
+		ExtensionFilter filter = new ExtensionFilter( "Any File", "*" );
 
 		if( propertyLabel.getText().contains( "Geb " ) )
 		{
-			filter = new ExtensionFilter( "Geb script file (*.groovy)", "*.groovy" );
+			filter = new ExtensionFilter( "Geb script file", "*.groovy" );
 		}
 		else if( propertyLabel.getText().contains( "Groovy" ) )
 		{
-			filter = new ExtensionFilter( "Groovy Script (*.groovy)", "*.groovy" );
-
+			filter = new ExtensionFilter( "Groovy Script", "*.groovy" );
 		}
 		else if( propertyLabel.getText().contains( "soapUI" ) )
 		{
-			filter = new ExtensionFilter( "SoapUI Project (*.xml)", "*.xml", "*.XML" );
+			filter = new ExtensionFilter( "SoapUI Project", "*.xml", "*.XML" );
 		}
-		//Just add more special cases here as we have more needs. 
-		FilePicker filePicker = new FilePicker( propertyLabel.getText(), filter );
+		//Just add more special cases here as we have more needs.
+
+		WorkspaceItem workspace = BeanInjector.getBean( WorkspaceProvider.class ).getWorkspace();
+
+		VBox container = VBoxBuilder.create().id( "component-file-picker" ).build();
+
+		FilePicker filePicker = new FilePicker( container, propertyLabel.getText(), filter, workspace );
 		javafx.beans.property.Property<File> jfxProp = Properties
 				.convert( ( Property<File> )propLayoutComp.getProperty() );
 		filePicker.selectedProperty().bindBidirectional( jfxProp );
-		return nodeWithProperty( VBoxBuilder.create().children( propertyLabel, filePicker ).build(), jfxProp );
+
+		container.getChildren().addAll( propertyLabel, filePicker );
+
+		return nodeWithProperty( container, jfxProp );
 	}
 
 	@SuppressWarnings( "unchecked" )

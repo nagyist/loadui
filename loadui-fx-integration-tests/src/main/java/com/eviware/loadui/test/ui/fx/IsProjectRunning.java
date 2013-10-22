@@ -4,8 +4,8 @@ import com.eviware.loadui.api.model.ProjectItem;
 import com.google.code.tempusfugit.temporal.Condition;
 
 /**
-* @author renato
-*/
+ * @author renato
+ */
 public class IsProjectRunning implements Condition
 {
 	final ProjectItem projectItem;

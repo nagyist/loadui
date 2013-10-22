@@ -55,7 +55,7 @@ public class IntegrationTestUtilsTest
 	}
 
 	@Test
-	@Repeating( repetition = 10 )
+	@Repeating(repetition = 10)
 	public void testNewestDirectoryIn_WithFilesAndDirectories()
 	{
 		System.out.println( "Running test" );

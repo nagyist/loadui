@@ -30,7 +30,7 @@ import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 import static junit.framework.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@Category( IntegrationTest.class )
+@Category(IntegrationTest.class)
 public class ScenarioLinkedPlaybackTest extends FxIntegrationTestBase
 {
 	HasScenarios helper = new HasScenarios();

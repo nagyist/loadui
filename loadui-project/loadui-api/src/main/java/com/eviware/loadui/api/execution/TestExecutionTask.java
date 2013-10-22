@@ -19,14 +19,14 @@ package com.eviware.loadui.api.execution;
  * A task which is invoked during one or several phases of a TestExecution
  * life-cycle. A life-cycle phase will not complete until all TestExecutionTasks
  * for the given phase have completed. Tasks are executed in parallel.
- * 
+ *
  * @author dain.nilsson
  */
 public interface TestExecutionTask
 {
 	/**
 	 * Called when the given Phase is initiated.
-	 * 
+	 *
 	 * @param execution
 	 * @param phase
 	 */

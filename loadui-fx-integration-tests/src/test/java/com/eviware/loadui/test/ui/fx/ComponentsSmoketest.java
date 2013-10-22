@@ -3,7 +3,6 @@ package com.eviware.loadui.test.ui.fx;
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import javafx.scene.input.KeyCode;
-import org.junit.After;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
@@ -104,8 +103,6 @@ public class ComponentsSmoketest extends FxIntegrationTestBase
 		assertNodeExists( ".check-box" );
 
 		turnKnobIn( USAGE ).to( 20 );
-
-
 
 
 	}

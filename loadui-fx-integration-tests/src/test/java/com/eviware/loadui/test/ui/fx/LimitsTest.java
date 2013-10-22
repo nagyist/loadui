@@ -2,9 +2,7 @@ package com.eviware.loadui.test.ui.fx;
 
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.test.TestState;
-import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import com.eviware.loadui.test.ui.fx.states.SimpleWebTestState;
-import javafx.scene.input.KeyCode;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
@@ -27,8 +25,7 @@ public class LimitsTest extends FxIntegrationTestBase
 	@Test
 	public void shouldStopTestWhenRequestsReachLimit()
 	{
-		ProjectItem project = ProjectLoadedWithoutAgentsState.STATE.getProject();
-
+		ProjectItem project = getProjectItem();
 
 
 		click( "#set-limits" ).doubleClick( "#request-limit" ).type( "30" ).click( "#default" );
@@ -48,7 +45,7 @@ public class LimitsTest extends FxIntegrationTestBase
 	@Test
 	public void shouldStopTestWhenTimeLimitIsReached() throws Exception
 	{
-		ProjectItem project = ProjectLoadedWithoutAgentsState.STATE.getProject();
+		ProjectItem project = getProjectItem();
 
 		click( "#set-limits" ).doubleClick( "#time-limit" ).type( "3" ).click( "#default" );
 
@@ -62,12 +59,10 @@ public class LimitsTest extends FxIntegrationTestBase
 	}
 
 
-
-
 	@Test
 	public void shouldStopTestWhenFailuresReachLimit()
 	{
-		ProjectItem project = ProjectLoadedWithoutAgentsState.STATE.getProject();
+		ProjectItem project = getProjectItem();
 
 		click( ".component-view .text-field" ).type( "sdjsdhfsaasjhsdf" );
 
@@ -82,5 +77,5 @@ public class LimitsTest extends FxIntegrationTestBase
 
 		assertTrue( !project.isRunning() );
 
-}
+	}
 }

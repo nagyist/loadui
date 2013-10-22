@@ -15,14 +15,14 @@
  */
 package com.eviware.loadui.api.model;
 
-import java.io.File;
-
 import com.eviware.loadui.api.events.EventFirer;
+
+import java.io.File;
 
 /**
  * Loads a WorkspaceItem from a File, and provides a reference to the loaded
  * workspace.
- * 
+ *
  * @author dain.nilsson
  */
 public interface WorkspaceProvider extends EventFirer
@@ -35,9 +35,8 @@ public interface WorkspaceProvider extends EventFirer
 
 	/**
 	 * Loads a stored workspace from file.
-	 * 
-	 * @param workspaceFile
-	 *           The location of the stored workspace.
+	 *
+	 * @param workspaceFile The location of the stored workspace.
 	 * @return The loaded workspace.
 	 */
 	public WorkspaceItem loadWorkspace( File workspaceFile );
@@ -45,27 +44,28 @@ public interface WorkspaceProvider extends EventFirer
 	/**
 	 * Loads a workspace from the file returned by loadDefaultWorkspace(). The
 	 * same as calling loadWorkspace( getDefaultWorkspaceFile() ).
-	 * 
-	 * @return
+	 *
+	 * @return The loaded workspace
 	 */
 	public WorkspaceItem loadDefaultWorkspace();
 
 	/**
-	 * @return
+	 * @return The loaded workspace File
 	 */
 	public File getDefaultWorkspaceFile();
 
 	/**
 	 * Gets the current workspace, if one has been loaded.
-	 * 
-	 * @return The currently loaded WorkspaceItem.
+	 *
+	 * @return The currently loaded WorkspaceItem, null if no workspace is loaded.
 	 */
 	public WorkspaceItem getWorkspace();
 
 	/**
 	 * Checks if a workspace has been loaded.
-	 * 
+	 *
 	 * @return True if a workspace has been loaded, false if not.
 	 */
 	public boolean isWorkspaceLoaded();
+
 }
