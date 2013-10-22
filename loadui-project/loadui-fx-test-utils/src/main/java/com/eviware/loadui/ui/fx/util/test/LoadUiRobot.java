@@ -2,13 +2,11 @@ package com.eviware.loadui.ui.fx.util.test;
 
 import com.eviware.loadui.util.test.TestUtils;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.stage.Window;
-import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.internal.matchers.TypeSafeMatcher;
@@ -20,17 +18,27 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
-import static org.loadui.testfx.GuiTest.find;
-import static org.loadui.testfx.GuiTest.findAll;
+import static org.loadui.testfx.GuiTest.*;
 import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
+import static org.loadui.testfx.matchers.EnabledMatcher.enabled;
+import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 
 public class LoadUiRobot
 {
 	public enum Component
 	{
 		FIXED_RATE_GENERATOR( "generators", "Fixed Rate" ), TABLE_LOG( "output", "Table Log" ), WEB_PAGE_RUNNER(
-			"runners", "Web Page Runner" );
+			"runners", "Web Page Runner" ), VARIANCE( "generators", "Variance" ), RANDOM( "generators", "Random" ),
+		RAMP_SEQUENCE( "generators", "Ramp Sequence" ), RAMP( "generators", "Ramp" ), USAGE( "generators", "Usage" ),
+		FIXED_LOAD( "generators", "Fixed Load" ), SCRIPT_RUNNER( "runners", "Script Runner" ),
+		PROCESS_RUNNER( "runners", "Process Runner" ), GEB_RUNNER( "runners", "Geb Runner" ), LOOP( "flow", "Loop" ),
+		SPLITTER( "flow", "Splitter" ), DELAY( "flow", "Delay" ), CONDITION( "flow", "Condition" ),
+		INTERVAL( "scheduler", "Interval" ), SCHEDULER( "scheduler", "Scheduler" ),
+		SOUPUI_MOCKSERVICE( "misc", "soupUI MockService" );
+
 
 		public final String category;
 		public final String name;
@@ -54,7 +62,8 @@ public class LoadUiRobot
 		this.controller = controller;
 	}
 
-	public void resetPredefinedPoints() {
+	public void resetPredefinedPoints()
+	{
 		predefinedPoints = Lists.newLinkedList( ImmutableList.of( new Point( 250, 250 ), new Point(
 				450, 450 ) ) );
 	}
@@ -104,24 +113,24 @@ public class LoadUiRobot
 
 	public Matcher<Node> matcherForIconOf( final Component component )
 	{
-		 return new TypeSafeMatcher<Node>()
-		 {
-			 @Override
-			 public boolean matchesSafely( Node node )
-			 {
-				 if( node.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
-				 {
-					 return node.toString().equals( component.name );
-				 }
-				 return false;
-			 }
+		return new TypeSafeMatcher<Node>()
+		{
+			@Override
+			public boolean matchesSafely( Node node )
+			{
+				if( node.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
+				{
+					return node.toString().equals( component.name );
+				}
+				return false;
+			}
 
-			 @Override
-			 public void describeTo( Description description )
-			 {
-				 //To change body of implemented methods use File | Settings | File Templates.
-			 }
-		 };
+			@Override
+			public void describeTo( Description description )
+			{
+				//To change body of implemented methods use File | Settings | File Templates.
+			}
+		};
 	}
 
 	public void expandCategoryOf( Component component )
@@ -177,7 +186,9 @@ public class LoadUiRobot
 
 	public void clickPlayStopButton()
 	{
-		controller.click( ".project-playback-panel .play-button" );
+		Node playButton = find( ".project-playback-panel .play-button" );
+		waitUntil( playButton, is( enabled() ) );
+		controller.click( playButton );
 	}
 
 	public void pointAtPlayStopButton()
@@ -190,7 +201,7 @@ public class LoadUiRobot
 		clickPlayStopButton();
 		controller.sleep( unit.toMillis( number ) );
 		clickPlayStopButton();
-		controller.sleep( 2000 );
+		waitUntil( "#abort-requests", is( not( visible() ) ) );
 	}
 
 	public void deleteAllComponentsFromProjectView()

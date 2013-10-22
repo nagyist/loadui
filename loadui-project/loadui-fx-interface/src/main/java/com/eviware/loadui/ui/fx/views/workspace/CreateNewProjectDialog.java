@@ -38,7 +38,6 @@ import java.io.File;
 
 public class CreateNewProjectDialog extends ConfirmationDialog
 {
-
 	public CreateNewProjectDialog( final WorkspaceItem workspace, final Node owner )
 	{
 		super( owner, "Create new project", "Create" );
@@ -74,11 +73,11 @@ public class CreateNewProjectDialog extends ConfirmationDialog
 						.extensionFilters( UIUtils.XML_EXTENSION_FILTER )
 						.build();
 
-				File file = fileChooser.showSaveDialog( getScene().getWindow() );
+				File chosenFile = fileChooser.showSaveDialog( getScene().getWindow() );
 
-				if( file != null )
+				if( chosenFile != null )
 				{
-					fileNameField.setText( file.getPath() );
+					fileNameField.setText( chosenFile.getPath() );
 				}
 
 			}
@@ -89,6 +88,7 @@ public class CreateNewProjectDialog extends ConfirmationDialog
 				.text( "Browse..." )
 				.onAction( createFileChooser )
 				.build();
+
 		final CheckBox openNewProject = new CheckBox( "Open project after creation" );
 		openNewProject.setSelected( true );
 

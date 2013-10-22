@@ -1,33 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
                       http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi-1.0.xsd">
-		
-	<osgi:reference interface="java.util.concurrent.ExecutorService" id="executorService" />
-	
-	<osgi:reference interface="com.eviware.loadui.api.messaging.BroadcastMessageEndpoint" id="broadcastMessageEndpoint" />
-	
-	<osgi:reference interface="com.eviware.loadui.api.model.WorkspaceProvider" id="workspaceProvider" />
-	
-	<osgi:reference interface="com.eviware.loadui.api.component.ComponentRegistry" id="componentRegistry" />
-	
-	<osgi:reference interface="com.eviware.loadui.api.statistics.store.ExecutionManager" id="executionManager" />
-	
-	<osgi:reference interface="com.eviware.loadui.api.reporting.ReportingManager" id="reportingManager" />
-	
-	<osgi:service interface="com.eviware.loadui.api.execution.TestRunner" ref="testRunner" />
-	
-	<osgi:service interface="com.eviware.loadui.api.discovery.AgentDiscovery" ref="agentDiscovery" />
-	
-	<osgi:service interface="com.eviware.loadui.api.statistics.StatisticsAggregator" ref="statisticsAggregator" />
-	
-	<osgi:service interface="com.eviware.loadui.api.statistics.ProjectExecutionManager" ref="projectExecutionManager" />
-	
-	<osgi:service ref="agentTestExecutionAddonFactory" interface="com.eviware.loadui.api.addon.Addon$Factory" />
-	
-	<osgi:service ref="testExecutionAddonFactory" interface="com.eviware.loadui.api.addon.Addon$Factory" />
-	
-	<osgi:service ref="messageAwaiterFactory" interface="com.eviware.loadui.api.messaging.MessageAwaiterFactory" />
-	
+
+    <osgi:reference interface="java.util.concurrent.ExecutorService" id="executorService"/>
+
+    <osgi:reference interface="com.eviware.loadui.api.messaging.BroadcastMessageEndpoint"
+                    id="broadcastMessageEndpoint"/>
+
+    <osgi:reference interface="com.eviware.loadui.api.model.WorkspaceProvider" id="workspaceProvider"/>
+
+    <osgi:reference interface="com.eviware.loadui.api.component.ComponentRegistry" id="componentRegistry"/>
+
+    <osgi:reference interface="com.eviware.loadui.api.statistics.store.ExecutionManager" id="executionManager"/>
+
+    <osgi:reference interface="com.eviware.loadui.api.reporting.ReportingManager" id="reportingManager"/>
+
+    <osgi:reference interface="com.eviware.loadui.api.reporting.SummaryExporter" id="summaryExporter"/>
+
+    <osgi:reference interface="com.eviware.loadui.api.addon.AddonRegistry" id="addonRegistry"/>
+
+    <osgi:service interface="com.eviware.loadui.api.execution.TestRunner" ref="testRunner"/>
+
+    <osgi:service interface="com.eviware.loadui.api.discovery.AgentDiscovery" ref="agentDiscovery"/>
+
+    <osgi:service interface="com.eviware.loadui.api.statistics.StatisticsAggregator" ref="statisticsAggregator"/>
+
+    <osgi:service interface="com.eviware.loadui.api.statistics.ProjectExecutionManager" ref="projectExecutionManager"/>
+
+    <osgi:service ref="agentTestExecutionAddonFactory" interface="com.eviware.loadui.api.addon.Addon$Factory"/>
+
+    <osgi:service ref="testExecutionAddonFactory" interface="com.eviware.loadui.api.addon.Addon$Factory"/>
+
+    <osgi:service ref="messageAwaiterFactory" interface="com.eviware.loadui.api.messaging.MessageAwaiterFactory"/>
+
 </beans>

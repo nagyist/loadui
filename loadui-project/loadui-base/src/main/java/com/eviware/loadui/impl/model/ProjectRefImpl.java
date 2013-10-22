@@ -23,6 +23,7 @@ import com.eviware.loadui.api.model.ProjectRef;
 import com.eviware.loadui.api.traits.Labeled;
 import com.eviware.loadui.api.traits.Releasable;
 import com.eviware.loadui.config.ProjectReferenceConfig;
+import com.eviware.loadui.impl.model.canvas.project.ProjectItemImpl;
 import com.eviware.loadui.impl.property.AttributeHolderSupport;
 import com.eviware.loadui.util.ReleasableUtils;
 import com.eviware.loadui.util.events.EventSupport;

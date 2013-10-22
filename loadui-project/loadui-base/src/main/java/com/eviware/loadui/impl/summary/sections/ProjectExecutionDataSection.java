@@ -15,25 +15,30 @@
  */
 package com.eviware.loadui.impl.summary.sections;
 
-import javax.swing.table.TableModel;
-
 import com.eviware.loadui.api.model.CanvasItem;
-import com.eviware.loadui.impl.model.ProjectItemImpl;
-import com.eviware.loadui.impl.model.SceneItemImpl;
+import com.eviware.loadui.api.summary.MutableSummary;
+import com.eviware.loadui.impl.model.canvas.SceneItemImpl;
+import com.eviware.loadui.impl.model.canvas.project.ProjectItemImpl;
 import com.eviware.loadui.impl.summary.MutableSectionImpl;
 import com.eviware.loadui.impl.summary.sections.tablemodels.TestCaseDataTableModel;
 import com.eviware.loadui.util.summary.CalendarUtils;
 
+import javax.swing.table.TableModel;
+
+import static com.eviware.loadui.impl.summary.sections.tablemodels.TestCaseDataTableModel.TestCaseDataModel;
+
 final public class ProjectExecutionDataSection extends MutableSectionImpl
 {
 
-	ProjectItemImpl project;
+	private final ProjectItemImpl project;
+	private final MutableSummary summary;
 
-	public ProjectExecutionDataSection( ProjectItemImpl projectItemImpl )
+	public ProjectExecutionDataSection( ProjectItemImpl projectItemImpl, MutableSummary summary )
 	{
 
 		super( "Execution Data" );
 		project = projectItemImpl;
+		this.summary = summary;
 		addValue( "Duration", getExecutionTime() );
 		addValue( "Start Time", getStartTime() );
 		addValue( "End Time", getEndTime() );
@@ -50,25 +55,25 @@ final public class ProjectExecutionDataSection extends MutableSectionImpl
 		TestCaseDataTableModel model = new TestCaseDataTableModel();
 		for( SceneItemImpl testcase : project.getChildren() )
 		{
-			if( testcase.getStartTime() != null && testcase.getEndTime() != null )
-				model.add( new TestCaseDataTableModel.TestCaseDataModel( testcase ) );
+			if( summary.getStartTime() != null && summary.getEndTime() != null )
+				model.add( new TestCaseDataModel( testcase, summary ) );
 		}
 		return model;
 	}
 
 	public String getEndTime()
 	{
-		return CalendarUtils.formatAbsoluteTime( project.getEndTime() );
+		return CalendarUtils.formatAbsoluteTime( summary.getEndTime() );
 	}
 
 	public String getExecutionTime()
 	{
-		return CalendarUtils.formatInterval( project.getStartTime(), project.getEndTime() );
+		return CalendarUtils.formatInterval( summary.getStartTime(), summary.getEndTime() );
 	}
 
 	public String getStartTime()
 	{
-		return CalendarUtils.formatAbsoluteTime( project.getStartTime() );
+		return CalendarUtils.formatAbsoluteTime( summary.getStartTime() );
 	}
 
 	public String getTotalNumberOfAssertions()

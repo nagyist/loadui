@@ -15,11 +15,6 @@
  */
 package com.eviware.loadui.api.model;
 
-import java.util.Collection;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.eviware.loadui.api.component.ComponentCreationException;
 import com.eviware.loadui.api.component.ComponentDescriptor;
 import com.eviware.loadui.api.counter.CounterHolder;
@@ -30,9 +25,13 @@ import com.eviware.loadui.api.terminal.Connection;
 import com.eviware.loadui.api.terminal.InputTerminal;
 import com.eviware.loadui.api.terminal.OutputTerminal;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Collection;
+
 /**
  * Base ModelItem which holds ComponentItems and Connections.
- * 
+ *
  * @author dain.nilsson
  */
 public interface CanvasItem extends ModelItem, CounterHolder, StatisticHolder
@@ -71,7 +70,7 @@ public interface CanvasItem extends ModelItem, CounterHolder, StatisticHolder
 	 * is a ProjectItem itself, then it will return itself. Note that if this
 	 * CanvasItem is a SceneItem deployed on an Agent, then it will not have a
 	 * ProjectItem and will return null.
-	 * 
+	 *
 	 * @return The ProjectItem which this CanvasItem belongs to.
 	 */
 	@Nonnull
@@ -85,18 +84,16 @@ public interface CanvasItem extends ModelItem, CounterHolder, StatisticHolder
 
 	/**
 	 * Check whether the item has been changes since the last save.
-	 * 
+	 *
 	 * @return True if it has been changed
 	 */
 	public boolean isDirty();
 
 	/**
 	 * Adds a new ComponentItem to this CanvasItem.
-	 * 
-	 * @param label
-	 *           The label to give the new component.
-	 * @param descriptor
-	 *           The ComponentDescriptor to create a component from.
+	 *
+	 * @param label The label to give the new component.
+	 * @param descriptor The ComponentDescriptor to create a component from.
 	 * @return The newly created ComponentItem.
 	 * @throws ComponentCreationException
 	 */
@@ -106,7 +103,7 @@ public interface CanvasItem extends ModelItem, CounterHolder, StatisticHolder
 
 	/**
 	 * Get the child components.
-	 * 
+	 *
 	 * @return A Collection of all the contained Components.
 	 */
 	@Nonnull
@@ -115,7 +112,7 @@ public interface CanvasItem extends ModelItem, CounterHolder, StatisticHolder
 	/**
 	 * Convenience method for finding a child ComponentItem with the given label.
 	 * Returns null if no such ComponentItem exists.
-	 * 
+	 *
 	 * @param label
 	 * @return
 	 */
@@ -124,7 +121,7 @@ public interface CanvasItem extends ModelItem, CounterHolder, StatisticHolder
 
 	/**
 	 * Gets the connections in this canvas.
-	 * 
+	 *
 	 * @return A Collection of the Connections in this CanvasItem.
 	 */
 	@Nonnull
@@ -132,11 +129,9 @@ public interface CanvasItem extends ModelItem, CounterHolder, StatisticHolder
 
 	/**
 	 * Connects an OutputTerminal to an InputTerminal, creating a new Connection.
-	 * 
-	 * @param output
-	 *           The OutputTerminal to connect from.
-	 * @param input
-	 *           The InputTerminal to connect to.
+	 *
+	 * @param output The OutputTerminal to connect from.
+	 * @param input The InputTerminal to connect to.
 	 * @return The newly created Connection.
 	 */
 	@Nonnull
@@ -144,14 +139,14 @@ public interface CanvasItem extends ModelItem, CounterHolder, StatisticHolder
 
 	/**
 	 * Gets the current running state of the CanvasItem.
-	 * 
+	 *
 	 * @return True if the canvas is running, false if it is stopped.
 	 */
 	public boolean isRunning();
 
 	/**
 	 * Gets whether the cavas item has been started or not
-	 * 
+	 *
 	 * @return True if the canvas has been started, even if it is paused, false
 	 *         if it is stopped.
 	 */
@@ -159,7 +154,7 @@ public interface CanvasItem extends ModelItem, CounterHolder, StatisticHolder
 
 	/**
 	 * Gets whether the cavas item has been completed or not
-	 * 
+	 *
 	 * @return True if the canvas has been completed, false if it is not.
 	 */
 	public boolean isCompleted();
@@ -167,7 +162,7 @@ public interface CanvasItem extends ModelItem, CounterHolder, StatisticHolder
 	/**
 	 * Set a limit for a Counter. When the given counter reaches the limit set,
 	 * the CanvasItem is stopped.
-	 * 
+	 *
 	 * @param counterName
 	 * @param counterValue
 	 */
@@ -176,23 +171,16 @@ public interface CanvasItem extends ModelItem, CounterHolder, StatisticHolder
 	/**
 	 * Get the currently set limit for the given Counter, or -1 if no limit has
 	 * been set.
-	 * 
+	 *
 	 * @param counterName
 	 * @return
 	 */
 	public long getLimit( @Nonnull String counterName );
 
 	/**
-	 * Called on a CanvasItem to generate a summary of the last completed run.
-	 * 
-	 */
-	public void generateSummary();
-
-	/**
-	 * Gets the latest Summary. If no Summary is available, this will return
-	 * null;
-	 * 
-	 * @return
+	 * Creates and returns the latest Summary. If no Summary is available, this will return null
+	 *
+	 * @return latest summary or null if none
 	 */
 	@Nullable
 	public Summary getSummary();
@@ -200,10 +188,8 @@ public interface CanvasItem extends ModelItem, CounterHolder, StatisticHolder
 	/**
 	 * Creates and returns a duplicate of the given CanvasObjectItem (which must
 	 * already be a child of the CanvasItem).
-	 * 
-	 * @param obj
-	 *           The child CanvasObjectItem to duplicate.
-	 * 
+	 *
+	 * @param obj The child CanvasObjectItem to duplicate.
 	 * @return The new copy of the given object.
 	 */
 	@Nonnull
@@ -211,7 +197,7 @@ public interface CanvasItem extends ModelItem, CounterHolder, StatisticHolder
 
 	/**
 	 * Used for checking if there were any errors when loading the component.
-	 * 
+	 *
 	 * @return True if any errors occurred.
 	 */
 	public boolean isLoadingError();
@@ -234,9 +220,8 @@ public interface CanvasItem extends ModelItem, CounterHolder, StatisticHolder
 
 	/**
 	 * Used to define if ongoing requests should be aborted on finish
-	 * 
-	 * @param abort
-	 *           True to abort ongoing requests, false otherwise
+	 *
+	 * @param abort True to abort ongoing requests, false otherwise
 	 */
 	public void setAbortOnFinish( boolean abort );
 }

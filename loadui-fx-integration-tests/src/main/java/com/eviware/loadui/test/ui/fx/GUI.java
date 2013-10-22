@@ -15,96 +15,93 @@
  */
 package com.eviware.loadui.test.ui.fx;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
+import com.eviware.loadui.util.BeanInjector;
+import com.google.code.tempusfugit.temporal.Condition;
+import com.google.code.tempusfugit.temporal.WaitFor;
 import javafx.stage.Stage;
-
-import org.loadui.testfx.FXScreenController;
 import org.loadui.testfx.FXTestUtils;
 import org.loadui.testfx.GuiTest;
 import org.osgi.framework.BundleContext;
 
-import com.eviware.loadui.util.BeanInjector;
-import com.eviware.loadui.util.test.TestUtils;
+import static com.google.code.tempusfugit.temporal.Duration.seconds;
+import static com.google.code.tempusfugit.temporal.Timeout.timeout;
 
 public class GUI
 {
-	public static GuiTest getController()
-	{
-		return getInstance().robot.target( getStage() );
-	}
+	protected static GUI instance;
 
-	public static Stage getStage()
-	{
-		return getInstance().stage;
-	}
+	private ControllerFXWrapper controller;
+	private Stage stage;
+	private GuiTest robot;
 
-	public static BundleContext getBundleContext()
+	protected GUI()
 	{
-		return getInstance().controller.getBundleContext();
-	}
+		ControllerFXWrapper localController = null;
+		Stage localStage = null;
+		GuiTest localRobot = null;
 
-	private static Holder getInstance()
-	{
-		if( Holder.instance.error != null )
+		try
 		{
-			throw new RuntimeException( Holder.instance.error );
-		}
+			localController = createController();
 
-		return Holder.instance;
-	}
+			localStage = localController.getStage();
+			final Stage finalStage = localStage;
 
-	private static class Holder
-	{
-		private final ControllerFXWrapper controller;
-		private final Stage stage;
-		private final GuiTest robot;
-		private final Exception error;
-
-		private static final Holder instance = new Holder();
-
-		private Holder()
-		{
-			ControllerFXWrapper localController = null;
-			Stage localStage = null;
-			GuiTest localRobot = null;
-			Exception localError = null;
-
-			try
+			WaitFor.waitOrTimeout( new Condition()
 			{
-				localController = new ControllerFXWrapper();
-
-				localStage = localController.getStageFuture().get( 10, TimeUnit.SECONDS );
-				final Stage finalStage = localStage;
-
-				TestUtils.awaitCondition( new Callable<Boolean>()
+				@Override
+				public boolean isSatisfied()
 				{
-					@Override
-					public Boolean call() throws Exception
-					{
-						return finalStage.getScene() != null;
-					}
-				}, 60 );
+					return finalStage.getScene() != null;
+				}
+			}, timeout( seconds( 60 ) ) );
 
-				BeanInjector.setBundleContext( localController.getBundleContext() );
+			BeanInjector.setBundleContext( localController.getBundleContext() );
 
-				Thread.sleep( 1000 );
+			Thread.sleep( 1000 );
 
-				FXTestUtils.bringToFront( localStage );
-				localRobot = GuiTest.wrap( new FXScreenController() );
-				GuiTest.targetWindow( localStage );
-			}
-			catch( Exception e )
-			{
-				localError = e;
-				e.printStackTrace();
-			}
-
-			controller = localController;
-			stage = localStage;
-			robot = localRobot;
-			error = localError;
+			FXTestUtils.bringToFront( localStage );
+			localRobot = new GuiTest();
+			GuiTest.targetWindow( localStage );
 		}
+		catch( Exception e )
+		{
+			e.printStackTrace();
+		}
+
+		controller = localController;
+		stage = localStage;
+		robot = localRobot;
 	}
+
+	protected ControllerFXWrapper createController()
+	{
+		return new ControllerFXWrapper();
+	}
+
+	public static synchronized GUI getOpenSourceGui()
+	{
+		if( instance == null )
+		{
+			instance = new GUI();
+		}
+		return instance;
+	}
+
+	public GuiTest getController()
+	{
+		return robot.target( getStage() );
+	}
+
+	public Stage getStage()
+	{
+		return stage;
+	}
+
+	public BundleContext getBundleContext()
+	{
+		return controller.getBundleContext();
+	}
+
 }
+

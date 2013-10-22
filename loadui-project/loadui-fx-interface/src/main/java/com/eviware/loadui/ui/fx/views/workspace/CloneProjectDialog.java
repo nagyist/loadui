@@ -32,13 +32,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
 
 import java.io.File;
 
 public class CloneProjectDialog extends ConfirmationDialog
 {
-	private static final ExtensionFilter XML_EXTENSION_FILTER = new FileChooser.ExtensionFilter( "loadUI project file",
+	private static final FileChooser.ExtensionFilter XML_EXTENSION_FILTER = new FileChooser.ExtensionFilter( "loadUI project file",
 			"*.xml" );
 
 	private final WorkspaceItem workspace;
@@ -81,7 +80,10 @@ public class CloneProjectDialog extends ConfirmationDialog
 						.usingWorkspace( workspace )
 						.extensionFilters( XML_EXTENSION_FILTER )
 						.build();
-				fileNameField.setText( fileChooser.showSaveDialog( owner.getScene().getWindow() ).getPath() );
+
+				File chosenFile = fileChooser.showSaveDialog( owner.getScene().getWindow() );
+				if( chosenFile != null )
+					fileNameField.setText( chosenFile.getPath() );
 			}
 		} ).build();
 

@@ -41,12 +41,18 @@ public class ControllerStartedState extends TestState
 
 	private ControllerStartedState()
 	{
-		super( "Controller Started", TestState.ROOT );
+		super( "Controller Started" );
 	}
 
-	protected ControllerStartedState( String name, TestState parentState )
+	protected ControllerStartedState( String name )
 	{
-		super( name, parentState );
+		super( name );
+	}
+
+	@Override
+	protected TestState parentState()
+	{
+		return TestState.ROOT;
 	}
 
 	@Override

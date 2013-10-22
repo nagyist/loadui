@@ -15,37 +15,56 @@
  */
 package com.eviware.loadui.test.ui.fx.states;
 
-import javafx.stage.Stage;
-
+import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.ui.fx.GUI;
+import javafx.stage.Stage;
 import org.loadui.testfx.FXTestUtils;
 import org.loadui.testfx.GuiTest;
 
+import java.io.File;
 import java.util.NoSuchElementException;
 
-public class FXAppLoadedState extends TestState
+public class OpenSourceFxLoadedState extends TestState
 {
-	public static final TestState STATE = new FXAppLoadedState();
+	public static final TestState STATE = new OpenSourceFxLoadedState();
 
-	private FXAppLoadedState()
+	protected OpenSourceFxLoadedState()
 	{
-		super( "FX App Loaded", TestState.ROOT );
+		super( "OS FX Loaded" );
+	}
+
+	protected OpenSourceFxLoadedState( String name )
+	{
+		super( name );
+	}
+
+	@Override
+	protected TestState parentState()
+	{
+		return TestState.ROOT;
 	}
 
 	@Override
 	protected void enterFromParent() throws Exception
 	{
-		GUI.getBundleContext();
-		closeWindow("Welcome to LoadUI");
-		closeWindow("New version available");
+		getGui().getBundleContext();
+		System.setProperty( "groovy.root", new File( LoadUI.getWorkingDir(), ".groovy" ).getAbsolutePath() );
+		closeWindow( "Welcome to LoadUI" );
+		closeWindow( "New version available" );
 
-		GUI.getController().click( "#mainButton" ).click( "#mainButton" ).sleep( 500 );
+		getGui().getController().click( "#mainButton" ).click( "#mainButton" ).sleep( 500 );
 	}
 
-	private void closeWindow( final String windowTitle ) throws Exception
+	protected GUI getGui()
 	{
-		try {
+		return GUI.getOpenSourceGui();
+	}
+
+	protected void closeWindow( final String windowTitle ) throws Exception
+	{
+		try
+		{
 			final Stage dialog = GuiTest.findStageByTitle( windowTitle );
 
 			FXTestUtils.invokeAndWait( new Runnable()
@@ -53,12 +72,13 @@ public class FXAppLoadedState extends TestState
 				@Override
 				public void run()
 				{
-					log.debug( "Closing window: '"+windowTitle+"'" );
+					log.debug( "Closing window: '" + windowTitle + "'" );
 					dialog.close();
 				}
 			}, 1 );
 		}
-		catch (NoSuchElementException e ) {
+		catch( NoSuchElementException e )
+		{
 			// No need to close a window if it's not open.
 		}
 	}

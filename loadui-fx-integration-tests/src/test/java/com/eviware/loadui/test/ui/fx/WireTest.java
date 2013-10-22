@@ -17,25 +17,23 @@ package com.eviware.loadui.test.ui.fx;
 
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
-import org.loadui.testfx.GuiTest;
 import com.eviware.loadui.util.test.TestUtils;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.loadui.testfx.GuiTest;
 
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import static org.loadui.testfx.GuiTest.findAll;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -67,13 +65,13 @@ public class WireTest extends GuiTest
 	{
 		ProjectLoadedWithoutAgentsState.STATE.enter();
 
-		controller = GUI.getController();
+		controller = GUI.getOpenSourceGui().getController();
 
 		controller.drag( "#Assertions" ).by( 0, 250 ).drop();
 
 		controller.click( "#flow.category .expander-button" ).drag( CONDITION_COMPONENT ).by( 100, -400 ).drop();
 
-		waitUntil( numberOf( ".canvas-object-view" ), is(1) );
+		waitUntil( numberOf( ".canvas-object-view" ), is( 1 ) );
 
 		System.gc();
 		System.gc();
@@ -116,7 +114,7 @@ public class WireTest extends GuiTest
 	}
 
 	@Test
-	@Ignore( "LOADUI-64 - Skipped this for release 2.5 as implementation would be too time-consuming" )
+	@Ignore("LOADUI-64 - Skipped this for release 2.5 as implementation would be too time-consuming")
 	public void shouldDeleteSelectedWiresByRightClickMenu()
 	{
 		Set<Node> outputs = findAll( ".canvas-object-view .terminal-view.output-terminal" );
@@ -126,7 +124,7 @@ public class WireTest extends GuiTest
 
 		assertThat( findAll( ".connection-view" ).size(), is( 1 ) );
 
-		move( Iterables.get( inputs, 0 ) ).moveBy( 0, -25 ).click(MouseButton.SECONDARY)
+		move( Iterables.get( inputs, 0 ) ).moveBy( 0, -25 ).click( MouseButton.SECONDARY )
 				.click( "#delete-wire" );
 
 		assertThat( findAll( ".connection-view" ).size(), is( 0 ) );

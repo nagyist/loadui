@@ -72,7 +72,7 @@ public class WorkspaceView extends StackPane
 	private static final ExtensionFilter XML_EXTENSION_FILTER = new FileChooser.ExtensionFilter( "LoadUI project file",
 			"*.xml" );
 	private static final String HELPER_PAGE_URL = "http://www.loadui.org/Working-with-loadUI/workspace-overview.html";
-	private static final String PROP_FILE = "res/application.properties";
+	private static final File PROP_FILE = LoadUI.relativeFile( "res/application.properties" );
 
 	private final WorkspaceItem workspace;
 
@@ -148,7 +148,7 @@ public class WorkspaceView extends StackPane
 
 		java.util.Properties props = new java.util.Properties();
 
-		try(InputStream propsStream = Files.newInputStreamSupplier( new File( PROP_FILE ) ).getInput())
+		try(InputStream propsStream = Files.newInputStreamSupplier( PROP_FILE ).getInput())
 		{
 			props.load( propsStream );
 		}

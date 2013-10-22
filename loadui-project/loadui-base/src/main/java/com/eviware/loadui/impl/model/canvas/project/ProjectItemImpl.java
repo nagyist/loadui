@@ -13,43 +13,40 @@
  * express or implied. See the Licence for the specific language governing permissions and limitations
  * under the Licence.
  */
-package com.eviware.loadui.impl.model;
+package com.eviware.loadui.impl.model.canvas.project;
 
-import com.eviware.loadui.api.addressable.Addressable;
-import com.eviware.loadui.api.component.ComponentContext;
+import com.eviware.loadui.api.addressable.AddressableRegistry;
 import com.eviware.loadui.api.counter.CounterSynchronizer;
 import com.eviware.loadui.api.events.*;
 import com.eviware.loadui.api.execution.Phase;
-import com.eviware.loadui.api.execution.TestExecution;
-import com.eviware.loadui.api.execution.TestExecutionTask;
 import com.eviware.loadui.api.execution.TestRunner;
-import com.eviware.loadui.api.messaging.*;
+import com.eviware.loadui.api.messaging.BroadcastMessageEndpoint;
+import com.eviware.loadui.api.messaging.MessageAwaiterFactory;
+import com.eviware.loadui.api.messaging.SceneCommunication;
 import com.eviware.loadui.api.model.*;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.api.property.PropertySynchronizer;
 import com.eviware.loadui.api.statistics.model.StatisticPages;
-import com.eviware.loadui.api.summary.MutableSummary;
 import com.eviware.loadui.api.terminal.Connection;
 import com.eviware.loadui.api.terminal.InputTerminal;
 import com.eviware.loadui.api.terminal.OutputTerminal;
-import com.eviware.loadui.api.terminal.TerminalMessage;
-import com.eviware.loadui.api.traits.Releasable;
 import com.eviware.loadui.config.*;
 import com.eviware.loadui.impl.XmlBeansUtils;
 import com.eviware.loadui.impl.counter.AggregatedCounterSupport;
+import com.eviware.loadui.impl.model.canvas.CanvasItemImpl;
+import com.eviware.loadui.impl.model.canvas.SceneItemImpl;
 import com.eviware.loadui.impl.statistics.model.StatisticPagesImpl;
-import com.eviware.loadui.impl.summary.MutableChapterImpl;
-import com.eviware.loadui.impl.summary.sections.*;
+import com.eviware.loadui.impl.summary.ProjectSummaryCreator;
+import com.eviware.loadui.impl.summary.SummaryCreator;
 import com.eviware.loadui.impl.terminal.ConnectionImpl;
 import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.ReleasableUtils;
 import com.eviware.loadui.util.collections.CollectionEventSupport;
-import com.eviware.loadui.util.collections.CollectionFuture;
-import com.eviware.loadui.util.events.EventFuture;
 import com.eviware.loadui.util.messaging.BroadcastMessageEndpointImpl;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 import org.slf4j.Logger;
@@ -61,7 +58,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.*;
 
 public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implements ProjectItem
 {
@@ -71,13 +67,12 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 	private final WorkspaceItem workspace;
 	private final LoaduiProjectDocumentConfig doc;
 	private final CollectionEventSupport<Assignment, Void> assignments = new CollectionEventSupport<>( this, ASSIGNMENTS );
-	private final AgentListener agentListener = new AgentListener();
+	private final AgentListener agentListener;
 	private final SceneListener sceneListener = new SceneListener();
 	private final WorkspaceListener workspaceListener = new WorkspaceListener();
 	private final SceneComponentListener sceneComponentListener = new SceneComponentListener();
 	private final Map<SceneItem, BroadcastMessageEndpoint> sceneEndpoints = Maps.newHashMap();
-	private final AgentReadyAwaiterTask agentAwaiter = new AgentReadyAwaiterTask();
-	private final MessageAwaiterFactory messageAwaiterFactory;
+	private final AgentReadyAwaiterTask agentAwaiter = new AgentReadyAwaiterTask( this );
 	private final ConversionService conversionService;
 	private final PropertySynchronizer propertySynchronizer;
 	private final CounterSynchronizer counterSynchronizer;
@@ -97,7 +92,6 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 						: LoaduiProjectDocumentConfig.Factory.newInstance() );
 		project.init();
 		project.postInit();
-
 		return project;
 	}
 
@@ -110,12 +104,13 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 		conversionService = BeanInjector.getBean( ConversionService.class );
 		propertySynchronizer = BeanInjector.getBean( PropertySynchronizer.class );
 		counterSynchronizer = BeanInjector.getBean( CounterSynchronizer.class );
-		messageAwaiterFactory = BeanInjector.getBean( MessageAwaiterFactory.class );
 		saveReport = createProperty( SAVE_REPORT_PROPERTY, Boolean.class, false );
 		reportFolder = createProperty( REPORT_FOLDER_PROPERTY, String.class, "" );
 		reportFormat = createProperty( REPORT_FORMAT_PROPERTY, String.class, "" );
 		statisticPages = new StatisticPagesImpl( getConfig().getStatistics() == null ? getConfig().addNewStatistics()
 				: getConfig().getStatistics() );
+
+		agentListener = new AgentListener( this, conversionService, BeanInjector.getBean( MessageAwaiterFactory.class ) );
 
 		BeanInjector.getBean( TestRunner.class ).registerTask( agentAwaiter, Phase.PRE_START );
 	}
@@ -182,6 +177,11 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 		}
 	}
 
+	Set<? extends SceneItemImpl> getScenes()
+	{
+		return scenes;
+	}
+
 	@Override
 	protected void postInit()
 	{
@@ -189,7 +189,7 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 		statisticPages.init();
 	}
 
-	private void sendAssignMessage( AgentItem agent, SceneItem scene )
+	void sendAssignMessage( AgentItem agent, SceneItem scene )
 	{
 		agent.sendMessage( AgentItem.AGENT_CHANNEL,
 				ImmutableMap.<String, String>of( AgentItem.ASSIGN, scene.getId(), AgentItem.PROJECT_ID, getId() ) );
@@ -216,7 +216,7 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 		return false;
 	}
 
-	private void detachScene( SceneItem scene )
+	private void detachScene( SceneItemImpl scene )
 	{
 		if( scenes.remove( scene ) )
 		{
@@ -236,12 +236,14 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 		}
 	}
 
+	@Nonnull
 	@Override
 	public WorkspaceItem getWorkspace()
 	{
 		return workspace;
 	}
 
+	@Nonnull
 	@Override
 	public ProjectItem getProject()
 	{
@@ -249,7 +251,7 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 	}
 
 	@Override
-	public SceneItem getSceneByLabel( String label )
+	public SceneItem getSceneByLabel( @Nonnull String label )
 	{
 		for( SceneItem scene : scenes )
 			if( scene.getLabel().equals( label ) )
@@ -258,8 +260,9 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 		return null;
 	}
 
+	@Nonnull
 	@Override
-	public SceneItem createScene( String label )
+	public SceneItem createScene( @Nonnull String label )
 	{
 		SceneItemConfig sceneConfig = getConfig().addNewScene();
 		sceneConfig.setLabel( label );
@@ -303,7 +306,7 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 	}
 
 	@Override
-	public void saveAs( File saveAsFile )
+	public void saveAs( @Nonnull File saveAsFile )
 	{
 		try
 		{
@@ -346,7 +349,7 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 	}
 
 	@Override
-	protected void markClean()
+	public void markClean()
 	{
 		super.markClean();
 		for( SceneItemImpl scene : scenes )
@@ -356,7 +359,7 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 	}
 
 	@Override
-	public void assignScene( SceneItem scene, AgentItem agent )
+	public void assignScene( @Nonnull SceneItem scene, @Nonnull AgentItem agent )
 	{
 		AssignmentImpl assignment = getOrCreateAssignment( scene, agent );
 
@@ -374,6 +377,7 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 		}
 	}
 
+	@Nonnull
 	@Override
 	public Collection<AgentItem> getAgentsAssignedTo( SceneItem scene )
 	{
@@ -384,8 +388,9 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 		return agents;
 	}
 
+	@Nonnull
 	@Override
-	public Collection<SceneItem> getScenesAssignedTo( AgentItem agent )
+	public Collection<SceneItem> getScenesAssignedTo( @Nonnull AgentItem agent )
 	{
 		Set<SceneItem> scenesOnAgent = new HashSet<>();
 		for( Assignment assignment : assignments.getItems() )
@@ -394,6 +399,7 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 		return scenesOnAgent;
 	}
 
+	@Nonnull
 	@Override
 	public Collection<Assignment> getAssignments()
 	{
@@ -401,7 +407,7 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 	}
 
 	@Override
-	public void unassignScene( SceneItem scene, AgentItem agent )
+	public void unassignScene( @Nonnull SceneItem scene, @Nonnull AgentItem agent )
 	{
 		AssignmentImpl assignment = getAssignment( scene, agent );
 		if( assignment != null )
@@ -427,18 +433,22 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 		}
 	}
 
+	AddressableRegistry getRegistry()
+	{
+		return addressableRegistry;
+	}
+
 	private void sendSceneCommand( SceneItem scene, String... args )
 	{
 		List<String> message = new ArrayList<>();
 		message.add( scene.getId() );
 		message.add( Long.toString( scene.getVersion() ) );
-		for( String arg : args )
-			message.add( arg );
+		Collections.addAll( message, args );
 
 		broadcastMessage( scene, SceneCommunication.CHANNEL, message.toArray() );
 	}
 
-	private AssignmentImpl getAssignment( SceneItem scene, AgentItem agent )
+	AssignmentImpl getAssignment( SceneItem scene, AgentItem agent )
 	{
 		for( Assignment assignment : assignments.getItems() )
 			if( assignment.getScene() == scene && assignment.getAgent() == agent )
@@ -454,14 +464,14 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 	}
 
 	@Override
-	public void broadcastMessage( SceneItem scene, String channel, Object data )
+	public void broadcastMessage( @Nonnull SceneItem scene, @Nonnull String channel, Object data )
 	{
 		// log.debug( "BROADCASTING: " + scene + " " + channel + " " + data );
 		sceneEndpoints.get( scene ).sendMessage( channel, data );
 	}
 
 	@Override
-	protected void onComplete( EventFirer source )
+	public void onComplete( EventFirer source )
 	{
 		// At this point all project components are finished. They are either
 		// canceled or finished normally which depends on project 'abortOnFinish'
@@ -469,43 +479,26 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 		// do by listening for ON_COMPLETE_DONE event which is fired after
 		// 'onComplete' method was called in local mode and after controller
 		// received test case data in distributed mode.
-		new SceneCompleteAwaiter().start();
+		new SceneCompleteAwaiter( this, scheduler ).start();
 	}
 
 	@Override
-	public void appendToSummary( MutableSummary mutableSummary )
+	public SummaryCreator getSummaryCreator()
 	{
-		// add a project chapter first
-		MutableChapterImpl projectChapter = ( MutableChapterImpl )mutableSummary.addChapter( getLabel() );
-
-		// add and generate Scenario chapters if the Scenario has run at least
-		// once.
-		for( SceneItemImpl scene : scenes )
-		{
-			if( scene.getEndTime() != null && scene.getStartTime() != null )
-				scene.appendToSummary( mutableSummary );
-		}
-
-		// fill project chapter
-		projectChapter.addSection( new ProjectDataSummarySection( this ) );
-		projectChapter.addSection( new ProjectExecutionDataSection( this ) );
-		projectChapter.addSection( new ProjectExecutionMetricsSection( this ) );
-		projectChapter.addSection( new ProjectExecutionNotablesSection( this ) );
-		projectChapter.addSection( new ProjectDataSection( this ) );
-		projectChapter.setDescription( getDescription() );
-
-		for( ComponentItem component : getComponents() )
-			component.generateSummary( projectChapter );
+		return new ProjectSummaryCreator( this );
 	}
 
+
+	@Nonnull
 	@Override
 	public Collection<? extends SceneItemImpl> getChildren()
 	{
 		return ImmutableSet.copyOf( scenes );
 	}
 
+	@Nonnull
 	@Override
-	public CanvasObjectItem duplicate( CanvasObjectItem obj )
+	public CanvasObjectItem duplicate( @Nonnull CanvasObjectItem obj )
 	{
 		if( !( obj instanceof SceneItem ) )
 			return super.duplicate( obj );
@@ -541,10 +534,10 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 	}
 
 	@Override
-	public boolean isSceneLoaded( SceneItem scene, AgentItem agent )
+	public boolean isSceneLoaded( @Nonnull SceneItem scene, @Nonnull AgentItem agent )
 	{
 		AssignmentImpl assignment = getAssignment( scene, agent );
-		return assignment == null ? false : assignment.loaded;
+		return assignment != null && assignment.loaded;
 	}
 
 	@Override
@@ -612,7 +605,7 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 		return ModelItemType.PROJECT;
 	}
 
-	private class AssignmentImpl implements Assignment
+	class AssignmentImpl implements Assignment
 	{
 		private final SceneItem scene;
 		private final AgentItem agent;
@@ -656,9 +649,9 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 				SceneItem scene = ( SceneItem )event.getSource();
 				sendSceneCommand( scene, SceneCommunication.ACTION_EVENT, event.getKey(), scene.getId() );
 			}
-			else if( event.getSource() instanceof SceneItem )
+			else if( event.getSource() instanceof SceneItemImpl )
 			{
-				SceneItem scene = ( SceneItem )event.getSource();
+				SceneItemImpl scene = ( SceneItemImpl )event.getSource();
 				if( !scenes.contains( scene ) )
 				{
 					return;
@@ -707,161 +700,6 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 						}
 					}
 				}
-			}
-		}
-	}
-
-	private class AgentListener implements EventHandler<BaseEvent>, MessageListener, Releasable
-	{
-		private final Set<AgentItem> agents = new HashSet<>();
-		private final AgentContextListener subListener = new AgentContextListener();
-
-		public void attach( AgentItem agent )
-		{
-			if( agents.add( agent ) )
-			{
-				agent.addEventListener( BaseEvent.class, this );
-				agent.addMessageListener( AgentItem.AGENT_CHANNEL, this );
-				agent.addMessageListener( ComponentContext.COMPONENT_CONTEXT_CHANNEL, subListener );
-			}
-		}
-
-		public void detach( AgentItem agent )
-		{
-			if( agents.remove( agent ) )
-			{
-				agent.removeEventListener( BaseEvent.class, this );
-				agent.removeMessageListener( this );
-				agent.removeMessageListener( subListener );
-			}
-		}
-
-		@Override
-		public void release()
-		{
-			for( AgentItem agent : agents )
-			{
-				agent.removeEventListener( BaseEvent.class, this );
-				agent.removeMessageListener( this );
-				agent.removeMessageListener( subListener );
-			}
-			agents.clear();
-		}
-
-		@Override
-		public void handleEvent( BaseEvent event )
-		{
-			AgentItem agent = ( AgentItem )event.getSource();
-			if( AgentItem.READY.equals( event.getKey() ) )
-			{
-				final boolean ready = agent.isReady();
-				log.debug( "Agent {} ready: {}", agent, ready );
-				for( SceneItem scene : getScenesAssignedTo( agent ) )
-				{
-					log.debug( "Send message assign: {}", scene.getLabel() );
-					AssignmentImpl assignment = getAssignment( scene, agent );
-					if( assignment != null )
-						assignment.setLoaded( false );
-					if( ready )
-						sendAssignMessage( agent, scene );
-				}
-			}
-		}
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public void handleMessage( String channel, MessageEndpoint endpoint, Object data )
-		{
-			Preconditions.checkArgument( endpoint instanceof AgentItem, "Endpoint: %s is not an AgentItem", endpoint );
-			final AgentItem agent = ( AgentItem )endpoint;
-
-			Map<String, String> message = ( Map<String, String> )data;
-			if( message.containsKey( AgentItem.DEFINE_SCENE ) )
-			{
-				SceneItem scene = ( SceneItem )addressableRegistry.lookup( message.get( AgentItem.DEFINE_SCENE ) );
-				if( scene != null )
-				{
-					log.debug( "Agent {} has requested a Scenario: {}, sending...", agent,
-							message.get( AgentItem.DEFINE_SCENE ) );
-					AssignmentImpl assignment = getAssignment( scene, agent );
-					if( assignment != null )
-						assignment.setLoaded( false );
-					agent.sendMessage(
-							channel,
-							ImmutableMap.of( AgentItem.SCENE_ID, scene.getId(), AgentItem.SCENE_DEFINITION,
-									conversionService.convert( scene, String.class ) ) );
-				}
-				else
-				{
-					log.warn( "An Agent {} has requested a nonexistant Scenario: {}", agent,
-							message.get( AgentItem.DEFINE_SCENE ) );
-				}
-			}
-			else if( message.containsKey( AgentItem.SCENE_ID ) )
-			{
-				Map<Object, Object> map = ( Map<Object, Object> )data;
-				Addressable scene = addressableRegistry.lookup( ( String )map.remove( AgentItem.SCENE_ID ) );
-				if( scene instanceof SceneItemImpl )
-				{
-					synchronized( scene )
-					{
-						( ( SceneItemImpl )scene ).handleStatisticsData( agent, map );
-					}
-				}
-			}
-			else if( message.containsKey( AgentItem.STARTED ) )
-			{
-				SceneItem scene = ( SceneItem )addressableRegistry.lookup( message.get( AgentItem.STARTED ) );
-				AssignmentImpl assignment = getAssignment( scene, agent );
-
-				if( assignment != null )
-					assignment.setLoaded( true );
-
-				if( scene.isRunning() && !workspace.isLocalMode() )
-				{
-
-					if( scene != null && scene.isRunning() && !scene.getProject().getWorkspace().isLocalMode() )
-					{
-						final String canvasId = message.get( AgentItem.STARTED );
-						BeanInjector.getBean( ExecutorService.class ).execute( new Runnable()
-						{
-							@Override
-							public void run()
-							{
-								for( Phase phase : Arrays.asList( Phase.PRE_START, Phase.START, Phase.POST_START ) )
-								{
-									messageAwaiterFactory.create( ( AgentItem )agent, canvasId, phase ).await();
-								}
-							}
-						} );
-					}
-				}
-
-				if( scene.isRunning() && !workspace.isLocalMode() )
-				{
-					agent.sendMessage( SceneCommunication.CHANNEL,
-							new Object[] { scene.getId(), Long.toString( scene.getVersion() ),
-									SceneCommunication.ACTION_EVENT, START_ACTION, scene.getId() } );
-				}
-			}
-		}
-	}
-
-	private class AgentContextListener implements MessageListener
-	{
-		@Override
-		public void handleMessage( String channel, MessageEndpoint endpoint, Object data )
-		{
-			Preconditions.checkArgument( endpoint instanceof AgentItem, "Endpoint: %s is not an AgentItem", endpoint );
-			AgentItem agent = ( AgentItem )endpoint;
-			Object[] args = ( Object[] )data;
-			Addressable target = addressableRegistry.lookup( ( String )args[0] );
-			if( target instanceof ComponentItemImpl )
-			{
-				ComponentItemImpl component = ( ComponentItemImpl )target;
-				TerminalMessage message = component.getContext().newMessage();
-				message.load( args[1] );
-				component.sendAgentMessage( agent, message );
 			}
 		}
 	}
@@ -920,152 +758,6 @@ public class ProjectItemImpl extends CanvasItemImpl<ProjectItemConfig> implement
 			if( !linkedOnly || s.isFollowProject() )
 			{
 				s.cancelComponents();
-			}
-		}
-	}
-
-	/**
-	 * Waits for ON_COMPLETE_DONE event from all scenes and calls
-	 * 'doGenerateSummary' method. This event is fired after 'onComplete' method
-	 * of test case is executed in local mode, and when controller receives agent
-	 * data in distributed mode.
-	 *
-	 * @author predrag.vucetic
-	 */
-	private class SceneCompleteAwaiter implements EventHandler<BaseEvent>
-	{
-		// timeout scheduler. this is used when all test cases have property
-		// abortOnFinish set to true, so since they should return immediately,
-		// they will be discarded if they do not return in timeout period. if
-		// there is a test case with this property set to false, respond time is
-		// not known and there is no timeout.
-		private ScheduledFuture<?> awaitingSummaryTimeout;
-		private final Predicate<SceneItem> notAbortOnFinish = new Predicate<SceneItem>()
-		{
-			@Override
-			public boolean apply( SceneItem scene )
-			{
-				return scene.isFollowProject() && !scene.isAbortOnFinish();
-			}
-
-		};
-
-		private void start()
-		{
-			startTimeoutScheduler();
-			tryComplete();
-		}
-
-		@Override
-		public void handleEvent( BaseEvent event )
-		{
-			if( event.getKey().equals( ON_COMPLETE_DONE ) )
-			{
-				event.getSource().removeEventListener( BaseEvent.class, this );
-				tryComplete();
-			}
-		}
-
-		private void tryComplete()
-		{
-			boolean allScenesCompleted = true;
-			for( SceneItemImpl scene : scenes )
-			{
-				synchronized( scene )
-				{
-					if( scene.getStartTime() != null && !scene.isCompleted() )
-					{
-						scene.addEventListener( BaseEvent.class, this );
-						allScenesCompleted = false;
-					}
-				}
-			}
-			if( allScenesCompleted )
-			{
-				if( awaitingSummaryTimeout != null )
-					awaitingSummaryTimeout.cancel( true );
-
-				setCompleted( true );
-				generateSummary();
-			}
-		}
-
-		// if abort is true for all test cases, set timer to wait 15 seconds and
-		// then on each scene call setCompleted(true) which will throw
-		// ON_COMPLETE_DONE event on every test case which will then call the
-		// handleEvent method of this class which will call tryComplete() and
-		// generate summary when all test cases are finished.
-		// TODO add another, longer timeout when there are test cases with
-		// abortOnFinish = false?
-		private void startTimeoutScheduler()
-		{
-			if( Iterables.any( getChildren(), notAbortOnFinish ) )
-				return;
-
-			awaitingSummaryTimeout = scheduler.schedule( new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					log.error( "Failed to get statistics from all expected Agents within timeout period!" );
-					for( SceneItemImpl scene : scenes )
-					{
-						synchronized( scene )
-						{
-							if( !scene.isCompleted() )
-							{
-								scene.setCompleted( true );
-							}
-						}
-					}
-				}
-			}, 15, TimeUnit.SECONDS );
-		}
-	}
-
-	private class AgentReadyAwaiterTask implements TestExecutionTask
-	{
-		@Override
-		public void invoke( TestExecution execution, Phase phase )
-		{
-			if( execution.getCanvas() == ProjectItemImpl.this && !getWorkspace().isLocalMode() )
-			{
-				ArrayList<EventFuture<BaseEvent>> awaitingScenes = Lists.newArrayList();
-				for( final SceneItem scene : getChildren() )
-				{
-					for( final AgentItem agent : getAgentsAssignedTo( scene ) )
-					{
-						if( agent.isEnabled() && !isSceneLoaded( scene, agent ) )
-						{
-							awaitingScenes.add( new EventFuture<>( ProjectItemImpl.this, BaseEvent.class,
-									new Predicate<BaseEvent>()
-									{
-										@Override
-										public boolean apply( BaseEvent event )
-										{
-											return SCENE_LOADED.equals( event.getKey() ) && isSceneLoaded( scene, agent );
-										}
-									} ) );
-						}
-					}
-				}
-
-				try
-				{
-					new CollectionFuture<>( awaitingScenes ).get( 10, TimeUnit.SECONDS );
-				}
-				catch( InterruptedException e )
-				{
-					log.error( "Error while waiting for Scenarios to become ready on Agents", e );
-				}
-				catch( ExecutionException e )
-				{
-					log.error( "Error while waiting for Scenario to become ready on Agents", e );
-				}
-				catch( TimeoutException e )
-				{
-					log.error( "Timed out waiting for Scenarios to become ready on Agents", e );
-				}
 			}
 		}
 	}

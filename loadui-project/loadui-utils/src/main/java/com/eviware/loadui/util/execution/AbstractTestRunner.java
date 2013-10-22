@@ -15,37 +15,31 @@
  */
 package com.eviware.loadui.util.execution;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.WeakHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.execution.Phase;
 import com.eviware.loadui.api.execution.TestExecution;
 import com.eviware.loadui.api.execution.TestExecutionTask;
 import com.eviware.loadui.api.execution.TestRunner;
 import com.google.common.base.Supplier;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 /**
  * Provides a partial implementation of TestRunner, taking care of managing
  * TestExecutionTasks.
- * 
+ *
  * @author dain.nilsson
  */
 public abstract class AbstractTestRunner implements TestRunner
@@ -55,13 +49,22 @@ public abstract class AbstractTestRunner implements TestRunner
 	private final ListeningExecutorService executorService;
 	private final Multimap<Phase, TestExecutionTask> tasks = Multimaps.newSetMultimap(
 			new HashMap<Phase, Collection<TestExecutionTask>>(), new Supplier<Set<TestExecutionTask>>()
-			{
-				@Override
-				public Set<TestExecutionTask> get()
-				{
-					return Collections.newSetFromMap( new WeakHashMap<TestExecutionTask, Boolean>() );
-				}
-			} );
+	{
+		@Override
+		public Set<TestExecutionTask> get()
+		{
+			return Collections.newSetFromMap( new WeakHashMap<TestExecutionTask, Boolean>() );
+		}
+	} );
+	private final Multimap<Phase, TestExecutionTask> runOnceTasks = Multimaps.newSetMultimap(
+			new HashMap<Phase, Collection<TestExecutionTask>>(), new Supplier<Set<TestExecutionTask>>()
+	{
+		@Override
+		public Set<TestExecutionTask> get()
+		{
+			return new HashSet<>();
+		}
+	} );
 
 	public AbstractTestRunner( ExecutorService executorService )
 	{
@@ -75,6 +78,12 @@ public abstract class AbstractTestRunner implements TestRunner
 		{
 			tasks.put( phase, task );
 		}
+	}
+
+	@Override
+	public synchronized void runTaskOnce( TestExecutionTask task, Phase phase )
+	{
+		runOnceTasks.put( phase, task );
 	}
 
 	@Override
@@ -92,12 +101,12 @@ public abstract class AbstractTestRunner implements TestRunner
 	 * one Execution is being run at one time, so care should be taken externally
 	 * to always wait for a submitted Phase to complete before running another
 	 * one.
-	 * 
-	 * @param phase
-	 * @param execution
-	 * @return
+	 *
+	 * @param phase to run
+	 * @param execution an execution
+	 * @return a ListenableFuture representing pending completion of the phase
 	 */
-	@SuppressFBWarnings( justification = "ExecutorService.submit CAN take a null result.", value = "NP_NONNULL_PARAM_VIOLATION" )
+	@SuppressFBWarnings(justification = "ExecutorService.submit CAN take a null result.", value = "NP_NONNULL_PARAM_VIOLATION")
 	protected ListenableFuture<Void> runPhase( Phase phase, TestExecution execution )
 	{
 		return executorService.submit( new PhaseRunner( phase, execution ), null );
@@ -107,9 +116,9 @@ public abstract class AbstractTestRunner implements TestRunner
 	 * Waits for a Future to complete, logging any checked exceptions thrown.
 	 * Returns true if the Future completed without throwing any checked
 	 * exceptions.
-	 * 
-	 * @param future
-	 * @return
+	 *
+	 * @param future to wait for
+	 * @return true if the future returned successfully, false if an error happened
 	 */
 	protected boolean awaitFuture( Future<?> future )
 	{
@@ -118,11 +127,7 @@ public abstract class AbstractTestRunner implements TestRunner
 			future.get();
 			return true;
 		}
-		catch( InterruptedException e )
-		{
-			log.error( "Error invoking TestExecutionTask", e );
-		}
-		catch( ExecutionException e )
+		catch( InterruptedException | ExecutionException e )
 		{
 			log.error( "Error invoking TestExecutionTask", e );
 		}
@@ -145,10 +150,16 @@ public abstract class AbstractTestRunner implements TestRunner
 		{
 			log.debug( "Starting phase: {}", phase );
 			LinkedList<Future<?>> futures = Lists.newLinkedList();
-			for( TestExecutionTask task : tasks.get( phase ) )
+
+			Collection<TestExecutionTask> phaseRunOnceTasks = runOnceTasks.get( phase );
+
+			for( TestExecutionTask task : Iterables.concat( tasks.get( phase ), phaseRunOnceTasks ) )
 			{
 				futures.add( executorService.submit( new TaskRunner( task ) ) );
 			}
+
+			phaseRunOnceTasks.clear();
+
 			for( Future<?> future : futures )
 			{
 				awaitFuture( future );

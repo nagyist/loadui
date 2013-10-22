@@ -41,7 +41,7 @@ import static org.junit.Assert.*;
  *
  * @author renato
  */
-@Category( IntegrationTest.class )
+@Category(IntegrationTest.class)
 public class EventsHandlingTest
 {
 
@@ -53,7 +53,7 @@ public class EventsHandlingTest
 	public static void enterState() throws Exception
 	{
 
-		controller = GUI.getController();
+		controller = GUI.getOpenSourceGui().getController();
 
 		log.info( "Asking to enter ProjectLoadedState" );
 		ProjectLoadedWithoutAgentsState.STATE.enter();
@@ -94,7 +94,7 @@ public class EventsHandlingTest
 
 		assertThat( knob.getClass().getSimpleName(), is( "Knob" ) );
 
-		ComponentItem cItem = ProjectLoadedWithoutAgentsState.STATE.getProject().getComponentByLabel( "Fixed Rate 1" );
+		ComponentItem cItem = FxIntegrationBase.getProjectItem().getComponentByLabel( "Fixed Rate 1" );
 
 		// using reflection to get value of a knob because dependency problems are making impossible
 		// to add loadui-fx-interface as a dependency and consequently get access to the knob class

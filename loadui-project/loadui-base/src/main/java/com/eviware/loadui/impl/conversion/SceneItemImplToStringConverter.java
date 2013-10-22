@@ -15,11 +15,10 @@
  */
 package com.eviware.loadui.impl.conversion;
 
-import org.springframework.core.convert.converter.Converter;
-
 import com.eviware.loadui.config.LoaduiSceneDocumentConfig;
-import com.eviware.loadui.impl.model.SceneItemImpl;
+import com.eviware.loadui.impl.model.canvas.SceneItemImpl;
 import com.eviware.loadui.util.StringUtils;
+import org.springframework.core.convert.converter.Converter;
 
 public class SceneItemImplToStringConverter implements Converter<SceneItemImpl, String>
 {

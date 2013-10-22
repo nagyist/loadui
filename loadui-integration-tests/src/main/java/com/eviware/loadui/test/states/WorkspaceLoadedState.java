@@ -28,7 +28,13 @@ public class WorkspaceLoadedState extends TestState
 
 	private WorkspaceLoadedState()
 	{
-		super( "Workspace Loaded", ControllerStartedState.getState() );
+		super( "Workspace Loaded" );
+	}
+
+	@Override
+	protected TestState parentState()
+	{
+		return ControllerStartedState.getState();
 	}
 
 	@Override
