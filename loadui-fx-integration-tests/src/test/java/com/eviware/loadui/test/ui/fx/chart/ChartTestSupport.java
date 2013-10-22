@@ -9,6 +9,6 @@ public class ChartTestSupport
 {
 	public static Set<Node> allChartLines()
 	{
-		return GuiTest.findAll( ".line-segment-view" );
+		return GuiTest.findAll( ".plot-content .chart-series-line" );
 	}
 }
