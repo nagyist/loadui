@@ -15,28 +15,7 @@
  */
 package com.eviware.loadui.ui.fx.views.canvas;
 
-import static com.eviware.loadui.ui.fx.util.ObservableLists.fx;
-import static com.eviware.loadui.ui.fx.util.ObservableLists.ofCollection;
-import static com.eviware.loadui.ui.fx.util.ObservableLists.transform;
-import javafx.beans.binding.Bindings;
-import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
-import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuButton;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.model.CanvasObjectItem;
-import com.eviware.loadui.api.model.ComponentItem;
-import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.api.terminal.InputTerminal;
 import com.eviware.loadui.api.terminal.OutputTerminal;
 import com.eviware.loadui.api.terminal.TerminalHolder;
@@ -44,12 +23,22 @@ import com.eviware.loadui.api.traits.Deletable;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import com.eviware.loadui.ui.fx.util.FXMLUtils;
 import com.eviware.loadui.ui.fx.util.Properties;
-import com.eviware.loadui.ui.fx.views.canvas.component.ComponentView;
-import com.eviware.loadui.ui.fx.views.canvas.scenario.ScenarioView;
 import com.eviware.loadui.ui.fx.views.canvas.terminal.InputTerminalView;
 import com.eviware.loadui.ui.fx.views.canvas.terminal.OutputTerminalView;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import javafx.beans.binding.Bindings;
+import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
+import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static com.eviware.loadui.ui.fx.util.ObservableLists.*;
 
 public abstract class CanvasObjectView extends StackPane implements Deletable
 {
@@ -76,21 +65,6 @@ public abstract class CanvasObjectView extends StackPane implements Deletable
 			return terminalView;
 		}
 	};
-
-	@SuppressWarnings( "unchecked" )
-	public static final <T extends CanvasObjectView> T newInstanceUnchecked( Class<T> type, CanvasObjectItem item )
-	{
-		if( item instanceof ComponentItem )
-		{
-			return ( T )ComponentView.newInstance( ( ComponentItem )item );
-		}
-		if( item instanceof SceneItem )
-		{
-			return ( T )new ScenarioView( ( SceneItem )item );
-		}
-
-		throw new IllegalArgumentException();
-	}
 
 	private final CanvasObjectItem canvasObject;
 	private final ObservableList<InputTerminalView> inputTerminals;
@@ -180,7 +154,9 @@ public abstract class CanvasObjectView extends StackPane implements Deletable
 	@Override
 	public void delete()
 	{
+		//FIXME check if this is ever actually called!!
 		// The CanvasObject will usually be a ComponentItemImpl which knows how to delete() itself
+		log.debug( "Deleting the CanvasObjectView from Canvas " + canvasObject.getCanvas().getLabel() );
 		fireEvent( IntentEvent.create( IntentEvent.INTENT_DELETE, canvasObject ) );
 	}
 

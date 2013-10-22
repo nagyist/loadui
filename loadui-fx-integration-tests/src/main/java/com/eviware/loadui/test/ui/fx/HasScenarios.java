@@ -39,6 +39,17 @@ public class HasScenarios extends FxIntegrationBase
 		}
 	}
 
+	public void enterScenario()
+	{
+		doubleClick( ".scenario-view" );
+	}
+
+	public void exitScenarioIfPossible()
+	{
+		if( !findAll( "#closeScenarioButton" ).isEmpty() )
+			doubleClick( "#closeScenarioButton" );
+	}
+
 	public SceneItem ensureScenarioIsLinkedIs( final boolean follow )
 	{
 		final SceneItem scenario = ScenarioCreatedState.STATE.getScenario();

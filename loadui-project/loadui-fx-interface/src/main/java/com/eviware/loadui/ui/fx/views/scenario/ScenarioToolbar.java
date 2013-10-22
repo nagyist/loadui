@@ -15,19 +15,17 @@
  */
 package com.eviware.loadui.ui.fx.views.scenario;
 
-import javafx.fxml.FXML;
-import javafx.scene.control.MenuButton;
-import javafx.scene.layout.AnchorPane;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import com.eviware.loadui.ui.fx.util.FXMLUtils;
 import com.eviware.loadui.ui.fx.util.Properties;
 import com.eviware.loadui.ui.fx.util.UIUtils;
 import com.eviware.loadui.ui.fx.views.canvas.scenario.ScenarioView;
+import javafx.fxml.FXML;
+import javafx.scene.control.MenuButton;
+import javafx.scene.layout.AnchorPane;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ScenarioToolbar extends AnchorPane
 {
@@ -37,6 +35,8 @@ public class ScenarioToolbar extends AnchorPane
 
 	@FXML
 	private MenuButton menuButton;
+
+	private ScenarioPlaybackPanel playbackPanel;
 
 	public ScenarioToolbar( SceneItem scenario )
 	{
@@ -48,13 +48,13 @@ public class ScenarioToolbar extends AnchorPane
 	private void initialize()
 	{
 		menuButton.textProperty().bind( Properties.forLabel( scenario ) );
-		ScenarioPlaybackPanel playbackPanel = new ScenarioPlaybackPanel( scenario );
+		playbackPanel = new ScenarioPlaybackPanel( scenario );
 		AnchorPane.setTopAnchor( playbackPanel, 4d );
 		AnchorPane.setLeftAnchor( playbackPanel, 440d );
 		getChildren().add( playbackPanel );
-		
+
 	}
-	
+
 	@FXML
 	public void renameScenario()
 	{
@@ -67,6 +67,7 @@ public class ScenarioToolbar extends AnchorPane
 	{
 		log.info( "Close scenario requested" );
 		fireEvent( IntentEvent.create( IntentEvent.INTENT_CLOSE, scenario ) );
+		if( playbackPanel != null ) playbackPanel.release();
 	}
 
 	@FXML

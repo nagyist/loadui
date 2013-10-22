@@ -241,9 +241,9 @@ sample = { message, sampleId ->
                 throw e
 
             if (e instanceof IOException)
-                log.warn("IOException in {}: {}", label, e.message)
+                log.warn("IOException: {}: ", e.message)
             else
-                log.error("Exception in $label:", e)
+                log.error("Exception:", e)
 
             get.abort()
 

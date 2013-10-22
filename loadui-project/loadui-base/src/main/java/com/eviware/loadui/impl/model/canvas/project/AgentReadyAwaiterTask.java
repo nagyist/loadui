@@ -5,6 +5,7 @@ import com.eviware.loadui.api.execution.Phase;
 import com.eviware.loadui.api.execution.TestExecution;
 import com.eviware.loadui.api.execution.TestExecutionTask;
 import com.eviware.loadui.api.model.AgentItem;
+import com.eviware.loadui.api.model.Assignment;
 import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.util.collections.CollectionFuture;
 import com.eviware.loadui.util.events.EventFuture;
@@ -35,25 +36,48 @@ class AgentReadyAwaiterTask implements TestExecutionTask
 		if( execution.getCanvas() == projectItem && !projectItem.getWorkspace().isLocalMode() )
 		{
 			ArrayList<EventFuture<BaseEvent>> awaitingScenes = Lists.newArrayList();
-			for( final SceneItem scene : projectItem.getChildren() )
+
+			for( Assignment assignment : projectItem.getAssignments() )
 			{
-				for( final AgentItem agent : projectItem.getAgentsAssignedTo( scene ) )
+				final AgentItem agent = assignment.getAgent();
+				final SceneItem scene = assignment.getScene();
+				if( agent.isEnabled() && agent.isReady() && !projectItem.isSceneLoaded( scene, agent ) )
 				{
-					if( agent.isEnabled() && !projectItem.isSceneLoaded( scene, agent ) )
-					{
-						awaitingScenes.add( new EventFuture<>( projectItem, BaseEvent.class,
-								new Predicate<BaseEvent>()
+					log.info( "Will wait for agent {} to be loaded on scene {}", agent.getLabel(), scene.getLabel() );
+					awaitingScenes.add( new EventFuture<>( projectItem, BaseEvent.class,
+							new Predicate<BaseEvent>()
+							{
+								@Override
+								public boolean apply( BaseEvent event )
 								{
-									@Override
-									public boolean apply( BaseEvent event )
-									{
-										return ProjectItemImpl.SCENE_LOADED.equals( event.getKey() ) &&
-												projectItem.isSceneLoaded( scene, agent );
-									}
-								} ) );
-					}
+									return ProjectItemImpl.SCENE_LOADED.equals( event.getKey() ) &&
+											projectItem.isSceneLoaded( scene, agent );
+								}
+							} ) );
 				}
+
+
 			}
+
+//			for( final SceneItem scene : projectItem.getChildren() )
+//			{
+//				for( final AgentItem agent : projectItem.getAgentsAssignedTo( scene ) )
+//				{
+//					if( agent.isEnabled() && agent.isReady() && !projectItem.isSceneLoaded( scene, agent ) )
+//					{
+//						awaitingScenes.add( new EventFuture<>( projectItem, BaseEvent.class,
+//								new Predicate<BaseEvent>()
+//								{
+//									@Override
+//									public boolean apply( BaseEvent event )
+//									{
+//										return ProjectItemImpl.SCENE_LOADED.equals( event.getKey() ) &&
+//												projectItem.isSceneLoaded( scene, agent );
+//									}
+//								} ) );
+//					}
+//				}
+//			}
 
 			try
 			{
