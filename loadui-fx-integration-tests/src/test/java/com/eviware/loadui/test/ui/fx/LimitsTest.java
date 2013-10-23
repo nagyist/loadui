@@ -27,7 +27,7 @@ public class LimitsTest extends FxIntegrationTestBase
 	@Test
 	public void shouldStopTestWhenRequestsReachLimit()
 	{
-		ProjectItem project = ProjectLoadedWithoutAgentsState.STATE.getProject();
+		ProjectItem project = getProjectItem();
 
 
 
@@ -48,7 +48,7 @@ public class LimitsTest extends FxIntegrationTestBase
 	@Test
 	public void shouldStopTestWhenTimeLimitIsReached() throws Exception
 	{
-		ProjectItem project = ProjectLoadedWithoutAgentsState.STATE.getProject();
+		ProjectItem project = getProjectItem();
 
 		click( "#set-limits" ).doubleClick( "#time-limit" ).type( "3" ).click( "#default" );
 
@@ -67,7 +67,7 @@ public class LimitsTest extends FxIntegrationTestBase
 	@Test
 	public void shouldStopTestWhenFailuresReachLimit()
 	{
-		ProjectItem project = ProjectLoadedWithoutAgentsState.STATE.getProject();
+		ProjectItem project = getProjectItem();
 
 		click( ".component-view .text-field" ).type( "sdjsdhfsaasjhsdf" );
 
