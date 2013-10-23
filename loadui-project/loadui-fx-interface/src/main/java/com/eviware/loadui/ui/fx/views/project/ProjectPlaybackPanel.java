@@ -72,7 +72,7 @@ final public class ProjectPlaybackPanel extends ToolbarPlaybackPanel<ProjectItem
 		linkButton = linkScenarioButton( linkedProperty );
 
 		linkButton.selectedProperty().bindBidirectional( linkedProperty );
-		linkButton.disableProperty().bind( playButton.selectedProperty() );
+		playButton.bindToSelectedProperty( linkButton.disableProperty() );
 
 		linkButtonContainer.getChildren().add( linkButton );
 		return linkButton;

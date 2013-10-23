@@ -138,6 +138,8 @@ public class ComponentLayoutUtils
 			{
 				return ( Node )c;
 			}
+			throw new IllegalArgumentException( "node(component: foo) only supports foo of type Node, got: " + c );
+
 		}
 		else if( component.has( "fString" ) )
 		{

@@ -59,6 +59,7 @@ public class TestExecutionAddon implements Addon
 		protected final TestRunner testRunner = BeanInjector.getBean( TestRunner.class );
 	}
 
+	//FIXME this probably should not exist... executions should not occur from the workspace
 	private static class WorkspaceTestExecutionAddon extends AbstractTestExecutionAddon implements Releasable
 	{
 		private final TestExecutionTask actionTask = new TestExecutionTask()
@@ -112,7 +113,7 @@ public class TestExecutionAddon implements Addon
 		};
 		private final TestExecutionTask readyWaiterTask = new TestExecutionTask()
 		{
-			private EventFuture<BaseEvent> readyFuture;
+			private EventFuture<BaseEvent> waitForAllCanvasToGetReady;
 
 			@Override
 			public void invoke( TestExecution execution, Phase phase )
@@ -121,13 +122,13 @@ public class TestExecutionAddon implements Addon
 				{
 					if( phase == Phase.PRE_STOP )
 					{
-						readyFuture = new EventFuture<>( canvas, BaseEvent.class, isReadyAction );
+						waitForAllCanvasToGetReady = new EventFuture<>( canvas, BaseEvent.class, isReadyAction );
 					}
 					else if( phase == Phase.POST_STOP )
 					{
 						try
 						{
-							readyFuture.get( 1, TimeUnit.MINUTES );
+							waitForAllCanvasToGetReady.get( 1, TimeUnit.MINUTES );
 						}
 						catch( InterruptedException | ExecutionException | TimeoutException e )
 						{

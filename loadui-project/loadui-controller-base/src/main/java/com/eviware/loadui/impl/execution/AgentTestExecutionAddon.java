@@ -15,15 +15,6 @@
  */
 package com.eviware.loadui.impl.execution;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.addon.Addon;
 import com.eviware.loadui.api.addressable.AddressableRegistry;
 import com.eviware.loadui.api.execution.Phase;
@@ -31,44 +22,60 @@ import com.eviware.loadui.api.execution.TestExecution;
 import com.eviware.loadui.api.execution.TestExecutionTask;
 import com.eviware.loadui.api.execution.TestRunner;
 import com.eviware.loadui.api.messaging.MessageAwaiter;
+import com.eviware.loadui.api.messaging.MessageAwaiterFactory;
 import com.eviware.loadui.api.messaging.MessageEndpoint;
 import com.eviware.loadui.api.messaging.MessageListener;
 import com.eviware.loadui.api.model.AgentItem;
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.api.traits.Releasable;
-import com.eviware.loadui.util.BeanInjector;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Hooks into the TestExecution at each phase, and lets each Agent run its own
  * tasks before reporting back and continuing with the next phase.
- * 
+ *
  * @author dain.nilsson
  */
 public class AgentTestExecutionAddon implements Addon, Releasable
 {
 	static final Logger log = LoggerFactory.getLogger( AgentTestExecutionAddon.class );
-	
+
 	private final ProjectItem project;
 	private final DistributePhaseTask task = new DistributePhaseTask();
 	private final SceneReloadedListener reloadListener = new SceneReloadedListener();
-	private com.eviware.loadui.api.messaging.MessageAwaiterFactory factory;
+	private final MessageAwaiterFactory factory;
+	private final TestRunner testRunner;
+	private final AddressableRegistry addressableRegistry;
+	private final ExecutorService executorService;
 
-	private AgentTestExecutionAddon( ProjectItem project )
+	private AgentTestExecutionAddon( ProjectItem project, TestRunner testRunner,
+												MessageAwaiterFactory factory, AddressableRegistry addressableRegistry,
+												ExecutorService executorService )
 	{
 		this.project = project;
+		this.testRunner = testRunner;
+		this.factory = factory;
+		this.addressableRegistry = addressableRegistry;
+		this.executorService = executorService;
 
-		BeanInjector.getBean( TestRunner.class ).registerTask( task, Phase.values() );
-		factory = BeanInjector.getBean( com.eviware.loadui.api.messaging.MessageAwaiterFactory.class );
+		testRunner.registerTask( task, Phase.values() );
 	}
 
 	@Override
 	public void release()
 	{
-		BeanInjector.getBean( TestRunner.class ).unregisterTask( task, Phase.values() );
+		testRunner.unregisterTask( task, Phase.values() );
 	}
 
 	private class DistributePhaseTask implements TestExecutionTask
@@ -107,7 +114,7 @@ public class AgentTestExecutionAddon implements Addon, Releasable
 			{
 				for( AgentItem agent : project.getAgentsAssignedTo( scene ) )
 				{
-					if( agent.isEnabled() && agents.add( agent ) )
+					if( agent.isReady() && agents.add( agent ) )
 					{
 						waiters.add( factory.create( agent, execution.getCanvas().getId(), phase ) );
 					}
@@ -129,10 +136,10 @@ public class AgentTestExecutionAddon implements Addon, Releasable
 			@SuppressWarnings( "unchecked" )
 			Map<String, String> message = ( Map<String, String> )data;
 			final String canvasId = message.get( AgentItem.STARTED );
-			SceneItem scene = ( SceneItem )BeanInjector.getBean( AddressableRegistry.class ).lookup( canvasId );
+			SceneItem scene = ( SceneItem )addressableRegistry.lookup( canvasId );
 			if( scene != null && scene.isRunning() && !scene.getProject().getWorkspace().isLocalMode() )
 			{
-				BeanInjector.getBean( ExecutorService.class ).execute( new Runnable()
+				executorService.execute( new Runnable()
 				{
 					@Override
 					public void run()
@@ -149,7 +156,21 @@ public class AgentTestExecutionAddon implements Addon, Releasable
 
 	public static class Factory implements Addon.Factory<AgentTestExecutionAddon>
 	{
-		private final Set<Class<?>> eagerTypes = ImmutableSet.<Class<?>> of( ProjectItem.class );
+		private final MessageAwaiterFactory factory;
+		private final TestRunner testRunner;
+		private final AddressableRegistry addressableRegistry;
+		private final ExecutorService executorService;
+
+		private final Set<Class<?>> eagerTypes = ImmutableSet.<Class<?>>of( ProjectItem.class );
+
+		public Factory( TestRunner testRunner, MessageAwaiterFactory factory,
+							 AddressableRegistry addressableRegistry, ExecutorService executorService )
+		{
+			this.testRunner = testRunner;
+			this.factory = factory;
+			this.addressableRegistry = addressableRegistry;
+			this.executorService = executorService;
+		}
 
 		@Override
 		public Class<AgentTestExecutionAddon> getType()
@@ -161,7 +182,7 @@ public class AgentTestExecutionAddon implements Addon, Releasable
 		public AgentTestExecutionAddon create( Addon.Context context )
 		{
 			ProjectItem project = ( ProjectItem )Preconditions.checkNotNull( context.getOwner() );
-			return new AgentTestExecutionAddon( project );
+			return new AgentTestExecutionAddon( project, testRunner, factory, addressableRegistry, executorService );
 		}
 
 		@Override

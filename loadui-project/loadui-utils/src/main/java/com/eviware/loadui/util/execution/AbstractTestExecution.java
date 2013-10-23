@@ -15,9 +15,6 @@
  */
 package com.eviware.loadui.util.execution;
 
-import java.util.concurrent.Future;
-
-import com.eviware.loadui.api.execution.ExecutionResult;
 import com.eviware.loadui.api.execution.TestExecution;
 import com.eviware.loadui.api.execution.TestState;
 import com.eviware.loadui.api.model.CanvasItem;
@@ -32,9 +29,7 @@ public abstract class AbstractTestExecution implements TestExecution
 {
 	private final CanvasItem canvas;
 
-	protected TestState state = TestState.ENQUEUED;
-	private boolean aborted = false;
-	private String abortReason = "";
+	protected TestState state = TestState.STARTING;
 
 	public AbstractTestExecution( CanvasItem canvas )
 	{
@@ -59,24 +54,4 @@ public abstract class AbstractTestExecution implements TestExecution
 		return canvas == canvasItem || canvas.getChildren().contains( canvasItem );
 	}
 
-	@Override
-	public Future<ExecutionResult> abort( String reason )
-	{
-		abortReason = reason;
-		aborted = true;
-
-		return complete();
-	}
-
-	@Override
-	public boolean isAborted()
-	{
-		return aborted;
-	}
-
-	@Override
-	public String getAbortedReason()
-	{
-		return abortReason;
-	}
 }
