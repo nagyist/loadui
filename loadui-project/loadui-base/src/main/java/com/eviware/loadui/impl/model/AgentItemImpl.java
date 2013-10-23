@@ -110,7 +110,7 @@ public final class AgentItemImpl extends ModelItemImpl<AgentItemConfig> implemen
 		addMessageListener( AgentItem.AGENT_CHANNEL, new MessageListener()
 		{
 			@Override
-			@SuppressWarnings( "unchecked" )
+			@SuppressWarnings("unchecked")
 			public void handleMessage( String channel, MessageEndpoint endpoint, Object data )
 			{
 				log.debug( "Handling message: {}/{}", channel, data );
@@ -217,6 +217,8 @@ public final class AgentItemImpl extends ModelItemImpl<AgentItemConfig> implemen
 	{
 		return connected;
 	}
+
+
 
 	@Override
 	public int getUtilization()

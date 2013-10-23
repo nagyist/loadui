@@ -24,7 +24,7 @@ import org.junit.experimental.categories.Category;
 import com.eviware.loadui.test.categories.IntegrationTest;
 
 @Category( IntegrationTest.class )
-public class ProjectLoadedWithoutAgentsStateTest
+public class ProjectLoadedWithoutAgentsStateTest extends GuiTest
 {
 	@BeforeClass
 	public static void enterState() throws Exception
@@ -41,6 +41,6 @@ public class ProjectLoadedWithoutAgentsStateTest
 	@Test
 	public void shouldHaveProjectView() throws Exception
 	{
-		GuiTest.find( ".project-view" );
+		find( ".project-view" );
 	}
 }

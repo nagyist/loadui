@@ -85,15 +85,14 @@ public class IntegrationTestUtils
 	public static int getAvailablePort()
 	{
 
-		try( ServerSocket ss = new ServerSocket( 0 ) )
+		try(ServerSocket ss = new ServerSocket( 0 ))
 		{
 			ss.setReuseAddress( true );
 			return ss.getLocalPort();
 		}
 		catch( IOException e )
 		{
-		}
-		finally
+		} finally
 		{
 			try
 			{
@@ -118,7 +117,7 @@ public class IntegrationTestUtils
 
 	public static boolean isPortAvailable( int port )
 	{
-		try( ServerSocket ss = new ServerSocket( port ) )
+		try(ServerSocket ss = new ServerSocket( port ))
 		{
 			ss.setReuseAddress( true );
 			return true;

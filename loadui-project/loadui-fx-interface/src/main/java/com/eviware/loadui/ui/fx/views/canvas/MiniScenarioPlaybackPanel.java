@@ -37,7 +37,7 @@ public class MiniScenarioPlaybackPanel extends PlaybackPanel<CounterDisplay, Sce
 		linkButton = linkScenarioButton( linkedProperty );
 
 		linkButton.selectedProperty().bindBidirectional( linkedProperty );
-		linkButton.disableProperty().bind( playButton.selectedProperty() );
+		playButton.bindToSelectedProperty( linkButton.disableProperty() );
 
 		getStyleClass().setAll( "mini-playback-panel" );
 		setSpacing( 6 );

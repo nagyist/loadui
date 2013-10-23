@@ -2,10 +2,12 @@ package com.eviware.loadui.test.ui.fx;
 
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.test.TestState;
+import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import com.eviware.loadui.test.ui.fx.states.SimpleWebTestState;
 import javafx.scene.input.KeyCode;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertTrue;
 
@@ -16,6 +18,7 @@ import static org.junit.Assert.assertTrue;
  * Time: 13:43
  * To change this template use File | Settings | File Templates.
  */
+@Category( IntegrationTest.class )
 public class LimitsTest extends FxIntegrationTestBase
 {
 	@Override

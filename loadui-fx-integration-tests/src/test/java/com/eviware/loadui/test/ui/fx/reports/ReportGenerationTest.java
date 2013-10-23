@@ -2,7 +2,7 @@ package com.eviware.loadui.test.ui.fx.reports;
 
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
-import com.eviware.loadui.test.ui.fx.CanRunLoadUITests;
+import com.eviware.loadui.test.ui.fx.CanCreateReports;
 import com.eviware.loadui.test.ui.fx.FxIntegrationTestBase;
 import com.eviware.loadui.test.ui.fx.HasScenarios;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
@@ -23,7 +23,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class ReportGenerationTest extends FxIntegrationTestBase
 {
 	HasScenarios hasScenarios = new HasScenarios();
-	CanRunLoadUITests testRunner = new CanRunLoadUITests();
+	CanCreateReports testRunner = new CanCreateReports();
 
 	@Test
 	public void shouldGenerateReportAfterRunningATestInMainCanvas()

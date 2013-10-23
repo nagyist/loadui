@@ -17,6 +17,7 @@ package com.eviware.loadui.test.ui.fx.states;
 
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.test.TestState;
+import com.eviware.loadui.test.ui.fx.FxIntegrationBase;
 import com.eviware.loadui.test.ui.fx.GUI;
 import javafx.stage.Stage;
 import org.loadui.testfx.FXTestUtils;
@@ -28,6 +29,8 @@ import java.util.NoSuchElementException;
 public class OpenSourceFxLoadedState extends TestState
 {
 	public static final TestState STATE = new OpenSourceFxLoadedState();
+	private FxIntegrationBase base = new FxIntegrationBase();
+	private boolean firstTimeEntering = true;
 
 	protected OpenSourceFxLoadedState()
 	{
@@ -50,9 +53,13 @@ public class OpenSourceFxLoadedState extends TestState
 	{
 		getGui().getBundleContext();
 		System.setProperty( "groovy.root", new File( LoadUI.getWorkingDir(), ".groovy" ).getAbsolutePath() );
-		closeWindow( "Welcome to LoadUI" );
-		closeWindow( "New version available" );
-
+		if( firstTimeEntering )
+		{
+			base.waitForNode( ".getting-started-dialog" );
+			closeWindow( "Welcome to LoadUI" );
+			closeWindow( "New version available" );
+			firstTimeEntering = false;
+		}
 		getGui().getController().click( "#mainButton" ).click( "#mainButton" ).sleep( 500 );
 	}
 

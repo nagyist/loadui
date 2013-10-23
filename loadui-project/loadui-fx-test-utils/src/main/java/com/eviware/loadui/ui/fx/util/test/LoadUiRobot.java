@@ -11,6 +11,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.internal.matchers.TypeSafeMatcher;
 import org.loadui.testfx.GuiTest;
+import org.loadui.testfx.exceptions.NoNodesFoundException;
 
 import java.awt.*;
 import java.util.Queue;
@@ -31,17 +32,13 @@ public class LoadUiRobot
 	public enum Component
 	{
 		FIXED_RATE_GENERATOR( "generators", "Fixed Rate" ), TABLE_LOG( "output", "Table Log" ), WEB_PAGE_RUNNER(
-			"runners", "Web Page Runner" ), VARIANCE("generators", "Variance"), RANDOM("generators", "Random"),
-		RAMP_SEQUENCE("generators", "Ramp Sequence"), RAMP( "generators", "Ramp"), USAGE("generators", "Usage"),
-		FIXED_LOAD( "generators", "Fixed Load"), SCRIPT_RUNNER("runners", "Script Runner"),
-		PROCESS_RUNNER("runners","Process Runner"), GEB_RUNNER("runners", "Geb Runner"), LOOP("flow", "Loop"),
-		SPLITTER("flow", "Splitter"), DELAY("flow", "Delay"), CONDITION("flow", "Condition"),
-		INTERVAL("scheduler", "Interval"), SCHEDULER("scheduler", "Scheduler"),
-		SOUPUI_MOCKSERVICE("misc", "soupUI MockService");
-
-
-
-
+			"runners", "Web Page Runner" ), VARIANCE( "generators", "Variance" ), RANDOM( "generators", "Random" ),
+		RAMP_SEQUENCE( "generators", "Ramp Sequence" ), RAMP( "generators", "Ramp" ), USAGE( "generators", "Usage" ),
+		FIXED_LOAD( "generators", "Fixed Load" ), SCRIPT_RUNNER( "runners", "Script Runner" ),
+		PROCESS_RUNNER( "runners", "Process Runner" ), GEB_RUNNER( "runners", "Geb Runner" ), LOOP( "flow", "Loop" ),
+		SPLITTER( "flow", "Splitter" ), DELAY( "flow", "Delay" ), CONDITION( "flow", "Condition" ),
+		INTERVAL( "scheduler", "Interval" ), SCHEDULER( "scheduler", "Scheduler" ),
+		SOUPUI_MOCKSERVICE( "misc", "soupUI MockService" ), SCENARIO( "vu-scenario", "VU Scenario" );
 
 		public final String category;
 		public final String name;
@@ -50,6 +47,11 @@ public class LoadUiRobot
 		{
 			this.category = category;
 			this.name = name;
+		}
+
+		public String cssClass()
+		{
+			return name.toLowerCase().replace( ' ', '-' );
 		}
 	}
 
@@ -78,6 +80,11 @@ public class LoadUiRobot
 
 	public ComponentHandle createComponent( final Component component )
 	{
+		if( findAll( ".canvas-object-view" ).isEmpty() )
+		{
+			resetPredefinedPoints();
+		}
+
 		Preconditions.checkNotNull( predefinedPoints.peek(),
 				"All predefined points (x,y) for component placement are used. Please add new ones." );
 		return createComponentAt( component, predefinedPoints.poll() );
@@ -121,7 +128,8 @@ public class LoadUiRobot
 			@Override
 			public boolean matchesSafely( Node node )
 			{
-				if( node.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
+				String className = node.getClass().getSimpleName();
+				if( className.equals( "ComponentDescriptorView" ) || className.equals( "NewScenarioIcon" ) )
 				{
 					return node.toString().equals( component.name );
 				}
@@ -156,26 +164,20 @@ public class LoadUiRobot
 			controller.move( "#runners.category" ).scroll( 10 );
 		}
 	}
-
-	public Node getComponentNode( Component component, String... optionalName )
+	
+	public Node getComponentNode( Component component )
 	{
-		if( optionalName.length > 0 )
-		{
-			return findComponentByName( optionalName[0], true );
-		}
-		else
-		{
-			return findComponentByName( component.name, false );
-		}
+		return findComponentByName( component.name, false );
 	}
 
 	private Node findComponentByName( String name, boolean exactMatch )
 	{
 		for( Node compNode : findAll( ".canvas-object-view" ) )
 		{
-			Set<Node> textLabels = findAll( "Label", find( "#topBar", compNode ) );
+			Set<Node> textLabels = findAll( ".label", find( "#topBar", compNode ) );
 			for( Node label : textLabels )
 			{
+				if( !( label instanceof Label ) ) continue;
 				String componentLabel = ( ( Label )label ).getText();
 				boolean foundMatch = exactMatch ? componentLabel.equals( name ) : componentLabel.startsWith( name );
 				if( foundMatch )
@@ -184,7 +186,7 @@ public class LoadUiRobot
 				}
 			}
 		}
-		return null;
+		throw new NoNodesFoundException( "No component found matching name " + name );
 	}
 
 	public void clickPlayStopButton()
@@ -209,6 +211,8 @@ public class LoadUiRobot
 
 	public void deleteAllComponentsFromProjectView()
 	{
+		waitUntil( "#abort-requests", is( not( visible() ) ) );
+
 		controller.click( "#designTab" );
 
 		int maxTries = 20;

@@ -15,18 +15,6 @@
  */
 package com.eviware.loadui.impl.model;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.EventObject;
-
-import javax.annotation.Nonnull;
-
-import com.eviware.loadui.impl.model.canvas.project.ProjectItemImpl;
-import org.apache.xmlbeans.XmlException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.events.BaseEvent;
 import com.eviware.loadui.api.events.EventHandler;
 import com.eviware.loadui.api.events.WeakEventHandler;
@@ -35,9 +23,19 @@ import com.eviware.loadui.api.model.ProjectRef;
 import com.eviware.loadui.api.traits.Labeled;
 import com.eviware.loadui.api.traits.Releasable;
 import com.eviware.loadui.config.ProjectReferenceConfig;
+import com.eviware.loadui.impl.model.canvas.project.ProjectItemImpl;
 import com.eviware.loadui.impl.property.AttributeHolderSupport;
 import com.eviware.loadui.util.ReleasableUtils;
 import com.eviware.loadui.util.events.EventSupport;
+import org.apache.xmlbeans.XmlException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.EventObject;
 
 public final class ProjectRefImpl implements ProjectRef, Releasable
 {
@@ -50,7 +48,6 @@ public final class ProjectRefImpl implements ProjectRef, Releasable
 	private final AttributeHolderSupport attributeHolderSupport;
 	private final File projectFile;
 	private volatile ProjectItem project;
-	@Nonnull
 	private String label = "";
 	// With the current UI, we do not wish to autoload projects at startup, so do
 	// not save the enabled state as true, ever.
@@ -93,11 +90,16 @@ public final class ProjectRefImpl implements ProjectRef, Releasable
 			label = config.getLabel();
 		}
 
+		if( label == null )
+		{
+			label = "";
+		}
+
 		return label;
 	}
 
 	@Override
-	public void setLabel( String label )
+	public void setLabel( @Nonnull String label )
 	{
 		boolean disable = !isEnabled();
 		if( disable )
@@ -277,6 +279,7 @@ public final class ProjectRefImpl implements ProjectRef, Releasable
 	}
 
 	@Override
+	@Nonnull
 	public Collection<String> getAttributes()
 	{
 		return attributeHolderSupport.getAttributes();

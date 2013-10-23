@@ -71,7 +71,7 @@ public class WireTest extends GuiTest
 
 		controller.click( "#flow.category .expander-button" ).drag( CONDITION_COMPONENT ).by( 100, -400 ).drop();
 
-		waitUntil( numberOf( ".canvas-object-view" ), is(1) );
+		waitUntil( numberOf( ".canvas-object-view" ), is( 1 ) );
 
 		System.gc();
 		System.gc();
@@ -114,7 +114,7 @@ public class WireTest extends GuiTest
 	}
 
 	@Test
-	@Ignore( "LOADUI-64 - Skipped this for release 2.5 as implementation would be too time-consuming" )
+	@Ignore("LOADUI-64 - Skipped this for release 2.5 as implementation would be too time-consuming")
 	public void shouldDeleteSelectedWiresByRightClickMenu()
 	{
 		Set<Node> outputs = findAll( ".canvas-object-view .terminal-view.output-terminal" );
@@ -124,7 +124,7 @@ public class WireTest extends GuiTest
 
 		assertThat( findAll( ".connection-view" ).size(), is( 1 ) );
 
-		move( Iterables.get( inputs, 0 ) ).moveBy( 0, -25 ).click(MouseButton.SECONDARY)
+		move( Iterables.get( inputs, 0 ) ).moveBy( 0, -25 ).click( MouseButton.SECONDARY )
 				.click( "#delete-wire" );
 
 		assertThat( findAll( ".connection-view" ).size(), is( 0 ) );

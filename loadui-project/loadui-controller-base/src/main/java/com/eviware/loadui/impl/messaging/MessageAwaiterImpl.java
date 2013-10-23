@@ -59,7 +59,9 @@ public class MessageAwaiterImpl implements MessageListener, ConnectionListener, 
 	@Override
 	public boolean await()
 	{
-		synchronized( this )
+		if(!agent.isReady() )
+			return false;
+			synchronized( this )
 		{
 			deadline = System.currentTimeMillis() + TIMEOUT;
 			while( !done )

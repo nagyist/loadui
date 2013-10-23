@@ -106,7 +106,7 @@ public abstract class AbstractTestRunner implements TestRunner
 	 * @param execution an execution
 	 * @return a ListenableFuture representing pending completion of the phase
 	 */
-	@SuppressFBWarnings( justification = "ExecutorService.submit CAN take a null result.", value = "NP_NONNULL_PARAM_VIOLATION" )
+	@SuppressFBWarnings(justification = "ExecutorService.submit CAN take a null result.", value = "NP_NONNULL_PARAM_VIOLATION")
 	protected ListenableFuture<Void> runPhase( Phase phase, TestExecution execution )
 	{
 		return executorService.submit( new PhaseRunner( phase, execution ), null );

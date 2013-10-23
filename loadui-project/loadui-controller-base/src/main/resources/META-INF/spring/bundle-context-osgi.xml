@@ -19,7 +19,10 @@
 
     <osgi:reference interface="com.eviware.loadui.api.reporting.SummaryExporter" id="summaryExporter"/>
 
-    <osgi:reference interface="com.eviware.loadui.api.addon.AddonRegistry" id="addonRegistry" />
+    <osgi:reference interface="com.eviware.loadui.api.addon.AddonRegistry" id="addonRegistry"/>
+
+    <osgi:reference interface="com.eviware.loadui.api.addressable.AddressableRegistry"
+                  id="addressableRegistry" />
 
     <osgi:service interface="com.eviware.loadui.api.execution.TestRunner" ref="testRunner"/>
 
