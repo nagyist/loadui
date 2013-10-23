@@ -46,8 +46,12 @@ public class ControllerStartedStateTest
 	{
 		Bundle[] bundles = ControllerStartedState.getState().controller.getBundleContext().getBundles();
 		for( Bundle bundle : bundles )
+		{
+			System.out.println( "Bundle " + bundle.getSymbolicName() + " has status " + bundle.getState() );
 			assertThat( bundle.getSymbolicName() + " is not Active or Resolved", bundle.getState(),
 					anyOf( is( Bundle.ACTIVE ), is( Bundle.RESOLVED ) ) );
+
+		}
 	}
 
 	private void ensureWorkspaceProviderWasPublishedAsAService() throws Exception

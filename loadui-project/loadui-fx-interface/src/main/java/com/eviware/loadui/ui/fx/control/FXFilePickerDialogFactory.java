@@ -6,9 +6,9 @@ import com.eviware.loadui.api.ui.dialog.FilePickerDialog;
 import com.eviware.loadui.api.ui.dialog.FilePickerDialogFactory;
 import com.eviware.loadui.ui.fx.filechooser.LoadUIFileChooser;
 import com.eviware.loadui.ui.fx.filechooser.LoadUIFileChooserBuilder;
-import javafx.scene.Scene;
+import com.eviware.loadui.util.BeanInjector;
 import javafx.stage.FileChooser;
-import javafx.stage.Window;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,14 +33,14 @@ public class FXFilePickerDialogFactory implements FilePickerDialogFactory
 
 
 	@Override
-	public FilePickerDialog createPickerDialog( Scene scene, String buttonText, String stageTitle, String filePickerTitle, FilePickerDialog.ExtensionFilter filter )
+	public FilePickerDialog createPickerDialog( String buttonText, String stageTitle, String filePickerTitle, FilePickerDialog.ExtensionFilter filter )
 	{
 		WorkspaceItem workspace = workspaceProvider.getWorkspace();
-		return new FXFilePickerDialog( scene, stageTitle, filePickerTitle, filter, workspace );
+		return new FXFilePickerDialog( stageTitle, filePickerTitle, filter, workspace );
 	}
 
 	@Override
-	public File showOpenDialog( Window window, String title, FileChooser.ExtensionFilter filter )
+	public File showOpenDialog( String title, FileChooser.ExtensionFilter filter )
 	{
 		WorkspaceItem workspace = workspaceProvider.getWorkspace();
 		LoadUIFileChooser fileChooser = LoadUIFileChooserBuilder
@@ -49,6 +49,6 @@ public class FXFilePickerDialogFactory implements FilePickerDialogFactory
 				.title( title )
 				.build();
 
-		return fileChooser.showOpenDialog( window );
+		return fileChooser.showOpenDialog( BeanInjector.getBean( Stage.class ).getScene().getWindow() );
 	}
 }

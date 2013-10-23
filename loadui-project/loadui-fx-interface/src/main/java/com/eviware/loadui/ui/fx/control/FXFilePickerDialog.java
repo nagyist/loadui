@@ -4,12 +4,13 @@ package com.eviware.loadui.ui.fx.control;
 import com.eviware.loadui.api.model.WorkspaceItem;
 import com.eviware.loadui.api.ui.dialog.FilePickerDialog;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
+import com.eviware.loadui.util.BeanInjector;
 import com.sun.javafx.PlatformUtil;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.Scene;
 import javafx.scene.control.LabelBuilder;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,16 +29,16 @@ public class FXFilePickerDialog extends ConfirmationDialog implements FilePicker
 
 	Logger log = LoggerFactory.getLogger( FXFilePickerDialog.class );
 
-	public FXFilePickerDialog( Scene scene, String dialogTitle, String filePickerTitle, @Nullable ExtensionFilter filter, WorkspaceItem workspace )
+	public FXFilePickerDialog( String dialogTitle, String filePickerTitle, @Nullable ExtensionFilter filter, WorkspaceItem workspace )
 	{
-		super( scene.getRoot(), dialogTitle, "Set" );
+		super( BeanInjector.getBean( Stage.class ).getScene().getRoot(), dialogTitle, "Set" );
 
 		if( filter == null )
 		{
 			filter = ExtensionFilter.NO_FILTER;
 		}
 
-		picker = new FilePicker( scene.getFocusOwner(), filePickerTitle, getExtensionFilter( filter ), workspace );
+		picker = new FilePicker( BeanInjector.getBean( Stage.class ).getScene().getFocusOwner(), filePickerTitle, getExtensionFilter( filter ), workspace );
 
 		getItems().setAll(
 				LabelBuilder
