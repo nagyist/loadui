@@ -109,7 +109,7 @@ public class StringUtils
 	 */
 	public static String replaceAllUnderscoreWithSpace( String original )
 	{
-		return original.replaceAll( "_", " " );
+		return original.replace( '_', ' ' );
 	}
 
 	/**
