@@ -63,6 +63,7 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import org.slf4j.Logger;
@@ -252,7 +253,8 @@ public class ProjectView extends AnchorPane
 				else if( event.getEventType() == IntentEvent.INTENT_CLOSE && event.getArg() instanceof SceneItem )
 				{
 					lookup( ".tool-bar" ).setStyle( TOOLBAR_STYLE_WITHOUT_SCENARIO );
-					closeScene();
+					SceneItem scenario = ( SceneItem )event.getArg();
+					closeScene( scenario );
 					event.consume();
 				}
 				else if( event.getEventType() == IntentEvent.INTENT_CLONE )
@@ -312,10 +314,11 @@ public class ProjectView extends AnchorPane
 		designTab.setDetachableContent( this, openSceneView );
 	}
 
-	private void closeScene()
+	private void closeScene( SceneItem scene )
 	{
 		playbackPanel.removeLinkButton();
 
+		Node canvas = lookup( ".pane" );
 		Region grid = ( Region )lookup( ".grid" );
 		StackPane parent = ( StackPane )grid.getParent();
 		boolean gridRemoved = parent.getChildren().remove( grid );
@@ -323,6 +326,7 @@ public class ProjectView extends AnchorPane
 
 		log.info( "Removing SceneView, gridRemoved? {}, sceneRemoved? {}", gridRemoved, sceneRemoved );
 
+		openSceneView.snapshotScene( scene, canvas );
 		openSceneView.release();
 		openSceneView = null;
 
