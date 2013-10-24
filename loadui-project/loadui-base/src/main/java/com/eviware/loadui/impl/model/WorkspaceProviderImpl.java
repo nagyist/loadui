@@ -15,35 +15,36 @@
  */
 package com.eviware.loadui.impl.model;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.EventObject;
-
-import org.apache.xmlbeans.XmlException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.api.addon.AddonRegistry;
 import com.eviware.loadui.api.events.BaseEvent;
 import com.eviware.loadui.api.events.EventHandler;
 import com.eviware.loadui.api.model.WorkspaceItem;
 import com.eviware.loadui.api.model.WorkspaceProvider;
 import com.eviware.loadui.api.traits.Releasable;
+import com.eviware.loadui.api.ui.LatestDirectoryService;
 import com.eviware.loadui.util.ReleasableUtils;
 import com.eviware.loadui.util.events.EventSupport;
+import org.apache.xmlbeans.XmlException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.EventObject;
 
 public class WorkspaceProviderImpl implements WorkspaceProvider, Releasable
 {
 	public static final Logger log = LoggerFactory.getLogger( WorkspaceProviderImpl.class );
 
 	private final EventSupport eventSupport = new EventSupport( this );
-	private WorkspaceItem workspace;
+	private WorkspaceItem workspace = null;
 	private final AgentFactory agentFactory;
+	private final LatestDirectoryService latestDirectoryService;
 
-	public WorkspaceProviderImpl( AgentFactory agentFactory )
+	public WorkspaceProviderImpl( AgentFactory agentFactory, LatestDirectoryService latestDirectoryService )
 	{
 		this.agentFactory = agentFactory;
+		this.latestDirectoryService = latestDirectoryService;
 	}
 
 	@Override
@@ -52,16 +53,12 @@ public class WorkspaceProviderImpl implements WorkspaceProvider, Releasable
 		try
 		{
 			log.info( "Loading workspace from file: {}", workspaceFile );
-			workspace = WorkspaceItemImpl.loadWorkspace( workspaceFile, agentFactory );
+			workspace = WorkspaceItemImpl.loadWorkspace( workspaceFile, agentFactory, latestDirectoryService );
 			fireEvent( new BaseEvent( this, WORKSPACE_LOADED ) );
 
 			return workspace;
 		}
-		catch( XmlException e )
-		{
-			throw new RuntimeException( e );
-		}
-		catch( IOException e )
+		catch( XmlException | IOException e )
 		{
 			throw new RuntimeException( e );
 		}

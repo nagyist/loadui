@@ -87,7 +87,7 @@ public class KnobTest extends GuiTest
 	public void shouldBeModifiableByManualEntry()
 	{
 		Knob bounded = find( "#bounded" );
-		click( bounded ).click( bounded ).sleep( 100 ).type( "5" ).press( KeyCode.ENTER );
+		doubleClick( bounded ).sleep( 100 ).type( "5" ).press( KeyCode.ENTER );
 		assertThat( bounded.getValue(), closeTo( 5.0, 0.01 ) );
 	}
 

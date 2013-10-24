@@ -48,7 +48,6 @@ public final class ProjectRefImpl implements ProjectRef, Releasable
 	private final AttributeHolderSupport attributeHolderSupport;
 	private final File projectFile;
 	private volatile ProjectItem project;
-	@Nonnull
 	private String label = "";
 	// With the current UI, we do not wish to autoload projects at startup, so do
 	// not save the enabled state as true, ever.
@@ -91,11 +90,16 @@ public final class ProjectRefImpl implements ProjectRef, Releasable
 			label = config.getLabel();
 		}
 
+		if( label == null )
+		{
+			label = "";
+		}
+
 		return label;
 	}
 
 	@Override
-	public void setLabel( String label )
+	public void setLabel( @Nonnull String label )
 	{
 		boolean disable = !isEnabled();
 		if( disable )
@@ -275,6 +279,7 @@ public final class ProjectRefImpl implements ProjectRef, Releasable
 	}
 
 	@Override
+	@Nonnull
 	public Collection<String> getAttributes()
 	{
 		return attributeHolderSupport.getAttributes();

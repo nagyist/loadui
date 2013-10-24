@@ -15,7 +15,14 @@
  */
 package com.eviware.loadui.ui.fx.views.canvas.component;
 
+import com.eviware.loadui.api.component.categories.OnOffCategory;
+import com.eviware.loadui.api.model.ComponentItem;
+import com.eviware.loadui.api.traits.Releasable;
+import com.eviware.loadui.ui.fx.MenuItemsProvider;
+import com.eviware.loadui.ui.fx.MenuItemsProvider.HasMenuItems;
+import com.eviware.loadui.ui.fx.MenuItemsProvider.Options;
 import com.eviware.loadui.ui.fx.util.*;
+import com.eviware.loadui.ui.fx.views.canvas.CanvasObjectView;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.event.ActionEvent;
@@ -29,19 +36,12 @@ import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.RegionBuilder;
 
-import com.eviware.loadui.api.component.categories.OnOffCategory;
-import com.eviware.loadui.api.model.ComponentItem;
-import com.eviware.loadui.ui.fx.MenuItemsProvider;
-import com.eviware.loadui.ui.fx.MenuItemsProvider.HasMenuItems;
-import com.eviware.loadui.ui.fx.MenuItemsProvider.Options;
-import com.eviware.loadui.ui.fx.views.canvas.CanvasObjectView;
-
 import static com.eviware.loadui.ui.fx.util.UIUtils.toCssId;
 
-public class ComponentView extends CanvasObjectView
+public class ComponentView extends CanvasObjectView implements Releasable
 {
 	private static final String COMPACT_MODE_ATTRIBUTE = "gui.compact";
-	private final Observable layoutReloaded;
+	private final ReleasableObservableBase layoutReloaded;
 	private final ToggleButton compactModeButton;
 
 	protected ComponentView( final ComponentItem component )
@@ -132,4 +132,9 @@ public class ComponentView extends CanvasObjectView
 		}
 	}
 
+	@Override
+	public void release()
+	{
+		layoutReloaded.release();
+	}
 }

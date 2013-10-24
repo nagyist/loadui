@@ -15,6 +15,7 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
+import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
@@ -86,9 +87,22 @@ public class ConfirmationDialog extends ButtonDialog
 
 		if( forceConfirmOnEnter )
 			forceConfirmOnEnter();
-	}
 
-	private void forceConfirmOnEnter()
+        handleIntentEvents();
+    }
+
+    private void handleIntentEvents() {
+        addEventHandler(IntentEvent.INTENT_SAVE, new EventHandler<IntentEvent<?>>() {
+            @Override
+            public void handle(IntentEvent<?> event) {
+                if(event.getArg() == ConfirmationDialog.class)
+                    confirm();
+
+            }
+        });
+    }
+
+    private void forceConfirmOnEnter()
 	{
 		addEventFilter( KeyEvent.ANY, new EventHandler<KeyEvent>()
 		{
@@ -156,6 +170,7 @@ public class ConfirmationDialog extends ButtonDialog
 
 	public void confirm()
 	{
-		confirmButton.fire();
+        if(!confirmButton.isDisabled())
+		    confirmButton.fire();
 	}
 }

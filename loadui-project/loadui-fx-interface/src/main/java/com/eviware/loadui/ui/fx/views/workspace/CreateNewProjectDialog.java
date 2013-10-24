@@ -15,12 +15,13 @@
  */
 package com.eviware.loadui.ui.fx.views.workspace;
 
-import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.model.ProjectRef;
 import com.eviware.loadui.api.model.WorkspaceItem;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import com.eviware.loadui.ui.fx.control.ConfirmationDialog;
 import com.eviware.loadui.ui.fx.control.fields.ValidatableStringField;
+import com.eviware.loadui.ui.fx.filechooser.LoadUIFileChooser;
+import com.eviware.loadui.ui.fx.filechooser.LoadUIFileChooserBuilder;
 import com.eviware.loadui.ui.fx.util.UIUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -32,8 +33,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooserBuilder;
 
 import java.io.File;
 
@@ -46,29 +45,50 @@ public class CreateNewProjectDialog extends ConfirmationDialog
 		int projectNumber = getNextProjectNumber();
 
 		Label projectName = new Label( "Project name" );
-		final ValidatableStringField projectNameField = ValidatableStringField.Builder.create()
-				.stringConstraint( ValidatableStringField.NOT_EMPTY ).text( "Project " + projectNumber ).build();
+
+		final ValidatableStringField projectNameField = ValidatableStringField.Builder
+				.create()
+				.stringConstraint( ValidatableStringField.NOT_EMPTY )
+				.text( "Project " + projectNumber )
+				.build();
+
 		Label fileName = new Label( "File name" );
-		final ValidatableStringField fileNameField = ValidatableStringField.Builder.create()
-				.stringConstraint( ValidatableStringField.NOT_EMPTY ).text( "project-" + projectNumber + ".xml" ).build();
+
+		final ValidatableStringField fileNameField = ValidatableStringField.Builder
+				.create()
+				.stringConstraint( ValidatableStringField.NOT_EMPTY )
+				.text( "project-" + projectNumber + ".xml" )
+				.build();
+
+
 		HBox.setHgrow( fileNameField, Priority.ALWAYS );
-		Button browseButton = ButtonBuilder.create().text( "Browse..." ).onAction( new EventHandler<ActionEvent>()
+
+		final EventHandler<ActionEvent> createFileChooser = new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle( ActionEvent event )
 			{
-				FileChooser fileChooser = FileChooserBuilder
-						.create()
-						.initialDirectory(
-								new File( workspace.getAttribute( UIUtils.LATEST_DIRECTORY,
-										System.getProperty( LoadUI.LOADUI_HOME ) ) ) )
-						.extensionFilters( UIUtils.XML_EXTENSION_FILTER ).build();
+				LoadUIFileChooser fileChooser = LoadUIFileChooserBuilder
+						.usingWorkspace( workspace )
+						.extensionFilters( UIUtils.XML_EXTENSION_FILTER )
+						.build();
 
 				File chosenFile = fileChooser.showSaveDialog( getScene().getWindow() );
+
 				if( chosenFile != null )
+				{
 					fileNameField.setText( chosenFile.getPath() );
+				}
+
 			}
-		} ).build();
+		};
+
+		Button browseButton = ButtonBuilder
+				.create()
+				.text( "Browse..." )
+				.onAction( createFileChooser )
+				.build();
+
 		final CheckBox openNewProject = new CheckBox( "Open project after creation" );
 		openNewProject.setSelected( true );
 
@@ -83,8 +103,18 @@ public class CreateNewProjectDialog extends ConfirmationDialog
 				close();
 
 				String path = fileNameField.getText();
-				File projectFile = path.contains( File.separator ) ? new File( path ) : new File( workspace.getAttribute(
-						UIUtils.LATEST_DIRECTORY, System.getProperty( LoadUI.LOADUI_HOME ) ), path );
+
+				File projectFile;
+				if( path.contains( File.separator ) )
+				{
+					projectFile = new File( path );
+					workspace.setLatestDirectory( WorkspaceItem.LATEST_CREATE_PROJECT_DIRECTORY, projectFile.getParentFile() );
+				}
+				else
+				{
+					projectFile = new File( workspace.getLatestDirectory( WorkspaceItem.LATEST_CREATE_PROJECT_DIRECTORY ), path );
+				}
+
 				ProjectRef projectRef = workspace.createProject( projectFile, projectNameField.getText(), false );
 
 				if( openNewProject.isSelected() )

@@ -83,7 +83,7 @@ public class EventsHandlingTest
 		System.gc();
 		System.gc();
 
-		Node component = GuiTest.find( ".component-view" );
+		Node component = controller.find( ".component-view" );
 		assertNotNull( component );
 
 		ArrayList<Node> knobs = new ArrayList<>( GuiTest.findAll( ".knob", component ) );

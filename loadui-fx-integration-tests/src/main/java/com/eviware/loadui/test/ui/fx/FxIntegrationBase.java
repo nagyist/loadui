@@ -10,8 +10,10 @@ import com.google.code.tempusfugit.temporal.Condition;
 import com.google.code.tempusfugit.temporal.Timeout;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.Region;
 import org.loadui.testfx.GuiTest;
 
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -21,9 +23,12 @@ import java.util.concurrent.TimeoutException;
 import static com.google.code.tempusfugit.temporal.Duration.seconds;
 import static com.google.code.tempusfugit.temporal.Timeout.timeout;
 import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 
 /**
- * @Author Henrik
+ * @author Henrik
  */
 public class FxIntegrationBase extends GuiTest
 {
@@ -42,6 +47,11 @@ public class FxIntegrationBase extends GuiTest
 	public void create( LoadUiRobot.Component component )
 	{
 		robot.createComponent( component );
+	}
+
+	public void createAt( LoadUiRobot.Component component, Point targetPoint )
+	{
+		robot.createComponentAt( component, targetPoint );
 	}
 
 	public void runTestFor( int number, TimeUnit unit )
@@ -66,7 +76,16 @@ public class FxIntegrationBase extends GuiTest
 		{
 			robot.runTestFor( number, unit );
 		}
+	}
 
+	public void clickPlayStopButton()
+	{
+		click( ".project-playback-panel .play-button" );
+	}
+
+	public void waitForBlockingTaskToComplete()
+	{
+		waitUntil( ".task-progress-indicator", is( not( visible() ) ) );
 	}
 
 	protected void ensureProjectIsNotRunning()
@@ -76,7 +95,7 @@ public class FxIntegrationBase extends GuiTest
 		{
 			try
 			{
-				waitOrTimeout( new IsProjectRunning( project, false ), timeout( seconds( 5 ) ) );
+				waitOrTimeout( new IsCanvasRunning( project, false ), timeout( seconds( 5 ) ) );
 				System.out.println( "Project stopped running" );
 			}
 			catch( InterruptedException | TimeoutException e )
@@ -148,7 +167,7 @@ public class FxIntegrationBase extends GuiTest
 		System.out.println( "Component node: " + componentNode );
 		Set<Node> knobs = findAll( ".knob", componentNode );
 
-		Node knob = ( Node )Arrays.asList( knobs.toArray() ).get( number + 1 );
+		Node knob = ( Node )Arrays.asList( knobs.toArray() ).get( number - 1 );
 
 		return new KnobHandle( knob );
 	}
@@ -163,7 +182,62 @@ public class FxIntegrationBase extends GuiTest
 
 	public boolean isResultViewWindowIsOpen()
 	{
-		return !GuiTest.findAll( ".analysis-view" ).isEmpty();
+		return !GuiTest.findAll( ".result-view" ).isEmpty();
+	}
+
+	public boolean isInspectorViewOpen()
+	{
+		final Set<Node> inspectorViews = findAll( ".inspector-view" );
+		if( inspectorViews.isEmpty() ) return false;
+
+		final Region view = ( Region )inspectorViews.iterator().next();
+		try
+		{
+			waitOrTimeout( new Condition()
+			{
+				@Override
+				public boolean isSatisfied()
+				{
+					return view.getHeight() > 150;
+				}
+			}, timeout( seconds( 2 ) ) );
+		}
+		catch( Exception e )
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public void ensureInspectorViewIsClosed()
+	{
+		final Set<Node> inspectorViews = findAll( ".inspector-view" );
+		if( inspectorViews.isEmpty() ) return;
+
+		final Region view = ( Region )inspectorViews.iterator().next();
+		double height = view.getHeight();
+		if( height > 50 )
+		{
+			drag( "#Assertions" ).by( 0, height ).drop();
+		}
+	}
+
+	public void ensureNotificationPanelIsNotVisible()
+	{
+		Set<Node> panels = findAll( ".notification-panel" );
+		if( panels.isEmpty() ) return;
+
+		Node panel = panels.iterator().next();
+		if( panel.isVisible() && panel.getOpacity() > 0.99 )
+		{
+			click( "#hide-notification-panel" );
+			waitUntil( panel, is( not( visible() ) ) );
+		}
+	}
+
+	protected void clickOnAbortButton()
+	{
+		click( "#abort-requests" ).sleep( 1_000 );
 	}
 
 	public static ProjectItem getProjectItem()

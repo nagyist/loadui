@@ -39,7 +39,6 @@ import com.eviware.loadui.impl.terminal.TerminalHolderSupport;
 import com.eviware.loadui.util.BeanInjector;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +54,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.google.common.collect.Collections2.filter;
+
 public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements SceneItem
 {
 	private static final Logger log = LoggerFactory.getLogger( CanvasItemImpl.class );
@@ -64,7 +65,9 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 		@Override
 		public boolean apply( @Nullable AgentItem input )
 		{
-			return input != null && input.isEnabled() && input.isReady();
+			boolean isGood = input != null && input.isEnabled() && input.isReady();
+			log.info( "Agent {} is active? {}", input == null ? "null" : input.getLabel(), isGood );
+			return isGood;
 		}
 	};
 
@@ -195,6 +198,7 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 	@Override
 	public void delete()
 	{
+		log.debug( "DELETING A SCENARIOITEMIMPL!!!!!!!!!!!!!!!!!!" );
 		for( ComponentItem component : new ArrayList<>( getComponents() ) )
 		{
 			component.delete();
@@ -302,6 +306,7 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 		}
 		else if( isRunningInLocalMode || getActiveAgentsRunningThis().isEmpty() )
 		{
+			System.out.println( "I am complete!!! Running local mode? " + isRunningInLocalMode + " or no active agents are running scene " + getLabel() );
 			setCompleted( true );
 		}
 		// else set completed only after Agent(s) send statistics for this scene
@@ -310,7 +315,7 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 
 	private Collection<? extends AgentItem> getActiveAgentsRunningThis()
 	{
-		return Collections2.filter( project.getAgentsAssignedTo( this ), ACTIVE_AGENTS_FUNCTION );
+		return filter( project.getAgentsAssignedTo( this ), ACTIVE_AGENTS_FUNCTION );
 	}
 
 	@Override
@@ -429,9 +434,9 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 	public boolean isAffectedByExecutionTask( TestExecution execution )
 	{
 		CanvasItem startedCanvas = execution.getCanvas();
-		log.debug( "startedCanvas==this: " + Boolean.toString( startedCanvas == this ) + " getProject()==startedCanvas: "
-				+ Boolean.toString( getProject() == startedCanvas ) + " isFollowProject(): "
-				+ Boolean.toString( isFollowProject() ) );
+		log.debug( "startedCanvas==this: " + ( startedCanvas == this ) + " getProject()==startedCanvas: "
+				+ ( getProject() == startedCanvas ) + " isFollowProject(): "
+				+ ( isFollowProject() ) );
 		return startedCanvas == this || ( getProject() == startedCanvas && isFollowProject() );
 	}
 
@@ -440,7 +445,7 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 	{
 		if( isAffectedByExecutionTask( execution ) )
 		{
-			log.debug( "STARTING !!!" );
+			log.debug( "Scene {} going through phase {}!!!", getLabel(), phase );
 			super.onExecutionTask( execution, phase );
 		}
 	}

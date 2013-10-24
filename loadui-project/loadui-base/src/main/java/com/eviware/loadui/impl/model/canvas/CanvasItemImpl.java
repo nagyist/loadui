@@ -65,6 +65,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.GuardedBy;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
@@ -91,7 +92,9 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 	private ScheduledFuture<?> timeLimitFuture;
 	private long time = 0;
 	protected Summary summary = null;
+	@GuardedBy( value = "datesLock" )
 	private Date startTime;
+	@GuardedBy( value = "datesLock" )
 	private Date endTime;
 	private boolean hasStarted = false;
 	private String lastSavedHash;
@@ -571,6 +574,11 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		if( this.running != running )
 		{
 			this.running = running;
+			if( running )
+			{
+				triggerAction( CanvasItem.COUNTER_RESET_ACTION );
+				triggerAction( CanvasItem.START_ACTION );
+			}
 			fireBaseEvent( RUNNING );
 		}
 	}
@@ -587,12 +595,9 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 				{
 					endTime = new Date();
 				}
-				triggerAction( READY_ACTION );
-				fireBaseEvent( ON_COMPLETE_DONE );
 			}
 		}
-		else
-			log.debug( "Ignoring request to set Canvas completed state to {}", completed );
+		if( completed ) triggerAction( READY_ACTION );
 	}
 
 	public void markClean()
@@ -772,6 +777,15 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 		}
 	};
 
+	/**
+	 * Called when an execution which affects this canvas changes phases.
+	 * <br/>
+	 * If this canvas is not affected by the execution <em>(eg. the project is started but this canvas is a
+	 * scenario which is not linked to the project)</em> this method does not even get called!
+	 *
+	 * @param execution execution
+	 * @param phase new phase
+	 */
 	protected void onExecutionTask( TestExecution execution, Phase phase )
 	{
 		if( execution.contains( this ) )

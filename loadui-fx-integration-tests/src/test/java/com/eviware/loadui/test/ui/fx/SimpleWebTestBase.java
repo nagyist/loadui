@@ -4,20 +4,18 @@ import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.ui.fx.states.SimpleWebTestState;
 import org.junit.After;
 
-import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.WEB_PAGE_RUNNER;
-
 /**
  * @author renato
  */
 public abstract class SimpleWebTestBase extends FxIntegrationTestBase
 {
+	public static final String VALID_URL_TO_HIT_ON_TESTS = "win-srvmontest";
 
-	@Override
 	@After
-	public void teardown() throws Exception
+	public void cleanup() throws Exception
 	{
 		ensureProjectIsNotRunning();
-		super.teardown();
+		robot.deleteAllComponentsFromProjectView();
 	}
 
 	public void setMaxConcurrentRequestsTo( int requests )
@@ -33,7 +31,7 @@ public abstract class SimpleWebTestBase extends FxIntegrationTestBase
 
 	protected void setWebPageRunnerUrlTo( String text )
 	{
-		doubleClick( find( ".text-input", robot.getComponentNode( WEB_PAGE_RUNNER ) ) ).type( text );
+		doubleClick( ".component-view .text-input" ).type( text );
 	}
 
 	@Override

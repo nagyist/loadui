@@ -20,58 +20,79 @@ import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ScenarioCreatedState;
-import org.junit.After;
-import org.junit.Ignore;
+import com.google.code.tempusfugit.concurrency.IntermittentTestRunner;
+import com.google.code.tempusfugit.concurrency.annotations.Intermittent;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
 
+import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
+import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.WEB_PAGE_RUNNER;
 import static com.google.code.tempusfugit.temporal.Duration.seconds;
 import static com.google.code.tempusfugit.temporal.Timeout.timeout;
 import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 import static junit.framework.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
-@Ignore
 @Category( IntegrationTest.class )
-public class ScenarioLinkedPlaybackTest extends FxIntegrationTestBase
+@RunWith( IntermittentTestRunner.class )
+@Intermittent( repetition = 3 )
+public class ScenarioLinkedPlaybackTest extends SimpleWebTestBase
 {
-	HasScenarios helper = new HasScenarios();
+	HasScenarios hasScenarios = new HasScenarios();
+	CanRunLoadUITests testRunner = new CanRunLoadUITests();
 
-	@After
-	public void teardown() throws Exception
+
+	@Before
+	public void start() throws Exception
 	{
 		ensureProjectIsNotRunning();
-		super.teardown();
+	}
+
+	@Override
+	public void cleanup() throws Exception
+	{
+		try
+		{
+			testRunner.abortRequestsIfPossible();
+		}
+		catch( Exception e )
+		{
+			e.printStackTrace();
+		}
+		hasScenarios.exitScenarioIfPossible();
+		ensureProjectIsNotRunning();
+		robot.deleteAllComponentsFromProjectView();
+		setTestTimeLimitTo( 0 );
 	}
 
 	@Test
 	public void shouldFollowProject_when_linked() throws Exception
 	{
-		SceneItem scenario = helper.ensureScenarioIsLinkedIs( true );
+		SceneItem scenario = hasScenarios.ensureScenarioIsLinkedIs( true );
 
 		for( int i = 0; i < 3; i++ )
 		{
 			robot.clickPlayStopButton();
 
-			assertTrue( scenario.isRunning() );
+			waitOrTimeout( new IsCanvasRunning( scenario, true ), timeout( seconds( 2 ) ) );
 
 			robot.clickPlayStopButton();
-			waitForNodeToDisappear( "#abort-requests" );
+			testRunner.letGuiReactToProjectStopping();
 
-			assertFalse( scenario.isRunning() );
+			waitOrTimeout( new IsCanvasRunning( scenario, false ), timeout( seconds( 2 ) ) );
 		}
 	}
 
 	@Test
 	public void shouldNotFollowProject_when_unLinked() throws Exception
 	{
-		SceneItem scenario = helper.ensureScenarioIsLinkedIs( false );
+		SceneItem scenario = hasScenarios.ensureScenarioIsLinkedIs( false );
 
 		for( int i = 0; i < 4; i++ )
 		{
 			robot.clickPlayStopButton();
-			// using a very long timeout because of bug: LOADUI-1152
-			waitForNodeToDisappear( "#abort-requests", timeout( seconds( 20 ) ) );
+			testRunner.letGuiReactToProjectStopping();
 
 			assertFalse( scenario.isRunning() );
 		}
@@ -81,14 +102,41 @@ public class ScenarioLinkedPlaybackTest extends FxIntegrationTestBase
 	public void shouldStopOnLimit_when_isLinked() throws Exception
 	{
 		ProjectItem project = getProjectItem();
-		helper.ensureScenarioIsLinkedIs( true );
+		hasScenarios.ensureScenarioIsLinkedIs( true );
 
 		setTestTimeLimitTo( 2 );
 		robot.clickPlayStopButton();
 
-		waitOrTimeout( new IsProjectRunning( project, true ), timeout( seconds( 2 ) ) );
+		waitOrTimeout( new IsCanvasRunning( project, true ), timeout( seconds( 2 ) ) );
 
-		waitOrTimeout( new IsProjectRunning( project, false ), timeout( seconds( 4 ) ) );
+		waitOrTimeout( new IsCanvasRunning( project, false ), timeout( seconds( 4 ) ) );
+
+		testRunner.letGuiReactToProjectStopping();
+	}
+
+	@Test
+	public void shouldStopOnLimit_when_isLinked_AndThereAreComponents_InProjectAndInScenario() throws Exception
+	{
+		ProjectItem project = getProjectItem();
+		setTestTimeLimitTo( 2 );
+		hasScenarios.ensureScenarioIsLinkedIs( true );
+
+		connect( FIXED_RATE_GENERATOR ).to( WEB_PAGE_RUNNER );
+		setWebPageRunnerUrlTo( VALID_URL_TO_HIT_ON_TESTS );
+
+		hasScenarios.enterScenario();
+
+		robot.resetPredefinedPoints();
+		connect( FIXED_RATE_GENERATOR ).to( WEB_PAGE_RUNNER );
+		setWebPageRunnerUrlTo( VALID_URL_TO_HIT_ON_TESTS );
+
+		robot.clickPlayStopButton();
+
+		waitOrTimeout( new IsCanvasRunning( project, true ), timeout( seconds( 2 ) ) );
+
+		waitOrTimeout( new IsCanvasRunning( project, false ), timeout( seconds( 4 ) ) );
+
+		testRunner.letGuiReactToProjectStopping();
 	}
 
 	@Override

@@ -25,6 +25,8 @@ import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import com.eviware.loadui.ui.fx.control.Carousel;
 import com.eviware.loadui.ui.fx.control.ToolBox;
+import com.eviware.loadui.ui.fx.filechooser.LoadUIFileChooser;
+import com.eviware.loadui.ui.fx.filechooser.LoadUIFileChooserBuilder;
 import com.eviware.loadui.ui.fx.util.*;
 import com.eviware.loadui.ui.fx.views.projectref.ProjectRefView;
 import com.google.common.base.Function;
@@ -50,12 +52,10 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.stage.FileChooserBuilder;
 import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,26 +69,30 @@ public class WorkspaceView extends StackPane
 
 	protected static final Logger log = LoggerFactory.getLogger( WorkspaceView.class );
 
-	private static final String LATEST_DIRECTORY = "gui.latestDirectory";
-	private static final ExtensionFilter XML_EXTENSION_FILTER = new FileChooser.ExtensionFilter( "loadUI project file",
+	private static final ExtensionFilter XML_EXTENSION_FILTER = new FileChooser.ExtensionFilter( "LoadUI project file",
 			"*.xml" );
 	private static final String HELPER_PAGE_URL = "http://www.loadui.org/Working-with-loadUI/workspace-overview.html";
 	private static final File PROP_FILE = LoadUI.relativeFile( "res/application.properties" );
 
 	private final WorkspaceItem workspace;
+
 	private final ObservableList<ProjectRef> projectRefList;
 	private final ObservableList<ProjectRefView> projectRefViews;
 
 	@FXML
+	@SuppressWarnings( "unused" )
 	private VBox carouselArea;
 
 	@FXML
+	@SuppressWarnings( "unused" )
 	private ToolBox<Label> toolbox;
 
 	@FXML
+	@SuppressWarnings( "unused" )
 	private Carousel<ProjectRefView> projectRefCarousel;
 
 	@FXML
+	@SuppressWarnings( "unused" )
 	private WebView webView;
 	private ObservableList<ReadOnlyStringProperty> labelProperties;
 
@@ -113,10 +117,10 @@ public class WorkspaceView extends StackPane
 	@FXML
 	protected void initialize()
 	{
-		addEventHandler( IntentEvent.ANY, new EventHandler<IntentEvent<? extends Object>>()
+		addEventHandler( IntentEvent.ANY, new EventHandler<IntentEvent<?>>()
 		{
 			@Override
-			public void handle( IntentEvent<? extends Object> event )
+			public void handle( IntentEvent<?> event )
 			{
 				if( event.getEventType() == IntentEvent.INTENT_CLONE && event.getArg() instanceof ProjectRef )
 				{
@@ -221,7 +225,7 @@ public class WorkspaceView extends StackPane
 		projectRefCarousel.setSelected( Iterables.find( projectRefCarousel.getItems(), new Predicate<ProjectRefView>()
 		{
 			@Override
-			public boolean apply( @Nullable ProjectRefView view )
+			public boolean apply( ProjectRefView view )
 			{
 				return lastProject.equals( view.getProjectRef().getProjectFile().getAbsolutePath() );
 			}
@@ -244,17 +248,17 @@ public class WorkspaceView extends StackPane
 		} );
 	}
 
+	@FXML
+	@SuppressWarnings( "unused" )
 	public void importProject()
 	{
-		FileChooser fileChooser = FileChooserBuilder
-				.create()
-				.initialDirectory(
-						new File( workspace.getAttribute( LATEST_DIRECTORY, System.getProperty( LoadUI.LOADUI_HOME ) ) ) )
+
+		LoadUIFileChooser fileChooser = LoadUIFileChooserBuilder
+				.usingWorkspace( workspace )
 				.extensionFilters( XML_EXTENSION_FILTER ).build();
 		File file = fileChooser.showOpenDialog( getScene().getWindow() );
 		if( file != null )
 		{
-			workspace.setAttribute( LATEST_DIRECTORY, file.getParentFile().getAbsolutePath() );
 			fireEvent( IntentEvent.create( IntentEvent.INTENT_RUN_BLOCKING, new ImportProjectTask( workspace, file ) ) );
 		}
 	}
@@ -270,12 +274,14 @@ public class WorkspaceView extends StackPane
 	}
 
 	@FXML
+	@SuppressWarnings( "unused" )
 	public void openHelpPage()
 	{
 		UIUtils.openInExternalBrowser( HELPER_PAGE_URL );
 	}
 
 	@FXML
+	@SuppressWarnings( "unused" )
 	public void gettingStarted()
 	{
 		new GettingStartedDialog( workspace, WorkspaceView.this ).show();

@@ -15,12 +15,13 @@
  */
 package com.eviware.loadui.ui.fx.views.workspace;
 
-import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.model.ProjectRef;
 import com.eviware.loadui.api.model.WorkspaceItem;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import com.eviware.loadui.ui.fx.control.ConfirmationDialog;
+import com.eviware.loadui.ui.fx.filechooser.LoadUIFileChooser;
+import com.eviware.loadui.ui.fx.filechooser.LoadUIFileChooserBuilder;
 import com.google.common.io.Files;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -31,15 +32,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.stage.FileChooserBuilder;
 
 import java.io.File;
 
 public class CloneProjectDialog extends ConfirmationDialog
 {
-	private static final String LATEST_DIRECTORY = "gui.latestDirectory";
-	private static final ExtensionFilter XML_EXTENSION_FILTER = new FileChooser.ExtensionFilter( "loadUI project file",
+	private static final FileChooser.ExtensionFilter XML_EXTENSION_FILTER = new FileChooser.ExtensionFilter( "loadUI project file",
 			"*.xml" );
 
 	private final WorkspaceItem workspace;
@@ -72,18 +70,18 @@ public class CloneProjectDialog extends ConfirmationDialog
 		}
 		projectNameField.setText( String.format( "Copy %d of %s", count, projectRef.getLabel() ) );
 		fileNameField.setText( availableFile.getName() );
+
 		Button browseButton = ButtonBuilder.create().text( "Browse..." ).onAction( new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle( ActionEvent event )
 			{
-				FileChooser fileChooser = FileChooserBuilder
-						.create()
-						.initialDirectory(
-								new File( workspace.getAttribute( LATEST_DIRECTORY, System.getProperty( LoadUI.LOADUI_HOME ) ) ) )
-						.extensionFilters( XML_EXTENSION_FILTER ).build();
+				LoadUIFileChooser fileChooser = LoadUIFileChooserBuilder
+						.usingWorkspace( workspace )
+						.extensionFilters( XML_EXTENSION_FILTER )
+						.build();
 
-				File chosenFile = fileChooser.showSaveDialog( getScene().getWindow() );
+				File chosenFile = fileChooser.showSaveDialog( owner.getScene().getWindow() );
 				if( chosenFile != null )
 					fileNameField.setText( chosenFile.getPath() );
 			}

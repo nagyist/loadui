@@ -15,23 +15,20 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
-import static com.eviware.loadui.ui.fx.util.NodeUtils.bindStyleClass;
-import static javafx.beans.binding.Bindings.size;
-
-import java.util.List;
-
-import com.sun.javafx.scene.control.skin.TabPaneSkin;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.WindowEvent;
 
 import javax.annotation.Nonnull;
+import java.util.List;
+
+import static com.eviware.loadui.ui.fx.util.NodeUtils.bindStyleClass;
+import static javafx.beans.binding.Bindings.size;
 
 public class SettingsDialog extends ConfirmationDialog
 {
@@ -74,13 +71,14 @@ public class SettingsDialog extends ConfirmationDialog
 			{
 				if( hasExactlyOneTab.get() )
 				{
-					Region tabHeader = ( Region )tabPane.lookup( ".tab-header-area" );
+					Region tabHeader = (Region) tabPane.lookup( ".tab-header-area" );
 					double headerHeight = tabHeader.getHeight();
 					SettingsDialog.this.setHeight( SettingsDialog.this.getHeight() - headerHeight );
 					tabHeader.setPrefHeight( 0.0 );
-				}else{
-					StackPane node = ( StackPane )lookup( ".headers-region" );
-					SettingsDialog.this.setWidth( node.getWidth() + 110 );
+				} else
+				{
+					StackPane node = (StackPane) lookup( ".headers-region" );
+					SettingsDialog.this.setWidth( Math.max( node.getWidth() + 110, 320 ) );
 				}
 			}
 		} );

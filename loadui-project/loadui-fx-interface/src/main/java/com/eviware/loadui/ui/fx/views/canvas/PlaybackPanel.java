@@ -18,6 +18,7 @@ package com.eviware.loadui.ui.fx.views.canvas;
 import com.eviware.loadui.api.counter.CounterHolder;
 import com.eviware.loadui.api.model.CanvasItem;
 import com.eviware.loadui.api.model.SceneItem;
+import com.eviware.loadui.api.traits.Releasable;
 import com.eviware.loadui.ui.fx.util.Properties;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -34,15 +35,16 @@ import javafx.scene.layout.RegionBuilder;
 import javafx.util.Duration;
 
 import javax.annotation.Nonnull;
-import java.lang.ref.WeakReference;
 
-public abstract class PlaybackPanel<T extends CounterDisplay, C extends CanvasItem> extends HBox
+import static com.eviware.loadui.ui.fx.views.canvas.PlayButton.PlayButtonFactory;
+
+public abstract class PlaybackPanel<T extends CounterDisplay, C extends CanvasItem> extends HBox implements Releasable
 {
 	public final static String TIME_LABEL = "Time";
 	public final static String REQUESTS_LABEL = "Sent";
 	public final static String FAILURES_LABEL = "Failures";
 
-	private final UpdateDisplays updateDisplays = new UpdateDisplays( this );
+	private final UpdateDisplays updateDisplays = new UpdateDisplays();
 
 	protected final C canvas;
 
@@ -58,13 +60,20 @@ public abstract class PlaybackPanel<T extends CounterDisplay, C extends CanvasIt
 
 		setAlignment( Pos.CENTER );
 		setMaxHeight( 27 );
-		playButton = new PlayButton( canvas );
+		playButton = PlayButtonFactory.getInstance().createButtonFor( canvas );
 
 		time = timeCounter();
 		requests = timeRequests();
 		failures = timeFailures();
 
 		updateDisplays.timeline.play();
+	}
+
+	@Override
+	public void release()
+	{
+		updateDisplays.timeline.stop();
+		playButton.release();
 	}
 
 	protected abstract T timeCounter();
@@ -127,18 +136,15 @@ public abstract class PlaybackPanel<T extends CounterDisplay, C extends CanvasIt
 
 	protected Property<Boolean> getLinkedProperty( SceneItem scenario )
 	{
-		Property<Boolean> linkedProperty = Properties.convert( scenario.followProjectProperty() );
-		return linkedProperty;
+		return Properties.convert( scenario.followProjectProperty() );
 	}
 
-	private static class UpdateDisplays implements EventHandler<ActionEvent>
+	private class UpdateDisplays implements EventHandler<ActionEvent>
 	{
-		private final WeakReference<? extends PlaybackPanel<?, ?>> ref;
 		private final Timeline timeline;
 
-		private UpdateDisplays( PlaybackPanel<?, ?> panel )
+		private UpdateDisplays()
 		{
-			ref = new WeakReference<PlaybackPanel<?, ?>>( panel );
 			timeline = new Timeline( new KeyFrame( Duration.millis( 500 ), this ) );
 			timeline.setCycleCount( Timeline.INDEFINITE );
 		}
@@ -146,17 +152,9 @@ public abstract class PlaybackPanel<T extends CounterDisplay, C extends CanvasIt
 		@Override
 		public void handle( ActionEvent event )
 		{
-			PlaybackPanel<?, ?> panel = ref.get();
-			if( panel != null )
-			{
-				panel.time.setValue( panel.canvas.getCounter( CanvasItem.TIMER_COUNTER ).get() );
-				panel.requests.setValue( panel.canvas.getCounter( CanvasItem.REQUEST_COUNTER ).get() );
-				panel.failures.setValue( panel.canvas.getCounter( CanvasItem.FAILURE_COUNTER ).get() );
-			}
-			else
-			{
-				timeline.stop();
-			}
+			time.setValue( canvas.getCounter( CanvasItem.TIMER_COUNTER ).get() );
+			requests.setValue( canvas.getCounter( CanvasItem.REQUEST_COUNTER ).get() );
+			failures.setValue( canvas.getCounter( CanvasItem.FAILURE_COUNTER ).get() );
 		}
 	}
 }

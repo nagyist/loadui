@@ -25,7 +25,7 @@ import com.eviware.loadui.util.groovy.resolvers.TestExecutionResolver;
 /**
  * Modified TestExecutionResolver which only runs when the surrounding Canvas is
  * running.
- * 
+ *
  * @author dain.nilsson
  */
 public class ComponentTestExecutionResolver extends TestExecutionResolver
@@ -48,7 +48,7 @@ public class ComponentTestExecutionResolver extends TestExecutionResolver
 				if( LoadUI.isController() )
 				{
 					CanvasItem myCanvas = context.getCanvas();
-					if( !myCanvas.getProject().getWorkspace().isLocalMode() || !execution.contains( myCanvas ) )
+					if( !execution.contains( myCanvas ) )
 					{
 						return;
 					}

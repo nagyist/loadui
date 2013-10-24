@@ -1,10 +1,11 @@
 package com.eviware.loadui.test.ui.fx;
 
 import com.eviware.loadui.test.TestState;
+import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import javafx.scene.input.KeyCode;
-import org.junit.After;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.util.concurrent.TimeUnit;
 
@@ -18,6 +19,7 @@ import static org.loadui.testfx.Assertions.assertNodeExists;
  * Time: 11:12
  * To change this template use File | Settings | File Templates.
  */
+@Category( IntegrationTest.class )
 public class ComponentsSmoketest extends FxIntegrationTestBase
 {
 	@Override
@@ -104,8 +106,6 @@ public class ComponentsSmoketest extends FxIntegrationTestBase
 		assertNodeExists( ".check-box" );
 
 		turnKnobIn( USAGE ).to( 20 );
-
-
 
 
 	}

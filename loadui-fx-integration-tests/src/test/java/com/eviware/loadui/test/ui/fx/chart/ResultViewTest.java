@@ -23,6 +23,7 @@ import javafx.scene.Node;
 import javafx.scene.control.MenuButton;
 import javafx.scene.input.KeyCode;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -31,6 +32,8 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.loadui.testfx.Assertions.verifyThat;
+import static org.loadui.testfx.FXTestUtils.awaitEvents;
 import static org.loadui.testfx.FXTestUtils.getOrFail;
 import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
 import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
@@ -41,6 +44,19 @@ public class ResultViewTest extends FxIntegrationTestBase
 	public static final String ARCHIVE = "#archive-node-list";
 	public static final String RECENT = "#result-node-list";
 	public static final String TEST_RUNS = ".execution-view";
+
+	@Before
+	public void ensureNoStoredTestruns()
+	{
+		openManageTestRunsDialog();
+
+		while( !findAll( TEST_RUNS ).isEmpty() )
+		{
+			click( TEST_RUNS + " #menuButton" ).click( "#delete-item" ).click( "#default" );
+			awaitEvents();
+		}
+		ensureResultViewWindowIsClosed();
+	}
 
 	@After
 	public void cleanup()
@@ -56,7 +72,7 @@ public class ResultViewTest extends FxIntegrationTestBase
 
 		openManageTestRunsDialog();
 
-		assertThat( RECENT, contains( 2, TEST_RUNS ) );
+		verifyThat( RECENT, contains( 2, TEST_RUNS ) );
 		assertThat( ARCHIVE, contains( 0, TEST_RUNS ) );
 
 		archiveResult( firstRecentTestRun() );

@@ -33,17 +33,19 @@ public class TaskProgressIndicator extends StackPane
 		getChildren().setAll(
 				VBoxBuilder
 						.create()
-						.children( label = LabelBuilder.create().text( "Please wait..." ).build(),
+						.children( label = LabelBuilder.create().styleClass( "task-progress-indicator" ).text( "Please wait..." ).build(),
 								progress = ProgressBarBuilder.create().build() ).build() );
 	}
-	
-	public TaskProgressIndicator( Task<?> task ) {
+
+	public TaskProgressIndicator( Task<?> task )
+	{
 		this();
 		label.textProperty().bind( task.messageProperty() );
 		progress.progressProperty().bind( task.progressProperty() );
 	}
-	
-	public ProgressIndicator getProgressIndicator() {
+
+	public ProgressIndicator getProgressIndicator()
+	{
 		return progress;
 	}
 
