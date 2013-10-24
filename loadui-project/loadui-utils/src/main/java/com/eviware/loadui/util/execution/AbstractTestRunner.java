@@ -20,7 +20,6 @@ import com.eviware.loadui.api.execution.TestExecution;
 import com.eviware.loadui.api.execution.TestExecutionTask;
 import com.eviware.loadui.api.execution.TestRunner;
 import com.google.common.base.Supplier;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
@@ -31,6 +30,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.GuardedBy;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -47,6 +47,8 @@ public abstract class AbstractTestRunner implements TestRunner
 	public static final Logger log = LoggerFactory.getLogger( TestRunner.class );
 
 	private final ListeningExecutorService executorService;
+
+	@GuardedBy( "tasks" )
 	private final Multimap<Phase, TestExecutionTask> tasks = Multimaps.newSetMultimap(
 			new HashMap<Phase, Collection<TestExecutionTask>>(), new Supplier<Set<TestExecutionTask>>()
 	{
@@ -56,6 +58,7 @@ public abstract class AbstractTestRunner implements TestRunner
 			return Collections.newSetFromMap( new WeakHashMap<TestExecutionTask, Boolean>() );
 		}
 	} );
+	@GuardedBy( "runOnceTasks" )
 	private final Multimap<Phase, TestExecutionTask> runOnceTasks = Multimaps.newSetMultimap(
 			new HashMap<Phase, Collection<TestExecutionTask>>(), new Supplier<Set<TestExecutionTask>>()
 	{
@@ -72,18 +75,25 @@ public abstract class AbstractTestRunner implements TestRunner
 	}
 
 	@Override
-	public synchronized void registerTask( TestExecutionTask task, Phase... phases )
+	public void registerTask( TestExecutionTask task, Phase... phases )
 	{
+
 		for( Phase phase : phases )
 		{
-			tasks.put( phase, task );
+			synchronized( tasks )
+			{
+				tasks.put( phase, task );
+			}
 		}
 	}
 
 	@Override
-	public synchronized void runTaskOnce( TestExecutionTask task, Phase phase )
+	public void runTaskOnce( TestExecutionTask task, Phase phase )
 	{
-		runOnceTasks.put( phase, task );
+		synchronized( runOnceTasks )
+		{
+			runOnceTasks.put( phase, task );
+		}
 	}
 
 	@Override
@@ -91,7 +101,10 @@ public abstract class AbstractTestRunner implements TestRunner
 	{
 		for( Phase phase : phases )
 		{
-			tasks.remove( phase, task );
+			synchronized( tasks )
+			{
+				tasks.remove( phase, task );
+			}
 		}
 	}
 
@@ -106,7 +119,7 @@ public abstract class AbstractTestRunner implements TestRunner
 	 * @param execution an execution
 	 * @return a ListenableFuture representing pending completion of the phase
 	 */
-	@SuppressFBWarnings(justification = "ExecutorService.submit CAN take a null result.", value = "NP_NONNULL_PARAM_VIOLATION")
+	@SuppressFBWarnings( justification = "ExecutorService.submit CAN take a null result.", value = "NP_NONNULL_PARAM_VIOLATION" )
 	protected ListenableFuture<Void> runPhase( Phase phase, TestExecution execution )
 	{
 		return executorService.submit( new PhaseRunner( phase, execution ), null );
@@ -151,20 +164,31 @@ public abstract class AbstractTestRunner implements TestRunner
 			log.debug( "Starting phase: {}", phase );
 			LinkedList<Future<?>> futures = Lists.newLinkedList();
 
-			Collection<TestExecutionTask> phaseRunOnceTasks = runOnceTasks.get( phase );
 
-			for( TestExecutionTask task : Iterables.concat( tasks.get( phase ), phaseRunOnceTasks ) )
+			for( TestExecutionTask task : getTasksToRun() )
 			{
 				futures.add( executorService.submit( new TaskRunner( task ) ) );
 			}
-
-			phaseRunOnceTasks.clear();
 
 			for( Future<?> future : futures )
 			{
 				awaitFuture( future );
 			}
 			log.debug( "Completed phase: {}", phase );
+		}
+
+		private Collection<TestExecutionTask> getTasksToRun()
+		{
+			Collection<TestExecutionTask> tasksToRun = new ArrayList<>();
+			synchronized( runOnceTasks )
+			{
+				tasksToRun.addAll( runOnceTasks.removeAll( phase ) );
+			}
+			synchronized( tasks )
+			{
+				tasksToRun.addAll( tasks.get( phase ) );
+			}
+			return tasksToRun;
 		}
 
 		private class TaskRunner implements Runnable

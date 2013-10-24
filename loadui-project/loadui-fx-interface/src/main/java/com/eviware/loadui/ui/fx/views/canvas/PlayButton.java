@@ -17,8 +17,13 @@ package com.eviware.loadui.ui.fx.views.canvas;
 
 import com.eviware.loadui.api.events.BaseEvent;
 import com.eviware.loadui.api.events.EventHandler;
+import com.eviware.loadui.api.execution.Phase;
+import com.eviware.loadui.api.execution.TestExecution;
+import com.eviware.loadui.api.execution.TestExecutionTask;
+import com.eviware.loadui.api.execution.TestRunner;
 import com.eviware.loadui.api.model.CanvasItem;
 import com.eviware.loadui.api.traits.Releasable;
+import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.execution.TestExecutionUtils;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -160,15 +165,7 @@ public class PlayButton extends StackPane implements Releasable
 	{
 
 		private static PlayButtonFactory instance;
-
-		private final ChangeListener<? super Boolean> buttonListener = new ChangeListener<Boolean>()
-		{
-			@Override
-			public void changed( ObservableValue<? extends Boolean> observable, Boolean wasOn, Boolean isOn )
-			{
-				disableAllExcept( observable, isOn );
-			}
-		};
+		private final TestExecutionTask buttonTask;
 
 		public static synchronized PlayButtonFactory getInstance()
 		{
@@ -179,14 +176,75 @@ public class PlayButton extends StackPane implements Releasable
 			return instance;
 		}
 
+		private PlayButtonFactory()
+		{
+			final TestRunner testRunner = BeanInjector.getBean( TestRunner.class );
+
+			buttonTask = new TestExecutionTask()
+			{
+				@Override
+				public void invoke( final TestExecution execution, final Phase phase )
+				{
+					Platform.runLater( new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							switch( phase )
+							{
+								case PRE_START:
+									onPreStart();
+									break;
+								case POST_START:
+									onPostStart();
+									break;
+								case POST_STOP:
+									onPostStop();
+							}
+						}
+					} );
+				}
+			};
+
+			testRunner.registerTask( buttonTask, Phase.PRE_START, Phase.POST_START, Phase.POST_STOP );
+		}
+
+		private void onPreStart()
+		{
+			for( PlayButton button : buttons )
+			{
+				button.setDisable( true );
+			}
+		}
+
+		private void onPostStart()
+		{
+			if( isProjectRunning() )
+				onlyProjectShouldBeEnabled();
+			else
+				for( PlayButton button : buttons )
+				{
+					button.setDisable( !button.canvas.isRunning() );
+
+				}
+		}
+
+		private void onPostStop()
+		{
+			for( PlayButton button : buttons )
+			{
+				button.setDisable( false );
+			}
+		}
+
 		private List<PlayButton> buttons = Lists.newArrayList();
 
-		private Predicate<PlayButton> isButtonSelected = new Predicate<PlayButton>()
+		private Predicate<PlayButton> isCanvasRunning = new Predicate<PlayButton>()
 		{
 			@Override
 			public boolean apply( @Nullable PlayButton input )
 			{
-				return input != null && input.toggleButton.selectedProperty().get();
+				return input != null && input.canvas.isRunning();
 			}
 		};
 
@@ -194,28 +252,36 @@ public class PlayButton extends StackPane implements Releasable
 		{
 			log.debug( "Creating PlayButton for canvas {}", canvas.getLabel() );
 			PlayButton button = new PlayButton( canvas );
-			button.toggleButton.selectedProperty().addListener( buttonListener );
-			if( Iterables.any( buttons, isButtonSelected ) )
-				button.toggleButton.setDisable( true );
+			if( canvasIsNotRunningAndOtherIsRunning( button.canvas ) || isProjectRunning() )
+				button.setDisable( true );
 			buttons.add( button );
 			return button;
+		}
+
+		private boolean canvasIsNotRunningAndOtherIsRunning( CanvasItem canvas )
+		{
+			return !canvas.isRunning() && Iterables.any( buttons, isCanvasRunning );
+		}
+
+		private boolean isProjectRunning()
+		{
+			for( PlayButton button : buttons )
+				return button.canvas.getProject().isRunning();
+			return false;
+		}
+
+		private void onlyProjectShouldBeEnabled()
+		{
+			for( PlayButton button : buttons )
+			{
+				button.setDisable( button.canvas.getProject() != button.canvas );
+			}
 		}
 
 		private static void release( PlayButton button )
 		{
 			boolean rem = instance.buttons.remove( button );
 			log.debug( "AFTER REMOVING BUTTON, THERE ARE {} BUTTONS, REMOVED ANY? {}", instance.buttons.size(), rem );
-		}
-
-		private void disableAllExcept( ObservableValue<?> observable, boolean disableOthers )
-		{
-			log.debug( "Disabling buttons, currently there are {} buttons", buttons.size() );
-			for( PlayButton button : buttons )
-			{
-				boolean isOther = button.toggleButton.selectedProperty() != observable;
-				if( isOther )
-					button.setDisable( disableOthers );
-			}
 		}
 
 	}

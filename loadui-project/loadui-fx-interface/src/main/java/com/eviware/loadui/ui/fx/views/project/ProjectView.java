@@ -63,7 +63,6 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import org.slf4j.Logger;
@@ -346,23 +345,6 @@ public class ProjectView extends AnchorPane
 					public void run()
 					{
 						summaryButton.setDisable( true );
-						getPlaybackPanel().getPlayButton().setDisable( true );
-					}
-				} );
-			}
-		};
-
-		final TestExecutionTask postStartTask = new TestExecutionTask()
-		{
-			@Override
-			public void invoke( TestExecution execution, Phase phase )
-			{
-				Platform.runLater( new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						getPlaybackPanel().getPlayButton().setDisable( false );
 					}
 				} );
 			}
@@ -386,7 +368,6 @@ public class ProjectView extends AnchorPane
 
 		final TestRunner testRunner = BeanInjector.getBean( TestRunner.class );
 		testRunner.registerTask( preStartTask, Phase.PRE_START );
-		testRunner.registerTask( postStartTask, Phase.POST_START );
 		testRunner.registerTask( blockWindowTask, Phase.PRE_STOP );
 		testRunner.registerTask( postStopTask, Phase.POST_STOP );
 
@@ -396,7 +377,6 @@ public class ProjectView extends AnchorPane
 			public void invalidated( Observable arg0 )
 			{
 				testRunner.unregisterTask( preStartTask, Phase.PRE_START );
-				testRunner.unregisterTask( postStartTask, Phase.POST_START );
 				testRunner.unregisterTask( blockWindowTask, Phase.PRE_STOP );
 				testRunner.unregisterTask( postStopTask, Phase.POST_STOP );
 				getPlaybackPanel().release();
