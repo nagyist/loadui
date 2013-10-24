@@ -19,6 +19,7 @@ import com.eviware.loadui.api.statistics.Statistic;
 import com.eviware.loadui.api.traits.Labeled;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import com.eviware.loadui.ui.fx.control.ConfirmationDialog;
+import com.eviware.loadui.ui.fx.util.UIUtils;
 import com.eviware.loadui.util.statistics.StatisticNameFormatter;
 
 import javafx.event.EventHandler;
@@ -43,16 +44,27 @@ public class LabeledTreeCell extends TreeCell<Labeled> {
     }
 
     @Override
-    public void updateItem(Labeled item, boolean empty) {
+    public void updateItem(Labeled item, boolean empty) 
+	 {
         super.updateItem(item, empty);
 
-        if (empty) {
+        if (empty) 
+		  {
             setText(null);
-        } else {
-            if (item instanceof Statistic<?> || item instanceof StatisticWrapper)
-                setText(StatisticNameFormatter.format(item.getLabel()));
-            else
-                setText(item.getLabel());
-        }
+        } 
+		  else 
+		  {
+			  if( item instanceof Statistic<?> || item instanceof StatisticWrapper )
+			  {
+				  setText( StatisticNameFormatter.format( item.getLabel() ) );
+				  setId( UIUtils.toCssId( StatisticNameFormatter.format( item.getLabel() ) ) );
+
+			  }
+			  else
+			  {
+				  setText( item.getLabel() );
+				  setId( UIUtils.toCssId ( item.getLabel() ) );
+			  }
+		  }
     }
 }

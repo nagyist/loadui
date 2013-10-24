@@ -111,7 +111,7 @@ public class LoadUiRobot
 			{
 				return GuiTest.findAll( ".canvas-object-view" ).size() == numberOfComponents + 1;
 			}
-		}, 25000 );
+		}, 25 );
 
 		Set<Node> outputs = findAll( ".canvas-object-view .terminal-view.output-terminal" );
 		Set<Node> inputs = findAll( ".canvas-object-view .terminal-view.input-terminal" );

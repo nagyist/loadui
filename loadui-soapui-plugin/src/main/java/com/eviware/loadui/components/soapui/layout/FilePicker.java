@@ -30,7 +30,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextFieldBuilder;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.stage.Window;
 
 import java.io.File;
 
@@ -55,7 +54,7 @@ public class FilePicker extends HBox
 		}
 	};
 
-	public FilePicker( final Window window, final String title, final ExtensionFilter filter )
+	public FilePicker( final String title, final ExtensionFilter filter )
 	{
 		setSpacing( 4 );
 
@@ -85,7 +84,7 @@ public class FilePicker extends HBox
 			@Override
 			public void handle( ActionEvent arg0 )
 			{
-				setSelected( filePickerDialogFactory.showOpenDialog( window, title, filter ) );
+				setSelected( filePickerDialogFactory.showOpenDialog( title, filter ) );
 			}
 		} );
 

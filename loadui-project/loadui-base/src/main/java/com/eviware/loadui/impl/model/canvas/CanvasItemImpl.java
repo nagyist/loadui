@@ -65,6 +65,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.GuardedBy;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
@@ -91,7 +92,9 @@ public abstract class CanvasItemImpl<Config extends CanvasItemConfig> extends Mo
 	private ScheduledFuture<?> timeLimitFuture;
 	private long time = 0;
 	protected Summary summary = null;
+	@GuardedBy( value = "datesLock" )
 	private Date startTime;
+	@GuardedBy( value = "datesLock" )
 	private Date endTime;
 	private boolean hasStarted = false;
 	private String lastSavedHash;

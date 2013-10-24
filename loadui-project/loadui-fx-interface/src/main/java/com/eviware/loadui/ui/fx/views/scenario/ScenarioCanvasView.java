@@ -9,6 +9,7 @@ import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.SceneBuilder;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.WritableImage;
@@ -24,13 +25,11 @@ import java.awt.image.BufferedImage;
  */
 public class ScenarioCanvasView extends CanvasView
 {
-	private final SceneItem scenario;
 
 	public ScenarioCanvasView( SceneItem scenario, ProjectPlaybackPanel playbackPanel,
-							  ReadOnlyBooleanProperty toBindToLinkButtonVisibleProperty )
+										ReadOnlyBooleanProperty toBindToLinkButtonVisibleProperty )
 	{
 		super( scenario );
-		this.scenario = scenario;
 
 		ScenarioToolbar toolbar = new ScenarioToolbar( scenario );
 
@@ -46,11 +45,10 @@ public class ScenarioCanvasView extends CanvasView
 	@Override
 	public void release()
 	{
-		snapshotScene();
 		super.release();
 	}
 
-	private void snapshotScene()
+	public void snapshotScene( SceneItem sceneItem, Node canvas )
 	{
 		Region gridRegion = RegionBuilder.create().styleClass( "grid" ).style( "-fx-background-repeat: repeat;" )
 				.build();
@@ -59,7 +57,7 @@ public class ScenarioCanvasView extends CanvasView
 		String gridUrl = CanvasView.class.getResource( "grid-box.png" ).toExternalForm();
 		gridRegion.setStyle( "-fx-background-image: url('" + gridUrl + "');" );
 
-		StackPane completeCanvas = StackPaneBuilder.create().children( gridRegion ).build();
+		StackPane completeCanvas = StackPaneBuilder.create().children( gridRegion, canvas ).build();
 		SceneBuilder.create().root( completeCanvas )
 				.width( getWidth() )
 				.height( getHeight() )
@@ -69,8 +67,7 @@ public class ScenarioCanvasView extends CanvasView
 		BufferedImage bimg = SwingFXUtils.fromFXImage( fxImage, null );
 		bimg = UIUtils.scaleImage( bimg, 332, 175 );
 		String base64 = NodeUtils.toBase64Image( bimg );
-
-		scenario.setAttribute( "miniature_fx2", base64 );
+		sceneItem.setAttribute( "miniature_fx2", base64 );
 	}
 
 }

@@ -105,7 +105,7 @@ public class ScenarioView extends CanvasObjectView implements Releasable
 		{
 			playbackPanel =  new MiniScenarioPlaybackPanel( getScenario() );
 			vBox.getChildren().add( 0, playbackPanel );
-			String base64 = getCanvasObject().getAttribute( "miniature_fx2", null );
+			String base64 = getScenario().getAttribute( "miniature_fx2", null );
 
 			if( base64 != null )
 				miniature.setImage( NodeUtils.fromBase64Image( base64 ) );

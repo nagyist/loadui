@@ -109,7 +109,7 @@ public class MiscLayoutComponents
 			{
 				FilePickerDialogFactory filePickerDialogFactory = BeanInjector.getBean( FilePickerDialogFactory.class );
 
-				final FilePickerDialog confirm = filePickerDialogFactory.createPickerDialog( button.getScene(), button.getText(), title, filePickerTitle, extensionFilter );
+				final FilePickerDialog confirm = filePickerDialogFactory.createPickerDialog( button.getText(), title, filePickerTitle, extensionFilter );
 
 				Runnable callback = new Runnable()
 				{

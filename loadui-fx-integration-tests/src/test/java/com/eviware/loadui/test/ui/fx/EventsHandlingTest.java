@@ -41,7 +41,7 @@ import static org.junit.Assert.*;
  *
  * @author renato
  */
-@Category(IntegrationTest.class)
+@Category( IntegrationTest.class )
 public class EventsHandlingTest
 {
 

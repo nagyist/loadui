@@ -67,11 +67,11 @@ public class IntegrationTestUtils
 	public static void copyDirectory( File sourceLocation, File targetLocation ) throws IOException
 	{
 		if( !sourceLocation.exists() )
-			throw new IOException( "File does not exist: " + sourceLocation );
+			throw new IOException( "File does not exist: " + sourceLocation.getAbsolutePath() );
 		if( sourceLocation.isDirectory() )
 		{
 			if( !targetLocation.exists() && !targetLocation.mkdir() )
-				throw new IOException( "Unable to create directory: " + targetLocation );
+				throw new IOException( "Unable to create directory: " + targetLocation.getAbsolutePath() );
 
 			for( String child : sourceLocation.list() )
 				copyDirectory( new File( sourceLocation, child ), new File( targetLocation, child ) );

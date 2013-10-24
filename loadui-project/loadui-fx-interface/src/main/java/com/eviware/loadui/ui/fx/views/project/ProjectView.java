@@ -252,7 +252,8 @@ public class ProjectView extends AnchorPane
 				else if( event.getEventType() == IntentEvent.INTENT_CLOSE && event.getArg() instanceof SceneItem )
 				{
 					lookup( ".tool-bar" ).setStyle( TOOLBAR_STYLE_WITHOUT_SCENARIO );
-					closeScene();
+					SceneItem scenario = ( SceneItem )event.getArg();
+					closeScene( scenario );
 					event.consume();
 				}
 				else if( event.getEventType() == IntentEvent.INTENT_CLONE )
@@ -312,10 +313,11 @@ public class ProjectView extends AnchorPane
 		designTab.setDetachableContent( this, openSceneView );
 	}
 
-	private void closeScene()
+	private void closeScene( SceneItem scene )
 	{
 		playbackPanel.removeLinkButton();
 
+		Node canvas = lookup( ".pane" );
 		Region grid = ( Region )lookup( ".grid" );
 		StackPane parent = ( StackPane )grid.getParent();
 		boolean gridRemoved = parent.getChildren().remove( grid );
@@ -323,6 +325,7 @@ public class ProjectView extends AnchorPane
 
 		log.info( "Removing SceneView, gridRemoved? {}, sceneRemoved? {}", gridRemoved, sceneRemoved );
 
+		openSceneView.snapshotScene( scene, canvas );
 		openSceneView.release();
 		openSceneView = null;
 
@@ -342,23 +345,6 @@ public class ProjectView extends AnchorPane
 					public void run()
 					{
 						summaryButton.setDisable( true );
-						getPlaybackPanel().getPlayButton().setDisable( true );
-					}
-				} );
-			}
-		};
-
-		final TestExecutionTask postStartTask = new TestExecutionTask()
-		{
-			@Override
-			public void invoke( TestExecution execution, Phase phase )
-			{
-				Platform.runLater( new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						getPlaybackPanel().getPlayButton().setDisable( false );
 					}
 				} );
 			}
@@ -382,7 +368,6 @@ public class ProjectView extends AnchorPane
 
 		final TestRunner testRunner = BeanInjector.getBean( TestRunner.class );
 		testRunner.registerTask( preStartTask, Phase.PRE_START );
-		testRunner.registerTask( postStartTask, Phase.POST_START );
 		testRunner.registerTask( blockWindowTask, Phase.PRE_STOP );
 		testRunner.registerTask( postStopTask, Phase.POST_STOP );
 
@@ -392,7 +377,6 @@ public class ProjectView extends AnchorPane
 			public void invalidated( Observable arg0 )
 			{
 				testRunner.unregisterTask( preStartTask, Phase.PRE_START );
-				testRunner.unregisterTask( postStartTask, Phase.POST_START );
 				testRunner.unregisterTask( blockWindowTask, Phase.PRE_STOP );
 				testRunner.unregisterTask( postStopTask, Phase.POST_STOP );
 				getPlaybackPanel().release();

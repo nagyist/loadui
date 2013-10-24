@@ -293,7 +293,7 @@ public class SoapUiProjectSelector
 
 			setAutoHide( true );
 
-			FilePicker picker = new FilePicker( parent.getScene().getWindow(), "Select SoapUI project", new ExtensionFilter(
+			FilePicker picker = new FilePicker( "Select SoapUI project", new ExtensionFilter(
 					"SoapUI Project Files", "*.xml" ) );
 			picker.selectedProperty().bindBidirectional( Properties.convert( projectFile ) );
 

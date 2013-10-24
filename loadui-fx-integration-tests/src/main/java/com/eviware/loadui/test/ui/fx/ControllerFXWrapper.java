@@ -51,14 +51,14 @@ public class ControllerFXWrapper
 	public ControllerFXWrapper()
 	{
 		if( baseDir.exists() && !deleteRecursive( baseDir ) )
-			throw new RuntimeException( "Test directory already exists and cannot be deleted! " + baseDir.getAbsolutePath() );
+			throw new RuntimeException( "Test directory already exists and cannot be deleted! at " + baseDir.getAbsolutePath() );
 
 		log.info( "Test Basedir: " + baseDir.getAbsolutePath() );
 		if( !baseDir.mkdir() )
-			throw new RuntimeException( "Could not create test directory!" );
+			throw new RuntimeException( "Could not create test directory! at " + baseDir.getAbsolutePath() );
 
 		if( !homeDir.mkdir() )
-			throw new RuntimeException( "Could not create home directory!" );
+			throw new RuntimeException( "Could not create home directory! at " + baseDir.getAbsolutePath() );
 
 		System.setProperty( LoadUI.LOADUI_HOME, homeDir.getAbsolutePath() );
 		System.setProperty( LoadUI.LOADUI_WORKING, baseDir.getAbsolutePath() );

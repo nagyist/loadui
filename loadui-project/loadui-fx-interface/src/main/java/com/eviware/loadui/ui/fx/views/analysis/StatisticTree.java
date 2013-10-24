@@ -27,7 +27,7 @@ import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import com.eviware.loadui.ui.fx.control.ConfirmationDialog;
 import com.eviware.loadui.ui.fx.control.Dialog;
 import com.eviware.loadui.ui.fx.control.fields.Validatable;
-import com.eviware.loadui.ui.fx.util.TreeUtils.LabeledStringValue;
+import com.eviware.loadui.ui.fx.util.TreeUtils.LabeledKeyValue;
 import com.eviware.loadui.ui.fx.views.assertions.LabeledTreeCell;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -77,6 +77,7 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 	{
 		super( root );
 		setShowRoot( false );
+
 		getSelectionModel().setSelectionMode( SelectionMode.MULTIPLE );
 		getStyleClass().add( "assertable-tree" );
 
@@ -154,13 +155,12 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 	{
 		abstract void createTree( StatisticHolder holder, TreeItem<Labeled> root );
 
-		TreeItem<Labeled> treeItem( Labeled value, TreeItem<Labeled> parent )
+		TreeItem<Labeled> treeNode( Labeled value, TreeItem<Labeled> parent )
 		{
-			TreeItem<Labeled> item = new TreeItem<>( value );
-			parent.getChildren().add( item );
-			return item;
+			TreeItem<Labeled> treeNode = new TreeItem<>( value );
+			parent.getChildren().add( treeNode );
+			return treeNode;
 		}
-
 	}
 
 	private class StandardTreeCreator extends TreeCreator
@@ -173,12 +173,11 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 			for( String variableName : holder.getStatisticVariableNames() )
 			{
 				StatisticVariable variable = holder.getStatisticVariable( variableName );
-				TreeItem<Labeled> variableItem = treeItem( variable, root );
+				TreeItem<Labeled> rootNode = treeNode( variable, root );
 				boolean mayBeInAgents = forceAgentStatistics
 						|| !( variable.getStatisticHolder().getCanvas() instanceof ProjectItem );
-				createSubItems( variable, variableItem, mayBeInAgents );
+				createSubItems( variable, rootNode, mayBeInAgents );
 			}
-
 		}
 
 		private void createSubItems( StatisticVariable variable, TreeItem<Labeled> variableItem, boolean mayBeInAgents )
@@ -186,14 +185,13 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 			for( String statisticName : variable.getStatisticNames() )
 			{
 				Statistic<?> statistic = variable.getStatistic( statisticName, StatisticVariable.MAIN_SOURCE );
-				TreeItem<Labeled> statisticItem = treeItem( statistic, variableItem );
+				TreeItem<Labeled> statisticItem = treeNode( statistic, variableItem );
 				if( !agents.isEmpty() && mayBeInAgents )
 				{
 					statisticItem.getChildren().add( dummyItem( AGENT_TOTAL, StatisticVariable.MAIN_SOURCE ) );
 					for( AgentItem agent : agents )
-						treeItem( new LabeledStringValue( agent.getLabel() ), statisticItem );
+						treeNode( new LabeledKeyValue<>( agent.getLabel(), agent.getLabel() ), statisticItem );
 				}
-
 			}
 		}
 	}
@@ -203,17 +201,15 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 		@Override
 		public void createTree( StatisticHolder holder, TreeItem<Labeled> root )
 		{
-
 			for( String variableName : holder.getStatisticVariableNames() )
 			{
 				StatisticVariable variable = holder.getStatisticVariable( variableName );
-				final TreeItem<Labeled> variableItem = treeItem( variable, root );
-				createSubItems( variable, variableItem );
+				final TreeItem<Labeled> variableItem = treeNode( variable, root );
+				createBranches( variable, variableItem );
 			}
-
 		}
 
-		private void createSubItems( StatisticVariable variable, final TreeItem<Labeled> variableItem )
+		private void createBranches( StatisticVariable variable, final TreeItem<Labeled> variableItem )
 		{
 			for( String statisticName : variable.getStatisticNames() )
 			{
@@ -226,7 +222,7 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 					TreeItem<Labeled> statItem = statsByLabel.get( statistic.getLabel() );
 					if( statItem == null )
 					{
-						statItem = treeItem( statistic, variableItem );
+						statItem = treeNode( statistic, variableItem );
 						statsByLabel.put( statistic.getLabel(), statItem );
 					}
 					itemsBySource.put( source, statItem );
@@ -234,9 +230,10 @@ public class StatisticTree extends TreeView<Labeled> implements Validatable
 
 				for( String source : variable.getSources() )
 					if( !source.equals( StatisticVariable.MAIN_SOURCE ) )
-						treeItem( new LabeledStringValue( source ), itemsBySource.get( source ) );
+						treeNode( new LabeledKeyValue<>( source, source ), itemsBySource.get( source ) );
 			}
 		}
+
 	}
 
 	@Override
