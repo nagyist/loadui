@@ -10,9 +10,12 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
 /**
@@ -109,6 +112,88 @@ public class AbstractTestRunnerTest
 			future.get( 5, TimeUnit.SECONDS );
 
 		verifyZeroInteractions( task1 );
+	}
+
+	@Test
+	public void canRegisterNewTasksWhileRunningSomeTask() throws Exception
+	{
+		TestExecution execution = mock( TestExecution.class );
+		final CountDownLatch countDown = new CountDownLatch( 2 );
+
+		TestExecutionTask task1 = new TestExecutionTask()
+		{
+			@Override
+			public void invoke( TestExecution execution, Phase phase )
+			{
+				testRunner.runTaskOnce( new TestExecutionTask()
+				{
+					@Override
+					public void invoke( TestExecution execution, Phase phase )
+					{
+						countDown.countDown();
+					}
+				}, Phase.STOP );
+				try
+				{
+					Thread.sleep( 50 );
+				}
+				catch( InterruptedException e )
+				{
+					e.printStackTrace();
+				}
+				countDown.countDown();
+			}
+		};
+
+		testRunner.runTaskOnce( task1, Phase.START );
+
+		ListenableFuture<Void> future1 = testRunner.runPhase( Phase.START, execution );
+		future1.get( 1, TimeUnit.SECONDS );
+		testRunner.runPhase( Phase.STOP, execution );
+
+		assertThat( "Ran both TestExecutionTasks", countDown.await( 1, TimeUnit.SECONDS ), is( true ) );
+
+	}
+
+	@Test
+	public void canRegisterNewTaskWhileRunningSomeTaskInSamePhase() throws Exception
+	{
+		TestExecution execution = mock( TestExecution.class );
+		final CountDownLatch countDown = new CountDownLatch( 2 );
+
+		TestExecutionTask task1 = new TestExecutionTask()
+		{
+			@Override
+			public void invoke( TestExecution execution, Phase phase )
+			{
+				testRunner.runTaskOnce( new TestExecutionTask()
+				{
+					@Override
+					public void invoke( TestExecution execution, Phase phase )
+					{
+						countDown.countDown();
+					}
+				}, Phase.START );
+				try
+				{
+					Thread.sleep( 50 );
+				}
+				catch( InterruptedException e )
+				{
+					e.printStackTrace();
+				}
+				countDown.countDown();
+			}
+		};
+
+		testRunner.runTaskOnce( task1, Phase.START );
+
+		ListenableFuture<Void> future1 = testRunner.runPhase( Phase.START, execution );
+		future1.get( 1, TimeUnit.SECONDS );
+		testRunner.runPhase( Phase.START, execution );
+
+		assertThat( "Ran both TestExecutionTasks", countDown.await( 1, TimeUnit.SECONDS ), is( true ) );
+
 	}
 
 }
