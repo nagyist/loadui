@@ -38,7 +38,6 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -293,8 +292,8 @@ public class SoapUiProjectSelector
 
 			setAutoHide( true );
 
-			FilePicker picker = new FilePicker( "Select SoapUI project", new ExtensionFilter(
-					"SoapUI Project Files", "*.xml" ) );
+			FilePicker picker = new FilePicker( "Select SoapUI project",
+					"SoapUI Project Files", "*.xml" );
 			picker.selectedProperty().bindBidirectional( Properties.convert( projectFile ) );
 
 			VBox vBox = VBoxBuilder

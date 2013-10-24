@@ -1,7 +1,5 @@
 package com.eviware.loadui.api.ui.dialog;
 
-import javafx.stage.FileChooser;
-
 import java.io.File;
 
 /**
@@ -14,5 +12,6 @@ public interface FilePickerDialogFactory
 {
 	public FilePickerDialog createPickerDialog( String buttonText, String stageTitle, String filePickerTitle, FilePickerDialog.ExtensionFilter filter );
 
-	public File showOpenDialog( String title, FileChooser.ExtensionFilter filter );
+	public File showOpenDialog( String title, String extensionFilterDescription,
+										 String extensionFilterRegex );
 }
