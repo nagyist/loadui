@@ -15,20 +15,20 @@
  */
 package com.eviware.loadui.ui.fx.views.statistics;
 
+import com.eviware.loadui.api.statistics.StatisticHolder;
+import com.eviware.loadui.ui.fx.control.DragNode;
+import com.eviware.loadui.ui.fx.util.Properties;
+import com.eviware.loadui.ui.fx.util.UIUtils;
 import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eviware.loadui.api.statistics.StatisticHolder;
-import com.eviware.loadui.ui.fx.control.DragNode;
-import com.eviware.loadui.ui.fx.util.Properties;
-import com.eviware.loadui.ui.fx.util.UIUtils;
+import static com.eviware.loadui.ui.fx.util.UIUtils.toCssId;
 
 public class StatisticHolderToolboxItem extends Label
 {
@@ -40,6 +40,8 @@ public class StatisticHolderToolboxItem extends Label
 	public StatisticHolderToolboxItem( final StatisticHolder holder )
 	{
 		this.holder = holder;
+
+		setId( toCssId( holder.getLabel() ) );
 
 		vbox = VBoxBuilder.create().spacing( 6 ).maxHeight( 68 ).minHeight( 68 ).build();
 		getStyleClass().add( "icon" );

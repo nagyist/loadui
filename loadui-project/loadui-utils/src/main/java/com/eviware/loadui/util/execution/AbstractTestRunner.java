@@ -15,19 +15,6 @@
  */
 package com.eviware.loadui.util.execution;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.WeakHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.execution.Phase;
 import com.eviware.loadui.api.execution.TestExecution;
 import com.eviware.loadui.api.execution.TestExecutionTask;
@@ -39,13 +26,20 @@ import com.google.common.collect.Multimaps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.concurrent.GuardedBy;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 /**
  * Provides a partial implementation of TestRunner, taking care of managing
  * TestExecutionTasks.
- * 
+ *
  * @author dain.nilsson
  */
 public abstract class AbstractTestRunner implements TestRunner
@@ -53,15 +47,27 @@ public abstract class AbstractTestRunner implements TestRunner
 	public static final Logger log = LoggerFactory.getLogger( TestRunner.class );
 
 	private final ListeningExecutorService executorService;
+
+	@GuardedBy( "tasks" )
 	private final Multimap<Phase, TestExecutionTask> tasks = Multimaps.newSetMultimap(
 			new HashMap<Phase, Collection<TestExecutionTask>>(), new Supplier<Set<TestExecutionTask>>()
-			{
-				@Override
-				public Set<TestExecutionTask> get()
-				{
-					return Collections.newSetFromMap( new WeakHashMap<TestExecutionTask, Boolean>() );
-				}
-			} );
+	{
+		@Override
+		public Set<TestExecutionTask> get()
+		{
+			return Collections.newSetFromMap( new WeakHashMap<TestExecutionTask, Boolean>() );
+		}
+	} );
+	@GuardedBy( "runOnceTasks" )
+	private final Multimap<Phase, TestExecutionTask> runOnceTasks = Multimaps.newSetMultimap(
+			new HashMap<Phase, Collection<TestExecutionTask>>(), new Supplier<Set<TestExecutionTask>>()
+	{
+		@Override
+		public Set<TestExecutionTask> get()
+		{
+			return new HashSet<>();
+		}
+	} );
 
 	public AbstractTestRunner( ExecutorService executorService )
 	{
@@ -69,11 +75,24 @@ public abstract class AbstractTestRunner implements TestRunner
 	}
 
 	@Override
-	public synchronized void registerTask( TestExecutionTask task, Phase... phases )
+	public void registerTask( TestExecutionTask task, Phase... phases )
 	{
+
 		for( Phase phase : phases )
 		{
-			tasks.put( phase, task );
+			synchronized( tasks )
+			{
+				tasks.put( phase, task );
+			}
+		}
+	}
+
+	@Override
+	public void runTaskOnce( TestExecutionTask task, Phase phase )
+	{
+		synchronized( runOnceTasks )
+		{
+			runOnceTasks.put( phase, task );
 		}
 	}
 
@@ -82,7 +101,10 @@ public abstract class AbstractTestRunner implements TestRunner
 	{
 		for( Phase phase : phases )
 		{
-			tasks.remove( phase, task );
+			synchronized( tasks )
+			{
+				tasks.remove( phase, task );
+			}
 		}
 	}
 
@@ -92,10 +114,10 @@ public abstract class AbstractTestRunner implements TestRunner
 	 * one Execution is being run at one time, so care should be taken externally
 	 * to always wait for a submitted Phase to complete before running another
 	 * one.
-	 * 
-	 * @param phase
-	 * @param execution
-	 * @return
+	 *
+	 * @param phase to run
+	 * @param execution an execution
+	 * @return a ListenableFuture representing pending completion of the phase
 	 */
 	@SuppressFBWarnings( justification = "ExecutorService.submit CAN take a null result.", value = "NP_NONNULL_PARAM_VIOLATION" )
 	protected ListenableFuture<Void> runPhase( Phase phase, TestExecution execution )
@@ -107,9 +129,9 @@ public abstract class AbstractTestRunner implements TestRunner
 	 * Waits for a Future to complete, logging any checked exceptions thrown.
 	 * Returns true if the Future completed without throwing any checked
 	 * exceptions.
-	 * 
-	 * @param future
-	 * @return
+	 *
+	 * @param future to wait for
+	 * @return true if the future returned successfully, false if an error happened
 	 */
 	protected boolean awaitFuture( Future<?> future )
 	{
@@ -118,11 +140,7 @@ public abstract class AbstractTestRunner implements TestRunner
 			future.get();
 			return true;
 		}
-		catch( InterruptedException e )
-		{
-			log.error( "Error invoking TestExecutionTask", e );
-		}
-		catch( ExecutionException e )
+		catch( InterruptedException | ExecutionException e )
 		{
 			log.error( "Error invoking TestExecutionTask", e );
 		}
@@ -145,15 +163,32 @@ public abstract class AbstractTestRunner implements TestRunner
 		{
 			log.debug( "Starting phase: {}", phase );
 			LinkedList<Future<?>> futures = Lists.newLinkedList();
-			for( TestExecutionTask task : tasks.get( phase ) )
+
+
+			for( TestExecutionTask task : getTasksToRun() )
 			{
 				futures.add( executorService.submit( new TaskRunner( task ) ) );
 			}
+
 			for( Future<?> future : futures )
 			{
 				awaitFuture( future );
 			}
 			log.debug( "Completed phase: {}", phase );
+		}
+
+		private Collection<TestExecutionTask> getTasksToRun()
+		{
+			Collection<TestExecutionTask> tasksToRun = new ArrayList<>();
+			synchronized( runOnceTasks )
+			{
+				tasksToRun.addAll( runOnceTasks.removeAll( phase ) );
+			}
+			synchronized( tasks )
+			{
+				tasksToRun.addAll( tasks.get( phase ) );
+			}
+			return tasksToRun;
 		}
 
 		private class TaskRunner implements Runnable

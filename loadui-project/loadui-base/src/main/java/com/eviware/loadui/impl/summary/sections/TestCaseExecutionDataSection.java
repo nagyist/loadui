@@ -16,19 +16,22 @@
 package com.eviware.loadui.impl.summary.sections;
 
 import com.eviware.loadui.api.model.CanvasItem;
-import com.eviware.loadui.impl.model.SceneItemImpl;
+import com.eviware.loadui.api.summary.MutableSummary;
+import com.eviware.loadui.impl.model.canvas.SceneItemImpl;
 import com.eviware.loadui.impl.summary.MutableSectionImpl;
 import com.eviware.loadui.util.summary.CalendarUtils;
 
 public class TestCaseExecutionDataSection extends MutableSectionImpl
 {
 
-	SceneItemImpl testcase;
+	final SceneItemImpl testcase;
+	final MutableSummary summary;
 
-	public TestCaseExecutionDataSection( SceneItemImpl sceneItem )
+	public TestCaseExecutionDataSection( SceneItemImpl sceneItem, MutableSummary summary )
 	{
 		super( "Execution Data" );
 		testcase = sceneItem;
+		this.summary = summary;
 		addValue( "Duration", getExecutionTime() );// hh:mm:ss
 		addValue( "Start Time", getStartTime() );
 		addValue( "End Time", getEndTime() );
@@ -40,21 +43,21 @@ public class TestCaseExecutionDataSection extends MutableSectionImpl
 
 	public final String getExecutionTime()
 	{
-		return CalendarUtils.formatInterval( testcase.getStartTime(), testcase.getEndTime() );
+		return CalendarUtils.formatInterval( summary.getStartTime(), summary.getEndTime() );
 	}
 
 	public final String getStartTime()
 	{
-		if( testcase.getStartTime() == null )
+		if( summary.getStartTime() == null )
 			return "N/A";
-		return CalendarUtils.formatAbsoluteTime( testcase.getStartTime() );
+		return CalendarUtils.formatAbsoluteTime( summary.getStartTime() );
 	}
 
 	public final String getEndTime()
 	{
-		if( testcase.getEndTime() == null )
+		if( summary.getEndTime() == null )
 			return "N/A";
-		return CalendarUtils.formatAbsoluteTime( testcase.getEndTime() );
+		return CalendarUtils.formatAbsoluteTime( summary.getEndTime() );
 	}
 
 	public final String getTotalNumberOfRequests()

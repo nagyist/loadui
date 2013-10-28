@@ -15,64 +15,36 @@
  */
 package com.eviware.loadui.util.execution;
 
-import java.util.List;
-
+import com.eviware.loadui.api.execution.TestExecution;
+import com.eviware.loadui.api.execution.TestRunner;
+import com.eviware.loadui.api.execution.TestState;
+import com.eviware.loadui.api.model.CanvasItem;
+import com.eviware.loadui.util.BeanInjector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eviware.loadui.api.execution.TestExecution;
-import com.eviware.loadui.api.execution.TestRunner;
-import com.eviware.loadui.api.model.CanvasItem;
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.util.BeanInjector;
-import com.google.common.collect.Lists;
+import java.util.List;
 
 public final class TestExecutionUtils
 {
 	private static final Logger log = LoggerFactory.getLogger( TestExecutionUtils.class );
-	public static final String WARN_STOPPING_TEST = "gui.warn_stopping_test";
 	public static final TestRunner testRunner = BeanInjector.getBean( TestRunner.class );
 
 	public static TestExecution startCanvas( CanvasItem canvas )
 	{
-		log.info( "Starting canvas" );
-		TestExecution currentExecution = popCurrentExecution();
+		log.info( "Trying to start canvas {}", canvas.getLabel() );
+		TestExecution currentExecution = getCurrentExecution();
 
-		if( currentExecution != null )
+		if( currentExecution != null && currentExecution.getState() != TestState.COMPLETED )
 		{
-			if( !( canvas instanceof ProjectItem ) && canvas.getProject() == currentExecution.getCanvas() )
-			{
-				canvas.triggerAction( CanvasItem.START_ACTION );
-				return null;
-			}
-			if( Boolean.parseBoolean( canvas.getProject().getAttribute( WARN_STOPPING_TEST, "true" ) ) )
-			{
-				//TODO: Add this dialog
-
-				//				CheckBox checkbox = new CheckBox( "Don't show this dialog again" );
-				//				Dialog dialog = new ConfirmationDialog()
-				//					title: "Stop current test?"
-				//					content: [
-				//						Label { text: "Starting {canvas.getLabel()} requires that the current test be stopped.\r\nDo you wish to stop the currently running test?\r\n" },
-				//						checkbox
-				//					]
-				//					okText: "Yes"
-				//					cancelText: "No"
-				//					onOk: function() {
-				//						if( checkbox.selected ) canvas.getProject().setAttribute( WARN_STOPPING_TEST, "false" );
-				//						for( execution in queuedExecutions ) execution.abort( "Aborting queued execution" );
-				//						currentExecution.complete();
-				//						testRunner.enqueueExecution( canvas );
-				//						dialog.close();
-				//					}
-				//				}
-				return null;
-			}
-			abortAllExecutions();
-			currentExecution.complete();
+			log.warn( "Cannot start an Execution while another is running! Will ignore request!" );
+			return currentExecution;
 		}
-		log.info( "Enqueing new Execution: " + canvas.getDescription() );
-		return testRunner.enqueueExecution( canvas );
+		else
+		{
+			log.info( "Requesting new Execution to start on canvas {}", canvas.getDescription() );
+			return testRunner.enqueueExecution( canvas );
+		}
 	}
 
 	public static TestExecution stopCanvas( CanvasItem canvas )
@@ -81,32 +53,21 @@ public final class TestExecutionUtils
 		if( execution != null )
 		{
 			if( execution.getCanvas() == canvas )
-			{
 				execution.complete();
-				return execution;
-			}
-			else if( execution.getCanvas() == canvas.getProject() )
-			{
-				canvas.triggerAction( CanvasItem.STOP_ACTION );
-			}
+			else
+				log.warn( "Tried to stop canvas which is not associated with currently running execution!" );
 		}
-		return null;
+		else
+		{
+			log.warn( "Request to stop canvas '{}' being ignored as there is no execution running", canvas.getDescription() );
+		}
+		return execution;
 	}
 
 	public static boolean isExecutionRunning()
 	{
-		List<TestExecution> e = testRunner.getExecutionQueue();
-		return e.size() > 0 && !e.get( 0 ).isAborted();
-	}
-
-	private static TestExecution popCurrentExecution()
-	{
-		List<TestExecution> queuedExecutions = Lists.newArrayList( testRunner.getExecutionQueue() );
-		if( !queuedExecutions.isEmpty() )
-		{
-			return queuedExecutions.remove( 0 );
-		}
-		return null;
+		TestExecution execution = getCurrentExecution();
+		return execution != null && execution.getState() != TestState.COMPLETED;
 	}
 
 	private static TestExecution getCurrentExecution()
@@ -117,15 +78,6 @@ public final class TestExecutionUtils
 			return queuedExecutions.get( 0 );
 		}
 		return null;
-	}
-
-	private static void abortAllExecutions()
-	{
-		List<TestExecution> queuedExecutions = testRunner.getExecutionQueue();
-		for( TestExecution execution : queuedExecutions )
-		{
-			execution.abort( "Aborting queued execution" );
-		}
 	}
 
 }

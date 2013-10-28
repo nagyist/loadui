@@ -54,10 +54,10 @@ public class ConstraintPane extends VBox implements Validatable
 
 	public ConstraintPane()
 	{
-		minField = ValidatableLongField.Builder.create().build();
+		minField = ValidatableLongField.Builder.create().id("min").build();
 		VBox minBox = VBoxBuilder.create().spacing( VERTICAL_SPACING ).children( new Label( "Min" ), minField ).build();
 
-		maxField = ValidatableLongField.Builder.create().longConstraint( new Predicate<Long>()
+		maxField = ValidatableLongField.Builder.create().id("max").longConstraint( new Predicate<Long>()
 		{
 			@Override
 			public boolean apply( @Nullable Long input )
@@ -70,7 +70,7 @@ public class ConstraintPane extends VBox implements Validatable
 		Label constrainLabel = LabelBuilder.create().text( "Constraint" ).build();
 		constrainLabel.getStyleClass().add( "strong" );
 
-		HBox constraintFields = HBoxBuilder.create().spacing( 26.0 ).children( minBox, maxBox ).build();
+		HBox constraintFields = HBoxBuilder.create().spacing( 26.0 ).styleClass( "constraints" ).children( minBox, maxBox ).build();
 
 		timesAllowed = ValidatableLongField.Builder.create().text( "0" ).build();
 		timeWindow = ValidatableLongField.Builder.create().convertFunction( EMPTY_TO_NEGATIVE_ONE )

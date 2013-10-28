@@ -18,6 +18,8 @@ package com.eviware.loadui.test;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
@@ -43,14 +45,33 @@ public class IntegrationTestUtils
 		return target.delete();
 	}
 
+	@Nullable
+	public static File newestDirectoryIn( @Nonnull File directory )
+	{
+		File[] files = directory.listFiles();
+		if( files == null || files.length == 0 )
+			return null;
+		File newest = null;
+		long newestTime = Long.MIN_VALUE;
+		for( File file : files )
+		{
+			if( file.isDirectory() && file.lastModified() > newestTime )
+			{
+				newest = file;
+				newestTime = file.lastModified();
+			}
+		}
+		return newest;
+	}
+
 	public static void copyDirectory( File sourceLocation, File targetLocation ) throws IOException
 	{
 		if( !sourceLocation.exists() )
-			throw new IOException( "File does not exist: " + sourceLocation );
+			throw new IOException( "File does not exist: " + sourceLocation.getAbsolutePath() );
 		if( sourceLocation.isDirectory() )
 		{
 			if( !targetLocation.exists() && !targetLocation.mkdir() )
-				throw new IOException( "Unable to create directory: " + targetLocation );
+				throw new IOException( "Unable to create directory: " + targetLocation.getAbsolutePath() );
 
 			for( String child : sourceLocation.list() )
 				copyDirectory( new File( sourceLocation, child ), new File( targetLocation, child ) );
@@ -64,15 +85,14 @@ public class IntegrationTestUtils
 	public static int getAvailablePort()
 	{
 
-		try( ServerSocket ss = new ServerSocket( 0 ) )
+		try(ServerSocket ss = new ServerSocket( 0 ))
 		{
 			ss.setReuseAddress( true );
 			return ss.getLocalPort();
 		}
 		catch( IOException e )
 		{
-		}
-		finally
+		} finally
 		{
 			try
 			{
@@ -97,7 +117,7 @@ public class IntegrationTestUtils
 
 	public static boolean isPortAvailable( int port )
 	{
-		try( ServerSocket ss = new ServerSocket( port ) )
+		try(ServerSocket ss = new ServerSocket( port ))
 		{
 			ss.setReuseAddress( true );
 			return true;

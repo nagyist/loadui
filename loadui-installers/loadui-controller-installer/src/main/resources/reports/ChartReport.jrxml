@@ -3,7 +3,7 @@
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<template><![CDATA["reports/styles.jrtx"]]></template>
+	<template><![CDATA[com.eviware.loadui.LoadUI.getWorkingDir().getAbsolutePath() + "/reports/styles.jrtx"]]></template>
 	<field name="chart" class="java.awt.Image"/>
 	<field name="chartName" class="java.lang.String"/>
 	<field name="legend" class="net.sf.jasperreports.engine.JRDataSource"/>

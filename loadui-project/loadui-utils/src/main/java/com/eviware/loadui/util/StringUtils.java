@@ -22,7 +22,7 @@ import java.util.List;
 
 /**
  * Utility class for Strings.
- * 
+ *
  * @author dain.nilsson
  */
 public class StringUtils
@@ -31,7 +31,7 @@ public class StringUtils
 
 	/**
 	 * Checks of the given String is null or empty.
-	 * 
+	 *
 	 * @param string
 	 * @return
 	 */
@@ -43,7 +43,7 @@ public class StringUtils
 	/**
 	 * Capitalizes the first character of a String. If the String is null, null
 	 * is returned.
-	 * 
+	 *
 	 * @param string
 	 * @return
 	 */
@@ -55,7 +55,7 @@ public class StringUtils
 
 	/**
 	 * Capitalizes The First Character Of Each Word In The String.
-	 * 
+	 *
 	 * @param string
 	 * @return
 	 */
@@ -75,7 +75,7 @@ public class StringUtils
 	/**
 	 * Shortens a String if it is longer than the given maxLength, ending an
 	 * abbreviated String with "...".
-	 * 
+	 *
 	 * @param string
 	 * @param maxLength
 	 * @return
@@ -89,7 +89,7 @@ public class StringUtils
 	 * Shortens a String if it is longer than the given maxLength, keeping the
 	 * start and end intact, placing "..." in the middle of the String where
 	 * content was removed.
-	 * 
+	 *
 	 * @param string
 	 * @param maxLength
 	 * @return
@@ -102,9 +102,20 @@ public class StringUtils
 	}
 
 	/**
+	 * Replaces all underscores with spaces
+	 *
+	 * @param original
+	 * @return the string with all underscores replaced as spaces
+	 */
+	public static String replaceAllUnderscoreWithSpace( String original )
+	{
+		return original.replace( '_', ' ' );
+	}
+
+	/**
 	 * Converts line separators in a String to the system default (defined in the
 	 * System Property "line.separator").
-	 * 
+	 *
 	 * @param string
 	 * @return
 	 */
@@ -116,7 +127,7 @@ public class StringUtils
 	/**
 	 * Converts a Collection (or array, or varargs) of Strings into a single
 	 * String, joined by the system default line separator characters.
-	 * 
+	 *
 	 * @param lines
 	 * @return
 	 */
@@ -137,7 +148,7 @@ public class StringUtils
 	/**
 	 * Serializes a collection of Strings into a single string, which can later
 	 * be deserialized to give a List of the original values. Order is preserved.
-	 * 
+	 *
 	 * @param strings
 	 * @return
 	 */
@@ -153,7 +164,7 @@ public class StringUtils
 	/**
 	 * Serializes several Strings into a single string, which can later be
 	 * deserialized to give a List of the original values. Order is preserved.
-	 * 
+	 *
 	 * @param strings
 	 * @return
 	 */
@@ -168,7 +179,7 @@ public class StringUtils
 
 	/**
 	 * Deserializes a serialized String back into a List of the original values.
-	 * 
+	 *
 	 * @param serialized
 	 * @return
 	 */
@@ -187,6 +198,7 @@ public class StringUtils
 		return strings;
 	}
 
+
 	public static String toHhMmSs( long seconds )
 	{
 		DecimalFormat f = new DecimalFormat( "00" );
@@ -198,13 +210,13 @@ public class StringUtils
 
 	public static String padLeft( String str, int length )
 	{
-		if (length <= 0) length = 1;
+		if( length <= 0 ) length = 1;
 		return String.format( "%1$" + length + "s", str );
 	}
 
 	public static String padRight( String str, int length )
 	{
-		if (length <= 0) length = 1;
+		if( length <= 0 ) length = 1;
 		return String.format( "%1$-" + length + "s", str );
 	}
 }

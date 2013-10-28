@@ -15,9 +15,9 @@
  */
 package com.eviware.loadui.api.execution;
 
-import java.util.concurrent.Future;
-
 import com.eviware.loadui.api.model.CanvasItem;
+
+import java.util.concurrent.Future;
 
 /**
  * The execution of a load test.
@@ -62,29 +62,4 @@ public interface TestExecution
 	 */
 	public Future<ExecutionResult> complete();
 
-	/**
-	 * Same as complete(), but also sets the aborting flag to true, indicating
-	 * that queued requests and requests in progress should be discarded.
-	 * 
-	 * @param reason
-	 *           The reason for aborting the TestExecution.
-	 * @return
-	 */
-	public Future<ExecutionResult> abort( String reason );
-
-	/**
-	 * If set to true, the test was aborted (or currently in the process of
-	 * aborting).
-	 * 
-	 * @return
-	 */
-	public boolean isAborted();
-
-	/**
-	 * Returns a message describing the reason for aborting. This method is only
-	 * applicable if the TestExecution was aborted, for obvious reasons.
-	 * 
-	 * @return
-	 */
-	public String getAbortedReason();
 }

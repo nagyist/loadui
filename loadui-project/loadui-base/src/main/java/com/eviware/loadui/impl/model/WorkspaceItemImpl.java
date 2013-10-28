@@ -25,6 +25,7 @@ import com.eviware.loadui.api.execution.TestExecution;
 import com.eviware.loadui.api.execution.TestRunner;
 import com.eviware.loadui.api.model.*;
 import com.eviware.loadui.api.property.Property;
+import com.eviware.loadui.api.ui.LatestDirectoryService;
 import com.eviware.loadui.config.*;
 import com.eviware.loadui.impl.XmlBeansUtils;
 import com.eviware.loadui.util.BeanInjector;
@@ -36,6 +37,8 @@ import org.apache.xmlbeans.XmlException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,23 +60,25 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 	private final AgentListener agentListener = new AgentListener();
 	private final Property<Boolean> localMode;
 	private final Property<Long> numberOfAutosaves;
+	private ProjectItem currentProject = null;
 	private final AgentFactory agentFactory;
 	private final ScheduledExecutorService agentReseter = Executors.newSingleThreadScheduledExecutor();
+	private final LatestDirectoryService latestDirectoryService;
 
-	public static WorkspaceItemImpl loadWorkspace( File workspaceFile, AgentFactory agentFactory )
+	public static WorkspaceItemImpl loadWorkspace( File workspaceFile, AgentFactory agentFactory, LatestDirectoryService latestDirectoryService )
 			throws XmlException, IOException
 	{
 		WorkspaceItemImpl object = new WorkspaceItemImpl( workspaceFile,
 				workspaceFile.exists() ? LoaduiWorkspaceDocumentConfig.Factory.parse( workspaceFile )
 						: LoaduiWorkspaceDocumentConfig.Factory.newInstance(),
-				agentFactory );
+				agentFactory, latestDirectoryService );
 		object.init();
 		object.postInit();
 
 		return object;
 	}
 
-	private WorkspaceItemImpl( File workspaceFile, LoaduiWorkspaceDocumentConfig doc, AgentFactory agentFactory )
+	private WorkspaceItemImpl( File workspaceFile, LoaduiWorkspaceDocumentConfig doc, AgentFactory agentFactory, LatestDirectoryService latestDirectoryService )
 	{
 		super( doc.getLoaduiWorkspace() == null ? doc.addNewLoaduiWorkspace() : doc.getLoaduiWorkspace() );
 
@@ -83,6 +88,7 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 		this.doc = doc;
 		this.agentFactory = agentFactory;
 		this.workspaceFile = workspaceFile;
+		this.latestDirectoryService = latestDirectoryService;
 
 		localMode = createProperty( LOCAL_MODE_PROPERTY, Boolean.class, true );
 		createProperty( MAX_THREADS_PROPERTY, Long.class, 1000 );
@@ -245,6 +251,7 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 	}
 
 	@Override
+	@Nonnull
 	public Collection<ProjectItem> getProjects()
 	{
 		Collection<ProjectItem> list = new ArrayList<>();
@@ -255,12 +262,14 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 	}
 
 	@Override
+	@Nonnull
 	public Collection<ProjectRef> getProjectRefs()
 	{
 		return ImmutableSet.<ProjectRef>copyOf( projectList.getItems() );
 	}
 
 	@Override
+	@Nonnull
 	public Collection<AgentItemImpl> getAgents()
 	{
 		return agentList.getItems();
@@ -336,6 +345,7 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 		log.debug( "public void projectLoaded" );
 		fireCollectionEvent( PROJECTS, CollectionEvent.Event.ADDED, project );
 		project.addEventListener( BaseEvent.class, projectListener );
+		currentProject = project;
 	}
 
 	@Override
@@ -391,6 +401,12 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 	}
 
 	@Override
+	public ProjectItem getCurrentProject()
+	{
+		return currentProject;
+	}
+
+	@Override
 	public ModelItemType getModelItemType()
 	{
 		return ModelItemType.WORKSPACE;
@@ -402,7 +418,10 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 		public void handleEvent( BaseEvent event )
 		{
 			if( event.getKey().equals( RELEASED ) )
+			{
+				currentProject = null;
 				fireCollectionEvent( PROJECTS, CollectionEvent.Event.REMOVED, event.getSource() );
+			}
 			else if( event.getKey().equals( DELETED ) )
 				removeProject( ( ProjectItem )event.getSource() );
 		}
@@ -449,4 +468,27 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 	{
 		return localMode;
 	}
+
+	@Override
+	public void setLatestDirectory( @Nullable String identifier, File file )
+	{
+		if( identifier == null )
+		{
+			identifier = WorkspaceItem.LATEST_DIRECTORY;
+		}
+
+		latestDirectoryService.setLatestDirectory( identifier, file, this );
+	}
+
+	@Override
+	public File getLatestDirectory( @Nullable String identifier )
+	{
+		if( identifier == null )
+		{
+			identifier = WorkspaceItem.LATEST_DIRECTORY;
+		}
+
+		return latestDirectoryService.getLatestDirectory( identifier, this );
+	}
+
 }

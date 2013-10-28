@@ -96,11 +96,12 @@ public final class AgentItemImpl extends ModelItemImpl<AgentItemConfig> implemen
 				if( isConnected )
 				{
 					broadcastEndpoint.registerEndpoint( AgentItemImpl.this );
+					connected = true;
 				}
 				else
 				{
 					broadcastEndpoint.deregisterEndpoint( AgentItemImpl.this );
-					AgentItemImpl.this.connected = false;
+					connected = false;
 					fireBaseEvent( READY );
 				}
 			}
@@ -109,7 +110,7 @@ public final class AgentItemImpl extends ModelItemImpl<AgentItemConfig> implemen
 		addMessageListener( AgentItem.AGENT_CHANNEL, new MessageListener()
 		{
 			@Override
-			@SuppressWarnings( "unchecked" )
+			@SuppressWarnings("unchecked")
 			public void handleMessage( String channel, MessageEndpoint endpoint, Object data )
 			{
 				log.debug( "Handling message: {}/{}", channel, data );
@@ -151,7 +152,7 @@ public final class AgentItemImpl extends ModelItemImpl<AgentItemConfig> implemen
 							.getStringValue() );
 					sendMessage( AgentItem.AGENT_CHANNEL, Collections.singletonMap( AgentItem.SET_MAX_THREADS,
 							getProperty( MAX_THREADS_PROPERTY ).getStringValue() ) );
-					AgentItemImpl.this.connected = true;
+					connected = true;
 					fireBaseEvent( READY );
 					fireBaseEvent( UTILIZATION );
 					resetTimeDifference();
@@ -216,6 +217,8 @@ public final class AgentItemImpl extends ModelItemImpl<AgentItemConfig> implemen
 	{
 		return connected;
 	}
+
+
 
 	@Override
 	public int getUtilization()
@@ -307,6 +310,7 @@ public final class AgentItemImpl extends ModelItemImpl<AgentItemConfig> implemen
 	public void close()
 	{
 		endpointSupport.close();
+		connected = false;
 	}
 
 	@Override

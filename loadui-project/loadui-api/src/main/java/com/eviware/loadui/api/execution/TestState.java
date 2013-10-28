@@ -22,5 +22,5 @@ package com.eviware.loadui.api.execution;
  */
 public enum TestState
 {
-	ENQUEUED, STARTING, RUNNING, STOPPING, COMPLETED
+	STARTING, RUNNING, STOPPING, COMPLETED
 }

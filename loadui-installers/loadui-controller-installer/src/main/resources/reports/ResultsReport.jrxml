@@ -3,7 +3,7 @@
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<template><![CDATA["reports/styles.jrtx"]]></template>
+	<template><![CDATA[com.eviware.loadui.LoadUI.getWorkingDir().getAbsolutePath() + "/reports/styles.jrtx"]]></template>
 	<subDataset name="Table Dataset 2"/>
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["D:\\Documents\\Eclipse Workspaces\\eviware\\loadui-project\\loadui-installer\\src\\controller\\resources\\reports\\"]]></defaultValueExpression>
@@ -146,7 +146,7 @@
 		<band height="35">
 			<image>
 				<reportElement x="0" y="20" width="60" height="10"/>
-				<imageExpression class="java.lang.String"><![CDATA["reports/logo.png"]]></imageExpression>
+				<imageExpression class="java.lang.String"><![CDATA[com.eviware.loadui.LoadUI.getWorkingDir().getAbsolutePath() + "/reports/logo.png"]]></imageExpression>
 			</image>
 			<line>
 				<reportElement x="0" y="12" width="505" height="1" forecolor="#999999"/>

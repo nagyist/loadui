@@ -15,17 +15,16 @@
  */
 package com.eviware.loadui.impl.summary.sections;
 
-import java.util.List;
-
-import javax.swing.table.TableModel;
-
 import com.eviware.loadui.api.component.categories.RunnerCategory;
 import com.eviware.loadui.api.model.ComponentItem;
 import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.api.summary.SampleStats;
-import com.eviware.loadui.impl.model.ProjectItemImpl;
+import com.eviware.loadui.impl.model.canvas.project.ProjectItemImpl;
 import com.eviware.loadui.impl.summary.MutableSectionImpl;
 import com.eviware.loadui.impl.summary.sections.tablemodels.TestCaseTopSamplesTable;
+
+import javax.swing.table.TableModel;
+import java.util.List;
 
 public class ProjectExecutionNotablesSection extends MutableSectionImpl
 {

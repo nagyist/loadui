@@ -15,6 +15,17 @@
  */
 package com.eviware.loadui.ui.fx.views.canvas.scenario;
 
+import com.eviware.loadui.api.model.SceneItem;
+import com.eviware.loadui.api.traits.Releasable;
+import com.eviware.loadui.ui.fx.MenuItemsProvider;
+import com.eviware.loadui.ui.fx.MenuItemsProvider.HasMenuItems;
+import com.eviware.loadui.ui.fx.MenuItemsProvider.Options;
+import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
+import com.eviware.loadui.ui.fx.util.FXMLUtils;
+import com.eviware.loadui.ui.fx.util.NodeUtils;
+import com.eviware.loadui.ui.fx.views.canvas.CanvasObjectView;
+import com.eviware.loadui.ui.fx.views.canvas.MiniScenarioPlaybackPanel;
+import com.eviware.loadui.ui.fx.views.canvas.PlaybackPanel;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
@@ -26,27 +37,19 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 
-import com.eviware.loadui.api.model.SceneItem;
-import com.eviware.loadui.ui.fx.MenuItemsProvider;
-import com.eviware.loadui.ui.fx.MenuItemsProvider.HasMenuItems;
-import com.eviware.loadui.ui.fx.MenuItemsProvider.Options;
-import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
-import com.eviware.loadui.ui.fx.util.FXMLUtils;
-import com.eviware.loadui.ui.fx.util.NodeUtils;
-import com.eviware.loadui.ui.fx.views.canvas.CanvasObjectView;
-import com.eviware.loadui.ui.fx.views.canvas.MiniScenarioPlaybackPanel;
-
-public class ScenarioView extends CanvasObjectView
+public class ScenarioView extends CanvasObjectView implements Releasable
 {
 	public static final String HELP_PAGE = "http://loadui.org/Working-with-loadUI/scenarios.html";
-	private static final Options MENU_ITEM_OPTIONS = Options.are().open();
+	private final Options MENU_ITEM_OPTIONS = Options.are().open();
+	private final Controller controller;
 
 	public ScenarioView( SceneItem scenario )
 	{
 		super( scenario );
 		getStyleClass().add( "scenario-view" );
+		controller = new Controller();
 
-		FXMLUtils.load( content, new Controller(),
+		FXMLUtils.load( content, controller,
 				ScenarioView.class.getResource( ScenarioView.class.getSimpleName() + ".fxml" ) );
 
 		HasMenuItems hasMenuItems = MenuItemsProvider.createWith( this, getCanvasObject(), MENU_ITEM_OPTIONS );
@@ -76,10 +79,18 @@ public class ScenarioView extends CanvasObjectView
 	@Override
 	public void delete()
 	{
+		log.debug( "Deleting scenario view for {}", getCanvasObject().getLabel() );
 		super.delete();
 	}
 
-	private final class Controller
+	@Override
+	public void release()
+	{
+		log.debug( "Releasing scenario view for {}", getCanvasObject().getLabel() );
+		controller.release();
+	}
+
+	private final class Controller implements Releasable
 	{
 		@FXML
 		private VBox vBox;
@@ -87,11 +98,14 @@ public class ScenarioView extends CanvasObjectView
 		@FXML
 		private ImageView miniature;
 
+		private PlaybackPanel playbackPanel;
+
 		@FXML
 		void initialize()
 		{
-			vBox.getChildren().add( 0, new MiniScenarioPlaybackPanel( getScenario() ) );
-			String base64 = getCanvasObject().getAttribute( "miniature_fx2", null );
+			playbackPanel =  new MiniScenarioPlaybackPanel( getScenario() );
+			vBox.getChildren().add( 0, playbackPanel );
+			String base64 = getScenario().getAttribute( "miniature_fx2", null );
 
 			if( base64 != null )
 				miniature.setImage( NodeUtils.fromBase64Image( base64 ) );
@@ -112,6 +126,12 @@ public class ScenarioView extends CanvasObjectView
 					}
 				}
 			} );
+		}
+
+		@Override
+		public void release()
+		{
+			 playbackPanel.release();
 		}
 	}
 }

@@ -241,9 +241,9 @@ sample = { message, sampleId ->
                 throw e
 
             if (e instanceof IOException)
-                log.warn("IOException in {}: {}", label, e.message)
+                log.warn("IOException: {}: ", e.message)
             else
-                log.error("Exception in $label:", e)
+                log.error("Exception:", e)
 
             get.abort()
 
@@ -298,7 +298,7 @@ layout {
     box(layout: 'wrap 2, ins 0') {
         property(property: url, label: 'Web Page Address', constraints: 'w 300!, spanx 2', style: '-fx-font-size: 17pt')
         action(label: 'Open in Browser', constraints: 'spanx 2', action: {
-            java.awt.Desktop.desktop.browse(new java.net.URI(validUrl))
+            com.eviware.loadui.ui.fx.util.UIUtils.openInExternalBrowser( validUrl )
         })
         runAction = action(label: 'Run Once', action: { triggerAction('SAMPLE') })
         action(label: 'Abort Running Pages', action: { triggerAction('CANCEL') })

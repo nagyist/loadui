@@ -15,33 +15,27 @@
  */
 package com.eviware.loadui.test.ui.fx.states;
 
-import static org.loadui.testfx.FXTestUtils.getOrFail;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Calendar;
-
+import com.eviware.loadui.test.TestState;
+import com.eviware.loadui.test.categories.IntegrationTest;
+import com.eviware.loadui.test.ui.fx.FxIntegrationTestBase;
 import javafx.scene.control.Label;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.eviware.loadui.test.categories.IntegrationTest;
+import java.util.Calendar;
 
-@Category( IntegrationTest.class )
-public class LastResultOpenedStateTest
+import static org.junit.Assert.assertTrue;
+import static org.loadui.testfx.FXTestUtils.getOrFail;
+
+@Category(IntegrationTest.class)
+public class LastResultOpenedStateTest extends FxIntegrationTestBase
 {
-	@BeforeClass
-	public static void enterState() throws Exception
-	{
-		LastResultOpenedState.STATE.enter();
-	}
 
-	@AfterClass
-	public static void leaveState() throws Exception
+	@After
+	public void cleanup()
 	{
-		LastResultOpenedState.STATE.getParent().enter();
+		ensureResultViewWindowIsClosed();
 	}
 
 	@Test
@@ -52,5 +46,11 @@ public class LastResultOpenedStateTest
 		int year = Calendar.getInstance().get( Calendar.YEAR );
 		assertTrue( lbl.getText().contains( year + "" ) ); // default label text should contain current date
 
+	}
+
+	@Override
+	public TestState getStartingState()
+	{
+		return LastResultOpenedState.STATE;
 	}
 }

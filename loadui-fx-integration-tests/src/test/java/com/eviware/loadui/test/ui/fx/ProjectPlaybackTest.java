@@ -15,74 +15,50 @@
  */
 package com.eviware.loadui.test.ui.fx;
 
-import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
-import static javafx.scene.input.KeyCode.A;
-import static javafx.scene.input.KeyCode.CONTROL;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Collection;
-
-import com.eviware.loadui.test.TestState;
-import com.eviware.loadui.test.ui.fx.states.SimpleWebTestState;
-import javafx.scene.Node;
-import org.loadui.testfx.GuiTest;
-import javafx.scene.input.KeyCode;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import com.eviware.loadui.api.model.ProjectItem;
+import com.eviware.loadui.test.categories.IntegrationTest;
+import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.api.model.WorkspaceProvider;
-import com.eviware.loadui.test.categories.IntegrationTest;
-import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import com.eviware.loadui.util.BeanInjector;
+import static com.eviware.loadui.test.ui.fx.FxIntegrationBase.RunBlocking.NON_BLOCKING;
+import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
+import static com.google.code.tempusfugit.temporal.Duration.seconds;
+import static com.google.code.tempusfugit.temporal.Timeout.timeout;
+import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
-@Category( IntegrationTest.class )
-public class ProjectPlaybackTest extends FxIntegrationTestBase
+@Category(IntegrationTest.class)
+public class ProjectPlaybackTest extends SimpleWebTestBase
 {
+
 	@Test
 	public void shouldPlayAndStop() throws Exception
 	{
-		click( ".project-playback-panel .play-button" ).sleep( 5000 );
+		final ProjectItem project = getProjectItem();
 
-		Collection<? extends ProjectItem> projects = BeanInjector.getBean( WorkspaceProvider.class ).getWorkspace()
-				.getProjects();
-		ProjectItem project = projects.iterator().next();
-		assertTrue( project.isRunning() );
+		runTestFor( 3, SECONDS, NON_BLOCKING );
 
-		click( ".project-playback-panel .play-button" ).sleep( 4000 );
-		assertTrue( !project.isRunning() );
+		waitOrTimeout( new IsCanvasRunning( project, true ), timeout( seconds( 5 ) ) );
+		waitOrTimeout( new IsCanvasRunning( project, false ), timeout( seconds( 5 ) ) );
 	}
 
 	@Test
 	public void shouldStopOnLimit() throws Exception
 	{
-		ProjectItem project = ProjectLoadedWithoutAgentsState.STATE.getProject();
+		ProjectItem project = getProjectItem();
 
 		long veryHighLoad = 10_000;
 		turnKnobIn( FIXED_RATE_GENERATOR ).to( veryHighLoad );
 
-		increaseMaxConcurrentRequests();
+		setMaxConcurrentRequestsTo( 1_000 );
 
-		click( "#set-limits" ).click( "#time-limit" ).doubleClick().type( "6" ).click( "#default" )
-				.sleep( 1000 ).click( ".project-playback-panel .play-button" ).sleep( 4000 );
+		setTestTimeLimitTo( 4 );
 
-		assertTrue( project.isRunning() );
+		robot.clickPlayStopButton();
 
-		sleep( 9000 );
-		assertTrue( !project.isRunning() );
+		sleep( 4_000 );
+		waitOrTimeout( new IsCanvasRunning( project, false ), timeout( seconds( 5 ) ) );
 	}
 
-	private void increaseMaxConcurrentRequests()
-	{
-		click( ".web-page-runner .menu-button" ).click( "Settings" ).click( "#max-concurrent-requests" ).doubleClick().type( "1000" ).click( "#default" );
-	}
-
-	@Override
-	public TestState getStartingState()
-	{
-		return SimpleWebTestState.STATE;
-	}
 }

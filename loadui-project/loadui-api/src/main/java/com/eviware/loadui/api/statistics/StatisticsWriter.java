@@ -15,18 +15,18 @@
  */
 package com.eviware.loadui.api.statistics;
 
-import javax.annotation.CheckForNull;
-
 import com.eviware.loadui.api.addressable.Addressable;
 import com.eviware.loadui.api.statistics.store.Entry;
 import com.eviware.loadui.api.statistics.store.TrackDescriptor;
+
+import javax.annotation.CheckForNull;
 
 /**
  * Writes statistics data to a Track. Each call to update allows the
  * StatisticsWriter to internally buffer data, which is aggregated and written
  * to the underlying storage periodically. A StatisticsWriter can expose several
  * Statistics which allow reading the stored statistics and current values.
- * 
+ *
  * @author dain.nilsson
  */
 public interface StatisticsWriter extends Addressable
@@ -35,7 +35,7 @@ public interface StatisticsWriter extends Addressable
 	/**
 	 * Updates the StatisticsWriter with new data, which may trigger data to be
 	 * flushed to the underlying Track, or may just buffer it in memory.
-	 * 
+	 *
 	 * @param timestamp
 	 * @param value
 	 */
@@ -49,21 +49,21 @@ public interface StatisticsWriter extends Addressable
 
 	/**
 	 * Returns an Entry based on raw data acquired from calls to update().
-	 * 
+	 *
 	 * @return
 	 */
 	public Entry output();
 
 	/**
 	 * Gets the associated StatisticVariable.
-	 * 
+	 *
 	 * @return
 	 */
 	public StatisticVariable getStatisticVariable();
 
 	/**
 	 * Gets the Track for the StatisticsWriter, for the current Execution.
-	 * 
+	 *
 	 * @return
 	 */
 	public TrackDescriptor getTrackDescriptor();
@@ -71,7 +71,7 @@ public interface StatisticsWriter extends Addressable
 	/**
 	 * Gets the type of the StatisticsWriter, which should be unique. This can be
 	 * the same as the associated StatisticsWriterFactory.getType().
-	 * 
+	 *
 	 * @return
 	 */
 	public String getType();

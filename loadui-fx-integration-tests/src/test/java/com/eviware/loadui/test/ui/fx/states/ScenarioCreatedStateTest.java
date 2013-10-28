@@ -15,24 +15,18 @@
  */
 package com.eviware.loadui.test.ui.fx.states;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-
+import com.eviware.loadui.api.model.ProjectItem;
+import com.eviware.loadui.api.model.WorkspaceProvider;
+import com.eviware.loadui.test.categories.IntegrationTest;
+import com.eviware.loadui.util.BeanInjector;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.api.model.WorkspaceProvider;
-import com.eviware.loadui.test.categories.IntegrationTest;
-import com.eviware.loadui.util.BeanInjector;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
-/**
- * Integration tests for testing the loadUI controller through its API.
- * 
- * @author henrik.olsson
- */
 @Category( IntegrationTest.class )
 public class ScenarioCreatedStateTest
 {

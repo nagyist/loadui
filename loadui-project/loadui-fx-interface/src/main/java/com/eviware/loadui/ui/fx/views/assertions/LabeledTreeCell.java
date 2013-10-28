@@ -17,27 +17,54 @@ package com.eviware.loadui.ui.fx.views.assertions;
 
 import com.eviware.loadui.api.statistics.Statistic;
 import com.eviware.loadui.api.traits.Labeled;
+import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
+import com.eviware.loadui.ui.fx.control.ConfirmationDialog;
+import com.eviware.loadui.ui.fx.util.UIUtils;
 import com.eviware.loadui.util.statistics.StatisticNameFormatter;
 
+import javafx.event.EventHandler;
 import javafx.scene.control.TreeCell;
+import javafx.scene.input.MouseEvent;
 
-public class LabeledTreeCell extends TreeCell<Labeled>
-{
-	@Override
-	public void updateItem( Labeled item, boolean empty )
-	{
-		super.updateItem( item, empty );
+public class LabeledTreeCell extends TreeCell<Labeled> {
+    public static LabeledTreeCell newInstance() {
+        final LabeledTreeCell cell = new LabeledTreeCell();
+        cell.addEventFilter(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                if (mouseEvent.getClickCount() > 1)
+                    cell.fireEvent(IntentEvent.create(IntentEvent.INTENT_SAVE, ConfirmationDialog.class));
+            }
+        });
+        return cell;
+    }
 
-		if( empty )
-		{
-			setText( null );
-		}
-		else
-		{
-			if( item instanceof Statistic<?> || item instanceof StatisticWrapper )
-				setText( StatisticNameFormatter.format( item.getLabel() ) );
-			else
-				setText( item.getLabel() );
-		}
-	}
+    private LabeledTreeCell() {
+
+    }
+
+    @Override
+    public void updateItem(Labeled item, boolean empty) 
+	 {
+        super.updateItem(item, empty);
+
+        if (empty) 
+		  {
+            setText(null);
+        } 
+		  else 
+		  {
+			  if( item instanceof Statistic<?> || item instanceof StatisticWrapper )
+			  {
+				  setText( StatisticNameFormatter.format( item.getLabel() ) );
+				  setId( UIUtils.toCssId( StatisticNameFormatter.format( item.getLabel() ) ) );
+
+			  }
+			  else
+			  {
+				  setText( item.getLabel() );
+				  setId( UIUtils.toCssId ( item.getLabel() ) );
+			  }
+		  }
+    }
 }

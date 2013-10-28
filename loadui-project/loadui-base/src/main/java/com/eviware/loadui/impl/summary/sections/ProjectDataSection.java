@@ -17,7 +17,7 @@ package com.eviware.loadui.impl.summary.sections;
 
 import com.eviware.loadui.api.model.CanvasItem;
 import com.eviware.loadui.api.model.SceneItem;
-import com.eviware.loadui.impl.model.ProjectItemImpl;
+import com.eviware.loadui.impl.model.canvas.project.ProjectItemImpl;
 import com.eviware.loadui.impl.summary.MutableSectionImpl;
 import com.eviware.loadui.util.summary.CalendarUtils;
 

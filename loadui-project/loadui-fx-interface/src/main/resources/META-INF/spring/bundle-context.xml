@@ -19,7 +19,9 @@
         <constructor-arg ref="executionsInfo"/>
     </bean>
 
-    <bean id="filePickerDialogFactory" class="com.eviware.loadui.ui.fx.control.FXFilePickerDialogFactory"/>
+    <bean id="filePickerDialogFactory" class="com.eviware.loadui.ui.fx.control.FXFilePickerDialogFactory">
+        <constructor-arg ref="workspaceProvider"/>
+    </bean>
 
 
     <bean id="uiUtils" class="com.eviware.loadui.ui.fx.util.UIUtils">

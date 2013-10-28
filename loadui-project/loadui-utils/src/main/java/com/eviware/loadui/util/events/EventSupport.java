@@ -15,19 +15,15 @@
  */
 package com.eviware.loadui.util.events;
 
-import java.lang.ref.WeakReference;
-import java.util.Arrays;
-import java.util.EventObject;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.events.EventFirer;
 import com.eviware.loadui.api.events.EventHandler;
 import com.eviware.loadui.api.events.WeakEventHandler;
 import com.eviware.loadui.api.traits.Releasable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.ref.WeakReference;
+import java.util.*;
 
 public class EventSupport implements EventFirer, Releasable
 {
@@ -36,10 +32,10 @@ public class EventSupport implements EventFirer, Releasable
 	private final WeakReference<Object> ownerRef;
 
 	private final Set<ListenerEntry<?>> listeners = new HashSet<>();
-	
+
 	private final EventQueue eventQueue = EventQueue.getInstance();
-	
-	
+
+
 	public EventSupport( Object object )
 	{
 		ownerRef = new WeakReference<>( object );
@@ -132,11 +128,10 @@ public class EventSupport implements EventFirer, Releasable
 							}
 						}
 					}
-				}		
+				}
 			}
 		}, "Cannot fire event, queue is full!" );
-		
-		
+
 
 	}
 
@@ -193,7 +188,7 @@ public class EventSupport implements EventFirer, Releasable
 			final int prime = 31;
 			int result = 1;
 			result = prime * result + ( ( listener == null ) ? 0 : listener.hashCode() );
-			result = prime * result + ( ( weakListener == null ) ? 0 : weakListener.hashCode() );
+			result = prime * result + ( ( weakListener == null || weakListener.get() == null ) ? 0 : weakListener.get().hashCode() );
 			result = prime * result + ( ( type == null ) ? 0 : type.hashCode() );
 			return result;
 		}
@@ -220,7 +215,7 @@ public class EventSupport implements EventFirer, Releasable
 				if( other.weakListener != null )
 					return false;
 			}
-			else if( !weakListener.equals( other.weakListener ) )
+			else if( !Objects.equals( weakListener.get(), other.weakListener.get() ) )
 				return false;
 			if( type == null )
 			{

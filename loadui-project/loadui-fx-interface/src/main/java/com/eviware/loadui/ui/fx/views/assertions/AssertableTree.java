@@ -20,23 +20,29 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeItemBuilder;
-import javafx.scene.control.TreeView;
-import javafx.util.Callback;
-
-import com.eviware.loadui.api.serialization.ListenableValue;
+import com.eviware.loadui.api.model.CanvasItem;
+import com.eviware.loadui.api.model.ComponentItem;
 import com.eviware.loadui.api.statistics.Statistic;
 import com.eviware.loadui.api.statistics.StatisticHolder;
 import com.eviware.loadui.api.statistics.StatisticVariable;
 import com.eviware.loadui.api.traits.Labeled;
 import com.eviware.loadui.ui.fx.control.fields.Validatable;
+import com.eviware.loadui.ui.fx.util.TreeUtils;
+import com.eviware.loadui.util.StringUtils;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TreeCell;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
+import javafx.util.Callback;
+
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class AssertableTree extends TreeView<Labeled> implements Validatable
 {
@@ -44,46 +50,31 @@ public class AssertableTree extends TreeView<Labeled> implements Validatable
 
 	public static BooleanProperty isValidProperty = new SimpleBooleanProperty( false );
 
-	// Used to prevent unwanted chain reactions when forcing TreeItems to collapse. 
+	// Used to prevent unwanted chain reactions when forcing TreeItems to collapse.
 	public final AtomicBoolean isForceCollapsing = new AtomicBoolean( false );
 
 	public static AssertableTree forHolder( StatisticHolder holder )
 	{
-		TreeItem<Labeled> holderItem = TreeItemBuilder.<Labeled> create().value( holder ).expanded( true ).build();
-		return new AssertableTree( holder, holderItem );
+		TreeItem<Labeled> treeRoot = new TreeItem<Labeled>( holder );
+		return new AssertableTree( holder, treeRoot );
 	}
 
 	AssertableTree( StatisticHolder holder, TreeItem<Labeled> root )
 	{
 		super( root );
 
+		setShowRoot( false );
+		getSelectionModel().setSelectionMode( SelectionMode.SINGLE );
 		getStyleClass().add( "assertable-tree" );
 
-		for( String variableName : holder.getStatisticVariableNames() )
-		{
-			StatisticVariable variable = holder.getStatisticVariable( variableName );
-			final TreeItem<Labeled> variableItem = new TreeItem<Labeled>( variable );
-			variableItem.expandedProperty().addListener( new ExpandedTreeItemsLimiter( variableItem, root ) );
 
-			for( String statisticName : holder.getStatisticVariable( variableName ).getStatisticNames() )
-			{
-				Statistic<Number> statistic = ( Statistic<Number> )holder.getStatisticVariable( variableName )
-						.getStatistic( statisticName, StatisticVariable.MAIN_SOURCE );
-				variableItem.getChildren().add( new TreeItem<Labeled>( new StatisticWrapper<Number>( statistic ) ) );
-			}
-
-			if( variable instanceof ListenableValue<?> )
-			{
-				variableItem.getChildren().add( new TreeItem<Labeled>( new RealtimeValueWrapper( variable ) ) );
-			}
-			root.getChildren().add( variableItem );
-		}
+		addVariablesToTree( holder, root );
 
 		getSelectionModel().selectedItemProperty().addListener( new ChangeListener<TreeItem<Labeled>>()
 		{
 			@Override
 			public void changed( ObservableValue<? extends TreeItem<Labeled>> arg0, TreeItem<Labeled> oldValue,
-					TreeItem<Labeled> newValue )
+										TreeItem<Labeled> newValue )
 			{
 				if( isForceCollapsing.get() )
 					return;
@@ -112,10 +103,123 @@ public class AssertableTree extends TreeView<Labeled> implements Validatable
 			@Override
 			public TreeCell<Labeled> call( TreeView<Labeled> treeView )
 			{
-				return new LabeledTreeCell();
+                return LabeledTreeCell.newInstance();
 			}
 		} );
 	}
+
+	public StatisticWrapper<Number> getSelectedAssertion()
+	{
+		TreeUtils.LabeledKeyValue<String, StatisticWrapper<Number>> selected =
+				( TreeUtils.LabeledKeyValue<String, StatisticWrapper<Number>> )getSelectionModel().getSelectedItem().getValue();
+		return selected.getValue();
+	}
+
+	private void addVariablesToTree( StatisticHolder holder, TreeItem<Labeled> root )
+	{
+		log.debug( "Adding variables to tree, StatisticHolder: " + holder );
+		TreeCreator creator = ( root.getValue() instanceof CanvasItem || root.getValue() instanceof ComponentItem ) ?
+				new AssertableComponentTreeCreator() : new AssertableMonitorTreeCreator();
+		creator.createTree( holder, root );
+	}
+
+	private abstract class TreeCreator
+	{
+		abstract void createTree( StatisticHolder holder, TreeItem<Labeled> root );
+
+		TreeItem<Labeled> treeNode( Labeled value, TreeItem<Labeled> parent )
+		{
+			TreeItem<Labeled> treeNode = new TreeItem<>( value );
+
+			parent.getChildren().add( treeNode );
+			return treeNode;
+		}
+	}
+
+	private class AssertableComponentTreeCreator extends TreeCreator
+	{
+		@Override
+		public void createTree( StatisticHolder holder, TreeItem<Labeled> root )
+		{
+			for( String variableName : holder.getStatisticVariableNames() )
+			{
+				StatisticVariable variable = holder.getStatisticVariable( variableName );
+				TreeItem<Labeled> rootNode = treeNode( variable, root );
+				createSubItems( variable, rootNode );
+			}
+		}
+
+		private void createSubItems( StatisticVariable variable, TreeItem<Labeled> parent )
+		{
+			for( String statisticName : variable.getStatisticNames() )
+			{
+				Statistic statistic = variable.getStatistic( statisticName, StatisticVariable.MAIN_SOURCE );
+				String statisticLabel = StringUtils.capitalizeEachWord( StringUtils.replaceAllUnderscoreWithSpace( statistic.getLabel() ) );
+
+				TreeUtils.LabeledKeyValue<String, StatisticWrapper> assertable =
+						new TreeUtils.LabeledKeyValue<>(
+								statisticLabel,
+								new StatisticWrapper( statistic )
+						);
+
+				treeNode( assertable, parent );
+			}
+		}
+	}
+
+	private class AssertableMonitorTreeCreator extends TreeCreator
+	{
+		@Override
+		public void createTree( StatisticHolder holder, TreeItem<Labeled> root )
+		{
+
+			for( String variableName : holder.getStatisticVariableNames() )
+			{
+				StatisticVariable variable = holder.getStatisticVariable( variableName );
+				final TreeItem<Labeled> rootNode = treeNode( variable, root );
+				createBranches( variable, rootNode );
+			}
+
+		}
+
+		private void createBranches( StatisticVariable variable, final TreeItem<Labeled> parent )
+		{
+			for( String statisticName : variable.getStatisticNames() )
+			{
+
+				Map<String, TreeItem<Labeled>> branchByLabel = new HashMap<>();
+
+				for( String source : variable.getSources() )
+				{
+					Statistic statistic = variable.getStatistic( statisticName, source );
+					StatisticWrapper wrapper = new StatisticWrapper( statistic );
+					TreeItem<Labeled> assertable = getOrCreateAssertableTreeItem( wrapper, branchByLabel, parent );
+
+					if( !source.equals( StatisticVariable.MAIN_SOURCE ) )
+					{
+						// creating leaf
+						treeNode( new TreeUtils.LabeledKeyValue( source, wrapper ), assertable );
+					}
+				}
+
+			}
+		}
+
+		private TreeItem<Labeled> getOrCreateAssertableTreeItem( StatisticWrapper wrapper, Map<String, TreeItem<Labeled>> alreadyCreatedBranches, TreeItem<Labeled> parent )
+		{
+			if( alreadyCreatedBranches.containsKey( wrapper.getLabel() ) )
+			{
+				return alreadyCreatedBranches.get( wrapper.getLabel() );
+			}
+			else
+			{
+				TreeItem<Labeled> assertable = treeNode( new TreeUtils.LabeledKeyValue( wrapper.getLabel(), wrapper ), parent );
+				alreadyCreatedBranches.put( wrapper.getLabel(), assertable );
+				return assertable;
+			}
+		}
+	}
+
 
 	@Override
 	public ReadOnlyBooleanProperty isValidProperty()
@@ -127,34 +231,5 @@ public class AssertableTree extends TreeView<Labeled> implements Validatable
 	public boolean isValid()
 	{
 		return isValidProperty.get();
-	}
-
-	private class ExpandedTreeItemsLimiter implements ChangeListener<Boolean>
-	{
-		private final TreeItem<Labeled> variableItem;
-		private final TreeItem<Labeled> holderItem;
-
-		ExpandedTreeItemsLimiter( TreeItem<Labeled> variableItem, TreeItem<Labeled> holderItem )
-		{
-			this.variableItem = variableItem;
-			this.holderItem = holderItem;
-		}
-
-		@Override
-		public void changed( ObservableValue<? extends Boolean> arg0, Boolean oldValue, Boolean newValue )
-		{
-			if( newValue.booleanValue() )
-			{
-				for( TreeItem<Labeled> item : holderItem.getChildren() )
-				{
-					if( item != variableItem )
-					{
-						isForceCollapsing.set( true );
-						item.setExpanded( false );
-						isForceCollapsing.set( false );
-					}
-				}
-			}
-		}
 	}
 }

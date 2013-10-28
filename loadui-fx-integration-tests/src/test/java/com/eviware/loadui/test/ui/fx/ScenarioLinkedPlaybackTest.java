@@ -15,90 +15,133 @@
  */
 package com.eviware.loadui.test.ui.fx;
 
-import static org.junit.Assert.assertTrue;
-
-import org.loadui.testfx.GuiTest;
-import javafx.scene.input.KeyCode;
-
-import org.junit.After;
+import com.eviware.loadui.api.model.ProjectItem;
+import com.eviware.loadui.api.model.SceneItem;
+import com.eviware.loadui.test.TestState;
+import com.eviware.loadui.test.categories.IntegrationTest;
+import com.eviware.loadui.test.ui.fx.states.ScenarioCreatedState;
+import com.google.code.tempusfugit.concurrency.IntermittentTestRunner;
+import com.google.code.tempusfugit.concurrency.annotations.Intermittent;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
 
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.api.model.SceneItem;
-import com.eviware.loadui.test.categories.IntegrationTest;
-import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import com.eviware.loadui.test.ui.fx.states.ScenarioCreatedState;
+import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
+import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.WEB_PAGE_RUNNER;
+import static com.google.code.tempusfugit.temporal.Duration.seconds;
+import static com.google.code.tempusfugit.temporal.Timeout.timeout;
+import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
+import static junit.framework.Assert.assertFalse;
 
 @Category( IntegrationTest.class )
-public class ScenarioLinkedPlaybackTest
+@RunWith( IntermittentTestRunner.class )
+@Intermittent( repetition = 3 )
+public class ScenarioLinkedPlaybackTest extends SimpleWebTestBase
 {
-	private static GuiTest controller;
+	HasScenarios hasScenarios = new HasScenarios();
+	CanRunLoadUITests testRunner = new CanRunLoadUITests();
+
 
 	@Before
-	public void enterState() throws Exception
+	public void start() throws Exception
 	{
-		ScenarioCreatedState.STATE.enter();
-		controller = GUI.getController();
+		ensureProjectIsNotRunning();
 	}
 
-	@After
-	public void leaveState() throws Exception
+	@Override
+	public void cleanup() throws Exception
 	{
-		ScenarioCreatedState.STATE.getParent().enter();
+		try
+		{
+			testRunner.abortRequestsIfPossible();
+		}
+		catch( Exception e )
+		{
+			e.printStackTrace();
+		}
+		hasScenarios.exitScenarioIfPossible();
+		ensureProjectIsNotRunning();
+		robot.deleteAllComponentsFromProjectView();
+		setTestTimeLimitTo( 0 );
 	}
 
 	@Test
 	public void shouldFollowProject_when_linked() throws Exception
 	{
-		SceneItem scenario = ScenarioCreatedState.STATE.getScenario();
-		assertTrue( scenario.isFollowProject() );
+		SceneItem scenario = hasScenarios.ensureScenarioIsLinkedIs( true );
 
-		for( int i = 0; i < 5; i++ )
+		for( int i = 0; i < 3; i++ )
 		{
-			clickPlayStopButton();
-			assertTrue( scenario.isRunning() );
+			robot.clickPlayStopButton();
 
-			clickPlayStopButton();
-			assertTrue( !scenario.isRunning() );
+			waitOrTimeout( new IsCanvasRunning( scenario, true ), timeout( seconds( 2 ) ) );
+
+			robot.clickPlayStopButton();
+			testRunner.letGuiReactToProjectStopping();
+
+			waitOrTimeout( new IsCanvasRunning( scenario, false ), timeout( seconds( 2 ) ) );
 		}
 	}
 
 	@Test
 	public void shouldNotFollowProject_when_unLinked() throws Exception
 	{
-		SceneItem scenario = ScenarioCreatedState.STATE.getScenario();
-		assertTrue( scenario.isFollowProject() );
+		SceneItem scenario = hasScenarios.ensureScenarioIsLinkedIs( false );
 
-		controller.click( "#link-scenario" ).sleep( 500 );
-
-		for( int i = 0; i < 3; i++ )
+		for( int i = 0; i < 4; i++ )
 		{
-			clickPlayStopButton();
-			assertTrue( !scenario.isRunning() );
+			robot.clickPlayStopButton();
+			testRunner.letGuiReactToProjectStopping();
 
-			clickPlayStopButton();
-			assertTrue( !scenario.isRunning() );
+			assertFalse( scenario.isRunning() );
 		}
 	}
 
 	@Test
 	public void shouldStopOnLimit_when_isLinked() throws Exception
 	{
-		ProjectItem project = ProjectLoadedWithoutAgentsState.STATE.getProject();
+		ProjectItem project = getProjectItem();
+		hasScenarios.ensureScenarioIsLinkedIs( true );
 
-		controller.click( "#set-limits" ).click( "#time-limit" ).press( KeyCode.CONTROL, KeyCode.A )
-				.release( KeyCode.CONTROL, KeyCode.A ).sleep( 100 ).type( "6" ).sleep( 100 ).click( "#default" )
-				.sleep( 1000 ).click( ".project-playback-panel .play-button" ).sleep( 2000 );
-		assertTrue( project.isRunning() );
+		setTestTimeLimitTo( 2 );
+		robot.clickPlayStopButton();
 
-		controller.sleep( 4000 );
-		assertTrue( !project.isRunning() );
+		waitOrTimeout( new IsCanvasRunning( project, true ), timeout( seconds( 2 ) ) );
+
+		waitOrTimeout( new IsCanvasRunning( project, false ), timeout( seconds( 4 ) ) );
+
+		testRunner.letGuiReactToProjectStopping();
 	}
 
-	protected void clickPlayStopButton()
+	@Test
+	public void shouldStopOnLimit_when_isLinked_AndThereAreComponents_InProjectAndInScenario() throws Exception
 	{
-		controller.click( ".project-playback-panel .play-button" ).sleep( 2000 );
+		ProjectItem project = getProjectItem();
+		setTestTimeLimitTo( 2 );
+		hasScenarios.ensureScenarioIsLinkedIs( true );
+
+		connect( FIXED_RATE_GENERATOR ).to( WEB_PAGE_RUNNER );
+		setWebPageRunnerUrlTo( VALID_URL_TO_HIT_ON_TESTS );
+
+		hasScenarios.enterScenario();
+
+		robot.resetPredefinedPoints();
+		connect( FIXED_RATE_GENERATOR ).to( WEB_PAGE_RUNNER );
+		setWebPageRunnerUrlTo( VALID_URL_TO_HIT_ON_TESTS );
+
+		robot.clickPlayStopButton();
+
+		waitOrTimeout( new IsCanvasRunning( project, true ), timeout( seconds( 2 ) ) );
+
+		waitOrTimeout( new IsCanvasRunning( project, false ), timeout( seconds( 4 ) ) );
+
+		testRunner.letGuiReactToProjectStopping();
+	}
+
+	@Override
+	public TestState getStartingState()
+	{
+		return ScenarioCreatedState.STATE;
 	}
 }
