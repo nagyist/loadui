@@ -15,8 +15,10 @@
  */
 package com.eviware.loadui.ui.fx.views.canvas;
 
-import java.net.MalformedURLException;
-
+import com.eviware.loadui.api.component.ComponentDescriptor;
+import com.eviware.loadui.ui.fx.control.DragNode;
+import com.eviware.loadui.ui.fx.util.Properties;
+import com.eviware.loadui.ui.fx.util.UIUtils;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
@@ -25,9 +27,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
 
-import com.eviware.loadui.api.component.ComponentDescriptor;
-import com.eviware.loadui.ui.fx.control.DragNode;
-import com.eviware.loadui.ui.fx.util.Properties;
+import java.net.MalformedURLException;
+import java.net.URI;
 
 public class ComponentDescriptorView extends Label
 {
@@ -43,7 +44,12 @@ public class ComponentDescriptorView extends Label
 
 		try
 		{
-			Image image = new Image( descriptor.getIcon().toURL().toString(), 72, 0, true, true );
+			Image image;
+			URI iconUri = descriptor.getIcon();
+			if( iconUri == null )
+				image = UIUtils.getDefaultComponentImage();
+			else
+				image = new Image( descriptor.getIcon().toURL().toString(), 72, 0, true, true );
 
 			ImageView icon = new ImageView( image );
 

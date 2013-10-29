@@ -15,12 +15,12 @@
  */
 package com.eviware.loadui.api.component;
 
-import java.net.URI;
-
-import javax.annotation.concurrent.Immutable;
-
 import com.eviware.loadui.api.traits.Describable;
 import com.eviware.loadui.api.traits.Labeled;
+
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
+import java.net.URI;
 
 /**
  * An immutable data structure describing a type of Component.
@@ -133,6 +133,7 @@ public class ComponentDescriptor implements Labeled, Describable
 		return description;
 	}
 
+	@Nullable
 	public URI getIcon()
 	{
 		return icon;
