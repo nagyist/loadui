@@ -167,7 +167,7 @@ public class ComponentsSmoketest extends FxIntegrationTestBase
 		click( "#menu" );
 		sleep( 100 );
 		click( "Delete" );
-		click( "Delete" );
+		click( "#default" );
 
 
 	}
@@ -272,7 +272,7 @@ public class ComponentsSmoketest extends FxIntegrationTestBase
 		sleep( 300 );
 		click( "#menu" );
 		click( "Delete" );
-		click( "Delete" );
+		click( "#default" );
 
 
 	}
