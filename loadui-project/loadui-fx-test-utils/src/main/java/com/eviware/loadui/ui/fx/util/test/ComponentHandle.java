@@ -27,7 +27,15 @@ public class ComponentHandle
 	{
 		ComponentHandle handle = robot.createComponent( otherComponent );
 		controller.drag( get( outputs, 0 ) ).to( get( handle.inputs, 0 ) );
-
 		return handle;
+	}
+
+	public ComponentHandle to( Component otherComponent1, Component otherComponent2 )
+	{
+		ComponentHandle handle1 = robot.createComponent( otherComponent1 );
+		ComponentHandle handle2 = robot.createComponent( otherComponent2 );
+		controller.drag( get( outputs, 0 ) ).to( get( handle1.inputs, 0 ) );
+		controller.drag( get( outputs, 1 ) ).to( get( handle2.inputs, 0 ) );
+		return handle1;
 	}
 }
