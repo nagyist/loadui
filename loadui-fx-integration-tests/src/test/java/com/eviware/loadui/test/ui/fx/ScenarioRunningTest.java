@@ -6,6 +6,7 @@ import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ScenarioCreatedState;
 import com.google.code.tempusfugit.temporal.Timeout;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -70,6 +71,7 @@ public class ScenarioRunningTest extends SimpleWebTestBase
 
 	}
 
+	@Ignore
 	@Test
 	public void ShouldStopScenarioWhenPressingExitProjectButton() throws Exception
 	{
@@ -83,7 +85,7 @@ public class ScenarioRunningTest extends SimpleWebTestBase
 
 	}
 
-
+	@Ignore
 	@Test
 	public void ShouldNotWaitMoreThanFiveSecondsWhenStoppingEmptyScenario() throws Exception
 	{
