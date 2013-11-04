@@ -40,12 +40,13 @@ public class FXFilePickerDialogFactory implements FilePickerDialogFactory
 	}
 
 	@Override
-	public File showOpenDialog( String title, FileChooser.ExtensionFilter filter )
+	public File showOpenDialog( String title, String extensionFilterDescription,
+										 String extensionFilterRegex )
 	{
 		WorkspaceItem workspace = workspaceProvider.getWorkspace();
 		LoadUIFileChooser fileChooser = LoadUIFileChooserBuilder
 				.usingWorkspace( workspace )
-				.extensionFilters( filter )
+				.extensionFilters( new FileChooser.ExtensionFilter( extensionFilterDescription, extensionFilterRegex ) )
 				.title( title )
 				.build();
 

@@ -15,58 +15,29 @@
  */
 package com.eviware.loadui.groovy;
 
-import java.beans.PropertyChangeEvent;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.util.Arrays;
-import java.util.EventObject;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.codec.digest.DigestUtils;
-
 import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.api.component.BehaviorProvider;
-import com.eviware.loadui.api.component.ComponentBehavior;
-import com.eviware.loadui.api.component.ComponentContext;
-import com.eviware.loadui.api.component.ComponentCreationException;
-import com.eviware.loadui.api.component.ComponentDescriptor;
-import com.eviware.loadui.api.component.ComponentRegistry;
-import com.eviware.loadui.api.component.categories.AnalysisCategory;
-import com.eviware.loadui.api.component.categories.FlowCategory;
-import com.eviware.loadui.api.component.categories.GeneratorCategory;
-import com.eviware.loadui.api.component.categories.MiscCategory;
-import com.eviware.loadui.api.component.categories.OutputCategory;
-import com.eviware.loadui.api.component.categories.RunnerCategory;
-import com.eviware.loadui.api.component.categories.SchedulerCategory;
+import com.eviware.loadui.api.component.*;
+import com.eviware.loadui.api.component.categories.*;
 import com.eviware.loadui.api.events.EventFirer;
 import com.eviware.loadui.api.events.EventHandler;
 import com.eviware.loadui.api.traits.Releasable;
-import com.eviware.loadui.groovy.categories.GroovyAnalysis;
-import com.eviware.loadui.groovy.categories.GroovyFlow;
-import com.eviware.loadui.groovy.categories.GroovyGenerator;
-import com.eviware.loadui.groovy.categories.GroovyMisc;
-import com.eviware.loadui.groovy.categories.GroovyOutput;
-import com.eviware.loadui.groovy.categories.GroovyRunner;
-import com.eviware.loadui.groovy.categories.GroovyScheduler;
+import com.eviware.loadui.groovy.categories.*;
 import com.eviware.loadui.util.ReleasableUtils;
 import com.eviware.loadui.util.events.EventSupport;
 import com.eviware.loadui.util.groovy.ClassLoaderRegistry;
 import com.eviware.loadui.util.groovy.ParsedGroovyScript;
-import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import com.google.common.io.InputSupplier;
+import org.apache.commons.codec.digest.DigestUtils;
+
+import java.beans.PropertyChangeEvent;
+import java.io.*;
+import java.net.URI;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class GroovyBehaviorProvider implements BehaviorProvider, EventFirer, Releasable
 {
@@ -85,7 +56,7 @@ public class GroovyBehaviorProvider implements BehaviorProvider, EventFirer, Rel
 			"", null );
 
 	public GroovyBehaviorProvider( ComponentRegistry registry, ScheduledExecutorService scheduler, File scriptDir,
-			ClassLoaderRegistry clr )
+											 ClassLoaderRegistry clr )
 	{
 		if( !scriptDir.isAbsolute() )
 		{
@@ -290,7 +261,7 @@ public class GroovyBehaviorProvider implements BehaviorProvider, EventFirer, Rel
 
 			File icon = new File( script.getParentFile(), headers.getHeader( "icon", baseName + ".png" ) );
 			String digest = null;
-			try (FileInputStream fis = new FileInputStream( script ))
+			try( FileInputStream fis = new FileInputStream( script ) )
 			{
 				digest = DigestUtils.md5Hex( fis );
 			}
@@ -301,16 +272,14 @@ public class GroovyBehaviorProvider implements BehaviorProvider, EventFirer, Rel
 
 			return new ScriptDescriptor( headers.getHeader( "id", baseName ), headers.getHeader( "classloader",
 					headers.getHeader( "id", baseName ) ), script, headers.getHeader( "category", MiscCategory.CATEGORY ),
-					headers.getHeader( "name", baseName ), headers.getDescription(), icon.exists() ? icon : null, digest,
+					headers.getHeader( "name", baseName ), headers.getDescription(), icon.exists() ? icon.toURI() : null, digest,
 					headers.getHeader( "help", null ), headers.getHeader( "deprecated", "false" ) );
 		}
 
 		private static String getFileContent( File file )
 		{
-			Reader in = null;
-			try
+			try( Reader in = new FileReader( file ) )
 			{
-				in = new FileReader( file );
 				StringBuilder sb = new StringBuilder();
 				char[] chars = new char[1 << 16];
 				int length;
@@ -321,26 +290,17 @@ public class GroovyBehaviorProvider implements BehaviorProvider, EventFirer, Rel
 				}
 				return sb.toString();
 			}
-			catch( FileNotFoundException e )
-			{
-				e.printStackTrace();
-			}
 			catch( IOException e )
 			{
 				e.printStackTrace();
 			}
-			finally
-			{
-				Closeables.closeQuietly( in );
-			}
-
 			return "";
 		}
 
 		private ScriptDescriptor( String id, String classLoaderId, File script, String category, String label,
-				String description, File icon, String digest, String helpUrl, String deprecated )
+										  String description, URI icon, String digest, String helpUrl, String deprecated )
 		{
-			super( TYPE, category, label, description, icon == null ? null : icon.toURI(), helpUrl, !"false"
+			super( TYPE, category, label, description, icon, helpUrl, !"false"
 					.equals( deprecated ) );
 			this.classLoaderId = classLoaderId;
 			this.id = id;
