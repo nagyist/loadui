@@ -5,6 +5,7 @@ import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.FxIntegrationTestBase;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import javafx.scene.Node;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -34,6 +35,7 @@ public class SplitterTest extends FxIntegrationTestBase
 
 	}
 
+	@Ignore
 	@Test
 	public void TestSplitter()
 	{

@@ -54,6 +54,7 @@ public class ConditionTest extends FxIntegrationTestBase
 	{
 		connect( FIXED_RATE_GENERATOR ).to( CONDITION ).to( TABLE_LOG );
 		turnKnobIn( FIXED_RATE_GENERATOR ).to( 1 );
+		sleep(200);
 		assertNodeExists( "1 / Sec" );
 
 		turnKnobIn( CONDITION, 2 ).to( 99999999999999L );
