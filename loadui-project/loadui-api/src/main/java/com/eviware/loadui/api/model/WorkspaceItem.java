@@ -19,6 +19,7 @@ import com.eviware.loadui.api.discovery.AgentDiscovery.AgentReference;
 import com.eviware.loadui.api.property.Property;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -51,6 +52,9 @@ public interface WorkspaceItem extends ModelItem
 			+ ".statisticNumberOfAutosaves";
 
 	public final static String IGNORED_VERSION_UPDATE = WorkspaceItem.class.getSimpleName() + ".ignoredVersionUpdate";
+
+	public static final String LATEST_DIRECTORY = "gui.latestDirectory";
+	public static final String LATEST_CREATE_PROJECT_DIRECTORY = "gui.latestCreateProjectDirectory";
 
 	/**
 	 * Gets the version of loadUI which was used to create the workspace.
@@ -164,7 +168,7 @@ public interface WorkspaceItem extends ModelItem
 	/**
 	 * Gets the localMode property value.
 	 *
-	 * @return
+	 * @return local mode property
 	 */
 	public boolean isLocalMode();
 
@@ -173,8 +177,6 @@ public interface WorkspaceItem extends ModelItem
 	 * When in local mode, any SceneItems on the controller will act as if they
 	 * were deployed on a local AgentItem. TerminalMessages and ActionEvents will
 	 * not be propagated to any remote Agents when in this state.
-	 *
-	 * @param localMode
 	 */
 	public void setLocalMode( boolean localMode );
 
@@ -182,17 +184,30 @@ public interface WorkspaceItem extends ModelItem
 	 * Gets the maximum number of executions for all projects that are
 	 * automatically saved before the oldest one is deleted.
 	 *
-	 * @return
+	 * @return the number of auto saved executions
 	 */
 	long getNumberOfAutosaves();
 
 	/**
 	 * Sets the maximum number of executions for all projects that are
 	 * automatically saved before the oldest one is deleted.
-	 *
-	 * @return
 	 */
 	void setNumberOfAutosaves( long n );
+
+	/**
+	 * Sets the latest directory with the identifier provided as attribute name.
+	 * File has to be a valid directory;
+	 */
+	public void setLatestDirectory( @Nullable String identifier, File file );
+
+	/**
+	 * Gets the latest directory with the identifier provided as attribute name.
+	 * Will always return a valid directory
+	 *
+	 * @return the latest directory
+	 */
+	public File getLatestDirectory( String identifier );
+
 
 	/**
 	 * Gets the currently open project or null if no project is open

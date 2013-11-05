@@ -44,7 +44,7 @@ public class ReportingManagerImpl implements ReportingManager
 
 	private static JasperPrint getJpFromFile( File file )
 	{
-		try( ObjectInputStream ois = new ObjectInputStream( new FileInputStream( file ) ) )
+		try(ObjectInputStream ois = new ObjectInputStream( new FileInputStream( file ) ))
 		{
 			return ( JasperPrint )ois.readObject();
 		}

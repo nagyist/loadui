@@ -15,15 +15,6 @@
  */
 package com.eviware.loadui.components.soapui;
 
-import java.io.File;
-
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.component.ComponentDescriptor;
 import com.eviware.loadui.api.component.ComponentRegistry;
@@ -46,6 +37,17 @@ import com.eviware.soapui.impl.wsdl.support.xsd.SchemaUtils;
 import com.eviware.soapui.model.settings.Settings;
 import com.eviware.soapui.settings.ProxySettings;
 import com.eviware.soapui.support.UISupport;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 public final class SoapUIComponentActivator implements BundleActivator
 {
@@ -61,15 +63,18 @@ public final class SoapUIComponentActivator implements BundleActivator
 	{
 		SoapUIClassLoaderState state = SoapUIExtensionClassLoader.ensure();
 
+		URI soapuiRunnerIcon = getResourceURI( "/images/SoapuiRunner.png" );
+		URI mockServiceIcon = getResourceURI( "/images/SoapuiMockService.png" );
+
 		bundleContext = context;
 		loadUIIntegrator = LoadUIIntegrator.getInstance();
 		final ComponentDescriptor componentDescriptor = new ComponentDescriptor( SoapUISamplerComponent.TYPE,
 				RunnerCategory.CATEGORY, LoadUIIntegrator.SOAPUI_RUNNER_BASE_NAME, "Runs a soapUI TestCase.",
-				getClass().getResource( "/images/SoapuiRunner.png" ).toURI() );
+				soapuiRunnerIcon );
 
 		final ComponentDescriptor mockServiceDescriptor = new ComponentDescriptor( MockServiceComponent.TYPE,
-				MiscCategory.CATEGORY, "soapUI MockService", "Runs a soapUI MockService.", getClass().getResource(
-						"/images/SoapuiMockService.png" ).toURI() );
+				MiscCategory.CATEGORY, "soapUI MockService", "Runs a soapUI MockService.",
+				mockServiceIcon );
 
 		context.addServiceListener( new ServiceListener()
 		{
@@ -78,14 +83,14 @@ public final class SoapUIComponentActivator implements BundleActivator
 			{
 				switch( event.getType() )
 				{
-				case ServiceEvent.REGISTERED :
-					ComponentRegistry registry = ( ComponentRegistry )bundleContext.getService( event.getServiceReference() );
-					provider = new SoapUIBehaviorProvider();
-					provider.setRegistry( registry );
-					loadUIIntegrator.setComponentRegistry( registry );
+					case ServiceEvent.REGISTERED:
+						ComponentRegistry registry = ( ComponentRegistry )bundleContext.getService( event.getServiceReference() );
+						provider = new SoapUIBehaviorProvider();
+						provider.setRegistry( registry );
+						loadUIIntegrator.setComponentRegistry( registry );
 
-					registry.registerDescriptor( componentDescriptor, provider );
-					registry.registerDescriptor( mockServiceDescriptor, provider );
+						registry.registerDescriptor( componentDescriptor, provider );
+						registry.registerDescriptor( mockServiceDescriptor, provider );
 				}
 			}
 		}, "(objectclass=" + ComponentRegistry.class.getName() + ")" );
@@ -97,10 +102,10 @@ public final class SoapUIComponentActivator implements BundleActivator
 			{
 				switch( event.getType() )
 				{
-				case ServiceEvent.REGISTERED :
-					WindowController windowControllerRegistry = ( WindowController )bundleContext.getService( event
-							.getServiceReference() );
-					loadUIIntegrator.setWindowController( windowControllerRegistry );
+					case ServiceEvent.REGISTERED:
+						WindowController windowControllerRegistry = ( WindowController )bundleContext.getService( event
+								.getServiceReference() );
+						loadUIIntegrator.setWindowController( windowControllerRegistry );
 
 				}
 			}
@@ -113,10 +118,10 @@ public final class SoapUIComponentActivator implements BundleActivator
 			{
 				switch( event.getType() )
 				{
-				case ServiceEvent.REGISTERED :
-					ApplicationState appStateRegistry = ( ApplicationState )bundleContext.getService( event
-							.getServiceReference() );
-					loadUIIntegrator.setApplicationState( appStateRegistry );
+					case ServiceEvent.REGISTERED:
+						ApplicationState appStateRegistry = ( ApplicationState )bundleContext.getService( event
+								.getServiceReference() );
+						loadUIIntegrator.setApplicationState( appStateRegistry );
 
 				}
 			}
@@ -129,22 +134,22 @@ public final class SoapUIComponentActivator implements BundleActivator
 			{
 				switch( event.getType() )
 				{
-				case ServiceEvent.REGISTERED :
-					WorkspaceProvider workspaceProviderRegistry = ( WorkspaceProvider )bundleContext.getService( event
-							.getServiceReference() );
-					loadUIIntegrator.setWorkspaceProvider( workspaceProviderRegistry );
-					loadUIIntegrator.setComponentDescriptor( componentDescriptor );
-					loadUIIntegrator.setMockServiceDescriptor( mockServiceDescriptor );
-					cajoServer = CajoServer.getInstance();
-					cajoServer.setLoadUILuncher( loadUIIntegrator );
-					Thread cajoThread = new Thread( cajoServer, "CajoServer" );
-					cajoThread.setDaemon( true );
-					cajoThread.start();
-					CajoClient.getInstance().setWorkspaceProviderRegistry( workspaceProviderRegistry );
-					// CajoClient.getInstance().setPathToSoapUIBat(
-					// workspaceProviderRegistry.getWorkspace().getProperty(
-					// WorkspaceItem.SOAPUI_CAJO_PORT_PROPERTY )
-					// .getStringValue() );
+					case ServiceEvent.REGISTERED:
+						WorkspaceProvider workspaceProviderRegistry = ( WorkspaceProvider )bundleContext.getService( event
+								.getServiceReference() );
+						loadUIIntegrator.setWorkspaceProvider( workspaceProviderRegistry );
+						loadUIIntegrator.setComponentDescriptor( componentDescriptor );
+						loadUIIntegrator.setMockServiceDescriptor( mockServiceDescriptor );
+						cajoServer = CajoServer.getInstance();
+						cajoServer.setLoadUILuncher( loadUIIntegrator );
+						Thread cajoThread = new Thread( cajoServer, "CajoServer" );
+						cajoThread.setDaemon( true );
+						cajoThread.start();
+						CajoClient.getInstance().setWorkspaceProviderRegistry( workspaceProviderRegistry );
+						// CajoClient.getInstance().setPathToSoapUIBat(
+						// workspaceProviderRegistry.getWorkspace().getProperty(
+						// WorkspaceItem.SOAPUI_CAJO_PORT_PROPERTY )
+						// .getStringValue() );
 
 				}
 			}
@@ -177,6 +182,20 @@ public final class SoapUIComponentActivator implements BundleActivator
 		finally
 		{
 			state.restore();
+		}
+	}
+
+	private URI getResourceURI( String resource )
+	{
+		URL url = getClass().getResource( resource );
+		try
+		{
+			return url == null ? null : url.toURI();
+		}
+		catch( URISyntaxException e )
+		{
+			log.warn( "URL is not valid: {}", url );
+			return null;
 		}
 	}
 

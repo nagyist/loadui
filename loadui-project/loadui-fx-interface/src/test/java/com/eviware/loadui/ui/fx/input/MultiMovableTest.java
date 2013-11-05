@@ -43,7 +43,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.loadui.testfx.GuiTest.offset;
 
-@Category(TestFX.class)
+@Category( TestFX.class )
 public class MultiMovableTest
 {
 	private static final SettableFuture<Stage> stageFuture = SettableFuture.create();

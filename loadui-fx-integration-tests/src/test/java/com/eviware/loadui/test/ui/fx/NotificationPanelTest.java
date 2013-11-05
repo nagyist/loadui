@@ -25,7 +25,7 @@ import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.test.TestUtils;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.layout.Region;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -35,42 +35,38 @@ import org.loadui.testfx.GuiTest;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.*;
 import static org.loadui.testfx.Assertions.assertNodeExists;
 import static org.loadui.testfx.FXTestUtils.getOrFail;
 import static org.loadui.testfx.Matchers.hasLabel;
 
-@Category( IntegrationTest.class )
+@Category(IntegrationTest.class)
 public class NotificationPanelTest extends FxIntegrationTestBase
 {
 	@Override
 	public TestState getStartingState()
 	{
-		return ProjectLoadedWithoutAgentsState.STATE;
+		return OpenSourceFxLoadedState.STATE;
 	}
 
 	@Before
-	public void onStart() throws Exception
+	public void start() throws Exception
 	{
-		// we must re-enter this state every time because some tests will go to another state
-		ProjectLoadedWithoutAgentsState.STATE.enter();
-		try
-		{
-			waitUntilNotVisible( notificationPanel() );
-		}
-		catch( TimeoutException te )
-		{
-			click( "#hide-notification-panel" );
-			waitUntilNotVisible( notificationPanel() );
-		}
+		ensureNotificationPanelIsNotVisible();
+		ensureInspectorViewIsClosed();
+	}
+
+	@After
+	public void cleanup() throws Exception
+	{
+		ensureNotificationPanelIsNotVisible();
+		ensureInspectorViewIsClosed();
 	}
 
 	@Test
 	public void notificationShowsUpInWorkspaceView() throws Exception
 	{
-		OpenSourceFxLoadedState.STATE.enter();
 		Node panelNode = notificationPanel();
 
 		assertFalse( panelNode.isVisible() );
@@ -81,16 +77,24 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 
 		assertNodeExists( "#notification-text" );
 		assertNodeExists( hasLabel( "A message" ) );
+	}
+
+	@Test
+	public void notificationPanelGoesAwayWhenClickingOnHideButton() throws Exception
+	{
+		Node panelNode = notificationPanel();
+		sendMsgToNotificationPanel( "A message" );
+		waitUntilVisible( panelNode );
 
 		click( "#hide-notification-panel" );
 
 		waitUntilNotVisible( panelNode );
+		assertFalse( panelNode.isVisible() );
 	}
 
 	@Test
 	public void notificationDoesNotChangeWithMultipleQuickMessages() throws Exception
 	{
-		OpenSourceFxLoadedState.STATE.enter();
 		Node panelNode = notificationPanel();
 
 		sendMsgToNotificationPanel( "A message" );
@@ -112,17 +116,13 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 		final Label msgLabel = ( Label )textNodes.iterator().next();
 		Label msgCountLabel = ( Label )msgCountNodes.iterator().next();
 
-		assertEquals( "A message", msgLabel.getText() );
-		assertEquals( "1", msgCountLabel.getText() );
+		waitUntil( msgLabel, hasLabel( "A message" ) );
+		waitUntil( msgCountLabel, hasLabel( "1" ) );
 
 		sendMsgToNotificationPanel( "Second message" );
 
 		waitUntil( msgLabel, hasLabel( "A message" ) );
-
-		assertEquals( "A message", msgLabel.getText() );
 		waitUntil( msgCountLabel, hasLabel( "2" ) );
-		click( "#hide-notification-panel" );
-
 	}
 
 	@Test
@@ -143,13 +143,6 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 		assertFalse( textNodes.isEmpty() );
 		assertTrue( textNodes.iterator().next() instanceof Label );
 		assertEquals( "A message", ( ( Label )textNodes.iterator().next() ).getText() );
-
-		click( "#hide-notification-panel" );
-
-		waitUntilNotVisible( panelNode );
-
-		assertFalse( panelNode.isVisible() );
-
 	}
 
 	@Test
@@ -224,44 +217,18 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 
 		Node panelNode = notificationPanel();
 
-		final Node inspectorView = getOrFail( ".inspector-view" );
-
-		// inspector view is closed
-		assertTrue( ( ( Region )inspectorView ).getHeight() < 50 );
+		assertFalse( isInspectorViewOpen() );
 
 		sendMsgToNotificationPanel( "A message" );
-
 		waitUntilVisible( panelNode );
+		click( "#show-system-log" );
 
-		click( getOrFail( "#show-system-log" ) );
-
-		TestUtils.awaitCondition( new Callable<Boolean>()
-		{
-			@Override
-			public Boolean call() throws Exception
-			{
-				return ( ( Region )inspectorView ).getHeight() > 150;
-			}
-		}, 2000 );
-
-		// inspector view is opened!
-		assertTrue( ( ( Region )inspectorView ).getHeight() > 150 );
-
-		// hide the inspector view so it won't break other tests
-		move( "#Assertions" ).moveBy( 400, 0 ).drag( "#Assertions" ).by( 0, 400 ).drop();
-
-		click( "#hide-notification-panel" );
-
-		waitUntilNotVisible( panelNode );
-
-		assertFalse( panelNode.isVisible() );
+		assertTrue( isInspectorViewOpen() );
 	}
 
 	@Test
 	public void notificationPanelWontGoAwayIfMouseIsOnIt() throws Exception
 	{
-		OpenSourceFxLoadedState.STATE.enter();
-
 		Node panelNode = notificationPanel();
 
 		sendMsgToNotificationPanel( "A message" );
@@ -286,7 +253,7 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 		assertTrue( panelNode.isVisible() );
 
 		// now go away and let the panel vanish
-		moveBy( 0, 150 );
+		moveBy( 150, 0 );
 
 		waitUntilNotVisible( panelNode );
 
@@ -295,6 +262,7 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 
 	private Node notificationPanel()
 	{
+		waitForNode( ".notification-panel" );
 		return getOrFail( ".notification-panel" );
 	}
 

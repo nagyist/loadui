@@ -7,6 +7,8 @@ import javafx.scene.input.KeyCode;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.*;
 import static org.loadui.testfx.Assertions.assertNodeExists;
 
@@ -64,6 +66,19 @@ public class ComponentsSmoketest extends FxIntegrationTestBase
 		assertNodeExists( "#sec" );
 		assertNodeExists( "#min" );
 
+		int peakRate = 20;
+
+		turnKnobIn( RAMP_SEQUENCE ).to( 1 );
+		turnKnobIn( RAMP_SEQUENCE, 2 ).to( 5 );
+		turnKnobIn( RAMP_SEQUENCE, 3 ).to( peakRate );
+
+		runTestFor( 3, TimeUnit.SECONDS, RunBlocking.NON_BLOCKING );
+
+		sleep( 2000 );
+
+		assertNodeExists( "Rate " + peakRate );
+
+		//TODO make sure the test is stopped here
 	}
 
 	@Test
@@ -92,8 +107,6 @@ public class ComponentsSmoketest extends FxIntegrationTestBase
 		assertNodeExists( ".check-box" );
 
 		turnKnobIn( USAGE ).to( 20 );
-
-
 
 
 	}

@@ -19,6 +19,7 @@ import com.eviware.loadui.api.addressable.AddressableRegistry;
 import com.eviware.loadui.api.model.WorkspaceItem;
 import com.eviware.loadui.api.model.WorkspaceProvider;
 import com.eviware.loadui.config.LoaduiWorkspaceDocumentConfig;
+import com.eviware.loadui.impl.LatestDirectoryServiceImpl;
 import com.eviware.loadui.impl.addressable.AddressableRegistryImpl;
 import com.eviware.loadui.util.test.BeanInjectorMocker;
 import org.junit.Before;
@@ -51,7 +52,7 @@ public class WorkspaceProviderImplTest
 		config.addNewLoaduiWorkspace();
 		config.save( tmp );
 
-		WorkspaceProvider provider = new WorkspaceProviderImpl( mock( AgentFactory.class ) );
+		WorkspaceProvider provider = new WorkspaceProviderImpl( mock( AgentFactory.class ), new LatestDirectoryServiceImpl() );
 
 		WorkspaceItem workspace = provider.loadWorkspace( tmp );
 

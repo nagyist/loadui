@@ -15,26 +15,6 @@
  */
 package com.eviware.loadui.ui.fx.views.assertions;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.fxml.FXML;
-import javafx.scene.layout.HBox;
-import javafx.util.Pair;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.assertion.AssertionAddon;
 import com.eviware.loadui.api.assertion.AssertionItem;
 import com.eviware.loadui.api.model.ProjectItem;
@@ -47,22 +27,42 @@ import com.eviware.loadui.ui.fx.util.FXMLUtils;
 import com.eviware.loadui.ui.fx.util.ObservableLists;
 import com.eviware.loadui.ui.fx.views.statistics.StatisticHolderToolBox;
 import com.google.common.base.Function;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.fxml.FXML;
+import javafx.scene.layout.HBox;
+import javafx.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@SuppressWarnings( "rawtypes" )
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+@SuppressWarnings("rawtypes")
 public class AssertionInspectorView extends HBox
 {
 
 	private static int currentIdInt = 1;
 
-	@SuppressWarnings( "unused" )
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger( AssertionInspectorView.class );
 
 	private final ObjectProperty<ProjectItem> projectProperty = new SimpleObjectProperty<>();
 
 	@FXML
+	@SuppressWarnings( "unused" )
 	private StatisticHolderToolBox componentToolBox;
 
 	@FXML
+	@SuppressWarnings("unused")
 	private ScrollableList<AssertionView> assertionList;
 
 	private ObservableList<AssertionView> assertions = FXCollections.observableArrayList();
@@ -83,9 +83,9 @@ public class AssertionInspectorView extends HBox
 	}
 
 	@FXML
+	@SuppressWarnings( "unused" )
 	private void initialize()
 	{
-
 		projectProperty.addListener( new ChangeListener<ProjectItem>()
 		{
 			@Override
@@ -138,7 +138,7 @@ public class AssertionInspectorView extends HBox
 			@Override
 			public void handle( ActionEvent actionEvent )
 			{
-				AssertableWrapper<ListenableValue<Number>> selectedWrapper = dialog.getSelectedAssertable();
+				StatisticWrapper<Number> selectedWrapper = dialog.getSelectedAssertable();
 
 				Resolver<? extends ListenableValue<Number>> resolver = selectedWrapper.getResolver();
 
@@ -175,11 +175,12 @@ public class AssertionInspectorView extends HBox
 			otherLabels.add( other.getLabel() );
 		}
 
-		String label = null;
-		while( ( label = "Assertion " + currentIdInt++ ) != null && otherLabels.contains( label ) )
+		String label;
+		do
 		{
-		} // repeat until unique ID is found
+			label = "Assertion " + currentIdInt++;
+		} while( otherLabels.contains( label ) );
+
 		return label;
 	}
-
 }

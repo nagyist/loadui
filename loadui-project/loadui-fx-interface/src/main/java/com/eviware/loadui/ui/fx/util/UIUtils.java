@@ -15,10 +15,12 @@
  */
 package com.eviware.loadui.ui.fx.util;
 
-import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.assertion.AssertionItem;
 import com.eviware.loadui.api.component.ComponentRegistry;
-import com.eviware.loadui.api.model.*;
+import com.eviware.loadui.api.model.AgentItem;
+import com.eviware.loadui.api.model.ComponentItem;
+import com.eviware.loadui.api.model.ProjectItem;
+import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.ui.fx.api.ImageResolver;
 import com.eviware.loadui.ui.fx.views.window.Overlay;
 import com.eviware.loadui.ui.fx.views.window.OverlayHolder;
@@ -27,8 +29,10 @@ import com.google.common.base.Preconditions;
 import com.sun.javafx.PlatformUtil;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.stage.*;
+import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.PopupWindow;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -47,9 +50,13 @@ public class UIUtils
 
 	private final static String TOOLBOX_IMAGES_PATH = "/com/eviware/loadui/ui/fx/toolboxIcons/";
 
+	public static final ExtensionFilter XML_EXTENSION_FILTER = new FileChooser.ExtensionFilter( "loadUI project file",
+			"*.xml" );
+
 	private static List<ImageResolver> imageResolvers;
 
 	// Used by the OSGi Framework to set imageResolver services. DO NOT REMOVE!
+	@SuppressWarnings( "unused" )
 	public void setImageResolvers( List<ImageResolver> imageResolvers )
 	{
 		UIUtils.imageResolvers = imageResolvers;
@@ -81,77 +88,6 @@ public class UIUtils
 			return new Overlay.NoOpOverlay();
 	}
 
-	public static File openSingleExtensionFileChooser( AttributeHolder workspace, ExtensionFilter extensionFilterWithSingleExtension, Window ownerWindow )
-	{
-		FileChooser fileChooser = FileChooserBuilder
-				.create()
-				.initialDirectory(
-						new File( UIUtils.getSaveDirectory( workspace ) ) )
-				.extensionFilters( extensionFilterWithSingleExtension )
-				.build();
-
-		File file = fileChooser.showSaveDialog( ownerWindow );
-
-		if( file != null )
-		{
-					/*
-					 * this code might be unnecessary when they release javafx 8.0
-					 * and may make FileChooser be able to save with extension.
-					 * Confirmed to be fixed in JavaFx 8 at: https://javafx-jira.kenai.com/browse/RT-18836
-					 */
-			String extension = extensionFilterWithSingleExtension.getExtensions().get( 0 ).substring( 1 );
-
-			if( !file.getName().endsWith( extension ) )
-			{
-				file = createUniqueFileWithExtension( file.getAbsolutePath(), extension );
-			}
-
-			log.debug( "file: " + file.getAbsolutePath() );
-			workspace.setAttribute( UIUtils.LATEST_DIRECTORY, file.getParentFile().getAbsolutePath() );
-		}
-
-		return file;
-
-	}
-
-	private static File createUniqueFileWithExtension( String AbsolutePathToFile, String extension )
-	{
-		File file = new File( AbsolutePathToFile + extension );
-
-		for( int i = 2; file.exists(); i++ )
-		{
-			file = new File( AbsolutePathToFile + "(" + i + ")" + extension );
-		}
-
-		return file;
-	}
-
-
-	public static String getSaveDirectory( AttributeHolder workspace )
-	{
-		String dir = workspace.getAttribute( LATEST_DIRECTORY, System.getProperty( LoadUI.LOADUI_HOME ) );
-
-		if( !isDirectory( dir ) )
-		{
-			dir = System.getProperty( "user.home" );
-		}
-
-		return dir;
-	}
-
-	private static boolean isDirectory( String dir )
-	{
-		try
-		{
-			return new File( dir ).getCanonicalFile().isDirectory();
-		}
-		catch( IOException e )
-		{
-			log.error( "Error with directory: " + dir, e );
-			return false;
-		}
-	}
-
 	@Nonnull
 	public static Image getImageFor( Object object )
 	{
@@ -162,8 +98,12 @@ public class UIUtils
 		catch( Exception e )
 		{
 			log.warn( "Could not get image for " + object, e );
-			return new Image( root( "default-component-icon.png" ) );
+			return getDefaultComponentImage();
 		}
+	}
+
+	public static Image getDefaultComponentImage() {
+		return new Image( root( "default-component-icon.png" ) );
 	}
 
 	private static Image doGetImage( Object object )
@@ -270,7 +210,4 @@ public class UIUtils
 		}
 	}
 
-	public static final String LATEST_DIRECTORY = "gui.latestDirectory";
-	public static final ExtensionFilter XML_EXTENSION_FILTER = new FileChooser.ExtensionFilter( "loadUI project file",
-			"*.xml" );
 }

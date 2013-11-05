@@ -15,21 +15,18 @@
  */
 package com.eviware.loadui.ui.fx.views.assertions;
 
-import static javafx.beans.binding.Bindings.and;
-import static javafx.beans.binding.Bindings.not;
+import com.eviware.loadui.api.assertion.Constraint;
+import com.eviware.loadui.api.statistics.StatisticHolder;
+import com.eviware.loadui.ui.fx.control.ConfirmationDialog;
 import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.util.Pair;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eviware.loadui.api.assertion.Constraint;
-import com.eviware.loadui.api.serialization.ListenableValue;
-import com.eviware.loadui.api.statistics.StatisticHolder;
-import com.eviware.loadui.api.traits.Labeled;
-import com.eviware.loadui.ui.fx.control.ConfirmationDialog;
+import static javafx.beans.binding.Bindings.and;
+import static javafx.beans.binding.Bindings.not;
 
 public class CreateAssertionDialog extends ConfirmationDialog
 {
@@ -50,10 +47,9 @@ public class CreateAssertionDialog extends ConfirmationDialog
 		getItems().add( hBox );
 	}
 
-	public AssertableWrapper<ListenableValue<Number>> getSelectedAssertable()
+	public StatisticWrapper<Number> getSelectedAssertable()
 	{
-		Labeled selected = tree.getSelectionModel().getSelectedItem().getValue();
-		return ( AssertableWrapper<ListenableValue<Number>> )selected;
+		return tree.getSelectedAssertion();
 	}
 
 	public Constraint<Number> getConstraint()

@@ -100,7 +100,7 @@ public class MiscLayoutComponents
 				.build() );
 	}
 
-	private void showFilePickerDialog( final Button button, final String title, final String filePickerTitle, FilePickerDialog.ExtensionFilter soapuiExecutable )
+	private void showFilePickerDialog( final Button button, final String title, final String filePickerTitle, final FilePickerDialog.ExtensionFilter extensionFilter )
 	{
 		Platform.runLater( new Runnable()
 		{
@@ -109,7 +109,7 @@ public class MiscLayoutComponents
 			{
 				FilePickerDialogFactory filePickerDialogFactory = BeanInjector.getBean( FilePickerDialogFactory.class );
 
-				final FilePickerDialog confirm = filePickerDialogFactory.createDialog( button.getText(), title, filePickerTitle, FilePickerDialog.ExtensionFilter.SOAPUI_EXECUTABLE );
+				final FilePickerDialog confirm = filePickerDialogFactory.createPickerDialog( button.getText(), title, filePickerTitle, extensionFilter );
 
 				Runnable callback = new Runnable()
 				{

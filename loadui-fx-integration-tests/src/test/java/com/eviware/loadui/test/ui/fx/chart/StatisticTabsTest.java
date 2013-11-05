@@ -35,7 +35,7 @@ import static org.loadui.testfx.FXTestUtils.getOrFail;
 import static org.loadui.testfx.Matchers.hasLabel;
 import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 
-@Category(IntegrationTest.class)
+@Category( IntegrationTest.class )
 public class StatisticTabsTest extends FxIntegrationTestBase
 {
 	private StatisticPages pages;

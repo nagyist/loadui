@@ -41,7 +41,7 @@ import static org.junit.Assert.*;
  *
  * @author renato
  */
-@Category(IntegrationTest.class)
+@Category( IntegrationTest.class )
 public class EventsHandlingTest
 {
 
@@ -83,7 +83,7 @@ public class EventsHandlingTest
 		System.gc();
 		System.gc();
 
-		Node component = GuiTest.find( ".component-view" );
+		Node component = controller.find( ".component-view" );
 		assertNotNull( component );
 
 		ArrayList<Node> knobs = new ArrayList<>( GuiTest.findAll( ".knob", component ) );
