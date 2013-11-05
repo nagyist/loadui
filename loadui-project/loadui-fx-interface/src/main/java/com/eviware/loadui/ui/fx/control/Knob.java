@@ -62,6 +62,8 @@ public class Knob extends Control
 	private void initialize()
 	{
 		getStyleClass().setAll( DEFAULT_STYLE_CLASS );
+
+		setId( DEFAULT_STYLE_CLASS );
 	}
 
 	public final StringProperty textProperty()

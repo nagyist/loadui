@@ -111,6 +111,8 @@ public class KnobSkin extends SkinBase<Knob, KnobBehavior>
 	{
 		super( control, new KnobBehavior( control ) );
 
+		setId( "knob-skin" ); // removing "knob" id
+
 		angle = new DoubleBinding()
 		{
 			{

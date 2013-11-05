@@ -73,7 +73,7 @@ public class LoadUiRobot
 	public void resetPredefinedPoints()
 	{
 		predefinedPoints = Lists.newLinkedList( ImmutableList.of( new Point( 250, 250 ), new Point(
-				450, 450 ), new Point( 600, 200 ) ) );
+				450, 450 ), new Point( 600, 200 ), new Point( 200, 600 ), new Point(600, 600) ) );
 	}
 
 	public static LoadUiRobot usingController( GuiTest controller )
