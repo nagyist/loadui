@@ -1,9 +1,9 @@
 package com.eviware.loadui.ui.fx.util.test;
 
 import com.eviware.loadui.util.test.TestUtils;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import javafx.geometry.VerticalDirection;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.stage.Window;
@@ -11,6 +11,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.internal.matchers.TypeSafeMatcher;
 import org.loadui.testfx.GuiTest;
+import org.loadui.testfx.exceptions.NoNodesFoundException;
 
 import java.awt.*;
 import java.util.Queue;
@@ -18,6 +19,9 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static javafx.geometry.VerticalDirection.DOWN;
+import static javafx.geometry.VerticalDirection.UP;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
@@ -31,13 +35,13 @@ public class LoadUiRobot
 	public enum Component
 	{
 		FIXED_RATE_GENERATOR( "generators", "Fixed Rate" ), TABLE_LOG( "output", "Table Log" ), WEB_PAGE_RUNNER(
-			"runners", "Web Page Runner" ), VARIANCE("generators", "Variance"), RANDOM("generators", "Random"),
-		RAMP_SEQUENCE("generators", "Ramp Sequence"), RAMP( "generators", "Ramp"), USAGE("generators", "Usage"),
-		FIXED_LOAD( "generators", "Fixed Load"), SCRIPT_RUNNER("runners", "Script Runner"),
-		PROCESS_RUNNER("runners","Process Runner"), GEB_RUNNER("runners", "Geb Runner"), LOOP("flow", "Loop"),
-		SPLITTER("flow", "Splitter"), DELAY("flow", "Delay"), CONDITION("flow", "Condition"),
-		INTERVAL("scheduler", "Interval"), SCHEDULER("scheduler", "Scheduler"),
-		SOUPUI_MOCKSERVICE("misc", "soupUI MockService");
+			"runners", "Web Page Runner" ), VARIANCE( "generators", "Variance" ), RANDOM( "generators", "Random" ),
+		RAMP_SEQUENCE( "generators", "Ramp Sequence" ), RAMP( "generators", "Ramp" ), USAGE( "generators", "Usage" ),
+		FIXED_LOAD( "generators", "Fixed Load" ), SCRIPT_RUNNER( "runners", "Script Runner" ),
+		PROCESS_RUNNER( "runners", "Process Runner" ), GEB_RUNNER( "runners", "Geb Runner" ), LOOP( "flow", "Loop" ),
+		SPLITTER( "flow", "Splitter" ), DELAY( "flow", "Delay" ), CONDITION( "flow", "Condition" ),
+		INTERVAL( "scheduler", "Interval" ), SCHEDULER( "scheduler", "Scheduler" ),
+		SOUPUI_MOCKSERVICE( "misc", "soupUI MockService" ), SCENARIO( "vu-scenario", "VU Scenario" );
 
 		public final String category;
 		public final String name;
@@ -69,7 +73,7 @@ public class LoadUiRobot
 	public void resetPredefinedPoints()
 	{
 		predefinedPoints = Lists.newLinkedList( ImmutableList.of( new Point( 250, 250 ), new Point(
-				450, 450 ) ) );
+				450, 450 ), new Point( 600, 200 ), new Point( 200, 600 ), new Point(600, 600) ) );
 	}
 
 	public static LoadUiRobot usingController( GuiTest controller )
@@ -79,7 +83,12 @@ public class LoadUiRobot
 
 	public ComponentHandle createComponent( final Component component )
 	{
-		Preconditions.checkNotNull( predefinedPoints.peek(),
+		if( findAll( ".canvas-object-view" ).isEmpty() )
+		{
+			resetPredefinedPoints();
+		}
+
+		checkNotNull( predefinedPoints.peek(),
 				"All predefined points (x,y) for component placement are used. Please add new ones." );
 		return createComponentAt( component, predefinedPoints.poll() );
 	}
@@ -105,7 +114,7 @@ public class LoadUiRobot
 			{
 				return GuiTest.findAll( ".canvas-object-view" ).size() == numberOfComponents + 1;
 			}
-		}, 25000 );
+		}, 25 );
 
 		Set<Node> outputs = findAll( ".canvas-object-view .terminal-view.output-terminal" );
 		Set<Node> inputs = findAll( ".canvas-object-view .terminal-view.input-terminal" );
@@ -122,7 +131,8 @@ public class LoadUiRobot
 			@Override
 			public boolean matchesSafely( Node node )
 			{
-				if( node.getClass().getSimpleName().equals( "ComponentDescriptorView" ) )
+				String className = node.getClass().getSimpleName();
+				if( className.equals( "ComponentDescriptorView" ) || className.equals( "NewScenarioIcon" ) )
 				{
 					return node.toString().equals( component.name );
 				}
@@ -148,35 +158,41 @@ public class LoadUiRobot
 
 	public void scrollToCategoryOf( Component component )
 	{
-		int maxToolboxCategories = 50;
-		while( GuiTest.findAll( "#" + component.category + ".category" ).isEmpty() )
+		String query = "#" + component.category + ".category";
+		controller.move( ".canvas-view .tool-box .button .up" );
+
+		for( VerticalDirection direction : ImmutableList.of( DOWN, UP ) )
 		{
-			if( --maxToolboxCategories < 0 )
-				throw new RuntimeException( "Could not find component category " + component.category
-						+ " in component ToolBox." );
-			controller.move( "#runners.category" ).scroll( 10 );
+			int maxToolboxCategories = 10;
+			System.out.println( "Starting scrolling " + direction.toString() );
+			while( GuiTest.findAll( query ).isEmpty() )
+			{
+				System.out.println( "Want to scroll " + direction.toString() );
+				if( --maxToolboxCategories < 0 )
+					break;
+				controller.scroll( 10, direction );
+				System.out.println( "Scrolled " + direction.toString() );
+			}
 		}
+
+		if( GuiTest.findAll( query ).isEmpty() )
+			throw new RuntimeException( "Could not find component category '" + component.category
+					+ "' in component ToolBox." );
 	}
 
-	public Node getComponentNode( Component component, String... optionalName )
+	public Node getComponentNode( Component component )
 	{
-		if( optionalName.length > 0 )
-		{
-			return findComponentByName( optionalName[0], true );
-		}
-		else
-		{
-			return find( "." + component.cssClass() );
-		}
+		return findComponentByName( component.name, false );
 	}
 
 	private Node findComponentByName( String name, boolean exactMatch )
 	{
 		for( Node compNode : findAll( ".canvas-object-view" ) )
 		{
-			Set<Node> textLabels = findAll( "Label", find( "#topBar", compNode ) );
+			Set<Node> textLabels = findAll( ".label", find( "#topBar", compNode ) );
 			for( Node label : textLabels )
 			{
+				if( !( label instanceof Label ) ) continue;
 				String componentLabel = ( ( Label )label ).getText();
 				boolean foundMatch = exactMatch ? componentLabel.equals( name ) : componentLabel.startsWith( name );
 				if( foundMatch )
@@ -185,7 +201,7 @@ public class LoadUiRobot
 				}
 			}
 		}
-		return null;
+		throw new NoNodesFoundException( "No component found matching name " + name );
 	}
 
 	public void clickPlayStopButton()
@@ -210,6 +226,8 @@ public class LoadUiRobot
 
 	public void deleteAllComponentsFromProjectView()
 	{
+		waitUntil( "#abort-requests", is( not( visible() ) ) );
+
 		controller.click( "#designTab" );
 
 		int maxTries = 20;

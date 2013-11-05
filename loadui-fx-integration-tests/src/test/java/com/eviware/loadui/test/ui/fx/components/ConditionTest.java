@@ -12,6 +12,7 @@ import static com.eviware.loadui.test.ui.fx.tablelog.TableLogTestSupport.tableRo
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.*;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.Assert.assertThat;
 import static org.loadui.testfx.Assertions.assertNodeExists;
 import static org.loadui.testfx.Assertions.verifyThat;
 
@@ -41,6 +42,9 @@ public class ConditionTest extends FxIntegrationTestBase
 
 		robot.clickPlayStopButton();
 		sleep( 5000 );
+
+		assertThat( tableRows(), is( empty() ) );
+
 		robot.clickPlayStopButton();
 		sleep( 2000 );
 	}
@@ -50,12 +54,17 @@ public class ConditionTest extends FxIntegrationTestBase
 	{
 		connect( FIXED_RATE_GENERATOR ).to( CONDITION ).to( TABLE_LOG );
 		turnKnobIn( FIXED_RATE_GENERATOR ).to( 1 );
+		assertNodeExists( "1 / Sec" );
+
 		turnKnobIn( CONDITION, 2 ).to( 99999999999999L );
 
 		click( "#arrow-button" ); click( "TriggerTimestamp" );
 
 		robot.clickPlayStopButton();
 		sleep( 5000 );
+
+		verifyThat( tableRows(), is( not( empty() ) ) );
+
 		robot.clickPlayStopButton();
 		sleep( 2000 );
 	}

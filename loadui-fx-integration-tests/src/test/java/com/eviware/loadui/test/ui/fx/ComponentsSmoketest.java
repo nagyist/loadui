@@ -4,11 +4,8 @@ import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import javafx.scene.input.KeyCode;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-
-import java.util.concurrent.TimeUnit;
 
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.*;
 import static org.loadui.testfx.Assertions.assertNodeExists;
@@ -138,9 +135,10 @@ public class ComponentsSmoketest extends FxIntegrationTestBase
 
 
 		assertNodeExists( "#outputTerminalPane" );
-		assertNodeExists( ".component-view #menuButton" );
+		assertNodeExists( "#terminalNode" );
 
-		click( ".component-view #menuButton" );
+		doubleClick( "Menu" );
+
 	}
 
 	@Test
