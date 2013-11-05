@@ -73,7 +73,7 @@ public class LoadUiRobot
 	public void resetPredefinedPoints()
 	{
 		predefinedPoints = Lists.newLinkedList( ImmutableList.of( new Point( 250, 250 ), new Point(
-				450, 450 ), new Point( 600, 200 ) ) );
+				450, 450 ), new Point( 600, 200 ), new Point( 200, 600 ), new Point(600, 600) ) );
 	}
 
 	public static LoadUiRobot usingController( GuiTest controller )
@@ -164,14 +164,9 @@ public class LoadUiRobot
 		for( VerticalDirection direction : ImmutableList.of( DOWN, UP ) )
 		{
 			int maxToolboxCategories = 10;
-			System.out.println( "Starting scrolling " + direction.toString() );
-			while( GuiTest.findAll( query ).isEmpty() )
+			while( GuiTest.findAll( query ).isEmpty() && --maxToolboxCategories >= 0 )
 			{
-				System.out.println( "Want to scroll " + direction.toString() );
-				if( --maxToolboxCategories < 0 )
-					break;
 				controller.scroll( 10, direction );
-				System.out.println( "Scrolled " + direction.toString() );
 			}
 		}
 

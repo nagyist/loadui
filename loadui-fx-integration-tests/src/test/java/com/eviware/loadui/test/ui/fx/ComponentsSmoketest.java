@@ -8,9 +8,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import java.util.concurrent.TimeUnit;
-
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.*;
+import static org.hamcrest.Matchers.startsWith;
 import static org.loadui.testfx.Assertions.assertNodeExists;
 
 /**
@@ -20,7 +19,8 @@ import static org.loadui.testfx.Assertions.assertNodeExists;
  * Time: 11:12
  * To change this template use File | Settings | File Templates.
  */
-@Category(IntegrationTest.class)
+
+@Category( IntegrationTest.class )
 public class ComponentsSmoketest extends FxIntegrationTestBase
 {
 	@Override
@@ -73,11 +73,14 @@ public class ComponentsSmoketest extends FxIntegrationTestBase
 		turnKnobIn( RAMP_SEQUENCE, 2 ).to( 5 );
 		turnKnobIn( RAMP_SEQUENCE, 3 ).to( peakRate );
 
-		runTestFor( 3, TimeUnit.SECONDS, RunBlocking.NON_BLOCKING );
+		clickPlayStopButton();
 
 		sleep( 2000 );
 
-		assertNodeExists( "Rate " + peakRate );
+		assertNodeExists( startsWith( "Rate " + peakRate ) );
+
+		clickPlayStopButton();
+
 
 		//TODO make sure the test is stopped here
 	}
@@ -150,9 +153,10 @@ public class ComponentsSmoketest extends FxIntegrationTestBase
 
 
 		assertNodeExists( "#outputTerminalPane" );
-		assertNodeExists( ".component-view #menuButton" );
+		assertNodeExists( "#terminalNode" );
 
-		click( ".component-view #menuButton" );
+		doubleClick( "Menu" );
+
 	}
 
 	@Test
@@ -179,7 +183,7 @@ public class ComponentsSmoketest extends FxIntegrationTestBase
 		click( "#menu" );
 		sleep( 100 );
 		click( "Delete" );
-		click( "Delete" );
+		click( "#default" );
 
 
 	}
@@ -284,7 +288,7 @@ public class ComponentsSmoketest extends FxIntegrationTestBase
 		sleep( 300 );
 		click( "#menu" );
 		click( "Delete" );
-		click( "Delete" );
+		click( "#default" );
 
 
 	}

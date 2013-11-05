@@ -8,13 +8,13 @@ import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.test.TestUtils;
 import com.google.code.tempusfugit.temporal.Condition;
 import com.google.code.tempusfugit.temporal.Timeout;
+import com.google.common.collect.Lists;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Region;
 import org.loadui.testfx.GuiTest;
 
 import java.awt.*;
-import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +28,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 
 /**
- * @author Henrik
+ * @Author Henrik
  */
 public class FxIntegrationBase extends GuiTest
 {
@@ -165,9 +165,9 @@ public class FxIntegrationBase extends GuiTest
 	{
 		final Node componentNode = robot.getComponentNode( component );
 		System.out.println( "Component node: " + componentNode );
-		Set<Node> knobs = findAll( ".knob", componentNode );
+		Set<Node> knobs = findAll( "#knob", componentNode );
 
-		Node knob = ( Node )Arrays.asList( knobs.toArray() ).get( number - 1 );
+		Node knob = Lists.newArrayList(knobs).get( number - 1 );
 
 		return new KnobHandle( knob );
 	}
@@ -261,5 +261,10 @@ public class FxIntegrationBase extends GuiTest
 			return this;
 		}
 
+		public KnobHandle to( String value )
+		{
+			doubleClick( knob ).type( value ).type( KeyCode.ENTER );
+			return this;
+		}
 	}
 }
