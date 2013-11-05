@@ -34,7 +34,7 @@ public class DelayTest extends FxIntegrationTestBase
 	}
 
 	@After
-	public void teardown() throws Exception
+	public void ensureProjectNotRunning() throws Exception
 	{
 		ensureProjectIsNotRunning();
 		super.teardown();

@@ -1,7 +1,6 @@
 package com.eviware.loadui.ui.fx.util.test;
 
 import com.eviware.loadui.util.test.TestUtils;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import javafx.geometry.VerticalDirection;
@@ -13,7 +12,6 @@ import org.hamcrest.Matcher;
 import org.junit.internal.matchers.TypeSafeMatcher;
 import org.loadui.testfx.GuiTest;
 import org.loadui.testfx.exceptions.NoNodesFoundException;
-import org.loadui.testfx.exceptions.NoNodesFoundException;
 
 import java.awt.*;
 import java.util.Queue;
@@ -21,9 +19,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static javafx.geometry.VerticalDirection.DOWN;
-import static javafx.geometry.VerticalDirection.UP;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static javafx.geometry.VerticalDirection.DOWN;
 import static javafx.geometry.VerticalDirection.UP;

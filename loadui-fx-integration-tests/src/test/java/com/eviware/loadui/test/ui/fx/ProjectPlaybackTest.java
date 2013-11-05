@@ -17,7 +17,6 @@ package com.eviware.loadui.test.ui.fx;
 
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.test.categories.IntegrationTest;
-import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -58,7 +57,7 @@ public class ProjectPlaybackTest extends SimpleWebTestBase
 		robot.clickPlayStopButton();
 
 		sleep( 4_000 );
-		waitOrTimeout( new IsCanvasRunning( project, false ), timeout( seconds( 5 ) ) );
+		waitOrTimeout( new IsCanvasRunning( project, false ), timeout( seconds( 10 ) ) );
 	}
 
 }

@@ -7,9 +7,8 @@ import javafx.scene.input.KeyCode;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import java.util.concurrent.TimeUnit;
-
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.*;
+import static org.hamcrest.Matchers.startsWith;
 import static org.loadui.testfx.Assertions.assertNodeExists;
 
 /**
@@ -72,11 +71,14 @@ public class ComponentsSmoketest extends FxIntegrationTestBase
 		turnKnobIn( RAMP_SEQUENCE, 2 ).to( 5 );
 		turnKnobIn( RAMP_SEQUENCE, 3 ).to( peakRate );
 
-		runTestFor( 3, TimeUnit.SECONDS, RunBlocking.NON_BLOCKING );
+		clickPlayStopButton();
 
 		sleep( 2000 );
 
-		assertNodeExists( "Rate " + peakRate );
+		assertNodeExists( startsWith( "Rate " + peakRate ) );
+
+		clickPlayStopButton();
+
 
 		//TODO make sure the test is stopped here
 	}

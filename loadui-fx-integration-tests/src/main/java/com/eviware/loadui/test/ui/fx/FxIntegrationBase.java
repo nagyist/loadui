@@ -15,7 +15,6 @@ import javafx.scene.layout.Region;
 import org.loadui.testfx.GuiTest;
 
 import java.awt.*;
-import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -77,6 +76,7 @@ public class FxIntegrationBase extends GuiTest
 		{
 			robot.runTestFor( number, unit );
 		}
+	}
 
 	public void clickPlayStopButton()
 	{
