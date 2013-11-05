@@ -98,7 +98,7 @@
         <dependency>
             <groupId>org.loadui</groupId>
             <artifactId>testFx</artifactId>
-            <version>2.7.4</version>
+            <version>${testFxVersion}</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.tempus-fugit</groupId>
