@@ -98,8 +98,12 @@ public class UIUtils
 		catch( Exception e )
 		{
 			log.warn( "Could not get image for " + object, e );
-			return new Image( root( "default-component-icon.png" ) );
+			return getDefaultComponentImage();
 		}
+	}
+
+	public static Image getDefaultComponentImage() {
+		return new Image( root( "default-component-icon.png" ) );
 	}
 
 	private static Image doGetImage( Object object )

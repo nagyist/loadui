@@ -2,7 +2,6 @@ package com.eviware.loadui.cmd.interaction;
 
 import com.eviware.loadui.api.ui.dialog.FilePickerDialog;
 import com.eviware.loadui.api.ui.dialog.FilePickerDialogFactory;
-import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +20,8 @@ public class CmdFilePickerDialogFactory implements FilePickerDialogFactory
 	}
 
 	@Override
-	public File showOpenDialog( String title, FileChooser.ExtensionFilter filter )
+	public File showOpenDialog( String title, String extensionFilterDescription,
+										 String extensionFilterRegex )
 	{
 		log.warn( "Unsupported in headless" );
 		return null;

@@ -1,9 +1,9 @@
 package com.eviware.loadui.ui.fx.util.test;
 
 import com.eviware.loadui.util.test.TestUtils;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import javafx.geometry.VerticalDirection;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.stage.Window;
@@ -19,6 +19,9 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static javafx.geometry.VerticalDirection.DOWN;
+import static javafx.geometry.VerticalDirection.UP;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
@@ -70,7 +73,7 @@ public class LoadUiRobot
 	public void resetPredefinedPoints()
 	{
 		predefinedPoints = Lists.newLinkedList( ImmutableList.of( new Point( 250, 250 ), new Point(
-				450, 450 ) ) );
+				450, 450 ), new Point( 600, 200 ) ) );
 	}
 
 	public static LoadUiRobot usingController( GuiTest controller )
@@ -85,7 +88,7 @@ public class LoadUiRobot
 			resetPredefinedPoints();
 		}
 
-		Preconditions.checkNotNull( predefinedPoints.peek(),
+		checkNotNull( predefinedPoints.peek(),
 				"All predefined points (x,y) for component placement are used. Please add new ones." );
 		return createComponentAt( component, predefinedPoints.poll() );
 	}
@@ -155,16 +158,28 @@ public class LoadUiRobot
 
 	public void scrollToCategoryOf( Component component )
 	{
-		int maxToolboxCategories = 50;
-		while( GuiTest.findAll( "#" + component.category + ".category" ).isEmpty() )
+		String query = "#" + component.category + ".category";
+		controller.move( ".canvas-view .tool-box .button .up" );
+
+		for( VerticalDirection direction : ImmutableList.of( DOWN, UP ) )
 		{
-			if( --maxToolboxCategories < 0 )
-				throw new RuntimeException( "Could not find component category " + component.category
-						+ " in component ToolBox." );
-			controller.move( "#runners.category" ).scroll( 10 );
+			int maxToolboxCategories = 10;
+			System.out.println( "Starting scrolling " + direction.toString() );
+			while( GuiTest.findAll( query ).isEmpty() )
+			{
+				System.out.println( "Want to scroll " + direction.toString() );
+				if( --maxToolboxCategories < 0 )
+					break;
+				controller.scroll( 10, direction );
+				System.out.println( "Scrolled " + direction.toString() );
+			}
 		}
+
+		if( GuiTest.findAll( query ).isEmpty() )
+			throw new RuntimeException( "Could not find component category '" + component.category
+					+ "' in component ToolBox." );
 	}
-	
+
 	public Node getComponentNode( Component component )
 	{
 		return findComponentByName( component.name, false );
