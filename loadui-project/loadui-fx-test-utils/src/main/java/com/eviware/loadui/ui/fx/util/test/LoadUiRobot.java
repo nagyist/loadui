@@ -164,14 +164,9 @@ public class LoadUiRobot
 		for( VerticalDirection direction : ImmutableList.of( DOWN, UP ) )
 		{
 			int maxToolboxCategories = 10;
-			System.out.println( "Starting scrolling " + direction.toString() );
-			while( GuiTest.findAll( query ).isEmpty() )
+			while( GuiTest.findAll( query ).isEmpty() && --maxToolboxCategories >= 0 )
 			{
-				System.out.println( "Want to scroll " + direction.toString() );
-				if( --maxToolboxCategories < 0 )
-					break;
 				controller.scroll( 10, direction );
-				System.out.println( "Scrolled " + direction.toString() );
 			}
 		}
 
