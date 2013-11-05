@@ -41,7 +41,7 @@ import static org.loadui.testfx.Assertions.assertNodeExists;
 import static org.loadui.testfx.FXTestUtils.getOrFail;
 import static org.loadui.testfx.Matchers.hasLabel;
 
-@Category(IntegrationTest.class)
+@Category( IntegrationTest.class )
 public class NotificationPanelTest extends FxIntegrationTestBase
 {
 	@Override
@@ -72,6 +72,7 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 		assertFalse( panelNode.isVisible() );
 
 		sendMsgToNotificationPanel( "A message" );
+		sleep( 500 );
 
 		waitUntilVisible( panelNode );
 
@@ -84,6 +85,7 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 	{
 		Node panelNode = notificationPanel();
 		sendMsgToNotificationPanel( "A message" );
+		sleep( 500 );
 		waitUntilVisible( panelNode );
 
 		click( "#hide-notification-panel" );
@@ -102,6 +104,8 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 		sleep( 500 );
 
 		sendMsgToNotificationPanel( "Second message" );
+
+		sleep( 500 );
 
 		waitUntilVisible( panelNode );
 
@@ -136,6 +140,8 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 
 		sendMsgToNotificationPanel( "A message" );
 
+		sleep( 500 );
+
 		waitUntilVisible( panelNode );
 
 		Set<Node> textNodes = GuiTest.findAll( "#notification-text", panelNode );
@@ -146,7 +152,7 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 	}
 
 	@Test
-	@Ignore(value = "Feature disabled until further notice. See LOADUI-869 and LOADUI-871")
+	@Ignore( value = "Feature disabled until further notice. See LOADUI-869 and LOADUI-871" )
 	public void notificationShowsUpInDetachedTab() throws Exception
 	{
 		ProjectLoadedWithoutAgentsState.STATE.enter();
@@ -220,6 +226,7 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 		assertFalse( isInspectorViewOpen() );
 
 		sendMsgToNotificationPanel( "A message" );
+		sleep( 500 );
 		waitUntilVisible( panelNode );
 		click( "#show-system-log" );
 
@@ -232,6 +239,7 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 		Node panelNode = notificationPanel();
 
 		sendMsgToNotificationPanel( "A message" );
+		sleep( 500 );
 
 		waitUntilVisible( panelNode );
 
@@ -241,6 +249,7 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 		waitUntilNotVisible( panelNode );
 
 		sendMsgToNotificationPanel( "A message" );
+		sleep( 500 );
 
 		waitUntilVisible( panelNode );
 
@@ -300,7 +309,7 @@ public class NotificationPanelTest extends FxIntegrationTestBase
 			{
 				return !panelNode.isVisible();
 			}
-		}, 1 );
+		}, 2 );
 	}
 
 }

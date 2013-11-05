@@ -21,7 +21,7 @@ import static org.loadui.testfx.Assertions.verifyThat;
  * Date: 2013-10-30
  * Time: 10:29
  */
-@Category( IntegrationTest.class )
+@Category(IntegrationTest.class)
 public class ScenarioRunningTest extends SimpleWebTestBase
 {
 	HasScenarios hasScenarios = new HasScenarios();

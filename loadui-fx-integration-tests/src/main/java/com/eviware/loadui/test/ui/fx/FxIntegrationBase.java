@@ -218,7 +218,7 @@ public class FxIntegrationBase extends GuiTest
 		double height = view.getHeight();
 		if( height > 50 )
 		{
-			drag( "#Assertions" ).by( 0, height ).drop();
+			drag( ".inspector-bar" ).by( 0, height ).drop();
 		}
 	}
 
