@@ -3,12 +3,14 @@ package com.eviware.loadui.util.messaging;
 import com.eviware.loadui.api.messaging.ConnectionListener;
 import com.eviware.loadui.api.messaging.MessageEndpoint;
 import com.eviware.loadui.api.messaging.MessageListener;
-import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -23,7 +25,7 @@ abstract class MessageEndPointBase implements MessageEndpoint
 
 	protected static final Message CLOSE_MESSAGE = new Message( SERVICE_CLOSE, null );
 
-	protected final LinkedBlockingQueue<Message> outMessageQueue = Queues.newLinkedBlockingQueue();
+	protected final LinkedBlockingQueue<Message> outMessageQueue = new LinkedBlockingQueue();
 	private final Set<ConnectionListener> connectionListeners = Sets.newCopyOnWriteArraySet();
 	protected final ChannelRoutingSupport routingSupport;
 	private Thread messageReceiverThread;
@@ -66,7 +68,7 @@ abstract class MessageEndPointBase implements MessageEndpoint
 		connectionListeners.remove( listener );
 	}
 
-	public ObjectOutput provideObjectOutputStream( Socket socket ) throws ExceptionInInitializerError
+	public ObjectOutputStream provideObjectOutputStream( Socket socket ) throws ExceptionInInitializerError
 	{
 		try
 		{
@@ -114,13 +116,14 @@ abstract class MessageEndPointBase implements MessageEndpoint
 		return new Message( objectInput.readUTF(), objectInput.readObject() );
 	}
 
-	public void writeMessage( ObjectOutput oo, Message message )
+	public void writeMessage( ObjectOutputStream oo, Message message )
 	{
 		try
 		{
 			oo.writeUTF( message.channel );
 			oo.writeObject( message.data );
 			oo.flush();
+			oo.reset();
 		}
 		catch( IOException e )
 		{
@@ -258,7 +261,7 @@ abstract class MessageEndPointBase implements MessageEndpoint
 			outMessageQueue.clear();
 
 			Message message;
-			try( ObjectOutput oo = provideObjectOutputStream( socket ) )
+			try( ObjectOutputStream oo = provideObjectOutputStream( socket ) )
 			{
 				onMessageSenderLoopStarted();
 

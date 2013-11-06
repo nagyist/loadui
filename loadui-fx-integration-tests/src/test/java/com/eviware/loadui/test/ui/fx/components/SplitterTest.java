@@ -5,6 +5,7 @@ import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.FxIntegrationTestBase;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import javafx.scene.Node;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -23,7 +24,8 @@ import static org.loadui.testfx.Assertions.verifyThat;
  * Time: 13:50
  * To change this template use File | Settings | File Templates.
  */
-@Category( IntegrationTest.class )
+@Ignore( "Doesn't work in Jenkins" )
+@Category(IntegrationTest.class)
 public class SplitterTest extends FxIntegrationTestBase
 {
 
