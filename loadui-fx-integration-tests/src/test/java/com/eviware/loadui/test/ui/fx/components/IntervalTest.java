@@ -43,11 +43,11 @@ public class IntervalTest extends FxIntegrationTestBase
 
 		robot.clickPlayStopButton();
 
-		sleep( 2000 );
+		sleep( 3000 );
 
 		assertThat( tableRows(), is( empty() ) );
 
-		sleep( 3000 );
+		sleep( 6000 );
 
 		assertThat( tableRows(), is( not( empty() ) ) );
 

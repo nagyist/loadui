@@ -13,7 +13,6 @@ import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.*;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
-import static org.loadui.testfx.Assertions.assertNodeExists;
 import static org.loadui.testfx.Assertions.verifyThat;
 
 /**
@@ -54,7 +53,7 @@ public class ConditionTest extends FxIntegrationTestBase
 	{
 		connect( FIXED_RATE_GENERATOR ).to( CONDITION ).to( TABLE_LOG );
 		turnKnobIn( FIXED_RATE_GENERATOR ).to( 1 );
-		assertNodeExists( "1 / Sec" );
+		waitForNode( "1 / Sec" );
 
 		turnKnobIn( CONDITION, 2 ).to( 99999999999999L );
 
