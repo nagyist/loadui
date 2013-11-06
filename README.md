@@ -21,3 +21,9 @@ Contributing
 ------------
 
 We love contributions! Even though LoadUI is an open source project, for legal reasons you have to sign the [Contributor's Agreement](http://www.soapui.org/Developers-Corner/contribute-to-soapui.html) before we can incorporate any of your code in LoadUI.
+
+
+Additional resources
+--------------------
+* [Technical Overview](http://www.loadui.org/Developers-Corner/technical-overview.html)
+* [Creating Custom Components](http://www.loadui.org/Developers-Corner/custom-component-reference-new.html)
