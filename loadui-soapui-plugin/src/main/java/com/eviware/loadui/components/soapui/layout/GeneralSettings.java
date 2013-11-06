@@ -104,9 +104,9 @@ public class GeneralSettings
 		settingsFile.setValue( f );
 	}
 
-	public Boolean getUseProjectRelativePath()
+	public Property<Boolean> getUserProjectRelativePathProperty()
 	{
-		return useProjectRelativePath.getValue();
+		return useProjectRelativePath;
 	}
 
 	public String getProjectPassword()

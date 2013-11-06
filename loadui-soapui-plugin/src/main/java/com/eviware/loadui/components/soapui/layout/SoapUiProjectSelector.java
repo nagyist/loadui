@@ -21,6 +21,7 @@ import com.eviware.loadui.api.events.EventHandler;
 import com.eviware.loadui.api.events.PropertyEvent;
 import com.eviware.loadui.api.layout.LayoutComponent;
 import com.eviware.loadui.api.property.Property;
+import com.eviware.loadui.api.ui.dialog.FilePickerDialogFactory;
 import com.eviware.loadui.components.soapui.SoapUISamplerComponent;
 import com.eviware.loadui.components.soapui.SoapUISamplerComponent.SoapUITestCaseRunner;
 import com.eviware.loadui.impl.layout.LayoutComponentImpl;
@@ -29,16 +30,15 @@ import com.google.common.collect.ImmutableMap;
 import com.sun.javafx.Utils;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.geometry.HPos;
-import javafx.geometry.Insets;
-import javafx.geometry.Point2D;
-import javafx.geometry.VPos;
+import javafx.event.ActionEvent;
+import javafx.geometry.*;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +56,7 @@ public class SoapUiProjectSelector
 	private final com.eviware.loadui.api.property.Property<String> testCase;
 	private final javafx.beans.property.Property<String> convertedTestSuite;
 	private final javafx.beans.property.Property<String> convertedTestCase;
+	private final GeneralSettings settings;
 
 	private CountDownLatch testCaseLatch = new CountDownLatch( 0 );
 
@@ -66,15 +67,16 @@ public class SoapUiProjectSelector
 			.maxWidth( Double.MAX_VALUE ).build();
 
 	public static SoapUiProjectSelector newInstance( SoapUISamplerComponent component, ComponentContext context,
-																	 SoapUITestCaseRunner testCaseRunner )
+																	 SoapUITestCaseRunner testCaseRunner, GeneralSettings settings )
 	{
-		SoapUiProjectSelector selector = new SoapUiProjectSelector( context );
+		SoapUiProjectSelector selector = new SoapUiProjectSelector( context, settings );
 		context.addEventListener( PropertyEvent.class, selector.new PropertyChangedListener( component, testCaseRunner ) );
 		return selector;
 	}
 
-	private SoapUiProjectSelector( ComponentContext context )
+	private SoapUiProjectSelector( ComponentContext context, GeneralSettings settings )
 	{
+		this.settings = settings;
 		projectFile = context.createProperty( "projectFile", File.class, null, false );
 		testSuite = context.createProperty( "testSuite", String.class );
 		testCase = context.createProperty( TEST_CASE, String.class );
@@ -290,26 +292,61 @@ public class SoapUiProjectSelector
 		{
 			this.parent = parent;
 
+			setStyle( "-fx-border-radius: 3;" );
 			setAutoHide( true );
 
-			FilePicker picker = new FilePicker( "Select SoapUI project",
-					"SoapUI Project Files", "*.xml" );
+			final SoapUiFilePicker picker = new SoapUiFilePicker( "Select SoapUI project",
+					"SoapUI Project Files", "*.xml",
+					BeanInjector.getBean( FilePickerDialogFactory.class ),
+					projectFile.getValue().getParentFile() );
 			picker.selectedProperty().bindBidirectional( Properties.convert( projectFile ) );
+			picker.getIsRelativePathProperty().bindBidirectional(
+					Properties.convert( settings.getUserProjectRelativePathProperty() ) );
 
-			VBox vBox = VBoxBuilder
+			setOnHidden( new javafx.event.EventHandler<WindowEvent>()
+			{
+				@Override
+				public void handle( WindowEvent windowEvent )
+				{
+					picker.onHide();
+				}
+			} );
+
+			Button closeButton = new Button( "Close" );
+			closeButton.setId( "close-soapui-project-selector" );
+			closeButton.setOnAction( new javafx.event.EventHandler<ActionEvent>()
+			{
+				@Override
+				public void handle( ActionEvent actionEvent )
+				{
+					hide();
+				}
+			} );
+
+			HBox buttonBox = HBoxBuilder.create()
+					.alignment( Pos.BOTTOM_RIGHT )
+					.minWidth( 300 )
+					.children( closeButton )
+					.build();
+
+			VBox mainBox = VBoxBuilder
 					.create()
 					.styleClass( "project-selector" )
 					.fillWidth( true )
-					.prefWidth( 325 )
-					.prefHeight( 160 )
+					.prefWidth( 625 )
 					.spacing( 10 )
 					.padding( new Insets( 10 ) )
-					.style( "-fx-background-color: #f4f4f4;" )
-					.children( new Label( "SoapUI Project" ), picker, new Label( "TestSuite" ), testSuiteCombo,
-							new Label( "TestCase" ), testCaseCombo )
+					.style( "-fx-background-color: #f4f4f4;" +
+							" -fx-border-style: solid;" +
+							" -fx-border-color: black;" +
+							" -fx-border-radius: 3;" )
+					.children( new Label( "SoapUI Project" ), picker,
+							new Label( "TestSuite" ), testSuiteCombo,
+							new Label( "TestCase" ), testCaseCombo,
+							buttonBox )
 					.build();
 
-			bridge.getChildren().setAll( StackPaneBuilder.create().children( vBox ).build() );
+			bridge.getChildren().setAll( StackPaneBuilder.create().children( mainBox ).build() );
 		}
 
 		public void display()

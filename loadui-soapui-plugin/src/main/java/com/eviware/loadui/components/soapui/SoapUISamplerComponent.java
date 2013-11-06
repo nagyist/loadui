@@ -213,7 +213,7 @@ public class SoapUISamplerComponent extends RunnerBase
 
 		testStepsTableModel = new TestStepsTableModel( this );
 		generalSettings = GeneralSettings.newInstance( context, runner );
-		projectSelector = SoapUiProjectSelector.newInstance( this, context, runner );
+		projectSelector = SoapUiProjectSelector.newInstance( this, context, runner, generalSettings );
 
 		SoapUiProjectUtils.registerJdbcDrivers();
 
@@ -223,7 +223,7 @@ public class SoapUISamplerComponent extends RunnerBase
 		if( context.isController() )
 		{
 			loaduiProjectFolder = project.getProjectFile().getParentFile();
-			if( generalSettings.getUseProjectRelativePath() )
+			if( generalSettings.getUserProjectRelativePathProperty().getValue() )
 			{
 				// If relative path is used, calculate real (absolute) path and set
 				// it.
