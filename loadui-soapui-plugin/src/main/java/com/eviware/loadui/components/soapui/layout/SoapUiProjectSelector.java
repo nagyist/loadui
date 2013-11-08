@@ -26,6 +26,7 @@ import com.eviware.loadui.components.soapui.SoapUISamplerComponent;
 import com.eviware.loadui.components.soapui.SoapUISamplerComponent.SoapUITestCaseRunner;
 import com.eviware.loadui.impl.layout.LayoutComponentImpl;
 import com.eviware.loadui.util.BeanInjector;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.sun.javafx.Utils;
 import javafx.application.Platform;
@@ -57,6 +58,9 @@ public class SoapUiProjectSelector
 	private final javafx.beans.property.Property<String> convertedTestSuite;
 	private final javafx.beans.property.Property<String> convertedTestCase;
 	private final GeneralSettings settings;
+	private final PropertyChangedListener propertyEventListener;
+	private final ComponentContext context;
+	private final File loaduiProjectDir;
 
 	private CountDownLatch testCaseLatch = new CountDownLatch( 0 );
 
@@ -67,21 +71,28 @@ public class SoapUiProjectSelector
 			.maxWidth( Double.MAX_VALUE ).build();
 
 	public static SoapUiProjectSelector newInstance( SoapUISamplerComponent component, ComponentContext context,
-																	 SoapUITestCaseRunner testCaseRunner, GeneralSettings settings )
+																	 SoapUITestCaseRunner testCaseRunner, GeneralSettings settings,
+																	 File loaduiProjectDir )
 	{
-		SoapUiProjectSelector selector = new SoapUiProjectSelector( context, settings );
-		context.addEventListener( PropertyEvent.class, selector.new PropertyChangedListener( component, testCaseRunner ) );
-		return selector;
+		return new SoapUiProjectSelector( context, settings, component, testCaseRunner, loaduiProjectDir );
 	}
 
-	private SoapUiProjectSelector( ComponentContext context, GeneralSettings settings )
+	private SoapUiProjectSelector( ComponentContext context, GeneralSettings settings,
+											 SoapUISamplerComponent component,
+											 SoapUITestCaseRunner testCaseRunner,
+											 File loaduiProjectDir )
 	{
 		this.settings = settings;
+		this.context = context;
+		this.loaduiProjectDir = loaduiProjectDir;
 		projectFile = context.createProperty( "projectFile", File.class, null, false );
 		testSuite = context.createProperty( "testSuite", String.class );
 		testCase = context.createProperty( TEST_CASE, String.class );
 		convertedTestSuite = Properties.convert( testSuite );
 		convertedTestCase = Properties.convert( testCase );
+		this.propertyEventListener = new PropertyChangedListener( component, testCaseRunner );
+		context.addEventListener( PropertyEvent.class, propertyEventListener );
+		projectFile.getOwner().addEventListener( PropertyEvent.class, propertyEventListener );
 	}
 
 	public LayoutComponent buildLayout()
@@ -287,10 +298,17 @@ public class SoapUiProjectSelector
 	private class ProjectSelector extends PopupControl
 	{
 		private final Parent parent;
+		final javafx.beans.property.Property<File> fileProperty = Properties.convert( projectFile );
 
+		/**
+		 * This is created every time the user clicks on the project button - so cleanup is needed after hiding it
+		 *
+		 * @param parent
+		 */
 		private ProjectSelector( Parent parent )
 		{
 			this.parent = parent;
+			Preconditions.checkNotNull( loaduiProjectDir, "LoadUI Project Directory must not be null" );
 
 			setStyle( "-fx-border-radius: 3;" );
 			setAutoHide( true );
@@ -298,8 +316,8 @@ public class SoapUiProjectSelector
 			final SoapUiFilePicker picker = new SoapUiFilePicker( "Select SoapUI project",
 					"SoapUI Project Files", "*.xml",
 					BeanInjector.getBean( FilePickerDialogFactory.class ),
-					projectFile.getValue().getParentFile() );
-			picker.selectedProperty().bindBidirectional( Properties.convert( projectFile ) );
+					loaduiProjectDir.getAbsoluteFile() );
+			picker.selectedProperty().bindBidirectional( fileProperty );
 			picker.getIsRelativePathProperty().bindBidirectional(
 					Properties.convert( settings.getUserProjectRelativePathProperty() ) );
 
@@ -309,6 +327,10 @@ public class SoapUiProjectSelector
 				public void handle( WindowEvent windowEvent )
 				{
 					picker.onHide();
+					picker.selectedProperty().unbindBidirectional( fileProperty );
+					//FIXME might need to remove these listeners elsewhere
+					//context.removeEventListener( PropertyEvent.class, propertyEventListener );
+					//projectFile.getOwner().removeEventListener( PropertyEvent.class, propertyEventListener );
 				}
 			} );
 
