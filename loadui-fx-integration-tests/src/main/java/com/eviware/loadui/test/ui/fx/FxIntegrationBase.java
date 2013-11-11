@@ -25,10 +25,11 @@ import static com.google.code.tempusfugit.temporal.Timeout.timeout;
 import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.fail;
 import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 
 /**
- * @Author Henrik
+ * @author Henrik
  */
 public class FxIntegrationBase extends GuiTest
 {
@@ -266,5 +267,23 @@ public class FxIntegrationBase extends GuiTest
 			doubleClick( knob ).type( value ).type( KeyCode.ENTER );
 			return this;
 		}
+	}
+
+	public void waitAndClick( final String query )
+	{
+		TestUtils.awaitConditionSilent( new Callable<Boolean>()
+		{
+			@Override
+			public Boolean call() throws Exception
+			{
+				return exists( query );
+			}
+		}, 5 );
+
+		if(!exists( query ))
+		{
+			fail("Expected to find match for query \"" + query + "\" within wait period but failed. Captured screen shot: " + captureScreenshot().getAbsolutePath());
+		}
+		click( query );
 	}
 }

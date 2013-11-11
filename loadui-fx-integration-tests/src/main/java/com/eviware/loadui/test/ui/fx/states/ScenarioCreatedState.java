@@ -92,7 +92,7 @@ public class ScenarioCreatedState extends FxTestState
 			}
 		}, is( true ) );
 
-		GUI.getOpenSourceGui().getController().click( ".scenario-view #menu" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
+		GUI.getOpenSourceGui().getController().click( ".scenario-view #menu" ).sleep(200).click( "#delete-item" ).sleep(200).click( ".confirmation-dialog #default" );
 
 		waitForNodeToDisappear( ".scenario-view" );
 	}

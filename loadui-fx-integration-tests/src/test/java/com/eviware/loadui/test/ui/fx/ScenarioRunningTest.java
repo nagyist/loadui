@@ -4,11 +4,15 @@ import com.eviware.loadui.api.model.SceneItem;
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ScenarioCreatedState;
+import com.eviware.loadui.util.execution.TestExecutionUtils;
 import com.google.code.tempusfugit.temporal.Timeout;
+import javafx.scene.Node;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.loadui.testfx.matchers.EnabledMatcher;
+
+import java.util.concurrent.Callable;
 
 import static com.google.code.tempusfugit.temporal.Duration.seconds;
 import static com.google.code.tempusfugit.temporal.Timeout.timeout;
@@ -55,7 +59,7 @@ public class ScenarioRunningTest extends SimpleWebTestBase
 
 			scenario = hasScenarios.ensureScenarioIsLinkedIs( true );
 
-			click( ".mini-playback-panel  .play-button" );
+			stopScenario();
 
 			try
 			{
@@ -71,38 +75,109 @@ public class ScenarioRunningTest extends SimpleWebTestBase
 
 	}
 
-	@Ignore
 	@Test
 	public void ShouldStopScenarioWhenPressingExitProjectButton() throws Exception
 	{
 		//When
 		hasScenarios.startSingleScenario( scenario );
-		pressExitProject();
-		click( "Cancel" );
+		sleep( 500 );
+		click( "#closeProjectButton" );
+		waitForBlockingTaskToCompleteOrAbort();
+		testRunner.waitForBlockingTaskToComplete();
+
+		waitForNode( "#cancel" );
+		sleep( 200 );
+		click( "#cancel" );
 
 		//Then
-		verifyThat( "Expected scenario to not be running", scenario.isRunning(), is( false ) );
+		verifyScenarioIsRunningIs(false);
+		waitAndVerifyThatExecutionStoppedWithinFiveSecounds();
 
 	}
 
-	@Ignore
+	private void waitAndVerifyThatExecutionStoppedWithinFiveSecounds()
+	{
+		waitUntil( new Callable<Boolean>()
+		{
+			@Override
+			public Boolean call() throws Exception
+			{
+				return TestExecutionUtils.isExecutionRunning();
+			}
+		}, is(false), 5 );
+	}
+
 	@Test
-	public void ShouldNotWaitMoreThanFiveSecondsWhenStoppingEmptyScenario() throws Exception
+	public void shouldNotWaitMoreThanFiveSecondsWhenStoppingEmptyScenario() throws Exception
 	{
 		//Given
 		scenario = hasScenarios.ensureScenarioIsLinkedIs( true );
 
 		//When
 		hasScenarios.startSingleScenario( scenario );
-		click( ".mini-playback-panel  .play-button" );
-		System.out.println( "clicked stop" );
+		sleep( 500 );
+		stopScenario();
 
 		//Then
-		AssertNodeDisappeared( "#abort-requests", timeout( seconds( 5 ) ) );
+		assertNodeDisappeared( "#abort-requests", timeout( seconds( 5 ) ) );
 
 	}
 
-	private void AssertNodeDisappeared( String query, Timeout timeout )
+	@Test
+	public void shouldTrulyStopScenarioAndExecutionWhenAbortingCloseBlockingTask() throws Exception
+	{
+		//Given
+		scenario = hasScenarios.ensureScenarioIsLinkedIs( true );
+
+
+		//When
+		hasScenarios.startSingleScenario( scenario );
+		waitUntilPlayButtonIsEnabled();
+		stopScenario();
+
+		//Then
+		waitAndClick( "#abort-requests" );
+
+		testRunner.waitForBlockingTaskToComplete();
+		waitAndVerifyThatExecutionStoppedWithinFiveSecounds();
+		verifyScenarioIsRunningIs(false);
+	}
+
+	private void waitUntilPlayButtonIsEnabled()
+	{
+		Node playbutton = find(".mini-playback-panel  .play-button" );
+		waitUntil( playbutton, EnabledMatcher.enabled() );
+
+
+
+	}
+
+	private void stopScenario()
+	{
+		click( ".mini-playback-panel  .play-button" );
+	}
+
+	private void verifyScenarioIsRunningIs(Boolean bool)
+	{
+		verifyThat( "Expected that scenario isRunning is " + bool, scenario.isRunning(), is( bool ) );
+	}
+
+
+	private void waitForBlockingTaskToCompleteOrAbort()
+	{
+		try
+		{
+			waitForNodeToDisappear( ".task-progress-indicator", timeout( seconds( 10 ) ) );
+		}
+		catch( RuntimeException e )
+		{
+			clickOnAbortButton();
+			assertNodeDisappeared( ".task-progress-indicator", timeout( seconds( 5 ) ) );
+		}
+
+	}
+
+	private void assertNodeDisappeared( String query, Timeout timeout )
 	{
 		try
 		{
@@ -112,12 +187,6 @@ public class ScenarioRunningTest extends SimpleWebTestBase
 		{
 			fail( "Expected node that matched query " + query + " to disappear, captured screenshot: " + captureScreenshot().getAbsolutePath() );
 		}
-	}
-
-	private void pressExitProject()
-	{
-		click( "#closeProjectButton" );
-		testRunner.waitForBlockingTaskToComplete();
 	}
 
 
