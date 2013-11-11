@@ -36,7 +36,7 @@ fi
 
 JAVA="jre/bin/java"
 
-if [ ! -d "$JAVA" ]; then
+if [ ! -f "$JAVA" ]; then
   JAVA="java"
 fi
 

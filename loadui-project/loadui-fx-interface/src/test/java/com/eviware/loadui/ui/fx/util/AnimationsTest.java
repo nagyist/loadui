@@ -15,19 +15,7 @@
  */
 package com.eviware.loadui.ui.fx.util;
 
-import static org.loadui.testfx.GuiTest.targetWindow;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.loadui.testfx.categories.TestFX;
-import org.loadui.testfx.FXTestUtils;
-import org.loadui.testfx.GuiTest;
+import com.google.common.util.concurrent.SettableFuture;
 import javafx.application.Application;
 import javafx.geometry.Bounds;
 import javafx.scene.SceneBuilder;
@@ -37,12 +25,20 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
+import org.loadui.testfx.categories.TestFX;
 
-import com.google.common.util.concurrent.SettableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.*;
+import static org.loadui.testfx.GuiTest.targetWindow;
 
 @Category( TestFX.class )
 public class AnimationsTest
@@ -260,7 +256,7 @@ public class AnimationsTest
 		anime.slideDown();
 		Thread.sleep( 25 );
 		double opacity = rectangle.getOpacity();
-		assertEquals( 1.0, opacity, 0.01 );
+		assertEquals( 1.0, opacity, 0.1 );
 		Bounds bounds = rectangle.getBoundsInParent();
 		assertTrue( bounds.getMaxY() < rectangle.getHeight() );
 		assertTrue( rectangle.isVisible() );
