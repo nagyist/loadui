@@ -28,6 +28,8 @@ import com.eviware.loadui.api.messaging.SceneCommunication;
 import com.eviware.loadui.api.model.*;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.api.terminal.*;
+import com.eviware.loadui.api.testevents.MessageLevel;
+import com.eviware.loadui.api.testevents.TestEventManager;
 import com.eviware.loadui.config.SceneItemConfig;
 import com.eviware.loadui.impl.counter.AggregatedCounterSupport;
 import com.eviware.loadui.impl.counter.RemoteAggregatedCounterSupport;
@@ -37,6 +39,7 @@ import com.eviware.loadui.impl.terminal.ConnectionImpl;
 import com.eviware.loadui.impl.terminal.InputTerminalImpl;
 import com.eviware.loadui.impl.terminal.TerminalHolderSupport;
 import com.eviware.loadui.util.BeanInjector;
+import com.eviware.loadui.util.execution.TestExecutionUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
@@ -58,7 +61,7 @@ import static com.google.common.collect.Collections2.filter;
 
 public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements SceneItem
 {
-	private static final Logger log = LoggerFactory.getLogger( CanvasItemImpl.class );
+	private static final Logger log = LoggerFactory.getLogger( SceneItemImpl.class );
 
 	private static final Predicate<AgentItem> ACTIVE_AGENTS_FUNCTION = new Predicate<AgentItem>()
 	{
@@ -198,7 +201,12 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 	@Override
 	public void delete()
 	{
-		log.debug( "DELETING A SCENARIOITEMIMPL!!!!!!!!!!!!!!!!!!" );
+		if(TestExecutionUtils.getCurrentlyRunningCanvasItem() == this)
+		{
+			BeanInjector.getBean( TestEventManager.class ).logMessage( MessageLevel.WARNING, "Stop the scenario \"" + getLabel() + "\" before removing it" );
+			return;
+		}
+
 		for( ComponentItem component : new ArrayList<>( getComponents() ) )
 		{
 			component.delete();
