@@ -126,15 +126,23 @@ public class TestExecutionAddon implements Addon
 					}
 					else if( phase == Phase.POST_STOP )
 					{
-						try
+						if(!canvas.isCompleted())
 						{
-							waitForAllCanvasToGetReady.get( 1, TimeUnit.MINUTES );
-						}
-						catch( InterruptedException | ExecutionException | TimeoutException e )
-						{
-							log.error( "Failed waiting for READY event", e );
+							WaitforReadyEvent();
 						}
 					}
+				}
+			}
+
+			private void WaitforReadyEvent()
+			{
+				try
+				{
+					waitForAllCanvasToGetReady.get( 1, TimeUnit.MINUTES );
+				}
+				catch( InterruptedException | ExecutionException | TimeoutException e )
+				{
+					log.error( "Failed waiting for READY event", e );
 				}
 			}
 		};
