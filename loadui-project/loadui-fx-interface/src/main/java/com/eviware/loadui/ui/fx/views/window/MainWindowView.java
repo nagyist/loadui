@@ -21,6 +21,7 @@ import com.eviware.loadui.api.events.WeakEventHandler;
 import com.eviware.loadui.api.model.*;
 import com.eviware.loadui.api.testevents.TestEventManager;
 import com.eviware.loadui.api.traits.Labeled;
+import com.eviware.loadui.api.traits.Releasable;
 import com.eviware.loadui.ui.fx.api.Inspector;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import com.eviware.loadui.ui.fx.api.perspective.PerspectiveEvent;
@@ -37,14 +38,10 @@ import com.eviware.loadui.ui.fx.views.project.ProjectView;
 import com.eviware.loadui.ui.fx.views.project.SaveProjectDialog;
 import com.eviware.loadui.ui.fx.views.rename.RenameDialog;
 import com.eviware.loadui.ui.fx.views.workspace.GlobalSettingsDialog;
-import com.eviware.loadui.ui.fx.views.workspace.NewVersionDialog;
 import com.eviware.loadui.ui.fx.views.workspace.SystemPropertiesDialog;
 import com.eviware.loadui.ui.fx.views.workspace.WorkspaceView;
-import com.eviware.loadui.util.NewVersionChecker;
 import com.google.common.base.Preconditions;
 import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -61,6 +58,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class MainWindowView extends StackPane implements OverlayHolder
 {
@@ -116,7 +115,8 @@ public class MainWindowView extends StackPane implements OverlayHolder
 		if( workspaceProvider.isWorkspaceLoaded() )
 		{
 			workspaceProperty.setValue( workspaceProvider.getWorkspace() );
-		} else
+		}
+		else
 		{
 			workspaceProperty.setValue( workspaceProvider.loadDefaultWorkspace() );
 		}
@@ -133,7 +133,8 @@ public class MainWindowView extends StackPane implements OverlayHolder
 			initIntentEventHanding();
 			initInspectorView();
 			showWorkspace();
-		} catch( Exception e1 )
+		}
+		catch( Exception e1 )
 		{
 			e1.printStackTrace();
 			ErrorHandler.promptRestart();
@@ -161,7 +162,7 @@ public class MainWindowView extends StackPane implements OverlayHolder
 				{
 					if( event.getArg() instanceof ProjectRef )
 					{
-						final ProjectRef projectRef = (ProjectRef) event.getArg();
+						final ProjectRef projectRef = ( ProjectRef )event.getArg();
 						Task<Void> openProject = new Task<Void>()
 						{
 							@Override
@@ -178,11 +179,12 @@ public class MainWindowView extends StackPane implements OverlayHolder
 										public void run()
 										{
 											ProjectView projectView = new ProjectView( project, executionsInfo );
-											container.getChildren().setAll( projectView );
+											changeToView( projectView );
 											PerspectiveEvent.fireEvent( PerspectiveEvent.PERSPECTIVE_PROJECT, projectView );
 										}
 									} );
-								} catch( Exception e )
+								}
+								catch( Exception e )
 								{
 									e.printStackTrace();
 								}
@@ -192,55 +194,65 @@ public class MainWindowView extends StackPane implements OverlayHolder
 						};
 
 						fireEvent( IntentEvent.create( IntentEvent.INTENT_RUN_BLOCKING, openProject ) );
-					} else if( event.getArg() instanceof SceneItem )
+					}
+					else if( event.getArg() instanceof SceneItem )
 					{
 						if( container.getChildren().size() == 1 )
 						{
 							container.getChildren().get( 0 ).fireEvent( event );
 						}
-					} else
+					}
+					else
 					{
 						System.out.println( "Unhandled intent: " + event );
 						return;
 					}
-				} else if( event.getEventType() == IntentEvent.INTENT_CLOSE )
+				}
+				else if( event.getEventType() == IntentEvent.INTENT_CLOSE )
 				{
 					if( event.getArg() instanceof ProjectItem )
 					{
-						final ProjectItem project = (ProjectItem) event.getArg();
+						final ProjectItem project = ( ProjectItem )event.getArg();
 						if( project.isDirty() )
 						{
 							SaveProjectDialog saveDialog = new SaveProjectDialog( MainWindowView.this, project );
 							saveDialog.show();
-						} else
+						}
+						else
 						{
 							showWorkspace();
 							project.release();
 						}
 						//TODO: Need to have the ProjectRef close the project.
-					} else
+					}
+					else
 					{
 						System.out.println( "Unhandled intent: " + event );
 						return;
 					}
-				} else if( event.getEventType() == IntentEvent.INTENT_RENAME )
+				}
+				else if( event.getEventType() == IntentEvent.INTENT_RENAME )
 				{
 					final Object arg = event.getArg();
 					Preconditions.checkArgument( arg instanceof Labeled.Mutable );
-					new RenameDialog( (Labeled.Mutable) arg, MainWindowView.this ).show();
-				} else if( event.getEventType() == IntentEvent.INTENT_RUN_BLOCKING )
+					new RenameDialog( ( Labeled.Mutable )arg, MainWindowView.this ).show();
+				}
+				else if( event.getEventType() == IntentEvent.INTENT_RUN_BLOCKING )
 				{
 					//Handled by BlockingTask.
 					return;
-				} else if( event.getEventType() == IntentEvent.INTENT_RUN_BLOCKING_ABORTABLE )
+				}
+				else if( event.getEventType() == IntentEvent.INTENT_RUN_BLOCKING_ABORTABLE )
 				{
 					//Handled by AbortableBlockingTask.
 					return;
-				} else if( event.getEventType() == IntentEvent.INTENT_DELETE )
+				}
+				else if( event.getEventType() == IntentEvent.INTENT_DELETE )
 				{
 					//Handled by DeleteTask.
 					return;
-				} else
+				}
+				else
 				{
 					System.out.println( "Unhandled intent: " + event );
 					return;
@@ -253,11 +265,30 @@ public class MainWindowView extends StackPane implements OverlayHolder
 	public void showWorkspace()
 	{
 		WorkspaceView workspaceView = new WorkspaceView( workspaceProvider.getWorkspace() );
-		container.getChildren().setAll( workspaceView );
+		changeToView( workspaceView );
 		PerspectiveEvent.fireEvent( PerspectiveEvent.PERSPECTIVE_WORKSPACE, workspaceView );
 	}
 
-	@SuppressWarnings("unchecked")
+	public void changeToView( Node view )
+	{
+		releaseChildIfPossible( container );
+		container.getChildren().setAll( view );
+	}
+
+	private void releaseChildIfPossible( StackPane container )
+	{
+		List<Node> children = container.getChildren();
+		if( children.size() < 1 ) return;
+
+		Node child = children.get( 0 );
+		if( child instanceof Releasable )
+		{
+			( ( Releasable )child ).release();
+		}
+
+	}
+
+	@SuppressWarnings( "unchecked" )
 	public <T extends Parent> T getChildView( Class<T> expectedClass )
 	{
 		if( container != null && container.getChildren().isEmpty() == false )
@@ -266,7 +297,7 @@ public class MainWindowView extends StackPane implements OverlayHolder
 			for( Node childView : container.getChildren() )
 			{
 				if( expectedClass.isInstance( childView ) )
-					return (T) childView;
+					return ( T )childView;
 			}
 		}
 		throw new IllegalStateException( MainWindowView.class.getName() + " does not hold a view of class "

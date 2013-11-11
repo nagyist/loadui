@@ -19,16 +19,14 @@ import com.eviware.loadui.api.execution.Phase;
 import com.eviware.loadui.api.execution.TestExecution;
 import com.eviware.loadui.api.execution.TestExecutionTask;
 import com.eviware.loadui.api.execution.TestRunner;
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.api.model.ProjectRef;
-import com.eviware.loadui.api.model.SceneItem;
-import com.eviware.loadui.api.model.WorkspaceItem;
+import com.eviware.loadui.api.model.*;
 import com.eviware.loadui.api.reporting.ReportingManager;
 import com.eviware.loadui.api.statistics.model.StatisticPage;
 import com.eviware.loadui.api.statistics.model.chart.ChartView;
 import com.eviware.loadui.api.statistics.store.Execution;
 import com.eviware.loadui.api.testevents.MessageLevel;
 import com.eviware.loadui.api.testevents.TestEventManager;
+import com.eviware.loadui.api.traits.Releasable;
 import com.eviware.loadui.ui.fx.api.intent.AbortableTask;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import com.eviware.loadui.ui.fx.control.DetachableTab;
@@ -43,6 +41,7 @@ import com.eviware.loadui.ui.fx.views.statistics.StatisticsView;
 import com.eviware.loadui.ui.fx.views.workspace.CloneProjectDialog;
 import com.eviware.loadui.ui.fx.views.workspace.CreateNewProjectDialog;
 import com.eviware.loadui.util.BeanInjector;
+import com.eviware.loadui.util.execution.TestExecutionUtils;
 import com.eviware.loadui.util.projects.ProjectUtils;
 import com.google.common.base.Preconditions;
 import com.sun.javafx.PlatformUtil;
@@ -77,7 +76,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-public class ProjectView extends AnchorPane
+public class ProjectView extends AnchorPane implements Releasable
 {
 	private static final String HELP_PAGE = "http://www.loadui.org/interface/project-view.html";
 
@@ -426,13 +425,21 @@ public class ProjectView extends AnchorPane
 	}
 
 	@FXML
-	public void closeProject()
+	public void stopAndRequestCloseProject()
 	{
-		StatisticsView statisticsView = ( StatisticsView )statsTab.getDetachableContent();
-		statisticsView.close();
 		log.info( "Close project requested" );
-		executionsInfo.reset();
+		stopAnyExecutionRunning();
 		fireEvent( IntentEvent.create( IntentEvent.INTENT_CLOSE, project ) );
+	}
+
+	private void stopAnyExecutionRunning()
+	{
+		CanvasItem runningCanvas = TestExecutionUtils.getCurrentlyRunningCanvasItem();
+		if( runningCanvas != null )
+		{
+			runningCanvas.triggerAction( CanvasItem.STOP_ACTION );
+			TestExecutionUtils.stopCanvas( runningCanvas );
+		}
 	}
 
 	@FXML
@@ -477,6 +484,14 @@ public class ProjectView extends AnchorPane
 		}
 	}
 
+	@Override
+	public void release()
+	{
+		StatisticsView statisticsView = ( StatisticsView )statsTab.getDetachableContent();
+		statisticsView.release();
+		executionsInfo.reset();
+	}
+
 	private class SaveAndCloseTask extends Task<ProjectRef>
 	{
 		public SaveAndCloseTask()
@@ -493,7 +508,7 @@ public class ProjectView extends AnchorPane
 				@Override
 				public void run()
 				{
-					closeProject();
+					stopAndRequestCloseProject();
 				}
 			} );
 			return ProjectUtils.getProjectRef( project );

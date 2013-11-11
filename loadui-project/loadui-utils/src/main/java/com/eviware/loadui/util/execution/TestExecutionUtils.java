@@ -70,6 +70,19 @@ public final class TestExecutionUtils
 		return execution != null && execution.getState() != TestState.COMPLETED;
 	}
 
+	/**
+	 * @return Currently running CanvasItem or null if nothing is running
+	 */
+
+	public static CanvasItem getCurrentlyRunningCanvasItem()
+	{
+		if( !isExecutionRunning() )
+		{
+			return null;
+		}
+		return getCurrentExecution().getCanvas();
+	}
+
 	private static TestExecution getCurrentExecution()
 	{
 		List<TestExecution> queuedExecutions = testRunner.getExecutionQueue();

@@ -15,16 +15,15 @@
  */
 package com.eviware.loadui.ui.fx.views.project;
 
+import com.eviware.loadui.api.model.ProjectItem;
+import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
+import com.eviware.loadui.ui.fx.control.ButtonDialog;
+import com.eviware.loadui.ui.fx.views.window.MainWindowView;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
-
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
-import com.eviware.loadui.ui.fx.control.ButtonDialog;
-import com.eviware.loadui.ui.fx.views.window.MainWindowView;
 
 public class SaveProjectDialog extends ButtonDialog
 {
@@ -60,7 +59,7 @@ public class SaveProjectDialog extends ButtonDialog
 					}
 				} ).build();
 
-		Button cancelButton = ButtonBuilder.create().text( "Cancel" ).cancelButton( true ).alignment( Pos.BOTTOM_RIGHT )
+		Button cancelButton = ButtonBuilder.create().text( "Cancel" ).id( "cancel" ).cancelButton( true ).alignment( Pos.BOTTOM_RIGHT )
 				.onAction( new EventHandler<ActionEvent>()
 				{
 					@Override
