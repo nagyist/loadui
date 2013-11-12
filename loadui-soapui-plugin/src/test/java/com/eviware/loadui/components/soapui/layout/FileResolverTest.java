@@ -24,7 +24,7 @@ public class FileResolverTest
 	SoapUiFilePicker.FileResolver resolver = new SoapUiFilePicker.FileResolver();
 
 	File absPath;
-	File relPath;
+	String relPath;
 	final File baseDir = new File( File.separator + "base" );
 
 	@Parameters
@@ -41,7 +41,7 @@ public class FileResolverTest
 	public FileResolverTest( String[] absPath, String[] relPath )
 	{
 		this.absPath = new File( absPath( absPath ) );
-		this.relPath = new File( relPath( relPath ) );
+		this.relPath = relPath( relPath );
 	}
 
 	@Test
@@ -55,13 +55,13 @@ public class FileResolverTest
 	public void test_abs2rel() throws IOException
 	{
 		assertThat( canonicalPath( baseDir, resolver.abs2rel( baseDir, absPath ) ),
-				equalTo( canonicalPath( baseDir, relPath.getPath() ) ) );
+				equalTo( canonicalPath( baseDir, relPath ) ) );
 	}
 
 	@Test
 	public void testResolveFromText_rel2abs() throws IOException
 	{
-		File result = resolver.resolveFromText( false, baseDir, relPath.getPath() );
+		File result = resolver.resolveFromText( false, baseDir, relPath );
 		assertThat( canonicalPath( result.getAbsolutePath() ),
 				equalTo( canonicalPath( absPath.getAbsolutePath() ) ) );
 	}
@@ -70,7 +70,7 @@ public class FileResolverTest
 	public void testResolveFromText_abs2rel() throws IOException
 	{
 		File result = resolver.resolveFromText( true, baseDir, absPath.getAbsolutePath() );
-		assertThat( result.getPath(), equalTo( relPath.getPath() ) );
+		assertThat( result.getPath(), equalTo( relPath ) );
 	}
 
 	public static String canonicalPath( String path ) throws IOException

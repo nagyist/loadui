@@ -94,9 +94,6 @@ public class SoapUISamplerComponent extends RunnerBase
 	/**
 	 * Creates a real deep copy of a TestCaseConfig, since .copy() doesn't quite
 	 * do it.
-	 *
-	 * @param config
-	 * @return
 	 */
 	private static TestCaseConfig deepCopy( TestCaseConfig config )
 	{
@@ -602,6 +599,8 @@ public class SoapUISamplerComponent extends RunnerBase
 		executor.shutdown();
 		testStepsTableModel.release();
 		metricsDisplay.release();
+		getContext().removeEventListener( ActionEvent.class, actionListener );
+		projectSelector.onComponentRelease();
 	}
 
 	private final class TestStepNotifier extends TestRunListenerAdapter
@@ -891,7 +890,7 @@ public class SoapUISamplerComponent extends RunnerBase
 		{
 			if( project == null || testSuiteName == null )
 			{
-				projectSelector.setTestSuites( new String[0] );
+				projectSelector.setTestSuites();
 				return;
 			}
 			log.debug( "Setting SoapUI TestSuite to {}", testSuiteName );
@@ -904,7 +903,7 @@ public class SoapUISamplerComponent extends RunnerBase
 				String[] testCases = ModelSupport.getNames( testSuite.getTestCaseList() );
 				if( testCases.length == 0 )
 				{
-					projectSelector.setTestCases( new String[0] );
+					projectSelector.setTestCases();
 				}
 				else
 				{
@@ -952,7 +951,7 @@ public class SoapUISamplerComponent extends RunnerBase
 		{
 			if( testSuite == null || testCaseName == null )
 			{
-				projectSelector.setTestCases( new String[0] );
+				projectSelector.setTestCases();
 				return;
 			}
 
@@ -1145,6 +1144,7 @@ public class SoapUISamplerComponent extends RunnerBase
 						// context listener
 						try
 						{
+							log.info( "UPDATING PROJECT FILE IN THE SELECTOR BECAUSE PROJECT WAS UPDATED" );
 							projectSelector.setProjectFile( new File( file ).getCanonicalFile() );
 						}
 						catch( IOException e )
@@ -1174,8 +1174,8 @@ public class SoapUISamplerComponent extends RunnerBase
 			String[] testSuites = ModelSupport.getNames( project.getTestSuiteList() );
 			if( testSuites.length == 0 )
 			{
-				projectSelector.setTestSuites( new String[0] );
-				projectSelector.setTestCases( new String[0] );
+				projectSelector.setTestSuites();
+				projectSelector.setTestCases();
 				projectSelector.setTestCase( null );
 			}
 			else
@@ -1190,6 +1190,9 @@ public class SoapUISamplerComponent extends RunnerBase
 			}
 			else
 				setTestSuite( current );
+
+			log.info( "UPDATING PROJECT FILE IN THE SELECTOR BECAUSE PROJECT WAS INIT ED" );
+			projectSelector.setProjectFile( new File( project.getPath() ) );
 		}
 	}
 

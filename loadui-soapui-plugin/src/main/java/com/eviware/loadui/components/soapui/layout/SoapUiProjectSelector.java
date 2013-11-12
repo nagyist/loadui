@@ -27,7 +27,9 @@ import com.eviware.loadui.components.soapui.SoapUISamplerComponent.SoapUITestCas
 import com.eviware.loadui.impl.layout.LayoutComponentImpl;
 import com.eviware.loadui.util.BeanInjector;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.sun.javafx.Utils;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -43,8 +45,11 @@ import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.File;
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
+import java.util.regex.Pattern;
 
 public class SoapUiProjectSelector
 {
@@ -52,7 +57,8 @@ public class SoapUiProjectSelector
 
 	private static final Logger log = LoggerFactory.getLogger( SoapUiProjectSelector.class );
 
-	private final com.eviware.loadui.api.property.Property<File> projectFile;
+	// modified from File property to String property in 2.6.5
+	private final com.eviware.loadui.api.property.Property<String> projectFile;
 	private final com.eviware.loadui.api.property.Property<String> testSuite;
 	private final com.eviware.loadui.api.property.Property<String> testCase;
 	private final javafx.beans.property.Property<String> convertedTestSuite;
@@ -61,6 +67,7 @@ public class SoapUiProjectSelector
 	private final PropertyChangedListener propertyEventListener;
 	private final ComponentContext context;
 	private final File loaduiProjectDir;
+	private final SoapUiFilePicker.FileResolver fileResolver = new SoapUiFilePicker.FileResolver();
 
 	private CountDownLatch testCaseLatch = new CountDownLatch( 0 );
 
@@ -85,7 +92,10 @@ public class SoapUiProjectSelector
 		this.settings = settings;
 		this.context = context;
 		this.loaduiProjectDir = loaduiProjectDir;
-		projectFile = context.createProperty( "projectFile", File.class, null, false );
+
+		projectFile = createProjectFileProperty( context );
+		log.info( "PROJECT FILE IS NOW: " + projectFile.getValue() );
+
 		testSuite = context.createProperty( "testSuite", String.class );
 		testCase = context.createProperty( TEST_CASE, String.class );
 		convertedTestSuite = Properties.convert( testSuite );
@@ -93,6 +103,33 @@ public class SoapUiProjectSelector
 		this.propertyEventListener = new PropertyChangedListener( component, testCaseRunner );
 		context.addEventListener( PropertyEvent.class, propertyEventListener );
 		projectFile.getOwner().addEventListener( PropertyEvent.class, propertyEventListener );
+	}
+
+	private Property<String> createProjectFileProperty( ComponentContext context )
+	{
+		Property<?> currentProjectFile = context.getProperty( "projectFile" );
+		log.info( "Current project file is {}", currentProjectFile );
+		String initialProjectFileValue = null;
+
+		// versions pre 2.6.5 kept the projectFile as a File property - here we convert that to the new system
+		if( currentProjectFile != null && currentProjectFile.getValue() instanceof File )
+		{
+			log.info( "Converting projectFile property from File to String" );
+			context.deleteProperty( "projectFile" );
+
+			if( settings.getUserProjectRelativePathProperty().getValue() )
+			{
+				Property<?> relativePathProperty = context.getProperty( "projectRelativePath" );
+				initialProjectFileValue = ( relativePathProperty != null ? relativePathProperty.getStringValue() : null );
+			}
+			else
+			{
+				initialProjectFileValue = ( ( File )currentProjectFile.getValue() ).getAbsolutePath();
+			}
+		}
+
+		log.info( "Initial project file will be set to {}", initialProjectFileValue );
+		return context.createProperty( "projectFile", String.class, initialProjectFileValue, false );
 	}
 
 	public LayoutComponent buildLayout()
@@ -184,15 +221,30 @@ public class SoapUiProjectSelector
 			@Override
 			public void run()
 			{
-				projectLabel.setText( projectFile.getValue() == null ? "" : projectFile.getValue().getName()
-						.replaceFirst( ".xml$", "" ) );
+				String filePath = projectFile.getValue();
+				if( filePath == null )
+					return;
+				String[] parts = filePath.split( Pattern.quote( File.separator ) );
+				String lastPart = parts.length > 0 ? parts[parts.length - 1] : filePath;
+				int lastDotIndex = lastPart.lastIndexOf( "." );
+				lastPart = ( lastDotIndex > 0 ? lastPart.substring( 0, lastDotIndex ) : lastPart );
+				projectLabel.setText( lastPart );
 			}
 		} );
 	}
 
+	@Nullable
 	public File getProjectFile()
 	{
-		return projectFile.getValue();
+		if( Iterables.any( Arrays.asList(
+				settings.getUserProjectRelativePathProperty(),
+				projectFile, projectFile.getValue() ), Predicates.isNull() ) )
+			return null;
+
+		if( settings.getUserProjectRelativePathProperty().getValue() )
+			return new File( loaduiProjectDir, projectFile.getValue() );
+		else
+			return new File( projectFile.getValue() );
 	}
 
 	public String getProjectFileName()
@@ -200,9 +252,13 @@ public class SoapUiProjectSelector
 		return projectFile.getStringValue();
 	}
 
-	public void setProjectFile( File project )
+	public void setProjectFile( File projectAbsolutePath )
 	{
-		projectFile.setValue( project );
+		String path = ( settings.getUserProjectRelativePathProperty().getValue() ?
+				fileResolver.abs2rel( loaduiProjectDir, projectAbsolutePath ) :
+				projectAbsolutePath.getAbsolutePath() );
+		log.info( "Updating project file property to {}", path );
+		projectFile.setValue( new File( path ) );
 	}
 
 	public String getTestSuite()
@@ -295,15 +351,20 @@ public class SoapUiProjectSelector
 			return testCases[0];
 	}
 
+	public void onComponentRelease()
+	{
+		context.removeEventListener( PropertyEvent.class, propertyEventListener );
+		projectFile.getOwner().removeEventListener( PropertyEvent.class, propertyEventListener );
+	}
+
 	private class ProjectSelector extends PopupControl
 	{
 		private final Parent parent;
-		final javafx.beans.property.Property<File> fileProperty = Properties.convert( projectFile );
 
 		/**
 		 * This is created every time the user clicks on the project button - so cleanup is needed after hiding it
 		 *
-		 * @param parent
+		 * @param parent the parent
 		 */
 		private ProjectSelector( Parent parent )
 		{
@@ -316,10 +377,8 @@ public class SoapUiProjectSelector
 			final SoapUiFilePicker picker = new SoapUiFilePicker( "Select SoapUI project",
 					"SoapUI Project Files", "*.xml",
 					BeanInjector.getBean( FilePickerDialogFactory.class ),
-					loaduiProjectDir.getAbsoluteFile() );
-			picker.selectedProperty().bindBidirectional( fileProperty );
-			picker.getIsRelativePathProperty().bindBidirectional(
-					Properties.convert( settings.getUserProjectRelativePathProperty() ) );
+					loaduiProjectDir.getAbsoluteFile(),
+					projectFile, settings.getUserProjectRelativePathProperty() );
 
 			setOnHidden( new javafx.event.EventHandler<WindowEvent>()
 			{
@@ -327,10 +386,6 @@ public class SoapUiProjectSelector
 				public void handle( WindowEvent windowEvent )
 				{
 					picker.onHide();
-					picker.selectedProperty().unbindBidirectional( fileProperty );
-					//FIXME might need to remove these listeners elsewhere
-					//context.removeEventListener( PropertyEvent.class, propertyEventListener );
-					//projectFile.getOwner().removeEventListener( PropertyEvent.class, propertyEventListener );
 				}
 			} );
 
@@ -397,7 +452,7 @@ public class SoapUiProjectSelector
 				Property<?> property = event.getProperty();
 				if( property == projectFile )
 				{
-					component.onProjectUpdated( projectFile.getValue() );
+					component.onProjectUpdated( getProjectFile() );
 				}
 				else if( property == testSuite )
 				{

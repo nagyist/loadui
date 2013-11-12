@@ -6,16 +6,11 @@ import org.junit.Test;
 
 import java.io.File;
 
-import static com.eviware.loadui.components.soapui.layout.FileResolverTest.canonicalPath;
-import static com.eviware.loadui.components.soapui.layout.FileResolverTest.relPath;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static com.eviware.loadui.components.soapui.layout.FileResolverTest.*;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.CoreMatchers.not;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author renato
@@ -36,76 +31,99 @@ public class SoapUiFilePickerTest
 				.thenReturn( selectedFile );
 
 		filePicker = new SoapUiFilePicker( "Picker Title", ".xml", "*.xml",
-				factory, baseDirForRelativePaths );
+				factory, baseDirForRelativePaths, null, null );
 	}
 
 	@Test
 	public void canFigureOutWhereToStartARelativePath_FileUnderBaseDir()
 	{
-		File selected = new File( baseDirForRelativePaths, "selected.xml" );
+		File selectedFile = new File( baseDirForRelativePaths, "selected.xml" );
+
+		SoapUiFilePicker.FileResolver resolver = spy( filePicker.fileResolver );
+		when( resolver.isAcceptable( selectedFile ) ).thenReturn( true );
+		filePicker.fileResolver = resolver;
 
 		filePicker.setIsRelativePath( true );
-		filePicker.setSelected( selected );
+		filePicker.setAbsolutePath( selectedFile.getAbsolutePath() );
 
 		assertThat( filePicker.textLabel.getText(), equalTo( baseDirForRelativePaths.getAbsolutePath() + File.separator ) );
 		assertThat( filePicker.textField.getText(), equalTo( "selected.xml" ) );
-		assertThat( filePicker.selectedProperty().get(), equalTo( selected ) );
+		assertThat( filePicker.selectedProperty().get(), equalTo( "selected.xml" ) );
 	}
 
 	@Test
 	public void canFigureOutWhereToStartARelativePath_FileNotUnderBaseDir()
 	{
-		File selected = new File( baseDirForRelativePaths, relPath( "..", "another", "selected.xml" ) );
+		final String selected = relPath( "..", "another", "selected.xml" );
+		File selectedFile = new File( baseDirForRelativePaths, selected );
+
+		SoapUiFilePicker.FileResolver resolver = spy( filePicker.fileResolver );
+		when( resolver.isAcceptable( selectedFile ) ).thenReturn( true );
+		filePicker.fileResolver = resolver;
 
 		filePicker.setIsRelativePath( true );
-		filePicker.setSelected( selected );
+		filePicker.setAbsolutePath( selectedFile.getAbsolutePath() );
 
 		assertThat( filePicker.textLabel.getText(),
 				equalTo( baseDirForRelativePaths.getAbsolutePath() + File.separator ) );
 		assertThat( filePicker.textField.getText(),
-				equalTo( relPath( "..", "another", "selected.xml" ) ) );
+				equalTo( selected ) );
 		assertThat( filePicker.selectedProperty().get(), equalTo( selected ) );
 	}
 
 	@Test
 	public void canFigureOutAbsolutePath()
 	{
-		File selected = new File( "selected.xml" );
+		String selected = absPath( "mydir", "selected.xml" );
+
+		SoapUiFilePicker.FileResolver resolver = spy( filePicker.fileResolver );
+		when( resolver.isAcceptable( new File( selected ) ) ).thenReturn( true );
+		filePicker.fileResolver = resolver;
 
 		filePicker.setIsRelativePath( false );
-		filePicker.setSelected( selected );
+		filePicker.setAbsolutePath( selected );
 
 		assertThat( filePicker.textLabel.getText(), equalTo( "" ) );
-		assertThat( filePicker.textField.getText(), equalTo( new File( "selected.xml" ).getAbsolutePath() ) );
+		assertThat( filePicker.textField.getText(), equalTo( selected ) );
 		assertThat( filePicker.selectedProperty().get(), equalTo( selected ) );
 	}
 
 	@Test
 	public void canTurnAnAbsolutePathIntoARelativePath()
 	{
-		File selected = new File( baseDirForRelativePaths, "selected.xml" );
+		String selected = new File( baseDirForRelativePaths, "selected.xml" ).getAbsolutePath();
+
+		SoapUiFilePicker.FileResolver resolver = spy( filePicker.fileResolver );
+		when( resolver.isAcceptable( new File( baseDirForRelativePaths, "selected.xml" ) ) )
+				.thenReturn( true );
+		filePicker.fileResolver = resolver;
 
 		filePicker.setIsRelativePath( false );
-		filePicker.setSelected( selected );
+		filePicker.setAbsolutePath( selected );
 		filePicker.setIsRelativePath( true );
 
 		assertThat( filePicker.textLabel.getText(), equalTo( baseDirForRelativePaths.getAbsolutePath() + File.separator ) );
 		assertThat( filePicker.textField.getText(), equalTo( "selected.xml" ) );
-		assertThat( filePicker.selectedProperty().get(), equalTo( selected ) );
+		assertThat( filePicker.selectedProperty().get(), equalTo( "selected.xml" ) );
 	}
 
 	@Test
 	public void canTurnARelativePathIntoAnAbsolutePath()
 	{
-		File selected = new File( baseDirForRelativePaths, "selected.xml" );
+		String selected = relPath( "mydir", "selected.xml" );
+		File expectedAbsFile = new File( baseDirForRelativePaths, selected );
+
+		SoapUiFilePicker.FileResolver resolver = spy( filePicker.fileResolver );
+		when( resolver.isAcceptable( expectedAbsFile ) ).thenReturn( true );
+		filePicker.fileResolver = resolver;
 
 		filePicker.setIsRelativePath( true );
-		filePicker.setSelected( selected );
+		filePicker.setAbsolutePath( new File( baseDirForRelativePaths, selected ).getAbsolutePath() );
 		filePicker.setIsRelativePath( false );
 
 		assertThat( filePicker.textLabel.getText(), equalTo( "" ) );
-		assertThat( filePicker.textField.getText(), equalTo( new File( baseDirForRelativePaths, "selected.xml" ).getAbsolutePath() ) );
-		assertThat( filePicker.selectedProperty().get(), equalTo( selected ) );
+		assertThat( filePicker.textField.getText(), equalTo( expectedAbsFile.getAbsolutePath() ) );
+		assertThat( filePicker.selectedProperty().get(), equalTo( expectedAbsFile.getAbsolutePath() ) );
 	}
 
 	@Test
@@ -113,41 +131,28 @@ public class SoapUiFilePickerTest
 	{
 		filePicker.setIsRelativePath( false );
 
-		File firstSelected = mock( File.class );
-		when( firstSelected.exists() ).thenReturn( true );
-		when( firstSelected.isFile() ).thenReturn( true );
-		when( firstSelected.getPath() ).thenReturn( "first.xml" );
-		when( firstSelected.getAbsolutePath() ).thenReturn( new File( baseDirForRelativePaths, "first.xml" ).getAbsolutePath() );
+		File firstSelected = new File( baseDirForRelativePaths, "first.xml" );
+		File secondSelected = new File( baseDirForRelativePaths, relPath( "other", "second.xml" ) );
 
-		File secondSelected = mock( File.class );
-		File secondFile = new File( baseDirForRelativePaths, relPath( "other", "second.xml" ) );
-		String secondAbsPath = secondFile.getAbsolutePath();
-		when( secondSelected.exists() ).thenReturn( true );
-		when( secondSelected.isFile() ).thenReturn( true );
-		when( secondSelected.getPath() ).thenReturn( relPath( "other", "second.xml" ) );
-		when( secondSelected.getAbsolutePath() ).thenReturn( secondAbsPath );
-
-		SoapUiFilePicker.FileResolver mockResolver = mock( SoapUiFilePicker.FileResolver.class );
-		when( mockResolver.resolveFromText( false, baseDirForRelativePaths, "first.xml" ) ).thenReturn( firstSelected );
-		when( mockResolver.resolveFromText( false, baseDirForRelativePaths, secondAbsPath ) ).thenReturn( secondSelected );
-		when( mockResolver.abs2rel( any( File.class ), any( File.class ) ) ).thenCallRealMethod();
-		when( mockResolver.rel2abs( any( File.class ), any( File.class ) ) ).thenCallRealMethod();
-		filePicker.fileResolver = mockResolver;
+		SoapUiFilePicker.FileResolver resolver = spy( filePicker.fileResolver );
+		when( resolver.isAcceptable( firstSelected ) ).thenReturn( true );
+		when( resolver.isAcceptable( secondSelected ) ).thenReturn( true );
+		filePicker.fileResolver = resolver;
 
 		filePicker.setUpdateTextDelay( 10 );
 
 		filePicker.setIsRelativePath( true );
-		filePicker.setSelected( new File( baseDirForRelativePaths, "first.xml" ) );
+		filePicker.setAbsolutePath( firstSelected.getAbsolutePath() );
 		filePicker.setIsRelativePath( false );
 
-		filePicker.onFileTextUpdated( secondAbsPath );
+		filePicker.onFileTextUpdated( secondSelected.getAbsolutePath() );
 
 		Thread.sleep( 20 );
 
 		assertThat( filePicker.textLabel.getText(), equalTo( "" ) );
-		assertThat( filePicker.textField.getText(), equalTo( secondAbsPath ) );
-		assertThat( canonicalPath( filePicker.selectedProperty().get().getAbsolutePath() ),
-				equalTo( canonicalPath( secondAbsPath ) ) );
+		assertThat( filePicker.textField.getText(), equalTo( secondSelected.getAbsolutePath() ) );
+		assertThat( canonicalPath( filePicker.selectedProperty().get() ),
+				equalTo( canonicalPath( secondSelected.getAbsolutePath() ) ) );
 	}
 
 	@Test
@@ -155,48 +160,49 @@ public class SoapUiFilePickerTest
 	{
 		File selected = new File( baseDirForRelativePaths, "selected.xml" );
 
+		SoapUiFilePicker.FileResolver resolver = spy( filePicker.fileResolver );
+		when( resolver.isAcceptable( selected ) ).thenReturn( true );
+		filePicker.fileResolver = resolver;
+
 		filePicker.setIsRelativePath( false );
-		filePicker.setSelected( selected );
+		filePicker.setAbsolutePath( selected.getPath() );
 		filePicker.setIsRelativePath( true );
 
 		assertThat( filePicker.textLabel.getText(), equalTo( baseDirForRelativePaths.getAbsolutePath() + File.separator ) );
 		assertThat( filePicker.textField.getText(), equalTo( "selected.xml" ) );
-		assertThat( filePicker.selectedProperty().get(), equalTo( selected ) );
+		assertThat( filePicker.selectedProperty().get(), equalTo( "selected.xml" ) );
 	}
 
 	@Test
 	public void fieldsAreUpdatedSomeTimeAfterUserStopsTyping_AndTextChangesColorsIfFileExistsOrNot() throws Exception
 	{
-		File oldFile = new File( "old" );
-		filePicker.setSelected( oldFile );
+		File happyFile = new File( absPath( "good" ) );
+		File badFile = new File( absPath( "bad" ) );
 
-		File happyFile = mock( File.class );
-		when( happyFile.exists() ).thenReturn( true );
-		when( happyFile.isFile() ).thenReturn( true );
+		SoapUiFilePicker.FileResolver resolver = spy( filePicker.fileResolver );
+		when( resolver.isAcceptable( new File( absPath( "old" ) ) ) ).thenReturn( true );
+		when( resolver.isAcceptable( badFile ) ).thenReturn( false );
+		when( resolver.isAcceptable( happyFile ) ).thenReturn( true );
+		filePicker.fileResolver = resolver;
 
-		File badFile = mock( File.class );
-		when( badFile.exists() ).thenReturn( false );
-
-		SoapUiFilePicker.FileResolver mockResolver = mock( SoapUiFilePicker.FileResolver.class );
-		when( mockResolver.resolveFromText( false, baseDirForRelativePaths, "a" ) ).thenReturn( badFile );
-		when( mockResolver.resolveFromText( false, baseDirForRelativePaths, "ab" ) ).thenReturn( happyFile );
+		filePicker.setAbsolutePath( absPath( "old" ) );
 		filePicker.setUpdateTextDelay( 50 );
-		filePicker.fileResolver = mockResolver;
+		filePicker.fileResolver = resolver;
 
 		// actual value is not updated even after delay if new value is not good
-		filePicker.onFileTextUpdated( "a" );
+		filePicker.onFileTextUpdated( "bad" );
 		Thread.sleep( 75 );
-		assertThat( filePicker.selectedProperty().get(), equalTo( oldFile ) );
+		assertThat( filePicker.selectedProperty().get(), equalTo( absPath( "old" ) ) );
 		assertThat( filePicker.textField.getStyle(), containsString( "red" ) );
 
 		// ... and is not updated for a while if user keeps typing
-		filePicker.onFileTextUpdated( "ab" );
+		filePicker.onFileTextUpdated( "good" );
 		Thread.sleep( 30 );
-		assertThat( filePicker.selectedProperty().get(), equalTo( oldFile ) );
+		assertThat( filePicker.selectedProperty().get(), equalTo( absPath( "old" ) ) );
 
 		// ... but after the updateTextDelay is up, the selected file is updated if it exists (happy files always exist)
 		Thread.sleep( 50 );
-		assertThat( filePicker.selectedProperty().get(), equalTo( happyFile ) );
+		assertThat( filePicker.selectedProperty().get(), equalTo( absPath( "good" ) ) );
 		assertThat( filePicker.textField.getStyle(), not( containsString( "red" ) ) );
 	}
 
@@ -206,9 +212,8 @@ public class SoapUiFilePickerTest
 		assertThat( filePicker.textField.getStyle(), not( containsString( "red" ) ) );
 
 		File badFile = mock( File.class );
-		when( badFile.exists() ).thenReturn( false );
-
 		SoapUiFilePicker.FileResolver mockResolver = mock( SoapUiFilePicker.FileResolver.class );
+		when( badFile.exists() ).thenReturn( false );
 		when( mockResolver.resolveFromText( false, baseDirForRelativePaths, "bad" ) ).thenReturn( badFile );
 		filePicker.fileResolver = mockResolver;
 
@@ -224,20 +229,12 @@ public class SoapUiFilePickerTest
 	@Test
 	public void textTurnsBlackWhenUserTypesFileNameThatExists() throws Exception
 	{
+		SoapUiFilePicker.FileResolver resolver = spy( filePicker.fileResolver );
+		when( resolver.isAcceptable( new File( absPath( "bad" ) ) ) ).thenReturn( false );
+		when( resolver.isAcceptable( new File( absPath( "good" ) ) ) ).thenReturn( true );
+		filePicker.fileResolver = resolver;
+
 		filePicker.setIsRelativePath( false );
-
-		File happyFile = mock( File.class );
-		when( happyFile.exists() ).thenReturn( true );
-		when( happyFile.isFile() ).thenReturn( true );
-
-		File badFile = mock( File.class );
-		when( badFile.exists() ).thenReturn( false );
-
-		SoapUiFilePicker.FileResolver mockResolver = mock( SoapUiFilePicker.FileResolver.class );
-		when( mockResolver.resolveFromText( false, baseDirForRelativePaths, "bad" ) ).thenReturn( badFile );
-		when( mockResolver.resolveFromText( false, baseDirForRelativePaths, "good" ) ).thenReturn( happyFile );
-		filePicker.fileResolver = mockResolver;
-
 		filePicker.setUpdateTextDelay( 10 );
 
 		filePicker.onFileTextUpdated( "bad" );
@@ -253,30 +250,21 @@ public class SoapUiFilePickerTest
 	{
 		filePicker.setIsRelativePath( false );
 
-		File happyFile = mock( File.class );
-		when( happyFile.getAbsoluteFile() ).thenReturn( happyFile );
-		when( happyFile.exists() ).thenReturn( true );
-		when( happyFile.isFile() ).thenReturn( true );
-		when( happyFile.toPath() ).thenReturn( new File( baseDirForRelativePaths.getAbsoluteFile(), "good" ).toPath() );
+		File happyFile = new File( baseDirForRelativePaths, "good" );
+		File badFile = new File( baseDirForRelativePaths, "bad" );
 
-		File badFile = mock( File.class );
-		when( badFile.exists() ).thenReturn( false );
-
-		SoapUiFilePicker.FileResolver mockResolver = mock( SoapUiFilePicker.FileResolver.class );
-		when( mockResolver.resolveFromText( false, baseDirForRelativePaths, "good" ) ).thenReturn( happyFile );
-		when( mockResolver.resolveFromText( false, baseDirForRelativePaths, "bad" ) ).thenReturn( badFile );
-		when( mockResolver.resolveFromText( true, baseDirForRelativePaths, "bad" ) ).thenReturn( badFile );
-		when( mockResolver.abs2rel( any( File.class ), any( File.class ) ) ).thenCallRealMethod();
-
-		filePicker.fileResolver = mockResolver;
+		SoapUiFilePicker.FileResolver resolver = spy( filePicker.fileResolver );
+		when( resolver.isAcceptable( happyFile ) ).thenReturn( true );
+		when( resolver.isAcceptable( badFile ) ).thenReturn( false );
+		filePicker.fileResolver = resolver;
 
 		filePicker.setUpdateTextDelay( 10 );
-		filePicker.onFileTextUpdated( "good" );
+		filePicker.onFileTextUpdated( happyFile.getAbsolutePath() );
 		Thread.sleep( 25 );
 
 		assertThat( filePicker.textField.getStyle(), not( containsString( "red" ) ) );
 
-		filePicker.onFileTextUpdated( "bad" );
+		filePicker.onFileTextUpdated( badFile.getAbsolutePath() );
 
 		Thread.sleep( 25 );
 

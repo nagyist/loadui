@@ -15,6 +15,7 @@
  */
 package com.eviware.loadui.components.soapui.layout;
 
+import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.api.ui.dialog.FilePickerDialogFactory;
 import com.google.common.base.Preconditions;
 import javafx.beans.property.BooleanProperty;
@@ -54,6 +55,8 @@ public class SoapUiFilePicker extends VBox
 	private UpdateTextTimerTask updateTextTask;
 	FileResolver fileResolver = new FileResolver();
 	private final CheckBox useRelPath;
+	private javafx.beans.property.Property<String> projectFileExternalProperty;
+	private boolean isShowingFilePicker = false;
 
 	private class UpdateTextTimerTask extends TimerTask
 	{
@@ -73,7 +76,7 @@ public class SoapUiFilePicker extends VBox
 		}
 	}
 
-	private final ObjectProperty<File> selectedProperty = new ObjectPropertyBase<File>()
+	private final ObjectProperty<String> selectedProperty = new ObjectPropertyBase<String>()
 	{
 		@Override
 		public Object getBean()
@@ -104,10 +107,10 @@ public class SoapUiFilePicker extends VBox
 		}
 	};
 
-	private final ChangeListener<File> selectedListener = new ChangeListener<File>()
+	private final ChangeListener<String> selectedListener = new ChangeListener<String>()
 	{
 		@Override
-		public void changed( ObservableValue<? extends File> observableValue, File oldValue, File newValue )
+		public void changed( ObservableValue<? extends String> observableValue, String oldValue, String newValue )
 		{
 			setFieldsWith( newValue );
 		}
@@ -122,9 +125,13 @@ public class SoapUiFilePicker extends VBox
 			{
 				textLabel.setMaxWidth( isNowRelative ? 300 : 0 );
 				textField.setPrefWidth( isNowRelative ? 200 : 500 );
-				if( !isNowRelative )
-					resolveFileUpdatingSelectedIfAcceptable();
-				setFieldsWith( selectedProperty.get() );
+
+				String newSelectedValue = isNowRelative ?
+						fileResolver.abs2rel( baseDirForRelativePaths, new File( selectedProperty.get() ) ) :
+						fileResolver.rel2abs( baseDirForRelativePaths, selectedProperty.get() );
+
+				setFieldsWith( newSelectedValue );
+				resolveFileUpdatingSelectedIfAcceptable();
 			}
 		}
 	};
@@ -132,7 +139,9 @@ public class SoapUiFilePicker extends VBox
 	public SoapUiFilePicker( final String title, final String extensionFilterDescription,
 									 final String extensionFilterRegex,
 									 final FilePickerDialogFactory filePickerDialogFactory,
-									 final File baseDirForRelativePaths )
+									 final File baseDirForRelativePaths,
+									 final Property<String> projectFileProperty,
+									 final Property<Boolean> externalIsRelativePathProperty )
 	{
 		Preconditions.checkArgument( baseDirForRelativePaths.isAbsolute() );
 		this.baseDirForRelativePaths = baseDirForRelativePaths;
@@ -158,6 +167,9 @@ public class SoapUiFilePicker extends VBox
 		HBox.setHgrow( textField, Priority.ALWAYS );
 
 		selectedProperty.addListener( selectedListener );
+
+		if( externalIsRelativePathProperty != null )
+			isRelativePathProperty.bindBidirectional( Properties.convert( externalIsRelativePathProperty ) );
 		isRelativePathProperty.addListener( isRelativeListener );
 
 		final Button browse = ButtonBuilder
@@ -170,10 +182,16 @@ public class SoapUiFilePicker extends VBox
 			@Override
 			public void handle( ActionEvent _ )
 			{
+				isShowingFilePicker = true;
 				File selectedFile = filePickerDialogFactory.showOpenDialog(
 						title, extensionFilterDescription, extensionFilterRegex );
-				if( isAcceptable( selectedFile ) )
-					setSelected( selectedFile );
+				if( selectedFile != null && fileResolver.isAcceptable( selectedFile ) )
+				{
+					setAbsolutePath( selectedFile.getAbsolutePath() );
+					if( projectFileExternalProperty != null )
+						selectedProperty.unbindBidirectional( projectFileExternalProperty );
+				}
+				isShowingFilePicker = false;
 			}
 		} );
 
@@ -183,6 +201,12 @@ public class SoapUiFilePicker extends VBox
 
 		firstLine.getChildren().setAll( textLabel, textField, browse );
 		getChildren().setAll( firstLine, useRelPath );
+
+		if( projectFileProperty != null )
+		{
+			projectFileExternalProperty = Properties.convert( projectFileProperty );
+			selectedProperty.bindBidirectional( projectFileExternalProperty );
+		}
 	}
 
 	void onFileTextUpdated( String text )
@@ -198,12 +222,14 @@ public class SoapUiFilePicker extends VBox
 	{
 		cancelUpdateTextTask();
 		updateTextTimer.cancel();
-		isRelativePathProperty.unbindBidirectional( useRelPath.selectedProperty() );
+		useRelPath.selectedProperty().unbindBidirectional( isRelativePathProperty );
 		isRelativePathProperty.removeListener( isRelativeListener );
 		selectedProperty.removeListener( selectedListener );
+		if( projectFileExternalProperty != null && !isShowingFilePicker )
+			selectedProperty.unbindBidirectional( projectFileExternalProperty );
 	}
 
-	public ObjectProperty<File> selectedProperty()
+	public ObjectProperty<String> selectedProperty()
 	{
 		return selectedProperty;
 	}
@@ -221,30 +247,37 @@ public class SoapUiFilePicker extends VBox
 
 	private boolean resolveFileUpdatingSelectedIfAcceptable()
 	{
+		String text = textField.getText();
+		if( !isRelativePathProperty.get() && !fileResolver.isAbsolute( textField.getText() ) )
+		{
+			text = File.separator + text;
+		}
 		File resolvedFile = fileResolver.resolveFromText( isRelativePathProperty.get(),
-				baseDirForRelativePaths, textField.getText() );
+				baseDirForRelativePaths, text );
 		log.info( "SoapUI project file resolved to {}", resolvedFile );
 
-		if( isAcceptable( resolvedFile ) )
+		if( fileResolver.isAcceptable( resolvedFile ) )
 		{
-			selectedProperty.setValue( resolvedFile );
+			selectedProperty.setValue( text );
 			return true;
 		}
 		log.debug( "The resolved file is not an acceptable SoapUI project file" );
 		return false;
 	}
 
-	public void setSelected( File file )
+	public void setAbsolutePath( String absolutePath )
 	{
-		if( file != null )
+		if( absolutePath != null )
 		{
-			selectedProperty.set( file );
-		}
-	}
+			log.info( "Setting selected property with absolute file path: {}", absolutePath );
+			if( !fileResolver.isAbsolute( absolutePath ) )
+				throw new RuntimeException( "Expected absolute path but got a relative one: " + absolutePath );
 
-	public BooleanProperty getIsRelativePathProperty()
-	{
-		return isRelativePathProperty;
+			File resolvedFile = fileResolver.resolveFromText( isRelativePathProperty.get(),
+					baseDirForRelativePaths, absolutePath );
+			setFieldsWith( resolvedFile.getPath() );
+			resolveFileUpdatingSelectedIfAcceptable();
+		}
 	}
 
 	public void setIsRelativePath( boolean isRelativePath )
@@ -252,22 +285,27 @@ public class SoapUiFilePicker extends VBox
 		isRelativePathProperty.setValue( isRelativePath );
 	}
 
-	private void setFieldsWith( @Nonnull File file )
+	private void setFieldsWith( @Nonnull String filePath )
 	{
 		String basePath = baseDirForRelativePaths.getAbsolutePath();
+		File file;
 
 		if( isRelativePathProperty.get() )
 		{
 			textLabel.setText( basePath + File.separator );
-			String text = fileResolver.abs2rel( baseDirForRelativePaths, file );
+			String text = !fileResolver.isAbsolute( filePath ) ?
+					filePath :
+					fileResolver.abs2rel( baseDirForRelativePaths, new File( filePath ) );
 			textField.setText( text );
+			file = new File( baseDirForRelativePaths, text );
 		}
 		else
 		{
 			textLabel.setText( "" );
-			textField.setText( file.getAbsolutePath() );
+			textField.setText( filePath );
+			file = new File( filePath );
 		}
-		updatTextFieldStyle( isAcceptable( file ) );
+		updatTextFieldStyle( fileResolver.isAcceptable( file ) );
 	}
 
 	private void updatTextFieldStyle( boolean isAcceptableFile )
@@ -275,42 +313,44 @@ public class SoapUiFilePicker extends VBox
 		textField.setStyle( "-fx-text-fill: " + ( isAcceptableFile ? "black;" : "red;" ) );
 	}
 
-	private boolean isAcceptable( File resolvedFile )
-	{
-		return resolvedFile.exists() && resolvedFile.isFile();
-	}
-
-	static class FileResolver
+	public static class FileResolver
 	{
 
-		File resolveFromText( boolean isRelativePath, File baseDir, String fileName )
+		File resolveFromText( boolean toRelativePath, File baseDir, String fileName )
 		{
 			File file = new File( fileName );
-			if( file.isAbsolute() )
+			if( isAbsolute( fileName ) )
 			{
-				if( isRelativePath )
+				if( toRelativePath )
 					return new File( abs2rel( baseDir, file ) );
 				else
 					return file;
 			}
 			else
 			{
-				if( isRelativePath )
-					return new File( baseDir, fileName );
-				else
-					return new File( rel2abs( baseDir, file ) );
+				return new File( baseDir, fileName );
 			}
 		}
 
-		String rel2abs( File baseDir, File relativePath )
+		public boolean isAbsolute( String path )
 		{
-			return new File( baseDir, relativePath.getPath() ).getAbsolutePath();
+			return new File( path ).isAbsolute() || path.startsWith( File.separator );
 		}
 
-		String abs2rel( File baseDir, File absolutePath )
+		public String rel2abs( File baseDir, String relativePath )
+		{
+			return new File( baseDir, relativePath ).getAbsolutePath();
+		}
+
+		public String abs2rel( File baseDir, File absolutePath )
 		{
 			return baseDir.getAbsoluteFile().toPath()
 					.relativize( absolutePath.getAbsoluteFile().toPath() ).toString();
+		}
+
+		public boolean isAcceptable( File resolvedFile )
+		{
+			return resolvedFile.exists() && resolvedFile.isFile();
 		}
 
 	}

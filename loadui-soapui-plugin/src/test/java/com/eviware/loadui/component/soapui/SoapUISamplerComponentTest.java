@@ -15,33 +15,13 @@ package com.eviware.loadui.component.soapui;
  * express or implied. See the Licence for the specific language governing permissions and limitations
  * under the Licence.
  */
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.net.URISyntaxException;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.mockito.Matchers;
 
 import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.component.categories.GeneratorCategory;
 import com.eviware.loadui.api.model.ComponentItem;
 import com.eviware.loadui.api.model.ProjectItem;
+import com.eviware.loadui.api.model.PropertyHolder;
+import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.api.statistics.Statistic;
 import com.eviware.loadui.api.statistics.StatisticVariable;
 import com.eviware.loadui.api.statistics.StatisticVariable.Mutable;
@@ -52,6 +32,21 @@ import com.eviware.loadui.components.soapui.SoapUISamplerComponent;
 import com.eviware.loadui.util.component.ComponentTestUtils;
 import com.eviware.loadui.util.test.TestUtils;
 import com.google.common.collect.ImmutableMap;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Matchers;
+
+import java.io.File;
+import java.net.URISyntaxException;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 public class SoapUISamplerComponentTest
 {
@@ -68,11 +63,16 @@ public class SoapUISamplerComponentTest
 		ctu = new ComponentTestUtils();
 		ctu.getDefaultBeanInjectorMocker();
 
+		Property<String> projectFileProperty = mock( Property.class );
+		when( projectFileProperty.getOwner() ).thenReturn( mock( PropertyHolder.class ) );
+		when( projectFileProperty.getValue() ).thenReturn( "project.xml" );
+
 		component = ctu.createComponentItem();
 		ComponentItem componentSpy = spy( component );
 		ComponentContext contextSpy = spy( component.getContext() );
 		doReturn( contextSpy ).when( componentSpy ).getContext();
 		doReturn( componentSpy ).when( contextSpy ).getComponent();
+		doReturn( projectFileProperty ).when( contextSpy ).createProperty( "projectFile", String.class, null, false );
 
 		final Mutable mockVariable = mock( StatisticVariable.Mutable.class );
 		when( mockVariable.getStatisticHolder() ).thenReturn( componentSpy );
@@ -81,10 +81,10 @@ public class SoapUISamplerComponentTest
 		when( statisticMock.getStatisticVariable() ).thenReturn( mockVariable );
 		when( mockVariable.getStatistic( anyString(), anyString() ) ).thenReturn( statisticMock );
 		doReturn( mockVariable ).when( contextSpy ).addStatisticVariable( anyString(), anyString(),
-				Matchers.<String> anyVararg() );
+				Matchers.<String>anyVararg() );
 		doNothing().when( contextSpy ).removeStatisticVariable( anyString() );
 		doReturn( mockVariable ).when( contextSpy ).addListenableStatisticVariable( anyString(), anyString(),
-				Matchers.<String> anyVararg() );
+				Matchers.<String>anyVararg() );
 
 		ProjectItem projectMock = contextSpy.getCanvas().getProject();
 		when( projectMock.getProjectFile() ).thenReturn( new File( "temp.tmp" ) );
@@ -189,7 +189,7 @@ public class SoapUISamplerComponentTest
 		setTestCase( "soapUI-loadUI-plugin-project.xml", "TestSuite 1", "TestCase 4" );
 		BlockingQueue<TerminalMessage> results = ctu.getMessagesFrom( resultsTerminal );
 
-		ctu.sendMessage( triggerTerminal, ImmutableMap.<String, Object> of( "hasBeenOverridden", "true" ) );
+		ctu.sendMessage( triggerTerminal, ImmutableMap.<String, Object>of( "hasBeenOverridden", "true" ) );
 
 		TerminalMessage message = results.poll( 5, TimeUnit.SECONDS );
 
@@ -241,7 +241,7 @@ public class SoapUISamplerComponentTest
 		setTestCase( "soapUI-loadUI-plugin-project.xml", "TestSuite 1", "TestCase 4" );
 		BlockingQueue<TerminalMessage> results = ctu.getMessagesFrom( resultsTerminal );
 
-		ctu.sendMessage( triggerTerminal, ImmutableMap.<String, Object> of( "hasBeenOverridden", "true" ) );
+		ctu.sendMessage( triggerTerminal, ImmutableMap.<String, Object>of( "hasBeenOverridden", "true" ) );
 
 		TerminalMessage message = results.poll( 5, TimeUnit.SECONDS );
 
@@ -268,7 +268,7 @@ public class SoapUISamplerComponentTest
 	private void sendSimpleTrigger()
 	{
 		ctu.sendMessage( triggerTerminal,
-				ImmutableMap.<String, Object> of( GeneratorCategory.TRIGGER_TIMESTAMP_MESSAGE_PARAM, 0 ) );
+				ImmutableMap.<String, Object>of( GeneratorCategory.TRIGGER_TIMESTAMP_MESSAGE_PARAM, 0 ) );
 	}
 
 	private void setProject( String fileName ) throws URISyntaxException
