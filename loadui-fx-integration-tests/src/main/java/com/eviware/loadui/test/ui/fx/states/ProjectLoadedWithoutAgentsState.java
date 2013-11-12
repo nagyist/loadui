@@ -22,7 +22,11 @@ import org.loadui.testfx.TestUtils;
 
 import java.util.concurrent.Callable;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.loadui.testfx.GuiTest.findAll;
+import static org.loadui.testfx.GuiTest.waitUntil;
+import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 
 public class ProjectLoadedWithoutAgentsState extends TestState
 {
@@ -64,7 +68,10 @@ public class ProjectLoadedWithoutAgentsState extends TestState
 	@Override
 	protected void exitToParent() throws Exception
 	{
+
 		log.debug( "Closing project." );
+		waitUntil( "#abort-requests", is( not( visible() ) ) );
+
 		GUI.getOpenSourceGui().getController().click( "#closeProjectButton" );
 		//If there is a save dialog, do not save:
 		try

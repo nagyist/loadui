@@ -3,7 +3,9 @@ package com.eviware.loadui.test.ui.fx;
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
+import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
 import com.eviware.loadui.test.ui.fx.states.SimpleWebTestState;
+import javafx.scene.input.KeyCode;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -16,6 +18,7 @@ import static org.junit.Assert.assertTrue;
  * Time: 13:43
  * To change this template use File | Settings | File Templates.
  */
+
 @Category( IntegrationTest.class )
 public class LimitsTest extends FxIntegrationTestBase
 {
@@ -29,6 +32,7 @@ public class LimitsTest extends FxIntegrationTestBase
 	public void shouldStopTestWhenRequestsReachLimit()
 	{
 		ProjectItem project = getProjectItem();
+
 
 
 		click( "#set-limits" ).doubleClick( "#request-limit" ).type( "30" ).click( "#default" );
@@ -62,6 +66,8 @@ public class LimitsTest extends FxIntegrationTestBase
 	}
 
 
+
+
 	@Test
 	public void shouldStopTestWhenFailuresReachLimit()
 	{
@@ -80,5 +86,5 @@ public class LimitsTest extends FxIntegrationTestBase
 
 		assertTrue( !project.isRunning() );
 
-	}
+}
 }

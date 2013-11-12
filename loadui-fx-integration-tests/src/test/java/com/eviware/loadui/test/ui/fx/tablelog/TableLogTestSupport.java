@@ -22,9 +22,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.loadui.testfx.GuiTest.findAll;
 
-class TableLogTestSupport
+public class TableLogTestSupport
 {
-	static Set<Node> tableRows()
+	public static Set<Node> tableRows()
 	{
 		return findAll( ".component-view .table-row-cell" );
 	}
