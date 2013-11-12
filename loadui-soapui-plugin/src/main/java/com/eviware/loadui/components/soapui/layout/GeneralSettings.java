@@ -171,11 +171,6 @@ public class GeneralSettings
 				.put( PropertyLayoutComponentImpl.CONSTRAINTS, "w 200!, spanx 2" ) //
 				.build() ) );
 
-		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object>builder() //
-				.put( PropertyLayoutComponentImpl.PROPERTY, useProjectRelativePath ) //
-				.put( PropertyLayoutComponentImpl.LABEL, "Use relative path for project" ) //
-				.build() ) );
-
 		settingsLayoutTab.add( new PropertyLayoutComponentImpl<File>( ImmutableMap.<String, Object>builder() //
 				.put( PropertyLayoutComponentImpl.PROPERTY, projectPassword ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "Project Password" ) //
