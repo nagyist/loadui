@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import javafx.geometry.VerticalDirection;
 import org.loadui.testfx.categories.TestFX;
 import org.loadui.testfx.FXScreenController;
 import org.loadui.testfx.FXTestUtils;
@@ -74,7 +75,10 @@ public class ToolBoxTest
 	static ToolBox<Rectangle> toolbox;
 	static final List<Rectangle> allRects = asList( buildRect( Color.RED ), buildRect( Color.RED ),
 			buildRect( Color.BLUE ), buildRect( Color.GREEN ), buildRect( Color.RED ), buildRect( Color.YELLOW ),
-			buildRect( Color.BLUE ), buildRect( Color.ORANGE ) );
+			buildRect( Color.BLUE ), buildRect( Color.ORANGE ),
+			buildRect( Color.LAVENDERBLUSH ), buildRect( Color.LAVENDERBLUSH ), buildRect( Color.LAVENDERBLUSH ), buildRect( Color.LAVENDERBLUSH ),
+			buildRect( Color.LAVENDERBLUSH ), buildRect( Color.LAVENDERBLUSH ), buildRect( Color.LAVENDERBLUSH ), buildRect( Color.LAVENDERBLUSH ),
+			buildRect( Color.LAVENDERBLUSH ), buildRect( Color.LAVENDERBLUSH ), buildRect( Color.LAVENDERBLUSH ), buildRect( Color.LAVENDERBLUSH ));
 	static final List<Rectangle> rectsToAdd = asList( RectangleBuilder.create().fill( Color.AQUA ).build() );
 
 	public static class ToolboxTestApp extends Application
@@ -86,10 +90,10 @@ public class ToolBoxTest
 			toolbox.setMaxWidth( 120 );
 			toolbox.setMaxHeight( 400 );
 			List<Rectangle> everything = new ArrayList<Rectangle>( allRects );
-			everything.addAll( rectsToAdd );
+			everything.addAll( rectsToAdd);
 			toolbox.setComparator( Ordering.explicit( everything ) );
 			toolbox.setCategoryComparator( Ordering.explicit( Color.RED.toString(), Color.BLUE.toString(),
-					Color.GREEN.toString(), Color.YELLOW.toString(), Color.ORANGE.toString(), "Renamed" ) );
+					Color.GREEN.toString(), Color.YELLOW.toString(), Color.ORANGE.toString(), Color.LAVENDERBLUSH.toString(),"Renamed" ) );
 
 			PaneOverlayHolder root = new PaneOverlayHolder();
 			root.add( toolbox );
@@ -154,6 +158,18 @@ public class ToolBoxTest
 
 		controller.target( stage ).click( ".tool-box .title" );
 		assertTrue( GuiTest.findAll( ".tool-box-expander" ).size() == 0 );
+	}
+
+	@Test
+	public void shouldHandleTwelveRectangles() throws Exception
+	{
+		controller.move( toolbox )
+		.scroll( 5, VerticalDirection.DOWN )
+		.click(".expander-button");
+
+		controller.sleep( 115000 );
+
+
 	}
 
 	@Test
