@@ -94,7 +94,6 @@ public class SoapUiProjectSelector
 		this.loaduiProjectDir = loaduiProjectDir;
 
 		projectFile = createProjectFileProperty( context );
-		log.info( "PROJECT FILE IS NOW: " + projectFile.getValue() );
 
 		testSuite = context.createProperty( "testSuite", String.class );
 		testCase = context.createProperty( TEST_CASE, String.class );

@@ -26,6 +26,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
@@ -34,7 +35,6 @@ import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -121,18 +121,21 @@ public class SoapUiFilePicker extends VBox
 		@Override
 		public void changed( ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean isNowRelative )
 		{
+			textLabel.setMaxWidth( isNowRelative ? 300 : 0 );
+			textField.setPrefWidth( isNowRelative ? 200 : 500 );
+			HBox.setMargin( textField, new Insets( 4, 4, 4, isNowRelative ? 2 : 0 ) );
+
+			String newSelectedValue = null;
+
 			if( selectedProperty.get() != null )
 			{
-				textLabel.setMaxWidth( isNowRelative ? 300 : 0 );
-				textField.setPrefWidth( isNowRelative ? 200 : 500 );
-
-				String newSelectedValue = isNowRelative ?
+				newSelectedValue = isNowRelative ?
 						fileResolver.abs2rel( baseDirForRelativePaths, new File( selectedProperty.get() ) ) :
 						fileResolver.rel2abs( baseDirForRelativePaths, selectedProperty.get() );
-
-				setFieldsWith( newSelectedValue );
-				resolveFileUpdatingSelectedIfAcceptable();
 			}
+
+			setFieldsWith( newSelectedValue );
+			resolveFileUpdatingSelectedIfAcceptable();
 		}
 	};
 
@@ -149,7 +152,7 @@ public class SoapUiFilePicker extends VBox
 		setId( "soapui-file-picker" );
 		setSpacing( 4 );
 
-		HBox firstLine = new HBox( 4 );
+		HBox firstLine = new HBox( 0 );
 
 		textLabel = new Label();
 		textLabel.maxWidth( 300 );
@@ -199,6 +202,11 @@ public class SoapUiFilePicker extends VBox
 		useRelPath.setId( "use-rel-path" );
 		useRelPath.selectedProperty().bindBidirectional( isRelativePathProperty );
 
+		HBox.setMargin( textLabel, new Insets( 7, 0, 4, 0 ) );
+		HBox.setMargin( textField, new Insets( 4, 4, 4, 2 ) );
+		HBox.setMargin( browse, new Insets( 4 ) );
+
+		VBox.setMargin( firstLine, new Insets( 4, 4, 4, 0 ) );
 		firstLine.getChildren().setAll( textLabel, textField, browse );
 		getChildren().setAll( firstLine, useRelPath );
 
@@ -248,6 +256,9 @@ public class SoapUiFilePicker extends VBox
 	private boolean resolveFileUpdatingSelectedIfAcceptable()
 	{
 		String text = textField.getText();
+		if( text.trim().isEmpty() )
+			return false;
+
 		if( !isRelativePathProperty.get() && !fileResolver.isAbsolute( textField.getText() ) )
 		{
 			text = File.separator + text;
@@ -285,27 +296,35 @@ public class SoapUiFilePicker extends VBox
 		isRelativePathProperty.setValue( isRelativePath );
 	}
 
-	private void setFieldsWith( @Nonnull String filePath )
+	private void setFieldsWith( String filePath )
 	{
 		String basePath = baseDirForRelativePaths.getAbsolutePath();
-		File file;
+		File file = null;
 
 		if( isRelativePathProperty.get() )
 		{
 			textLabel.setText( basePath + File.separator );
-			String text = !fileResolver.isAbsolute( filePath ) ?
-					filePath :
-					fileResolver.abs2rel( baseDirForRelativePaths, new File( filePath ) );
-			textField.setText( text );
-			file = new File( baseDirForRelativePaths, text );
+
+			if( filePath != null )
+			{
+				String text = !fileResolver.isAbsolute( filePath ) ?
+						filePath :
+						fileResolver.abs2rel( baseDirForRelativePaths, new File( filePath ) );
+				textField.setText( text );
+				file = new File( baseDirForRelativePaths, text );
+			}
 		}
 		else
 		{
 			textLabel.setText( "" );
-			textField.setText( filePath );
-			file = new File( filePath );
+			if( filePath != null )
+			{
+				textField.setText( filePath );
+				file = new File( filePath );
+			}
 		}
-		updatTextFieldStyle( fileResolver.isAcceptable( file ) );
+		if( file != null )
+			updatTextFieldStyle( fileResolver.isAcceptable( file ) );
 	}
 
 	private void updatTextFieldStyle( boolean isAcceptableFile )
