@@ -504,6 +504,7 @@ public class SoapUISamplerComponent extends RunnerBase
 		if( getContext().isController() && !reloadingProject )
 		{
 			log.debug( "Updating SoapUI Project working copy" );
+			//FIXME this could throw an org.apache.xmlbeans.XmlException if the file is not an actual SoapUI Project
 			projectFileWorkingCopy.setValue( SoapUiProjectUtils.makeNonCompositeCopy( projectFile ) );
 		}
 	}

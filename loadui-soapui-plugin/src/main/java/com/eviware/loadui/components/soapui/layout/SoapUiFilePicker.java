@@ -55,8 +55,7 @@ public class SoapUiFilePicker extends VBox
 	private UpdateTextTimerTask updateTextTask;
 	FileResolver fileResolver = new FileResolver();
 	private final CheckBox useRelPath;
-	private javafx.beans.property.Property<String> projectFileExternalProperty;
-	private boolean isShowingFilePicker = false;
+	private final Property<String> projectFileProperty;
 
 	private class UpdateTextTimerTask extends TimerTask
 	{
@@ -113,6 +112,8 @@ public class SoapUiFilePicker extends VBox
 		public void changed( ObservableValue<? extends String> observableValue, String oldValue, String newValue )
 		{
 			setFieldsWith( newValue );
+			if( projectFileProperty != null )
+				projectFileProperty.setValue( newValue );
 		}
 	};
 
@@ -148,6 +149,7 @@ public class SoapUiFilePicker extends VBox
 	{
 		Preconditions.checkArgument( baseDirForRelativePaths.isAbsolute() );
 		this.baseDirForRelativePaths = baseDirForRelativePaths;
+		this.projectFileProperty = projectFileProperty;
 
 		setId( "soapui-file-picker" );
 		setSpacing( 4 );
@@ -178,25 +180,21 @@ public class SoapUiFilePicker extends VBox
 		final Button browse = ButtonBuilder
 				.create().minWidth( 100 ).id( "soapui-file-picker-browse" )
 				.text( "Browse..." )
-				.build();
-
-		browse.setOnAction( new EventHandler<ActionEvent>()
-		{
-			@Override
-			public void handle( ActionEvent _ )
-			{
-				isShowingFilePicker = true;
-				File selectedFile = filePickerDialogFactory.showOpenDialog(
-						title, extensionFilterDescription, extensionFilterRegex );
-				if( selectedFile != null && fileResolver.isAcceptable( selectedFile ) )
+				.onAction( new EventHandler<ActionEvent>()
 				{
-					setAbsolutePath( selectedFile.getAbsolutePath() );
-					if( projectFileExternalProperty != null )
-						selectedProperty.unbindBidirectional( projectFileExternalProperty );
-				}
-				isShowingFilePicker = false;
-			}
-		} );
+					@Override
+					public void handle( ActionEvent _ )
+					{
+						File selectedFile = filePickerDialogFactory.showOpenDialog(
+								title, extensionFilterDescription, extensionFilterRegex );
+						if( selectedFile != null && fileResolver.isAcceptable( selectedFile ) )
+						{
+							setAbsolutePath( selectedFile.getAbsolutePath() );
+							projectFileProperty.setValue( selectedProperty.getValue() );
+						}
+					}
+				} )
+				.build();
 
 		useRelPath = new CheckBox( "Use relative path" );
 		useRelPath.setId( "use-rel-path" );
@@ -210,11 +208,8 @@ public class SoapUiFilePicker extends VBox
 		firstLine.getChildren().setAll( textLabel, textField, browse );
 		getChildren().setAll( firstLine, useRelPath );
 
-		if( projectFileProperty != null )
-		{
-			projectFileExternalProperty = Properties.convert( projectFileProperty );
-			selectedProperty.bindBidirectional( projectFileExternalProperty );
-		}
+		if( projectFileProperty != null && projectFileProperty.getValue() != null )
+			selectedProperty.setValue( projectFileProperty.getValue() );
 	}
 
 	void onFileTextUpdated( String text )
@@ -233,8 +228,6 @@ public class SoapUiFilePicker extends VBox
 		useRelPath.selectedProperty().unbindBidirectional( isRelativePathProperty );
 		isRelativePathProperty.removeListener( isRelativeListener );
 		selectedProperty.removeListener( selectedListener );
-		if( projectFileExternalProperty != null && !isShowingFilePicker )
-			selectedProperty.unbindBidirectional( projectFileExternalProperty );
 	}
 
 	public ObjectProperty<String> selectedProperty()

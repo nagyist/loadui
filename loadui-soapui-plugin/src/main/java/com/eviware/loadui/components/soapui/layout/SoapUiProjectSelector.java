@@ -111,7 +111,7 @@ public class SoapUiProjectSelector
 		String initialProjectFileValue = null;
 
 		// versions pre 2.6.5 kept the projectFile as a File property - here we convert that to the new system
-		if( currentProjectFile != null && currentProjectFile.getValue() instanceof File )
+		if( currentProjectFile != null && currentProjectFile.getType().equals( File.class ) )
 		{
 			log.info( "Converting projectFile property from File to String" );
 			context.deleteProperty( "projectFile" );
@@ -123,7 +123,8 @@ public class SoapUiProjectSelector
 			}
 			else
 			{
-				initialProjectFileValue = ( ( File )currentProjectFile.getValue() ).getAbsolutePath();
+				initialProjectFileValue = currentProjectFile.getValue() == null ? null :
+						( ( File )currentProjectFile.getValue() ).getAbsolutePath();
 			}
 		}
 
