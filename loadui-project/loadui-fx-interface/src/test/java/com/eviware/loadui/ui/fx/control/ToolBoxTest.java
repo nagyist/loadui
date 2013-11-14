@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.Ignore;
 import org.loadui.testfx.categories.TestFX;
 import org.loadui.testfx.FXScreenController;
 import org.loadui.testfx.FXTestUtils;
@@ -235,6 +236,7 @@ public class ToolBoxTest
 	}
 
 	@Test
+    @Ignore("Doesn't work on Linux")
 	public void shouldChangeWhenAddingItemsAtRuntime() throws Exception
 	{
 		final Rectangle red = Iterables.get( rectangles.get( Color.RED ), 0 );
