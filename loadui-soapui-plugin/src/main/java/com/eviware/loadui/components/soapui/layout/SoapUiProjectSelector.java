@@ -31,6 +31,8 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.sun.javafx.Utils;
+import com.sun.javafx.collections.ObservableListWrapper;
+import edu.emory.mathcs.backport.java.util.Collections;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -329,6 +331,18 @@ public class SoapUiProjectSelector
 					testCaseLatch.countDown();
 				}
 			} );
+		}
+		else
+		{
+			Platform.runLater( new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					testCaseCombo.setItems( new ObservableListWrapper<String>( Collections.emptyList() ) );
+				}
+			} );
+
 		}
 	}
 

@@ -953,6 +953,8 @@ public class SoapUISamplerComponent extends RunnerBase
 			if( testSuite == null || testCaseName == null )
 			{
 				projectSelector.setTestCases();
+				testStepsInvocationCount.invalidateAll();
+				testStepsTableModel.clearTestCase();
 				return;
 			}
 

@@ -124,7 +124,7 @@ public class SoapUiFilePicker extends VBox
 		{
 			textLabel.setMaxWidth( isNowRelative ? 300 : 0 );
 			textField.setPrefWidth( isNowRelative ? 200 : 500 );
-			HBox.setMargin( textField, new Insets( 4, 4, 4, isNowRelative ? 2 : 0 ) );
+			HBox.setMargin( textField, new Insets( 4, 4, 4, isNowRelative ? 2 : -1 ) );
 
 			String newSelectedValue = null;
 
@@ -200,7 +200,7 @@ public class SoapUiFilePicker extends VBox
 		useRelPath.setId( "use-rel-path" );
 		useRelPath.selectedProperty().bindBidirectional( isRelativePathProperty );
 
-		HBox.setMargin( textLabel, new Insets( 7, 0, 4, 0 ) );
+		HBox.setMargin( textLabel, new Insets( 8, 0, 4, 0 ) );
 		HBox.setMargin( textField, new Insets( 4, 4, 4, 2 ) );
 		HBox.setMargin( browse, new Insets( 4 ) );
 
