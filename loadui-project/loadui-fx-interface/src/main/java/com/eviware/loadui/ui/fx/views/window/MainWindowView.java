@@ -21,7 +21,6 @@ import com.eviware.loadui.api.events.WeakEventHandler;
 import com.eviware.loadui.api.model.*;
 import com.eviware.loadui.api.testevents.TestEventManager;
 import com.eviware.loadui.api.traits.Labeled;
-import com.eviware.loadui.api.traits.Releasable;
 import com.eviware.loadui.ui.fx.api.Inspector;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import com.eviware.loadui.ui.fx.api.perspective.PerspectiveEvent;
@@ -59,15 +58,13 @@ import javafx.scene.layout.StackPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
 public class MainWindowView extends StackPane implements OverlayHolder
 {
 	@FXML
 	private MenuButton mainButton;
 
 	@FXML
-	private StackPane container;
+	private ContainerView container;
 
 	@FXML
 	private InspectorView inspectorView;
@@ -179,7 +176,7 @@ public class MainWindowView extends StackPane implements OverlayHolder
 										public void run()
 										{
 											ProjectView projectView = new ProjectView( project, executionsInfo );
-											changeToView( projectView );
+											container.setView( projectView );
 											PerspectiveEvent.fireEvent( PerspectiveEvent.PERSPECTIVE_PROJECT, projectView );
 										}
 									} );
@@ -197,9 +194,9 @@ public class MainWindowView extends StackPane implements OverlayHolder
 					}
 					else if( event.getArg() instanceof SceneItem )
 					{
-						if( container.getChildren().size() == 1 )
+						if( container.hasView() )
 						{
-							container.getChildren().get( 0 ).fireEvent( event );
+							container.getView().fireEvent( event );
 						}
 					}
 					else
@@ -265,40 +262,20 @@ public class MainWindowView extends StackPane implements OverlayHolder
 	public void showWorkspace()
 	{
 		WorkspaceView workspaceView = new WorkspaceView( workspaceProvider.getWorkspace() );
-		changeToView( workspaceView );
+		container.setView( workspaceView );
 		PerspectiveEvent.fireEvent( PerspectiveEvent.PERSPECTIVE_WORKSPACE, workspaceView );
 	}
 
-	public void changeToView( Node view )
-	{
-		releaseChildIfPossible( container );
-		container.getChildren().setAll( view );
-	}
 
-	private void releaseChildIfPossible( StackPane container )
-	{
-		List<Node> children = container.getChildren();
-		if( children.size() < 1 ) return;
-
-		Node child = children.get( 0 );
-		if( child instanceof Releasable )
-		{
-			( ( Releasable )child ).release();
-		}
-
-	}
-
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	public <T extends Parent> T getChildView( Class<T> expectedClass )
 	{
-		if( container != null && container.getChildren().isEmpty() == false )
+		if( container != null && !container.hasView() )
 		{
-			log.debug( "contains: " + container.getChildren().size() + ": " + container.getChildren() );
-			for( Node childView : container.getChildren() )
-			{
-				if( expectedClass.isInstance( childView ) )
-					return ( T )childView;
-			}
+			Node view = container.getView();
+
+			if( expectedClass.isInstance( view ) )
+				return ( T )view;
 		}
 		throw new IllegalStateException( MainWindowView.class.getName() + " does not hold a view of class "
 				+ expectedClass );

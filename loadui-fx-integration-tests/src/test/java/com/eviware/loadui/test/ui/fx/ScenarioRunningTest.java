@@ -85,12 +85,10 @@ public class ScenarioRunningTest extends SimpleWebTestBase
 		waitForBlockingTaskToCompleteOrAbort();
 		testRunner.waitForBlockingTaskToComplete();
 
-		waitForNode( "#cancel" );
-		sleep( 200 );
-		click( "#cancel" );
+		waitAndClick( "#cancel" );
 
 		//Then
-		verifyScenarioIsRunningIs(false);
+		verifyScenarioIsRunningIs( false );
 		waitAndVerifyThatExecutionStoppedWithinFiveSecounds();
 
 	}
@@ -104,7 +102,7 @@ public class ScenarioRunningTest extends SimpleWebTestBase
 			{
 				return TestExecutionUtils.isExecutionRunning();
 			}
-		}, is(false), 5 );
+		}, is( false ), 5 );
 	}
 
 	@Test
@@ -140,14 +138,13 @@ public class ScenarioRunningTest extends SimpleWebTestBase
 
 		testRunner.waitForBlockingTaskToComplete();
 		waitAndVerifyThatExecutionStoppedWithinFiveSecounds();
-		verifyScenarioIsRunningIs(false);
+		verifyScenarioIsRunningIs( false );
 	}
 
 	private void waitUntilPlayButtonIsEnabled()
 	{
-		Node playbutton = find(".mini-playback-panel  .play-button" );
+		Node playbutton = find( ".mini-playback-panel  .play-button" );
 		waitUntil( playbutton, EnabledMatcher.enabled() );
-
 
 
 	}
@@ -157,7 +154,7 @@ public class ScenarioRunningTest extends SimpleWebTestBase
 		click( ".mini-playback-panel  .play-button" );
 	}
 
-	private void verifyScenarioIsRunningIs(Boolean bool)
+	private void verifyScenarioIsRunningIs( Boolean bool )
 	{
 		verifyThat( "Expected that scenario isRunning is " + bool, scenario.isRunning(), is( bool ) );
 	}

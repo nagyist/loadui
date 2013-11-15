@@ -74,11 +74,11 @@ public final class TestExecutionUtils
 	 * @return Currently running CanvasItem or null if nothing is running
 	 */
 
-	public static CanvasItem getCurrentlyRunningCanvasItem()
+	public static CanvasItem getCurrentlyRunningCanvasItem() throws NoExecutionRunning
 	{
 		if( !isExecutionRunning() )
 		{
-			return null;
+			throw new NoExecutionRunning( "No execution is currently running" );
 		}
 		return getCurrentExecution().getCanvas();
 	}
@@ -93,4 +93,11 @@ public final class TestExecutionUtils
 		return null;
 	}
 
+	public static class NoExecutionRunning extends Exception
+	{
+		public NoExecutionRunning( String s )
+		{
+			super( s );
+		}
+	}
 }

@@ -201,10 +201,17 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 	@Override
 	public void delete()
 	{
-		if(TestExecutionUtils.getCurrentlyRunningCanvasItem() == this)
+		try
 		{
-			BeanInjector.getBean( TestEventManager.class ).logMessage( MessageLevel.WARNING, "Stop the scenario \"" + getLabel() + "\" before removing it" );
-			return;
+			if( TestExecutionUtils.getCurrentlyRunningCanvasItem() == this )
+			{
+				BeanInjector.getBean( TestEventManager.class ).logMessage( MessageLevel.WARNING, "Stop the scenario \"" + getLabel() + "\" before removing it" );
+				return;
+			}
+		}
+		catch( TestExecutionUtils.NoExecutionRunning noExecutionRunning )
+		{
+			// let deletion be done
 		}
 
 		for( ComponentItem component : new ArrayList<>( getComponents() ) )

@@ -434,12 +434,17 @@ public class ProjectView extends AnchorPane implements Releasable
 
 	private void stopAnyExecutionRunning()
 	{
-		CanvasItem runningCanvas = TestExecutionUtils.getCurrentlyRunningCanvasItem();
-		if( runningCanvas != null )
+		try
 		{
+			CanvasItem runningCanvas = TestExecutionUtils.getCurrentlyRunningCanvasItem();
 			runningCanvas.triggerAction( CanvasItem.STOP_ACTION );
 			TestExecutionUtils.stopCanvas( runningCanvas );
 		}
+		catch( TestExecutionUtils.NoExecutionRunning noExecutionRunning )
+		{
+			log.debug( "No running exection to stop" );
+		}
+
 	}
 
 	@FXML
