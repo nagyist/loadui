@@ -19,9 +19,9 @@ import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.api.ui.dialog.FilePickerDialogFactory;
 import com.google.common.base.Preconditions;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ObjectPropertyBase;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -75,36 +75,9 @@ public class SoapUiFilePicker extends VBox
 		}
 	}
 
-	private final ObjectProperty<String> selectedProperty = new ObjectPropertyBase<String>()
-	{
-		@Override
-		public Object getBean()
-		{
-			return SoapUiFilePicker.this;
-		}
+	private final ObjectProperty<String> selectedProperty = new SimpleObjectProperty<>();
 
-		@Override
-		public String getName()
-		{
-			return "selected";
-		}
-	};
-
-	private final BooleanProperty isRelativePathProperty = new BooleanPropertyBase()
-	{
-
-		@Override
-		public Object getBean()
-		{
-			return SoapUiFilePicker.this;
-		}
-
-		@Override
-		public String getName()
-		{
-			return "isRelativePath";
-		}
-	};
+	private final BooleanProperty isRelativePathProperty = new SimpleBooleanProperty();
 
 	private final ChangeListener<String> selectedListener = new ChangeListener<String>()
 	{
