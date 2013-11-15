@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.Rule;
 import org.loadui.testfx.categories.TestFX;
 import org.loadui.testfx.FXScreenController;
 import org.loadui.testfx.FXTestUtils;
@@ -161,12 +162,14 @@ public class CarouselTest
 		}
 	}
 
-	@Test
-	public void shouldChangeSelectionUsingDropdown() throws Exception
+    @Test
+    public void shouldChangeSelectionUsingDropdown() throws Exception
 	{
+        // Sleeps needed on Linux
 		setItems();
-		controller.click( ".combo-box" ).moveBy( 0, 70 ).click();
-		assertThat( carousel.getSelected(), sameInstance( rectangles.get( 2 ) ) );
+		controller.click( ".combo-box" ).sleep(1500).moveBy( 0, 70 ).sleep(1500).moveBy(2, 2).sleep(250).click();
+        controller.sleep(1500);
+		assertThat(carousel.getSelected(), sameInstance(rectangles.get(2)));
 	}
 
 	@Test
