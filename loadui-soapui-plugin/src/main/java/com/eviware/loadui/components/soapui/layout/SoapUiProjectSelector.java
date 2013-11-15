@@ -152,10 +152,11 @@ public class SoapUiProjectSelector
 				.columnConstraints( new ColumnConstraints( 70, 70, 70 ) ).hgap( 28 ).build();
 
 		final MenuButton menuButton = MenuButtonBuilder.create().text( "Project" ).build();
+		menuButton.getStyleClass().add( "soapui-project-menu-button" );
 		menuButton.setOnMouseClicked( new javafx.event.EventHandler<MouseEvent>()
 		{
 			@Override
-			public void handle( MouseEvent arg0 )
+			public void handle( MouseEvent _ )
 			{
 				new ProjectSelector( menuButton ).display();
 			}

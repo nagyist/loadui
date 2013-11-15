@@ -66,7 +66,7 @@ public class SoapUiFilePicker extends VBox
 			{
 				updateTextTask = null;
 				boolean hasUpdated = resolveFileUpdatingSelectedIfAcceptable();
-				updatTextFieldStyle( hasUpdated );
+				updateTextFieldStyle( hasUpdated );
 			}
 			catch( Exception e )
 			{
@@ -317,10 +317,10 @@ public class SoapUiFilePicker extends VBox
 			}
 		}
 		if( file != null )
-			updatTextFieldStyle( fileResolver.isAcceptable( file ) );
+			updateTextFieldStyle( fileResolver.isAcceptable( file ) );
 	}
 
-	private void updatTextFieldStyle( boolean isAcceptableFile )
+	private void updateTextFieldStyle( boolean isAcceptableFile )
 	{
 		textField.setStyle( "-fx-text-fill: " + ( isAcceptableFile ? "black;" : "red;" ) );
 	}
