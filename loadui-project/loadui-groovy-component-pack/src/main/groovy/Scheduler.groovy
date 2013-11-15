@@ -187,9 +187,10 @@ addEventListener( ActionEvent ) { event ->
 
 addEventListener( PropertyEvent ) { event ->
 	if( event.property in [ day, time, runsLimit, duration ] ) {
-		displayTime = "invalid"
 		validateDuration()
-		if( !canvas.running ){
+		if( !canvas.running )
+		{
+			displayTime = "invalid"
 			updateState()
 		} 
 	}
