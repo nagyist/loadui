@@ -339,10 +339,10 @@ public class ToolBoxSkin<E extends Node> extends SkinBase<ToolBox<E>, BehaviorBa
 			scrollPane.setContent( pane );
 			scrollPane.prefViewportWidthProperty().bind( pane.widthProperty() );
 			scrollPane.prefViewportHeightProperty().bind( Bindings
-					.when( Bindings.lessThan( getExpanderMaxWith(), pane.widthProperty() ) )
+					.when( Bindings.lessThan( getExpanderMaxWidth(), pane.widthProperty() ) )
 					.then( Bindings.add( 12, pane.heightProperty() ) )
 					.otherwise( pane.heightProperty() ) );
-			scrollPane.maxWidthProperty().bind( getExpanderMaxWith() );
+			scrollPane.maxWidthProperty().bind( getExpanderMaxWidth() );
 
 			scrollPane.setFocusTraversable( false );
 
@@ -359,7 +359,7 @@ public class ToolBoxSkin<E extends Node> extends SkinBase<ToolBox<E>, BehaviorBa
 			setModalLayerVisible( modalLayer, true );
 		}
 
-		private ReadOnlyDoubleProperty getExpanderMaxWith()
+		private ReadOnlyDoubleProperty getExpanderMaxWidth()
 		{
 			return ToolBoxSkin.this.getScene().widthProperty();
 		}
