@@ -295,7 +295,10 @@ public class SoapUiFilePicker extends VBox
 
 	private void updateTextFieldStyle( boolean isAcceptableFile )
 	{
-		textField.setStyle( "-fx-text-fill: " + ( isAcceptableFile ? "black;" : "red;" ) );
+		if( isAcceptableFile )
+			textField.getStyleClass().remove( "invalid" );
+		else
+			textField.getStyleClass().add( "invalid" );
 	}
 
 	public static class FileResolver
