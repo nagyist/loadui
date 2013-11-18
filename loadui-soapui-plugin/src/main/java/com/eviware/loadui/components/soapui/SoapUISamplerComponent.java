@@ -39,6 +39,7 @@ import com.eviware.loadui.components.soapui.layout.MetricsDisplay;
 import com.eviware.loadui.components.soapui.layout.MiscLayoutComponents;
 import com.eviware.loadui.components.soapui.layout.SoapUiProjectSelector;
 import com.eviware.loadui.components.soapui.testStepsTable.TestStepsTableModel;
+import com.eviware.loadui.components.soapui.utils.CompositeProjectUtils;
 import com.eviware.loadui.components.soapui.utils.SoapUiProjectUtils;
 import com.eviware.loadui.impl.component.ActivityStrategies;
 import com.eviware.loadui.impl.component.categories.RunnerBase;
@@ -181,6 +182,7 @@ public class SoapUISamplerComponent extends RunnerBase
 
 	private final TestStepsTableModel testStepsTableModel;
 	private final MetricsDisplay metricsDisplay;
+	private final CompositeProjectUtils compositeProjectUtils = new CompositeProjectUtils();
 
 	public SoapUISamplerComponent( ComponentContext context )
 	{
@@ -219,8 +221,12 @@ public class SoapUISamplerComponent extends RunnerBase
 		// the controller.
 		if( context.isController() )
 		{
-			//TODO need to check why we need this and whether this makeNonCompositeCopy method still works with new relative path handling
-			projectFileWorkingCopy.setValue( SoapUiProjectUtils.makeNonCompositeCopy( projectSelector.getProjectFile() ) );
+			File projectFile = projectSelector.getProjectFile();
+			if( projectFile.isDirectory() )
+			{
+				projectFile = compositeProjectUtils.fromCompositeDirectory( projectFile );
+			}
+			projectFileWorkingCopy.setValue( projectFile );
 		}
 
 		setProject( projectFileWorkingCopy.getValue() );

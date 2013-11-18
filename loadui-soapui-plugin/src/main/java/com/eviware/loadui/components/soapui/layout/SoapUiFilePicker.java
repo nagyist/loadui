@@ -189,7 +189,12 @@ public class SoapUiFilePicker extends VBox
 	void onFileTextUpdated( String text )
 	{
 		if( !text.equals( textField.getText() ) )
+		{
+			int caretPosition = textField.getCaretPosition();
 			textField.setText( text );
+			if( textField.isFocused() )
+				textField.positionCaret( caretPosition );
+		}
 		cancelUpdateTextTask();
 		updateTextTask = new UpdateTextTimerTask();
 		updateTextTimer.schedule( updateTextTask, updateTextDelay );
@@ -339,9 +344,19 @@ public class SoapUiFilePicker extends VBox
 
 		public boolean isAcceptable( File resolvedFile )
 		{
-			return resolvedFile.exists() && resolvedFile.isFile();
+			return resolvedFile.exists() &&
+					( resolvedFile.isFile() || mightBeSoapUiCompositeDirectory( resolvedFile ) );
+		}
+
+		private boolean mightBeSoapUiCompositeDirectory( File directory )
+		{
+			return directory.isDirectory() &&
+					!directory.getName().endsWith( "." ) &&
+					new File( directory, "element.order" ).exists() &&
+					new File( directory, "settings.xml" ).exists();
 		}
 
 	}
 
 }
+
