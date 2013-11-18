@@ -40,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.assertThat;
 import static org.loadui.testfx.GuiTest.offset;
 
@@ -140,10 +141,10 @@ public class MultiMovableTest
 		motion.drop().click( background );
 		assertThat( selectable1.isSelected(), is( false ) );
 		assertThat( selectable2.isSelected(), is( false ) );
-		assertThat( rectangle1.getLayoutX(), equalTo( 100.0 ) );
-		assertThat( rectangle1.getLayoutY(), equalTo( 20.0 ) );
-		assertThat( rectangle2.getLayoutX(), equalTo( 200.0 ) );
-		assertThat( rectangle2.getLayoutY(), equalTo( 120.0 ) );
+		assertThat( rectangle1.getLayoutX(), closeTo( 100.0, 1.0 ) );
+		assertThat( rectangle1.getLayoutY(), closeTo( 20.0, 1.0 ) );
+		assertThat( rectangle2.getLayoutX(), closeTo( 200.0, 1.0 ) );
+		assertThat( rectangle2.getLayoutY(), closeTo( 120.0, 1.0 ) );
 	}
 
 	@Test
@@ -165,8 +166,8 @@ public class MultiMovableTest
 		assertThat( selectable2.isSelected(), is( true ) );
 		assertThat( rectangle1.getLayoutX(), equalTo( 0.0 ) );
 		assertThat( rectangle1.getLayoutY(), equalTo( 0.0 ) );
-		assertThat( rectangle2.getLayoutX(), equalTo( 200.0 ) );
-		assertThat( rectangle2.getLayoutY(), equalTo( 120.0 ) );
+		assertThat( rectangle2.getLayoutX(), closeTo(200.0, 1.0) );
+		assertThat( rectangle2.getLayoutY(), closeTo( 120.0, 1.0 ) );
 	}
 
 	@Test

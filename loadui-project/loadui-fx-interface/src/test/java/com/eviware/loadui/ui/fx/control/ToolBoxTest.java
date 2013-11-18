@@ -281,8 +281,9 @@ public class ToolBoxTest
 		assertThat( rectangle5.getScene(), nullValue() );
 	}
 
-	@Ignore // this seems broken with faster testfx mouse movement.
+
 	@Test
+   @Ignore("Doesn't work on Linux")
 	public void shouldChangeWhenAddingItemsAtRuntime() throws Exception
 	{
 		final Rectangle red = Iterables.get( rectangles.get( Color.RED ), 0 );
