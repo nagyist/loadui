@@ -15,25 +15,7 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
-import static org.loadui.testfx.GuiTest.find;
-import static org.loadui.testfx.GuiTest.targetWindow;
-import static org.loadui.testfx.GuiTest.wrap;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import org.junit.Rule;
-import org.loadui.testfx.categories.TestFX;
-import org.loadui.testfx.FXScreenController;
-import org.loadui.testfx.FXTestUtils;
-import org.loadui.testfx.GuiTest;
+import com.google.common.util.concurrent.SettableFuture;
 import javafx.application.Application;
 import javafx.scene.SceneBuilder;
 import javafx.scene.control.Button;
@@ -41,13 +23,24 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
 import javafx.stage.Stage;
-
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.loadui.testfx.FXScreenController;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
+import org.loadui.testfx.categories.TestFX;
 
-import com.google.common.util.concurrent.SettableFuture;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.loadui.testfx.Assertions.verifyThat;
+import static org.loadui.testfx.GuiTest.*;
 
 @Category( TestFX.class )
 public class CarouselTest
@@ -168,8 +161,8 @@ public class CarouselTest
         // Sleeps needed on Linux
 		setItems();
 		controller.click( ".combo-box" ).sleep(1500).moveBy( 0, 70 ).sleep(1500).moveBy(2, 2).sleep(250).click();
-        controller.sleep(1500);
-		assertThat(carousel.getSelected(), sameInstance(rectangles.get(2)));
+        controller.sleep( 1500 );
+		verifyThat(carousel.getSelected(), sameInstance(rectangles.get(2)));
 	}
 
 	@Test
@@ -222,37 +215,37 @@ public class CarouselTest
 	{
 		Button prevButton = find( ".nav.left" );
 		Button nextButton = find( ".nav.right" );
-		assertThat( prevButton.isDisabled(), is( true ) );
-		assertThat( nextButton.isDisabled(), is( false ) );
+		verifyThat( prevButton.isDisabled(), is( true ) );
+		verifyThat( nextButton.isDisabled(), is( false ) );
 
-		assertThat( carousel.getSelected(), sameInstance( rectangles.get( 0 ) ) );
-		assertThat( rectangles.get( 0 ).getScene(), notNullValue() );
-		assertThat( rectangles.get( 1 ).getScene(), notNullValue() );
-		assertThat( rectangles.get( 2 ).getScene(), notNullValue() );
-		assertThat( rectangles.get( 3 ).getScene(), nullValue() );
-
-		next.run();
-		assertThat( carousel.getSelected(), sameInstance( rectangles.get( 1 ) ) );
-		assertThat( prevButton.isDisabled(), is( false ) );
-		assertThat( rectangles.get( 3 ).getScene(), notNullValue() );
+		verifyThat( carousel.getSelected(), sameInstance( rectangles.get( 0 ) ) );
+		verifyThat( rectangles.get( 0 ).getScene(), notNullValue() );
+		verifyThat( rectangles.get( 1 ).getScene(), notNullValue() );
+		verifyThat( rectangles.get( 2 ).getScene(), notNullValue() );
+		verifyThat( rectangles.get( 3 ).getScene(), nullValue() );
 
 		next.run();
-		next.run();
-		next.run();
-		assertThat( carousel.getSelected(), sameInstance( rectangles.get( 4 ) ) );
-		assertThat( rectangles.get( 0 ).getScene(), nullValue() );
-		assertThat( rectangles.get( 3 ).getScene(), notNullValue() );
+		verifyThat( carousel.getSelected(), sameInstance( rectangles.get( 1 ) ) );
+		verifyThat( prevButton.isDisabled(), is( false ) );
+		verifyThat( rectangles.get( 3 ).getScene(), notNullValue() );
 
 		next.run();
 		next.run();
-		assertThat( carousel.getSelected(), sameInstance( rectangles.get( 6 ) ) );
-		assertThat( nextButton.isDisabled(), is( true ) );
+		next.run();
+		verifyThat( carousel.getSelected(), sameInstance( rectangles.get( 4 ) ) );
+		verifyThat( rectangles.get( 0 ).getScene(), nullValue() );
+		verifyThat( rectangles.get( 3 ).getScene(), notNullValue() );
+
+		next.run();
+		next.run();
+		verifyThat( carousel.getSelected(), sameInstance( rectangles.get( 6 ) ) );
+		verifyThat( nextButton.isDisabled(), is( true ) );
 
 		prev.run();
-		assertThat( carousel.getSelected(), sameInstance( rectangles.get( 5 ) ) );
-		assertThat( nextButton.isDisabled(), is( false ) );
-		assertThat( rectangles.get( 2 ).getScene(), nullValue() );
-		assertThat( rectangles.get( 3 ).getScene(), notNullValue() );
+		verifyThat( carousel.getSelected(), sameInstance( rectangles.get( 5 ) ) );
+		verifyThat( nextButton.isDisabled(), is( false ) );
+		verifyThat( rectangles.get( 2 ).getScene(), nullValue() );
+		verifyThat( rectangles.get( 3 ).getScene(), notNullValue() );
 	}
 
 	@Test
@@ -280,8 +273,8 @@ public class CarouselTest
 			}
 		}, 5 );
 
-		assertThat( carousel.getSelected(), sameInstance( whiteRect ) );
-		assertThat( carousel.getSelected().getStyleClass().contains( "selected" ), is( true ) );
+		verifyThat( carousel.getSelected(), sameInstance( whiteRect ) );
+		verifyThat( carousel.getSelected().getStyleClass().contains( "selected" ), is( true ) );
 
 	}
 
@@ -301,7 +294,7 @@ public class CarouselTest
 			}
 		}, 5 );
 
-		assertThat( carousel.getSelected(), nullValue() );
+		verifyThat( carousel.getSelected(), nullValue() );
 
 		FXTestUtils.invokeAndWait( new Runnable()
 		{
@@ -313,14 +306,14 @@ public class CarouselTest
 			}
 		}, 5 );
 
-		assertThat( carousel.getSelected(), notNullValue() );
+		verifyThat( carousel.getSelected(), notNullValue() );
 		assertEquals( carousel.getItems().size(), 3 );
 		controller.move( ".nav.left" );
-		assertThat( carousel.getSelected(), sameInstance( cRedRect ) );
+		verifyThat( carousel.getSelected(), sameInstance( cRedRect ) );
 		controller.click( ".nav.left" ).sleep( 200 );
-		assertThat( carousel.getSelected(), sameInstance( bPurpleRect ) );
+		verifyThat( carousel.getSelected(), sameInstance( bPurpleRect ) );
 		controller.click( ".nav.left" ).sleep( 200 );
-		assertThat( carousel.getSelected(), sameInstance( aPinkRect ) );
+		verifyThat( carousel.getSelected(), sameInstance( aPinkRect ) );
 	}
 
 }
