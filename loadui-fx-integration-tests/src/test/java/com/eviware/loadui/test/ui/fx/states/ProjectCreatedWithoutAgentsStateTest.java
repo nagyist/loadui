@@ -128,6 +128,8 @@ public class ProjectCreatedWithoutAgentsStateTest extends FxIntegrationBase
 
 		createProjectThroughContextMenu( nameOfCreatedProject );
 
+		sleep( 200 ); // extra precaution due to assertion this failed in jenkins
+
 		assertProjectCountIs( projectCount + 1 );
 		assertProjectExistsWithName( nameOfCreatedProject );
 	}
