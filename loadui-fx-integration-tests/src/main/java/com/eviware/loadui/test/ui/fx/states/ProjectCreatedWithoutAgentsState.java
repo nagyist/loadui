@@ -24,7 +24,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.Is.is;
 import static org.loadui.testfx.GuiTest.find;
 import static org.loadui.testfx.GuiTest.waitUntil;
-import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
+import static org.loadui.testfx.Matchers.visible;
 
 public class ProjectCreatedWithoutAgentsState extends TestState
 {
