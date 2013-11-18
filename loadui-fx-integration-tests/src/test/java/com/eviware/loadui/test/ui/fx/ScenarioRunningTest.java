@@ -5,6 +5,7 @@ import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.ScenarioCreatedState;
 import com.eviware.loadui.util.execution.TestExecutionUtils;
+import com.eviware.loadui.util.test.TestUtils;
 import com.google.code.tempusfugit.temporal.Timeout;
 import javafx.scene.Node;
 import org.junit.Before;
@@ -85,7 +86,7 @@ public class ScenarioRunningTest extends SimpleWebTestBase
 		waitForBlockingTaskToCompleteOrAbort();
 		testRunner.waitForBlockingTaskToComplete();
 
-		waitAndClick( "#cancel" );
+		waitAndClickIfExists( "#cancel" );
 
 		//Then
 		verifyScenarioIsRunningIs( false );
@@ -134,19 +135,34 @@ public class ScenarioRunningTest extends SimpleWebTestBase
 		stopScenario();
 
 		//Then
-		waitAndClick( "#abort-requests" );
+		waitAndClickIfExists( "#abort-requests" );
 
 		testRunner.waitForBlockingTaskToComplete();
 		waitAndVerifyThatExecutionStoppedWithinFiveSecounds();
 		verifyScenarioIsRunningIs( false );
 	}
 
+	public void waitAndClickIfExists( final String query )
+	{
+		TestUtils.awaitConditionSilent( new Callable<Boolean>()
+		{
+			@Override
+			public Boolean call() throws Exception
+			{
+				return exists( query );
+			}
+		}, 2 );
+
+		if(exists( query ))
+		{
+			click( query );
+		}
+	}
+
 	private void waitUntilPlayButtonIsEnabled()
 	{
 		Node playbutton = find( ".mini-playback-panel  .play-button" );
 		waitUntil( playbutton, EnabledMatcher.enabled() );
-
-
 	}
 
 	private void stopScenario()
