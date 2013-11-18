@@ -15,6 +15,7 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
+import org.junit.After;
 import org.loadui.testfx.MouseMotion;
 import org.loadui.testfx.categories.TestFX;
 import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
@@ -90,6 +91,12 @@ public class DragNodeTest
 		stage = stageFuture.get( 5, TimeUnit.SECONDS );
 		GuiTest.targetWindow( stage );
 		FXTestUtils.bringToFront( stage );
+	}
+
+	@After
+	public void waitForAnimation()
+	{
+		controller.sleep( 500 ); // wait for any animation to finish;
 	}
 
 	@Test
