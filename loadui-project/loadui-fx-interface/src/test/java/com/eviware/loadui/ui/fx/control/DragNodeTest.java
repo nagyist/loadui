@@ -42,8 +42,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static javafx.beans.binding.Bindings.when;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.loadui.testfx.Assertions.verifyThat;
 
 @Category(TestFX.class)
 public class DragNodeTest
@@ -129,9 +131,9 @@ public class DragNodeTest
 
 		assertFalse( dragNode.isAcceptable() );
 
-		MouseMotion dragging = controller.drag( dragNode.getDragSource() ).via( dropArea );
+		MouseMotion dragging = controller.drag( dragNode.getDragSource() ).via( dropArea ).sleep( 200 );
 
-		assertTrue( dragNode.isAcceptable() );
+		verifyThat( dragNode.isAcceptable(), is(true) );
 
 		dragging.drop();
 
