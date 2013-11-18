@@ -30,6 +30,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -41,10 +42,7 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBuilder;
-import javafx.scene.control.Label;
-import javafx.scene.control.LabelBuilder;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -331,13 +329,25 @@ public class ToolBoxSkin<E extends Node> extends SkinBase<ToolBox<E>, BehaviorBa
 			final Rectangle modalLayer = createModalLayer();
 
 			expandedCategory.set( category );
-
 			ItemHolder itemHolder = createItemHolderFor( category );
+
+			ScrollPane scrollPane = new ScrollPane();
 
 			StackPane pane = StackPaneBuilder.create().alignment( Pos.BOTTOM_LEFT ).build();
 			pane.getChildren().setAll( itemHolder );
 
-			getChildren().setAll( pane );
+			scrollPane.setContent( pane );
+			scrollPane.prefViewportWidthProperty().bind( pane.widthProperty() );
+			scrollPane.prefViewportHeightProperty().bind( Bindings
+					.when( Bindings.lessThan( getExpanderMaxWidth(), pane.widthProperty() ) )
+					.then( Bindings.add( 12, pane.heightProperty() ) )
+					.otherwise( pane.heightProperty() ) );
+			scrollPane.maxWidthProperty().bind( getExpanderMaxWidth() );
+
+			scrollPane.setFocusTraversable( false );
+
+
+			getChildren().setAll( scrollPane );
 
 			Bounds sceneBounds = category.localToScene( category.getBoundsInLocal() );
 			final double xPos = sceneBounds.getMinX();
@@ -347,6 +357,11 @@ public class ToolBoxSkin<E extends Node> extends SkinBase<ToolBox<E>, BehaviorBa
 			setLayoutY( yPos );
 
 			setModalLayerVisible( modalLayer, true );
+		}
+
+		private ReadOnlyDoubleProperty getExpanderMaxWidth()
+		{
+			return ToolBoxSkin.this.getScene().widthProperty();
 		}
 
 		private void setModalLayerVisible( Node modalLayer, boolean visible )
