@@ -45,6 +45,7 @@ import java.util.TimerTask;
 
 public class SoapUiFilePicker extends VBox
 {
+	public static final String INVALID_CSS_CLASS = "invalid";
 	static Logger log = LoggerFactory.getLogger( SoapUiFilePicker.class );
 
 	private long updateTextDelay = 250L;
@@ -296,9 +297,9 @@ public class SoapUiFilePicker extends VBox
 	private void updateTextFieldStyle( boolean isAcceptableFile )
 	{
 		if( isAcceptableFile )
-			textField.getStyleClass().remove( "invalid" );
+			textField.getStyleClass().remove( INVALID_CSS_CLASS );
 		else
-			textField.getStyleClass().add( "invalid" );
+			textField.getStyleClass().add( INVALID_CSS_CLASS );
 	}
 
 	public static class FileResolver
