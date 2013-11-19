@@ -39,6 +39,7 @@ import com.eviware.loadui.components.soapui.layout.MetricsDisplay;
 import com.eviware.loadui.components.soapui.layout.MiscLayoutComponents;
 import com.eviware.loadui.components.soapui.layout.SoapUiProjectSelector;
 import com.eviware.loadui.components.soapui.testStepsTable.TestStepsTableModel;
+import com.eviware.loadui.components.soapui.utils.CompositeProjectUtils;
 import com.eviware.loadui.components.soapui.utils.SoapUiProjectUtils;
 import com.eviware.loadui.impl.component.ActivityStrategies;
 import com.eviware.loadui.impl.component.categories.RunnerBase;
@@ -181,6 +182,7 @@ public class SoapUISamplerComponent extends RunnerBase
 
 	private final TestStepsTableModel testStepsTableModel;
 	private final MetricsDisplay metricsDisplay;
+	private final CompositeProjectUtils compositeProjectUtils = new CompositeProjectUtils();
 
 	public SoapUISamplerComponent( ComponentContext context )
 	{
@@ -219,8 +221,8 @@ public class SoapUISamplerComponent extends RunnerBase
 		// the controller.
 		if( context.isController() )
 		{
-			//TODO need to check why we need this and whether this makeNonCompositeCopy method still works with new relative path handling
-			projectFileWorkingCopy.setValue( SoapUiProjectUtils.makeNonCompositeCopy( projectSelector.getProjectFile() ) );
+			File projectFile = projectSelector.getProjectFile();
+			setProjectFileWorkingCopyWith( projectFile );
 		}
 
 		setProject( projectFileWorkingCopy.getValue() );
@@ -346,6 +348,15 @@ public class SoapUISamplerComponent extends RunnerBase
 				}
 			}
 		} );
+	}
+
+	private void setProjectFileWorkingCopyWith( File projectFile )
+	{
+		if( projectFile != null && projectFile.isDirectory() )
+		{
+			projectFile = compositeProjectUtils.fromCompositeDirectory( projectFile );
+		}
+		projectFileWorkingCopy.setValue( projectFile );
 	}
 
 	private void clearAndCreateSettingTabs( ComponentContext context )
@@ -504,8 +515,7 @@ public class SoapUISamplerComponent extends RunnerBase
 		if( getContext().isController() && !reloadingProject )
 		{
 			log.debug( "Updating SoapUI Project working copy" );
-			//FIXME this could throw an org.apache.xmlbeans.XmlException if the file is not an actual SoapUI Project
-			projectFileWorkingCopy.setValue( SoapUiProjectUtils.makeNonCompositeCopy( projectFile ) );
+			setProjectFileWorkingCopyWith( projectFile );
 		}
 	}
 
