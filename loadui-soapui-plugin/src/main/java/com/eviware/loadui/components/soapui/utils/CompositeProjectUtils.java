@@ -1,8 +1,10 @@
 package com.eviware.loadui.components.soapui.utils;
 
-import com.google.common.base.Preconditions;
-
+import javax.annotation.Nonnull;
 import java.io.File;
+
+import static com.eviware.loadui.components.soapui.utils.SoapUiProjectUtils.makeNonCompositeCopy;
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * @author renato
@@ -10,9 +12,12 @@ import java.io.File;
 public class CompositeProjectUtils
 {
 
-	public File fromCompositeDirectory( File projectDirectory )
+	@Nonnull
+	public File fromCompositeDirectory( @Nonnull File projectDirectory )
 	{
-		Preconditions.checkArgument( projectDirectory.isDirectory(), "File given must be a directory" );
-		return SoapUiProjectUtils.makeNonCompositeCopy( projectDirectory );
+		checkArgument( projectDirectory.exists(), "File must exist" );
+		checkArgument( projectDirectory.isDirectory(), "File must be a directory" );
+
+		return makeNonCompositeCopy( projectDirectory );
 	}
 }
