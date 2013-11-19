@@ -201,7 +201,7 @@ public class MainWindowView extends StackPane implements OverlayHolder
 					}
 					else
 					{
-						System.out.println( "Unhandled intent: " + event );
+						log.debug( "Unhandled intent: " + event );
 						return;
 					}
 				}
@@ -224,7 +224,7 @@ public class MainWindowView extends StackPane implements OverlayHolder
 					}
 					else
 					{
-						System.out.println( "Unhandled intent: " + event );
+						log.debug( "Unhandled intent: " + event );
 						return;
 					}
 				}
@@ -251,7 +251,7 @@ public class MainWindowView extends StackPane implements OverlayHolder
 				}
 				else
 				{
-					System.out.println( "Unhandled intent: " + event );
+					log.debug( "Unhandled intent: " + event );
 					return;
 				}
 				event.consume();
@@ -266,19 +266,23 @@ public class MainWindowView extends StackPane implements OverlayHolder
 		PerspectiveEvent.fireEvent( PerspectiveEvent.PERSPECTIVE_WORKSPACE, workspaceView );
 	}
 
-
-	@SuppressWarnings("unchecked")
 	public <T extends Parent> T getChildView( Class<T> expectedClass )
 	{
-		if( container != null && !container.hasView() )
+		if( container != null && container.hasView() )
 		{
 			Node view = container.getView();
 
 			if( expectedClass.isInstance( view ) )
-				return ( T )view;
+			{
+				return expectedClass.cast( view );
+			}
+			else
+			{
+				throw new IllegalStateException( MainWindowView.class.getName() + " does not hold a view of class "
+						+ expectedClass );
+			}
 		}
-		throw new IllegalStateException( MainWindowView.class.getName() + " does not hold a view of class "
-				+ expectedClass );
+		throw new IllegalStateException( "ContainerView not initialized, is null? " + container + " has view?" + ( container == null ? "" : container.hasView() ) );
 	}
 
 	public void settings()
