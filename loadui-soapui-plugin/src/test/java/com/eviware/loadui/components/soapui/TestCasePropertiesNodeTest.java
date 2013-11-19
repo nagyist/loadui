@@ -1,4 +1,4 @@
-package com.eviware.loadui.component.soapui;
+package com.eviware.loadui.components.soapui;
 
 import static com.eviware.loadui.components.soapui.TestCasePropertiesNode.OVERRIDING_VALUE_PREFIX;
 import static org.junit.Assert.assertEquals;

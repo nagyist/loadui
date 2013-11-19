@@ -1,4 +1,4 @@
-package com.eviware.loadui.component.soapui;
+package com.eviware.loadui.components.soapui;
 
 /*
  * Copyright 2013 SmartBear Software

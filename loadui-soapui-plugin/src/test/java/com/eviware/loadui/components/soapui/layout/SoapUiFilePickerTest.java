@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.io.File;
 
 import static com.eviware.loadui.components.soapui.layout.FileResolverTest.*;
+import static com.eviware.loadui.components.soapui.layout.SoapUiFilePicker.INVALID_CSS_CLASS;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.anyString;
@@ -195,7 +196,7 @@ public class SoapUiFilePickerTest
 		filePicker.onFileTextUpdated( "bad" );
 		Thread.sleep( 75 );
 		assertThat( filePicker.selectedProperty().get(), equalTo( absPath( "old" ) ) );
-		assertThat( filePicker.textField.getStyle(), containsString( "red" ) );
+		assertThat( filePicker.textField.getStyleClass(), hasItem( "invalid" ) );
 
 		// ... and is not updated for a while if user keeps typing
 		filePicker.onFileTextUpdated( "good" );
@@ -205,14 +206,14 @@ public class SoapUiFilePickerTest
 		// ... but after the updateTextDelay is up, the selected file is updated if it exists (happy files always exist)
 		Thread.sleep( 50 );
 		assertThat( filePicker.selectedProperty().get(), equalTo( absPath( "good" ) ) );
-		assertThat( filePicker.textField.getStyle(), not( containsString( "red" ) ) );
+		assertThat( filePicker.textField.getStyleClass(), not( hasItem( "invalid" ) ) );
 	}
 
 	@Ignore
 	@Test
 	public void textTurnsRedWhenUserTypesFileNameThatDoesNotExist() throws Exception
 	{
-		assertThat( filePicker.textField.getStyle(), not( containsString( "red" ) ) );
+		assertThat( filePicker.textField.getStyleClass(), not( hasItem( "invalid" ) ) );
 
 		File badFile = mock( File.class );
 		SoapUiFilePicker.FileResolver mockResolver = mock( SoapUiFilePicker.FileResolver.class );
@@ -226,7 +227,7 @@ public class SoapUiFilePickerTest
 
 		Thread.sleep( 25 );
 
-		assertThat( filePicker.textField.getStyle(), containsString( "red" ) );
+		assertThat( filePicker.textField.getStyleClass(), hasItem( "invalid" ) );
 	}
 
 	@Test
@@ -245,7 +246,7 @@ public class SoapUiFilePickerTest
 		filePicker.onFileTextUpdated( "good" );
 		Thread.sleep( 25 );
 
-		assertThat( filePicker.textField.getStyle(), not( containsString( "red" ) ) );
+		assertThat( filePicker.textField.getStyleClass(), not( hasItem( "invalid" ) ) );
 	}
 
 	@Ignore
@@ -266,19 +267,19 @@ public class SoapUiFilePickerTest
 		filePicker.onFileTextUpdated( happyFile.getAbsolutePath() );
 		Thread.sleep( 25 );
 
-		assertThat( filePicker.textField.getStyle(), not( containsString( "red" ) ) );
+		assertThat( filePicker.textField.getStyleClass(), not( hasItem( "invalid" ) ) );
 
 		filePicker.onFileTextUpdated( badFile.getAbsolutePath() );
 
 		Thread.sleep( 25 );
 
-		assertThat( filePicker.textField.getStyle(), containsString( "red" ) );
+		assertThat( filePicker.textField.getStyleClass(), hasItem( "invalid" ) );
 
 		filePicker.setIsRelativePath( true );
 
 		assertThat( filePicker.textLabel.getText(), equalTo( baseDirForRelativePaths.getAbsolutePath() + File.separator ) );
 		assertThat( filePicker.textField.getText(), equalTo( "good" ) );
-		assertThat( filePicker.textField.getStyle(), not( containsString( "red" ) ) );
+		assertThat( filePicker.textField.getStyleClass(), not( hasItem( INVALID_CSS_CLASS ) ) );
 	}
 
 

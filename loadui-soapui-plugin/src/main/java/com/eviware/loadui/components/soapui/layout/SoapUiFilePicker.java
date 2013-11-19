@@ -45,6 +45,7 @@ import java.util.TimerTask;
 
 public class SoapUiFilePicker extends VBox
 {
+	public static final String INVALID_CSS_CLASS = "invalid";
 	static Logger log = LoggerFactory.getLogger( SoapUiFilePicker.class );
 
 	private long updateTextDelay = 250L;
@@ -65,8 +66,8 @@ public class SoapUiFilePicker extends VBox
 			try
 			{
 				updateTextTask = null;
-				boolean hasUpdated = resolveFileUpdatingSelectedIfAcceptable();
-				updateTextFieldStyle( hasUpdated );
+				boolean isAcceptable = resolveFileUpdatingSelectedIfAcceptable();
+				updateTextFieldStyle( isAcceptable );
 			}
 			catch( Exception e )
 			{
@@ -188,7 +189,12 @@ public class SoapUiFilePicker extends VBox
 	void onFileTextUpdated( String text )
 	{
 		if( !text.equals( textField.getText() ) )
+		{
+			int caretPosition = textField.getCaretPosition();
 			textField.setText( text );
+			if( textField.isFocused() )
+				textField.positionCaret( caretPosition );
+		}
 		cancelUpdateTextTask();
 		updateTextTask = new UpdateTextTimerTask();
 		updateTextTimer.schedule( updateTextTask, updateTextDelay );
@@ -223,7 +229,7 @@ public class SoapUiFilePicker extends VBox
 	{
 		String text = textField.getText();
 		if( text.trim().isEmpty() )
-			return false;
+			return true;
 
 		if( !isRelativePathProperty.get() && !fileResolver.isAbsolute( textField.getText() ) )
 		{
@@ -296,9 +302,12 @@ public class SoapUiFilePicker extends VBox
 	private void updateTextFieldStyle( boolean isAcceptableFile )
 	{
 		if( isAcceptableFile )
-			textField.getStyleClass().remove( "invalid" );
-		else
-			textField.getStyleClass().add( "invalid" );
+		{
+			if( textField.getStyleClass().contains( INVALID_CSS_CLASS ) )
+				textField.getStyleClass().remove( INVALID_CSS_CLASS );
+		}
+		else if( !textField.getStyleClass().contains( INVALID_CSS_CLASS ) )
+			textField.getStyleClass().add( INVALID_CSS_CLASS );
 	}
 
 	public static class FileResolver
@@ -338,9 +347,19 @@ public class SoapUiFilePicker extends VBox
 
 		public boolean isAcceptable( File resolvedFile )
 		{
-			return resolvedFile.exists() && resolvedFile.isFile();
+			return resolvedFile.exists() &&
+					( resolvedFile.isFile() || mightBeSoapUiCompositeDirectory( resolvedFile ) );
+		}
+
+		private boolean mightBeSoapUiCompositeDirectory( File directory )
+		{
+			return directory.isDirectory() &&
+					!directory.getName().endsWith( "." ) &&
+					new File( directory, "element.order" ).exists() &&
+					new File( directory, "settings.xml" ).exists();
 		}
 
 	}
 
 }
+

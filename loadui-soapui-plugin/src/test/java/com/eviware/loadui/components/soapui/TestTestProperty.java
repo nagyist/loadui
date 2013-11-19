@@ -1,4 +1,4 @@
-package com.eviware.loadui.component.soapui;
+package com.eviware.loadui.components.soapui;
 
 import javax.xml.namespace.QName;
 
