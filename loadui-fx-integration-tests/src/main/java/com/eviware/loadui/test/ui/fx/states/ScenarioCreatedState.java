@@ -28,7 +28,6 @@ import java.util.concurrent.Callable;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.loadui.testfx.GuiTest.find;
-import static org.loadui.testfx.GuiTest.findAll;
 import static org.loadui.testfx.GuiTest.waitUntil;
 
 
@@ -80,9 +79,11 @@ public class ScenarioCreatedState extends FxTestState
 				ToggleButton playButton = find( ".play-button" );
 
 				boolean isStopping = true;
-				try{
-					find(".task-progress-indicator");
-				} catch( NoNodesFoundException e )
+				try
+				{
+					find( ".task-progress-indicator" );
+				}
+				catch( NoNodesFoundException e )
 				{
 					isStopping = false;
 				}
@@ -91,7 +92,7 @@ public class ScenarioCreatedState extends FxTestState
 			}
 		}, is( true ) );
 
-		GUI.getOpenSourceGui().getController().click( ".scenario-view #menu" ).click( "#delete-item" ).click( ".confirmation-dialog #default" );
+		GUI.getOpenSourceGui().getController().click( ".scenario-view #menu" ).sleep(200).click( "#delete-item" ).sleep(200).click( ".confirmation-dialog #default" );
 
 		waitForNodeToDisappear( ".scenario-view" );
 	}

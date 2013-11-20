@@ -2,7 +2,8 @@ package com.eviware.loadui.test.ui.fx;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
+import static org.loadui.testfx.Matchers.visible;
+
 
 /**
  * @author renato

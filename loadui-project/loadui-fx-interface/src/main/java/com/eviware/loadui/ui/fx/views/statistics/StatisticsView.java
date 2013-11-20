@@ -15,44 +15,15 @@
  */
 package com.eviware.loadui.ui.fx.views.statistics;
 
-import static com.eviware.loadui.ui.fx.util.ObservableLists.filter;
-import static com.eviware.loadui.ui.fx.util.ObservableLists.fx;
-import static com.eviware.loadui.ui.fx.util.ObservableLists.ofCollection;
-import static com.google.common.base.Objects.equal;
-
-import java.util.Collection;
-
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.animation.TimelineBuilder;
-import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
-import javafx.concurrent.WorkerStateEvent;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.control.ButtonBuilder;
-import javafx.scene.control.LabelBuilder;
-import javafx.scene.layout.StackPane;
-import javafx.util.Duration;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.execution.Phase;
 import com.eviware.loadui.api.execution.TestExecution;
 import com.eviware.loadui.api.execution.TestExecutionTask;
 import com.eviware.loadui.api.execution.TestRunner;
-import com.eviware.loadui.api.model.CanvasItem;
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.statistics.ProjectExecutionManager;
 import com.eviware.loadui.api.statistics.store.Execution;
 import com.eviware.loadui.api.statistics.store.ExecutionManager;
+import com.eviware.loadui.api.traits.Releasable;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import com.eviware.loadui.ui.fx.control.ButtonDialog;
 import com.eviware.loadui.ui.fx.util.ManualObservable;
@@ -62,8 +33,29 @@ import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.execution.TestExecutionUtils;
 import com.eviware.loadui.util.statistics.ExecutionListenerAdapter;
 import com.google.common.base.Predicate;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.animation.TimelineBuilder;
+import javafx.application.Platform;
+import javafx.beans.property.*;
+import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.control.ButtonBuilder;
+import javafx.scene.control.LabelBuilder;
+import javafx.scene.layout.StackPane;
+import javafx.util.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class StatisticsView extends StackPane
+import java.util.Collection;
+
+import static com.eviware.loadui.ui.fx.util.ObservableLists.*;
+import static com.google.common.base.Objects.equal;
+
+public class StatisticsView extends StackPane implements Releasable
 {
 	protected static final Logger log = LoggerFactory.getLogger( StatisticsView.class );
 
@@ -131,10 +123,6 @@ public class StatisticsView extends StackPane
 					@Override
 					public boolean apply( Execution input )
 					{
-						if( equal( projectExecutionManager.getProjectId( input ), project.getId() )
-								&& !( input ).isArchived() )
-							log.debug( "updated recent execution: " + input.getLabel() );
-
 						return equal( projectExecutionManager.getProjectId( input ), project.getId() ) && !input.isArchived();
 					}
 				} ) );
@@ -225,11 +213,9 @@ public class StatisticsView extends StackPane
 		return currentExecution;
 	}
 
-	public void close()
+	public void release()
 	{
-		log.debug( "Closing StatisticView. Removing ExecutionListener" );
-		project.triggerAction( CanvasItem.STOP_ACTION );
-		TestExecutionUtils.stopCanvas( project );
+		log.debug( "Releasing StatisticView. Removing ExecutionListener" );
 		execListener.pollTimeline.stop();
 		executionManager.removeExecutionListener( execListener );
 	}

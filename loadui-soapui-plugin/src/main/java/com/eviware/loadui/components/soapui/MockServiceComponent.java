@@ -15,15 +15,6 @@
  */
 package com.eviware.loadui.components.soapui;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.component.categories.MiscCategory;
 import com.eviware.loadui.api.counter.Counter;
@@ -38,17 +29,14 @@ import com.eviware.loadui.api.model.WorkspaceItem;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.api.terminal.OutputTerminal;
 import com.eviware.loadui.api.terminal.TerminalMessage;
+import com.eviware.loadui.api.testevents.MessageLevel;
+import com.eviware.loadui.api.testevents.TestEventManager;
 import com.eviware.loadui.impl.component.ActivityStrategies;
 import com.eviware.loadui.impl.component.categories.OnOffBase;
-import com.eviware.loadui.impl.layout.ActionLayoutComponentImpl;
-import com.eviware.loadui.impl.layout.LayoutComponentImpl;
-import com.eviware.loadui.impl.layout.LayoutContainerImpl;
-import com.eviware.loadui.impl.layout.OptionsProviderImpl;
-import com.eviware.loadui.impl.layout.PropertyLayoutComponentImpl;
-import com.eviware.loadui.impl.layout.SeparatorLayoutComponentImpl;
-import com.eviware.loadui.impl.layout.SettingsLayoutContainerImpl;
+import com.eviware.loadui.impl.layout.*;
 import com.eviware.loadui.integration.LoadUIIntegrator;
 import com.eviware.loadui.integration.SoapUIProjectLoader;
+import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.layout.DelayedFormattedString;
 import com.eviware.loadui.util.soapui.CajoClient;
 import com.eviware.soapui.SoapUIExtensionClassLoader;
@@ -62,8 +50,15 @@ import com.eviware.soapui.model.mock.MockRunListener;
 import com.eviware.soapui.model.mock.MockRunner;
 import com.eviware.soapui.model.support.ModelSupport;
 import com.eviware.soapui.support.Tools;
-import com.eviware.soapui.support.UISupport;
 import com.google.common.collect.ImmutableMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MockServiceComponent extends OnOffBase implements MiscCategory, MockRunListener
 {
@@ -192,9 +187,9 @@ public class MockServiceComponent extends OnOffBase implements MiscCategory, Moc
 				PropertyLayoutComponentImpl.PROPERTY, projectFile, //
 				PropertyLayoutComponentImpl.LABEL, "soapUI Project", //
 				PropertyLayoutComponentImpl.CONSTRAINTS, "w 300!, spanx 2, wrap" ) //
-				) );
+		) );
 
-		leftBox.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object> builder()
+		leftBox.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object>builder()
 				.put( PropertyLayoutComponentImpl.PROPERTY, mockService ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "soapUI MockService" ) //
 				.put( PropertyLayoutComponentImpl.CONSTRAINTS, "w 300!, spanx 2, wrap" ) //
@@ -203,14 +198,14 @@ public class MockServiceComponent extends OnOffBase implements MiscCategory, Moc
 				.build() ) );
 
 		LayoutContainer connect = new LayoutContainerImpl( "wrap 2, ins 0", "", "align top", "" );
-		pathField = new PropertyLayoutComponentImpl<>( ImmutableMap.<String, Object> builder() //
+		pathField = new PropertyLayoutComponentImpl<>( ImmutableMap.<String, Object>builder() //
 				.put( PropertyLayoutComponentImpl.PROPERTY, path ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "path" ) //
 				.put( PropertyLayoutComponentImpl.CONSTRAINTS, "w 200!, spanx 1" ) //
 				.build() );
 		leftBox.add( pathField );
 
-		portField = new PropertyLayoutComponentImpl<>( ImmutableMap.<String, Object> builder() //
+		portField = new PropertyLayoutComponentImpl<>( ImmutableMap.<String, Object>builder() //
 				.put( PropertyLayoutComponentImpl.PROPERTY, port ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "port" ) //
 				.put( PropertyLayoutComponentImpl.CONSTRAINTS, "w 100!, spanx 1" ) //
@@ -219,7 +214,7 @@ public class MockServiceComponent extends OnOffBase implements MiscCategory, Moc
 		leftBox.add( connect );
 		leftBox.add( new SeparatorLayoutComponentImpl( false, "" ) );
 
-		openInSoapUIAction = new ActionLayoutComponentImpl( ImmutableMap.<String, Object> builder() //
+		openInSoapUIAction = new ActionLayoutComponentImpl( ImmutableMap.<String, Object>builder() //
 				.put( ActionLayoutComponentImpl.LABEL, "Open in soapUI" ) //
 				.put( ActionLayoutComponentImpl.ACTION, new Runnable()
 				{
@@ -235,7 +230,8 @@ public class MockServiceComponent extends OnOffBase implements MiscCategory, Moc
 										.getProperty( WorkspaceItem.SOAPUI_PATH_PROPERTY ).getStringValue();
 								if( soapUIPath == null || soapUIPath.trim().equals( "" ) )
 								{
-									UISupport.showInfoMessage( "You have not specified soapui.bat(sh) in workspace settings!" );
+									BeanInjector.getBean( TestEventManager.class ).logMessage( MessageLevel.WARNING,
+											"You have not specified soapui.bat(sh) in workspace settings!" );
 									return;
 								}
 								CajoClient.getInstance().startSoapUI();
@@ -257,7 +253,7 @@ public class MockServiceComponent extends OnOffBase implements MiscCategory, Moc
 					}
 				} ).build() );
 
-		openInBrowserAction = new ActionLayoutComponentImpl( ImmutableMap.<String, Object> builder() //
+		openInBrowserAction = new ActionLayoutComponentImpl( ImmutableMap.<String, Object>builder() //
 				.put( ActionLayoutComponentImpl.LABEL, "Open in Browser" ) //
 				.put( ActionLayoutComponentImpl.ACTION, new Runnable()
 				{
@@ -287,7 +283,7 @@ public class MockServiceComponent extends OnOffBase implements MiscCategory, Moc
 
 		layout.add( leftBox );
 
-		LayoutContainerImpl box = new LayoutContainerImpl( ImmutableMap.<String, Object> builder()
+		LayoutContainerImpl box = new LayoutContainerImpl( ImmutableMap.<String, Object>builder()
 				.put( LayoutContainerImpl.LAYOUT_CONSTRAINTS, "wrap 3, align right" ) //
 				.put( "widget", "display" ) //
 				.build() );
@@ -302,39 +298,39 @@ public class MockServiceComponent extends OnOffBase implements MiscCategory, Moc
 			}
 		};
 
-		box.add( new LayoutComponentImpl( ImmutableMap.<String, Object> builder()
+		box.add( new LayoutComponentImpl( ImmutableMap.<String, Object>builder()
 				.put( PropertyLayoutComponentImpl.LABEL, "Requests" )
 				.put( PropertyLayoutComponentImpl.CONSTRAINTS, "w 50!" ).put( "fString", displayRequests ).build() ) ); //
 		layout.add( box );
 
-		LayoutContainer compactLayout = new LayoutContainerImpl( Collections.<String, Object> emptyMap() );
+		LayoutContainer compactLayout = new LayoutContainerImpl( Collections.<String, Object>emptyMap() );
 		compactLayout.add( box );
 		context.setCompactLayout( compactLayout );
 
 		SettingsLayoutContainerImpl settingsLayoutTab = new SettingsLayoutContainerImpl( "General", "", "", "align top",
 				"" );
 
-		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object> builder() //
+		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object>builder() //
 				.put( PropertyLayoutComponentImpl.PROPERTY, addRequestProperty ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "Add request to outgoing message" ) //
 				.build() ) );
 
-		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object> builder() //
+		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object>builder() //
 				.put( PropertyLayoutComponentImpl.PROPERTY, addResponseProperty ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "Add response to outgoing message" ) //
 				.build() ) );
 
-		settingsLayoutTab.add( new PropertyLayoutComponentImpl<File>( ImmutableMap.<String, Object> builder() //
+		settingsLayoutTab.add( new PropertyLayoutComponentImpl<File>( ImmutableMap.<String, Object>builder() //
 				.put( PropertyLayoutComponentImpl.PROPERTY, settingsFile ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "soapUI settings" ) //
 				.put( PropertyLayoutComponentImpl.CONSTRAINTS, "w 200!, spanx 2" ) //
 				.build() ) );
 
-		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object> builder() //
+		settingsLayoutTab.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object>builder() //
 				.put( PropertyLayoutComponentImpl.PROPERTY, useProjectRelativePath ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "Use relative path for project" ) //
 				.build() ) );
-		settingsLayoutTab.add( new PropertyLayoutComponentImpl<File>( ImmutableMap.<String, Object> builder() //
+		settingsLayoutTab.add( new PropertyLayoutComponentImpl<File>( ImmutableMap.<String, Object>builder() //
 				.put( PropertyLayoutComponentImpl.PROPERTY, projectPassword ) //
 				.put( PropertyLayoutComponentImpl.LABEL, "project password" ) //
 				.put( PropertyLayoutComponentImpl.CONSTRAINTS, "w 200!, spanx 2" ) //
@@ -382,7 +378,7 @@ public class MockServiceComponent extends OnOffBase implements MiscCategory, Moc
 
 	@Override
 	public MockResult onMockRequest( MockRunner runner, javax.servlet.http.HttpServletRequest request,
-			javax.servlet.http.HttpServletResponse response )
+												javax.servlet.http.HttpServletResponse response )
 	{
 		requestCounter.increment();
 		return null;

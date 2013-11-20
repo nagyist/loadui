@@ -36,6 +36,7 @@ public class SplitterTest extends FxIntegrationTestBase
 
 	}
 
+	@Ignore
 	@Test
 	public void TestSplitter()
 	{

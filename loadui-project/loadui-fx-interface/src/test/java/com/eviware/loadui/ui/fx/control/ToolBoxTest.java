@@ -15,53 +15,47 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
-import static java.util.Arrays.*;
-import static org.loadui.testfx.Assertions.verifyThat;
-import static org.loadui.testfx.GuiTest.find;
-import static org.loadui.testfx.GuiTest.targetWindow;
-import static org.loadui.testfx.GuiTest.wrap;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.loadui.testfx.matchers.NodeExistsMatcher.exists;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import org.loadui.testfx.categories.TestFX;
-import org.loadui.testfx.FXScreenController;
-import org.loadui.testfx.FXTestUtils;
-import org.loadui.testfx.GuiTest;
 import com.eviware.loadui.ui.fx.views.window.PaneOverlayHolder;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.collect.*;
+import com.google.common.util.concurrent.SettableFuture;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.SceneBuilder;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.Skin;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
 import javafx.stage.Stage;
-
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.loadui.testfx.FXScreenController;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
+import org.loadui.testfx.categories.TestFX;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Ordering;
-import com.google.common.util.concurrent.SettableFuture;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import static java.util.Arrays.asList;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.loadui.testfx.Assertions.verifyThat;
+import static org.loadui.testfx.GuiTest.*;
+import static org.loadui.testfx.matchers.NodeExistsMatcher.exists;
+import static org.loadui.testfx.matchers.VisibleMatcher.visible;
 
 @Category(TestFX.class)
 public class ToolBoxTest
@@ -74,8 +68,19 @@ public class ToolBoxTest
 	static ToolBox<Rectangle> toolbox;
 	static final List<Rectangle> allRects = asList( buildRect( Color.RED ), buildRect( Color.RED ),
 			buildRect( Color.BLUE ), buildRect( Color.GREEN ), buildRect( Color.RED ), buildRect( Color.YELLOW ),
-			buildRect( Color.BLUE ), buildRect( Color.ORANGE ) );
+			buildRect( Color.BLUE ), buildRect( Color.ORANGE ),
+			buildRect( Color.LAVENDERBLUSH ), buildRect( Color.LAVENDERBLUSH ), buildRect( Color.LAVENDERBLUSH ), buildRect( Color.LAVENDERBLUSH ),
+			buildRect( Color.LAVENDERBLUSH ), buildRect( Color.LAVENDERBLUSH ), buildRect( Color.LAVENDERBLUSH ), buildRect( Color.LAVENDERBLUSH ),
+			buildRect( Color.LAVENDERBLUSH ), buildRect( Color.LAVENDERBLUSH ), buildRect( Color.LAVENDERBLUSH ), buildRect( Color.LAVENDERBLUSH ) );
 	static final List<Rectangle> rectsToAdd = asList( RectangleBuilder.create().fill( Color.AQUA ).build() );
+	private Predicate<Node> noSkins = new Predicate<Node>()
+	{
+		@Override
+		public boolean apply( @Nullable Node node )
+		{
+			return !( node instanceof Skin );
+		}
+	};
 
 	public static class ToolboxTestApp extends Application
 	{
@@ -88,7 +93,7 @@ public class ToolBoxTest
 			List<Rectangle> everything = new ArrayList<Rectangle>( allRects );
 			everything.addAll( rectsToAdd );
 			toolbox.setComparator( Ordering.explicit( everything ) );
-			toolbox.setCategoryComparator( Ordering.explicit( Color.RED.toString(), Color.BLUE.toString(),
+			toolbox.setCategoryComparator( Ordering.explicit( Color.RED.toString(), Color.LAVENDERBLUSH.toString(), Color.BLUE.toString(),
 					Color.GREEN.toString(), Color.YELLOW.toString(), Color.ORANGE.toString(), "Renamed" ) );
 
 			PaneOverlayHolder root = new PaneOverlayHolder();
@@ -157,6 +162,43 @@ public class ToolBoxTest
 	}
 
 	@Test
+	public void shouldShowScrollBarWhenExpanderHasTooManyItemsToFitScreen() throws Exception
+	{
+		controller.move( toolbox )
+				.click( getSecondExpanderButton() );
+
+		waitUntil( ".tool-box-expander", exists() );
+		Set<Node> scrollBars = Sets.filter( findAll( ".tool-box-expander .scroll-bar" ), noSkins );
+
+		verifyThat( scrollBars, hasItem( is( visible() ) ) );
+		;
+
+		controller.click( ".nav.up" ); // to remove expander
+	}
+
+	@Test
+	public void shouldNotShowScrollBarWhenItemsFitScreen() throws Exception
+	{
+		controller.move( toolbox )
+				.click( ".expander-button" );
+
+		Set<Node> scrollBars = Sets.filter( findAll( ".tool-box-expander .scroll-bar" ), noSkins );
+
+		verifyThat( scrollBars, not( hasItem( is( visible() ) ) ) );
+
+		controller.click( ".nav.up" ); // to remove expander
+	}
+
+	private Node getSecondExpanderButton()
+	{
+		final Set<Node> allButtons = findAll( ".category" );
+		Preconditions.checkArgument( allButtons.size() >= 2 );
+		Iterator<Node> iter = allButtons.iterator();
+		iter.next();
+		return find( ".expander-button", iter.next() );
+	}
+
+	@Test
 	public void shouldScrollUsingButtons() throws Exception
 	{
 		testScrolling( new Runnable()
@@ -203,10 +245,11 @@ public class ToolBoxTest
 	private static void testScrolling( Runnable prev, Runnable next ) throws Exception
 	{
 		Rectangle rectangle0 = Iterables.get( rectangles.get( Color.RED ), 0 );
-		Rectangle rectangle1 = Iterables.get( rectangles.get( Color.BLUE ), 0 );
-		Rectangle rectangle2 = Iterables.get( rectangles.get( Color.GREEN ), 0 );
-		Rectangle rectangle3 = Iterables.get( rectangles.get( Color.YELLOW ), 0 );
-		Rectangle rectangle4 = Iterables.get( rectangles.get( Color.ORANGE ), 0 );
+		Rectangle rectangle1 = Iterables.get( rectangles.get( Color.LAVENDERBLUSH ), 0 );
+		Rectangle rectangle2 = Iterables.get( rectangles.get( Color.BLUE ), 0 );
+		Rectangle rectangle3 = Iterables.get( rectangles.get( Color.GREEN ), 0 );
+		Rectangle rectangle4 = Iterables.get( rectangles.get( Color.YELLOW ), 0 );
+		Rectangle rectangle5 = Iterables.get( rectangles.get( Color.ORANGE ), 0 );
 
 		Button prevButton = find( ".nav.up" );
 		Button nextButton = find( ".nav.down" );
@@ -226,20 +269,26 @@ public class ToolBoxTest
 		next.run();
 		assertThat( rectangle3.getScene(), notNullValue() );
 		assertThat( rectangle4.getScene(), notNullValue() );
+
+		next.run();
+		assertThat( rectangle4.getScene(), notNullValue() );
+		assertThat( rectangle5.getScene(), notNullValue() );
 		assertThat( nextButton.isDisabled(), is( true ) );
 
 		prev.run();
 		assertThat( nextButton.isDisabled(), is( false ) );
-		assertThat( rectangle2.getScene(), notNullValue() );
-		assertThat( rectangle4.getScene(), nullValue() );
+		assertThat( rectangle3.getScene(), notNullValue() );
+		assertThat( rectangle5.getScene(), nullValue() );
 	}
 
+
 	@Test
+   @Ignore("Doesn't work on Linux")
 	public void shouldChangeWhenAddingItemsAtRuntime() throws Exception
 	{
 		final Rectangle red = Iterables.get( rectangles.get( Color.RED ), 0 );
+		final Rectangle lavenderBlush = Iterables.get( rectangles.get( Color.LAVENDERBLUSH ), 0 );
 		final Rectangle blue = Iterables.get( rectangles.get( Color.BLUE ), 0 );
-		final Rectangle green = Iterables.get( rectangles.get( Color.GREEN ), 0 );
 
 		class Results
 		{
@@ -264,7 +313,7 @@ public class ToolBoxTest
 			public void run()
 			{
 				toolbox.getItems().add( red );
-				toolbox.getItems().add( blue );
+				toolbox.getItems().add( lavenderBlush );
 			}
 		}, results.addTwoItemsTest );
 		runLaterSettingRectangles( new Runnable()
@@ -272,7 +321,7 @@ public class ToolBoxTest
 			@Override
 			public void run()
 			{
-				toolbox.getItems().add( green );
+				toolbox.getItems().add( blue );
 			}
 		}, results.addItemTest );
 
@@ -286,8 +335,8 @@ public class ToolBoxTest
 
 		assertTrue( ( ( Set<?> )clearTest ).isEmpty() );
 
-		assertTrue( ( ( Set<?> )addTwoItemsTest ).containsAll( asList( red, blue ) ) );
-		assertTrue( ( ( Set<?> )addItemTest ).containsAll( asList( red, blue ) ) ); // no change until clicking scroll button
+		assertTrue( ( ( Set<?> )addTwoItemsTest ).containsAll( asList( red, lavenderBlush ) ) );
+		assertTrue( ( ( Set<?> )addItemTest ).containsAll( asList( red, lavenderBlush ) ) ); // no change until clicking scroll button
 
 		controller.click( ".nav.down" );
 
@@ -303,7 +352,7 @@ public class ToolBoxTest
 		Object afterScrollingTest = results.afterScrollingTest.get( 1, TimeUnit.SECONDS );
 
 		assertFalse( afterScrollingTest instanceof Exception );
-		assertTrue( ( ( Set<?> )afterScrollingTest ).containsAll( asList( blue, green ) ) );
+		assertTrue( ( ( Set<?> )afterScrollingTest ).containsAll( asList( lavenderBlush, blue ) ) );
 
 	}
 

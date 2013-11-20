@@ -70,6 +70,19 @@ public final class TestExecutionUtils
 		return execution != null && execution.getState() != TestState.COMPLETED;
 	}
 
+	/**
+	 * @return Currently running CanvasItem or null if nothing is running
+	 */
+
+	public static CanvasItem getCurrentlyRunningCanvasItem() throws NoExecutionRunning
+	{
+		if( !isExecutionRunning() )
+		{
+			throw new NoExecutionRunning( "No execution is currently running" );
+		}
+		return getCurrentExecution().getCanvas();
+	}
+
 	private static TestExecution getCurrentExecution()
 	{
 		List<TestExecution> queuedExecutions = testRunner.getExecutionQueue();
@@ -80,4 +93,11 @@ public final class TestExecutionUtils
 		return null;
 	}
 
+	public static class NoExecutionRunning extends Exception
+	{
+		public NoExecutionRunning( String s )
+		{
+			super( s );
+		}
+	}
 }

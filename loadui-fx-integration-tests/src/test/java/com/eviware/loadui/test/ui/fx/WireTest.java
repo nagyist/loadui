@@ -67,9 +67,9 @@ public class WireTest extends GuiTest
 
 		controller = GUI.getOpenSourceGui().getController();
 
-		controller.drag( "#Assertions" ).by( 0, 250 ).drop();
+		controller.click( "#flow.category .expander-button" );
 
-		controller.click( "#flow.category .expander-button" ).drag( CONDITION_COMPONENT ).by( 100, -400 ).drop();
+		controller.drag( CONDITION_COMPONENT ).by( 100, -400 ).drop();
 
 		waitUntil( numberOf( ".canvas-object-view" ), is( 1 ) );
 

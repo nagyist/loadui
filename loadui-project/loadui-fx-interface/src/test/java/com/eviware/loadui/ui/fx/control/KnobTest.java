@@ -15,25 +15,23 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
-import static org.loadui.testfx.GuiTest.find;
-import static javafx.geometry.VerticalDirection.DOWN;
-import static javafx.geometry.VerticalDirection.UP;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.closeTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.Assert.assertThat;
-
-import org.loadui.testfx.categories.TestFX;
-import org.loadui.testfx.GuiTest;
-import javafx.scene.*;
+import javafx.scene.GroupBuilder;
+import javafx.scene.Parent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBoxBuilder;
-
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.loadui.testfx.GuiTest;
+import org.loadui.testfx.categories.TestFX;
+
+import static javafx.geometry.VerticalDirection.DOWN;
+import static javafx.geometry.VerticalDirection.UP;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThat;
+import static org.loadui.testfx.Assertions.verifyThat;
 
 @Category( TestFX.class )
 public class KnobTest extends GuiTest
@@ -79,15 +77,15 @@ public class KnobTest extends GuiTest
 	{
 		Knob bounded = find( "#bounded" );
 		//Drag down first to initiate dragging.
-		drag( bounded ).by( 0, 10 ).by( 0, -5 ).drop();
-		assertThat( bounded.getValue(), closeTo( 5.0, 0.01 ) );
+		drag( bounded ).by( 0, 10 ).by( 0, -5 ).drop().sleep( 100 );
+		verifyThat( bounded.getValue(), closeTo( 5.0, 0.01 ) );
 	}
 
 	@Test
 	public void shouldBeModifiableByManualEntry()
 	{
 		Knob bounded = find( "#bounded" );
-		doubleClick( bounded ).sleep( 100 ).type( "5" ).press( KeyCode.ENTER );
+		doubleClick( bounded ).sleep( 100 ).type( "5" ).push( KeyCode.ENTER );
 		assertThat( bounded.getValue(), closeTo( 5.0, 0.01 ) );
 	}
 

@@ -2,6 +2,7 @@
 
 <?import com.eviware.loadui.ui.fx.control.NotificationPanel?>
 <?import com.eviware.loadui.ui.fx.views.inspector.InspectorView?>
+<?import com.eviware.loadui.ui.fx.views.window.ContainerView?>
 <?import com.eviware.loadui.ui.fx.views.window.Overlay?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
@@ -12,7 +13,7 @@
     <stylesheets>
         <URL value="@MainWindowView.css"/>
     </stylesheets>
-    <StackPane fx:id="container"/>
+    <ContainerView fx:id="container"/>
     <InspectorView fx:id="inspectorView" StackPane.alignment="bottom_center">
         <StackPane.margin>
             <Insets top="100"/>

@@ -83,9 +83,11 @@ createProperty( 'time', String, "0 0 0" )
 def duration = createProperty( 'duration', Long, 0 )
 def runsLimit = createProperty( 'runsLimit', Long, 0 )
 
+def displayTime = "N/A"
+
 def canvas = getCanvas()
 
-sendStart = { 
+sendStart = {
 	sendEnabled( true ) 
 	startSent = true
 	counter++
@@ -186,7 +188,9 @@ addEventListener( ActionEvent ) { event ->
 addEventListener( PropertyEvent ) { event ->
 	if( event.property in [ day, time, runsLimit, duration ] ) {
 		validateDuration()
-		if( !canvas.running ){
+		if( !canvas.running )
+		{
+			displayTime = "invalid"
 			updateState()
 		} 
 	}
@@ -208,18 +212,25 @@ validateDuration = {
 
 updateState = {
 	def expr = new CronExpression(createStartTriggerPattern())
-	schedulerModel.setSeconds(expr.seconds)
-	schedulerModel.setMinutes(expr.minutes)
-	schedulerModel.setHours(expr.hours)
-	schedulerModel.setDays(expr.daysOfWeek)
-	schedulerModel.setDuration(duration.value * 1000)
-	schedulerModel.setMaxDuration(maxDuration)
-	schedulerModel.setRunsLimit((int)runsLimit.value)
-	schedulerModel.notifyObservers()
+	
+	schedulerModel.with
+	{
+		setSeconds(expr.seconds)
+		setMinutes(expr.minutes)
+		setHours(expr.hours)
+		setDays(expr.daysOfWeek)
+		setDuration(duration.value * 1000)
+		setMaxDuration(maxDuration)
+		setRunsLimit( runsLimit.value as int )
+		notifyObservers()
+	}
+	
+	displayTime = "${expr.hours.value}:${expr.minutes.value}:${expr.seconds.value}".replace("[","").replace("]","");
 }
 
 createStartTriggerPattern = {
-	def startTriggerPattern = "${time.value} "
+	//def startTriggerPattern = "${time.value} "
+	def startTriggerPattern = "${time.value}".split().reverse().join(' ') + " "
 	startTriggerPattern += "? * "
 	if(day.value.equals("* (All)")){
 		startTriggerPattern += "* "
@@ -308,7 +319,12 @@ unscheduleEndTrigger = {
 onRelease = { scheduler.shutdown() }
 
 layout {
-	node( widget: 'schedulerWidget', model: schedulerModel, constraints: 'span 5, gaptop 10' )
+	box( widget:'display', constraints: 'span 5, gaptop 10' ) {
+		node( label:'Day', content: { day.value } )
+		node( label:'Time', content: { displayTime } )
+		node( label:'Duration', content: { FormattingUtils.formatTime( duration.value ) } )
+	}
+	//node( widget: 'schedulerWidget', model: schedulerModel, constraints: 'span 5, gaptop 10' )
 	separator( vertical: false )
 	property(property: day, widget: 'comboBox', label: 'Day', options: ['* (All)', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], constraints: 'w 100!' )
 	separator(vertical: true)
@@ -320,7 +336,7 @@ layout {
 compactLayout {
 	box( widget:'display' ) {
 		node( label:'Day', content: { day.value } )
-		node( label:'Time', content: { ssmmhh = time.value.split(" ") -> "${ssmmhh[2]}:${ssmmhh[1]}:${ssmmhh[0]}" } )
+		node( label:'Time', content: { displayTime } )
 		node( label:'Duration', content: { FormattingUtils.formatTime( duration.value ) } )
 	}
 }
