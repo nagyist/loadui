@@ -44,6 +44,7 @@ public class AssertionToolboxItem extends Label
 		vbox = VBoxBuilder.create().spacing( 6 ).maxHeight( 68 ).minHeight( 68 ).children( createIcon( assertion ), label ).build();
 		
 		getStyleClass().add( "icon" );
+		setId( "assertion-toolbox-item" );
 
 		textProperty().bind( Properties.forLabel( assertion ) );
 		

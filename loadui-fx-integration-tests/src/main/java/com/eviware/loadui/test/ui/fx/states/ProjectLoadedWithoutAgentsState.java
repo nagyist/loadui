@@ -68,11 +68,15 @@ public class ProjectLoadedWithoutAgentsState extends TestState
 	@Override
 	protected void exitToParent() throws Exception
 	{
-
 		log.debug( "Closing project." );
 		waitUntil( "#abort-requests", is( not( visible() ) ) );
 
 		GUI.getOpenSourceGui().getController().click( "#closeProjectButton" );
+
+		waitUntil( "#abort-requests", is( not( visible() ) ) );
+
+		GUI.getOpenSourceGui().getController().sleep( 500 );
+
 		//If there is a save dialog, do not save:
 		try
 		{
@@ -90,6 +94,6 @@ public class ProjectLoadedWithoutAgentsState extends TestState
 			{
 				return !findAll( ".workspace-view" ).isEmpty();
 			}
-		} );
+		}, 15 );
 	}
 }
