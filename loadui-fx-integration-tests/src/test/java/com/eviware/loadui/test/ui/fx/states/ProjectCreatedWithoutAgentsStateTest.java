@@ -34,6 +34,7 @@ import org.junit.experimental.categories.Category;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.loadui.testfx.Assertions.verifyThat;
 
 /**
  * Integration tests for testing the loadUI controller through its API.
@@ -127,6 +128,8 @@ public class ProjectCreatedWithoutAgentsStateTest extends FxIntegrationBase
 
 		createProjectThroughContextMenu( nameOfCreatedProject );
 
+		sleep( 1500 ); // extra precaution due to assertion failed in jenkins
+
 		assertProjectCountIs( projectCount + 1 );
 		assertProjectExistsWithName( nameOfCreatedProject );
 	}
@@ -182,7 +185,7 @@ public class ProjectCreatedWithoutAgentsStateTest extends FxIntegrationBase
 	private void assertProjectCountIs( int expectedCount )
 	{
 		WorkspaceItem workspace = getWorkspace();
-		assertThat( workspace.getProjectRefs().size(), is( expectedCount ) );
+		verifyThat( workspace.getProjectRefs().size(), is( expectedCount ) );
 	}
 
 	private WorkspaceItem getWorkspace()

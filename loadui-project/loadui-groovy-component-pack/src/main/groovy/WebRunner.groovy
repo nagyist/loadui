@@ -21,8 +21,8 @@
  * @help http://www.loadui.org/Runners/web-page-runner-component.html
  * @name Web Page Runner
  * @category runners
- * @dependency org.apache.httpcomponents:httpcore:4.1.1
- * @dependency org.apache.httpcomponents:httpclient:4.1.1
+ * @dependency org.apache.httpcomponents:httpcore:4.3
+ * @dependency org.apache.httpcomponents:httpclient:4.3
  */
 
 import org.apache.http.*
@@ -145,6 +145,9 @@ validateUrl = {
 
 updateProxy = {
     if (proxyHost.value?.trim() && proxyPort.value) {
+        // recreate the client because otherwise the credentials do not seem to be updated
+        http = new DefaultHttpClient(cm)
+
         HttpHost hcProxyHost = new HttpHost(proxyHost.value, (int) proxyPort.value, "http")
         http.params.setParameter(ConnRoutePNames.DEFAULT_PROXY, hcProxyHost)
 
@@ -173,6 +176,9 @@ updateAuth = {
     }
 
     if (username && password) {
+        // recreate the client because otherwise the credentials do not seem to be updated
+        http = new DefaultHttpClient(cm)
+
         http.credentialsProvider.setCredentials(
                 new AuthScope(AuthScope.ANY),
                 new UsernamePasswordCredentials(username, password)

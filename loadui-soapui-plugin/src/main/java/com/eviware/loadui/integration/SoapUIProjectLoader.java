@@ -15,27 +15,20 @@
  */
 package com.eviware.loadui.integration;
 
-import java.io.File;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.soapui.SoapUIExtensionClassLoader;
 import com.eviware.soapui.SoapUIExtensionClassLoader.SoapUIClassLoaderState;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.model.project.ProjectFactoryRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.*;
 
 /**
  * Keeps track of loaded soapUI projects shared between soapUI Runners.
- * 
+ *
  * @author Ole
- * 
  */
 
 public class SoapUIProjectLoader
@@ -43,7 +36,7 @@ public class SoapUIProjectLoader
 	private static volatile SoapUIProjectLoader instance;
 
 	private final HashMap<WsdlProject, String> projectFiles = new HashMap<>();
-	private final HashMap<String, WsdlProject> loadedProjects = new HashMap<>();;
+	private final HashMap<String, WsdlProject> loadedProjects = new HashMap<>();
 	private final HashMap<ProjectSettings, Long> timestamps = new HashMap<>();
 	private final HashMap<WsdlProject, Integer> counters = new HashMap<>();
 	private final Set<ProjectUpdateListener> listeners = new HashSet<>();
@@ -61,8 +54,8 @@ public class SoapUIProjectLoader
 	private SoapUIProjectLoader()
 	{
 		TimerTask task = new FileWatcher();
-		Timer timer = new Timer();
-		timer.schedule( task, new Date(), 5000 );
+		Timer timer = new Timer( "SoapUI-Project-Watcher", true );
+		timer.schedule( task, 0, 5000 );
 	}
 
 	public void addProjectUpdateListener( ProjectUpdateListener listener )
@@ -126,7 +119,7 @@ public class SoapUIProjectLoader
 	}
 
 	private WsdlProject tryReloadingProject( String projectPassword, File projectFile, String absolutePath,
-			ProjectSettings projectSettings )
+														  ProjectSettings projectSettings )
 	{
 		WsdlProject newProject;
 		newProject = ( WsdlProject )ProjectFactoryRegistry.getProjectFactory( "wsdl" ).createNew( absolutePath,

@@ -23,6 +23,8 @@ import com.eviware.loadui.api.component.categories.RunnerCategory;
 import com.eviware.loadui.api.model.WorkspaceProvider;
 import com.eviware.loadui.api.ui.ApplicationState;
 import com.eviware.loadui.api.ui.WindowController;
+import com.eviware.loadui.components.soapui.utils.NoOpXDialogs;
+import com.eviware.loadui.components.soapui.utils.NoOpXFileDialogs;
 import com.eviware.loadui.integration.CajoServer;
 import com.eviware.loadui.integration.LoadUIIntegrator;
 import com.eviware.loadui.util.soapui.CajoClient;
@@ -175,7 +177,11 @@ public final class SoapUIComponentActivator implements BundleActivator
 			ProxyUtils.setProxyEnabled( SoapUI.getSettings().getBoolean( ProxySettings.ENABLE_PROXY ) );
 
 			if( LoadUI.isController() )
+			{
 				UISupport.setMainFrame( null );
+				UISupport.setFileDialogs( new NoOpXFileDialogs() );
+				UISupport.setDialogs( new NoOpXDialogs() );
+			}
 
 			SchemaUtils.getExcludedTypes();
 		}

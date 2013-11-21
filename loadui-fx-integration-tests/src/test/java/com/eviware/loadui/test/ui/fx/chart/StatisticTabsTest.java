@@ -33,7 +33,7 @@ import static org.junit.Assert.assertThat;
 import static org.loadui.testfx.Assertions.assertNodeExists;
 import static org.loadui.testfx.FXTestUtils.getOrFail;
 import static org.loadui.testfx.Matchers.hasLabel;
-import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
+import static org.loadui.testfx.Matchers.visible;
 
 @Category( IntegrationTest.class )
 public class StatisticTabsTest extends FxIntegrationTestBase

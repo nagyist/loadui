@@ -25,10 +25,13 @@ import static com.google.code.tempusfugit.temporal.Timeout.timeout;
 import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
-import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
+import static org.junit.Assert.fail;
+import static org.loadui.testfx.Matchers.nodeVisible;
+import static org.loadui.testfx.Matchers.visible;
+
 
 /**
- * @Author Henrik
+ * @author Henrik
  */
 public class FxIntegrationBase extends GuiTest
 {
@@ -218,7 +221,7 @@ public class FxIntegrationBase extends GuiTest
 		double height = view.getHeight();
 		if( height > 50 )
 		{
-			drag( "#Assertions" ).by( 0, height ).drop();
+			drag( ".inspector-bar" ).by( 0, height ).drop();
 		}
 	}
 
@@ -231,7 +234,7 @@ public class FxIntegrationBase extends GuiTest
 		if( panel.isVisible() && panel.getOpacity() > 0.99 )
 		{
 			click( "#hide-notification-panel" );
-			waitUntil( panel, is( not( visible() ) ) );
+			waitUntil( panel, is( not( nodeVisible() ) ) );
 		}
 	}
 
@@ -266,5 +269,23 @@ public class FxIntegrationBase extends GuiTest
 			doubleClick( knob ).type( value ).type( KeyCode.ENTER );
 			return this;
 		}
+	}
+
+	public void waitAndClick( final String query )
+	{
+		TestUtils.awaitConditionSilent( new Callable<Boolean>()
+		{
+			@Override
+			public Boolean call() throws Exception
+			{
+				return exists( query );
+			}
+		}, 5 );
+
+		if(!exists( query ))
+		{
+			fail("Expected to find match for query \"" + query + "\" within wait period but failed. Captured screen shot: " + captureScreenshot().getAbsolutePath());
+		}
+		click( query );
 	}
 }

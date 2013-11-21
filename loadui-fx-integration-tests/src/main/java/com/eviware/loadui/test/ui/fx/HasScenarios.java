@@ -5,6 +5,7 @@ import com.eviware.loadui.test.ui.fx.states.ScenarioCreatedState;
 import com.google.code.tempusfugit.temporal.Condition;
 import com.google.common.collect.Lists;
 import javafx.scene.Node;
+import javafx.scene.control.ToggleButton;
 import org.loadui.testfx.GuiTest;
 
 import java.util.List;
@@ -20,6 +21,8 @@ import static org.junit.Assert.fail;
  */
 public class HasScenarios extends FxIntegrationBase
 {
+	CanRunLoadUITests testRunner = new CanRunLoadUITests();
+
 	/**
 	 * If there are several scenarios, provide the indexes of each scenario to use.
 	 *
@@ -81,6 +84,31 @@ public class HasScenarios extends FxIntegrationBase
 		waitForNode( "#newScenarioIcon" );
 		drag( "#newScenarioIcon" ).by( x, y ).drop();
 		waitForNode( ".scenario-view" );
+	}
+
+	public void clickPlayStopButton()
+	{
+		clickPlayStopButton( 0 );
+	}
+
+	public void clickPlayStopButton( int scenario )
+	{
+		List<Node> playButtons = Lists.newArrayList( GuiTest.findAll( ".mini-playback-panel  .play-button" ) );
+
+		click( playButtons.get( scenario ) );
+	}
+
+	public void startSingleScenario( SceneItem scenario ) throws InterruptedException, TimeoutException
+	{
+		ToggleButton playButton = find( ".mini-playback-panel  .play-button" );
+		if( playButton.isSelected() )
+		{
+			throw new RuntimeException( "Scenario already running" );
+		}
+
+		clickPlayStopButton();
+		testRunner.waitForBlockingTaskToComplete();
+		waitOrTimeout( new IsCanvasRunning( scenario, true ), timeout( seconds( 2 ) ) );
 	}
 
 }

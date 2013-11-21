@@ -13,7 +13,7 @@ import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.*;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
+import static org.loadui.testfx.Matchers.visible;
 
 /**
  * Created with IntelliJ IDEA.

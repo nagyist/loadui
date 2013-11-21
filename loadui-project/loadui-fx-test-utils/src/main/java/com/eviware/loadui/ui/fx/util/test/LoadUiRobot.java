@@ -26,9 +26,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 import static org.loadui.testfx.GuiTest.*;
+import static org.loadui.testfx.Matchers.visible;
 import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
 import static org.loadui.testfx.matchers.EnabledMatcher.enabled;
-import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 
 public class LoadUiRobot
 {

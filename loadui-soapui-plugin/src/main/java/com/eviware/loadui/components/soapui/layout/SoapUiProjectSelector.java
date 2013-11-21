@@ -21,29 +21,37 @@ import com.eviware.loadui.api.events.EventHandler;
 import com.eviware.loadui.api.events.PropertyEvent;
 import com.eviware.loadui.api.layout.LayoutComponent;
 import com.eviware.loadui.api.property.Property;
+import com.eviware.loadui.api.ui.dialog.FilePickerDialogFactory;
 import com.eviware.loadui.components.soapui.SoapUISamplerComponent;
 import com.eviware.loadui.components.soapui.SoapUISamplerComponent.SoapUITestCaseRunner;
 import com.eviware.loadui.impl.layout.LayoutComponentImpl;
 import com.eviware.loadui.util.BeanInjector;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.sun.javafx.Utils;
+import com.sun.javafx.collections.ObservableListWrapper;
+import edu.emory.mathcs.backport.java.util.Collections;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.geometry.HPos;
-import javafx.geometry.Insets;
-import javafx.geometry.Point2D;
-import javafx.geometry.VPos;
+import javafx.event.ActionEvent;
+import javafx.geometry.*;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.File;
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
+import java.util.regex.Pattern;
 
 public class SoapUiProjectSelector
 {
@@ -51,11 +59,17 @@ public class SoapUiProjectSelector
 
 	private static final Logger log = LoggerFactory.getLogger( SoapUiProjectSelector.class );
 
-	private final com.eviware.loadui.api.property.Property<File> projectFile;
+	// modified from File property to String property in 2.6.5
+	private final com.eviware.loadui.api.property.Property<String> projectFile;
 	private final com.eviware.loadui.api.property.Property<String> testSuite;
 	private final com.eviware.loadui.api.property.Property<String> testCase;
 	private final javafx.beans.property.Property<String> convertedTestSuite;
 	private final javafx.beans.property.Property<String> convertedTestCase;
+	private final GeneralSettings settings;
+	private final PropertyChangedListener propertyEventListener;
+	private final ComponentContext context;
+	private final File loaduiProjectDir;
+	private final SoapUiFilePicker.FileResolver fileResolver = new SoapUiFilePicker.FileResolver();
 
 	private CountDownLatch testCaseLatch = new CountDownLatch( 0 );
 
@@ -66,20 +80,58 @@ public class SoapUiProjectSelector
 			.maxWidth( Double.MAX_VALUE ).build();
 
 	public static SoapUiProjectSelector newInstance( SoapUISamplerComponent component, ComponentContext context,
-																	 SoapUITestCaseRunner testCaseRunner )
+																	 SoapUITestCaseRunner testCaseRunner, GeneralSettings settings,
+																	 File loaduiProjectDir )
 	{
-		SoapUiProjectSelector selector = new SoapUiProjectSelector( context );
-		context.addEventListener( PropertyEvent.class, selector.new PropertyChangedListener( component, testCaseRunner ) );
-		return selector;
+		return new SoapUiProjectSelector( context, settings, component, testCaseRunner, loaduiProjectDir );
 	}
 
-	private SoapUiProjectSelector( ComponentContext context )
+	private SoapUiProjectSelector( ComponentContext context, GeneralSettings settings,
+											 SoapUISamplerComponent component,
+											 SoapUITestCaseRunner testCaseRunner,
+											 File loaduiProjectDir )
 	{
-		projectFile = context.createProperty( "projectFile", File.class, null, false );
+		this.settings = settings;
+		this.context = context;
+		this.loaduiProjectDir = loaduiProjectDir;
+
+		projectFile = createProjectFileProperty( context );
+
 		testSuite = context.createProperty( "testSuite", String.class );
 		testCase = context.createProperty( TEST_CASE, String.class );
 		convertedTestSuite = Properties.convert( testSuite );
 		convertedTestCase = Properties.convert( testCase );
+		this.propertyEventListener = new PropertyChangedListener( component, testCaseRunner );
+		context.addEventListener( PropertyEvent.class, propertyEventListener );
+		projectFile.getOwner().addEventListener( PropertyEvent.class, propertyEventListener );
+	}
+
+	private Property<String> createProjectFileProperty( ComponentContext context )
+	{
+		Property<?> currentProjectFile = context.getProperty( "projectFile" );
+		log.info( "Current project file is {}", currentProjectFile );
+		String initialProjectFileValue = null;
+
+		// versions pre 2.6.5 kept the projectFile as a File property - here we convert that to the new system
+		if( currentProjectFile != null && currentProjectFile.getType().equals( File.class ) )
+		{
+			log.info( "Converting projectFile property from File to String" );
+			context.deleteProperty( "projectFile" );
+
+			if( settings.getUserProjectRelativePathProperty().getValue() )
+			{
+				Property<?> relativePathProperty = context.getProperty( "projectRelativePath" );
+				initialProjectFileValue = ( relativePathProperty != null ? relativePathProperty.getStringValue() : null );
+			}
+			else
+			{
+				initialProjectFileValue = currentProjectFile.getValue() == null ? null :
+						( ( File )currentProjectFile.getValue() ).getAbsolutePath();
+			}
+		}
+
+		log.info( "Initial project file will be set to {}", initialProjectFileValue );
+		return context.createProperty( "projectFile", String.class, initialProjectFileValue, false );
 	}
 
 	public LayoutComponent buildLayout()
@@ -100,10 +152,11 @@ public class SoapUiProjectSelector
 				.columnConstraints( new ColumnConstraints( 70, 70, 70 ) ).hgap( 28 ).build();
 
 		final MenuButton menuButton = MenuButtonBuilder.create().text( "Project" ).build();
+		menuButton.getStyleClass().add( "soapui-project-menu-button" );
 		menuButton.setOnMouseClicked( new javafx.event.EventHandler<MouseEvent>()
 		{
 			@Override
-			public void handle( MouseEvent arg0 )
+			public void handle( MouseEvent _ )
 			{
 				new ProjectSelector( menuButton ).display();
 			}
@@ -171,15 +224,30 @@ public class SoapUiProjectSelector
 			@Override
 			public void run()
 			{
-				projectLabel.setText( projectFile.getValue() == null ? "" : projectFile.getValue().getName()
-						.replaceFirst( ".xml$", "" ) );
+				String filePath = projectFile.getValue();
+				if( filePath == null )
+					return;
+				String[] parts = filePath.split( Pattern.quote( File.separator ) );
+				String lastPart = parts.length > 0 ? parts[parts.length - 1] : filePath;
+				int lastDotIndex = lastPart.lastIndexOf( "." );
+				lastPart = ( lastDotIndex > 0 ? lastPart.substring( 0, lastDotIndex ) : lastPart );
+				projectLabel.setText( lastPart );
 			}
 		} );
 	}
 
+	@Nullable
 	public File getProjectFile()
 	{
-		return projectFile.getValue();
+		if( Iterables.any( Arrays.asList(
+				settings.getUserProjectRelativePathProperty(),
+				projectFile, projectFile.getValue() ), Predicates.isNull() ) )
+			return null;
+
+		if( settings.getUserProjectRelativePathProperty().getValue() )
+			return new File( loaduiProjectDir, projectFile.getValue() );
+		else
+			return new File( projectFile.getValue() );
 	}
 
 	public String getProjectFileName()
@@ -187,9 +255,13 @@ public class SoapUiProjectSelector
 		return projectFile.getStringValue();
 	}
 
-	public void setProjectFile( File project )
+	public void setProjectFile( File projectAbsolutePath )
 	{
-		projectFile.setValue( project );
+		String path = ( settings.getUserProjectRelativePathProperty().getValue() ?
+				fileResolver.abs2rel( loaduiProjectDir, projectAbsolutePath ) :
+				projectAbsolutePath.getAbsolutePath() );
+		log.info( "Updating project file property to {}", path );
+		projectFile.setValue( new File( path ) );
 	}
 
 	public String getTestSuite()
@@ -261,6 +333,18 @@ public class SoapUiProjectSelector
 				}
 			} );
 		}
+		else
+		{
+			Platform.runLater( new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					testCaseCombo.setItems( new ObservableListWrapper<String>( Collections.emptyList() ) );
+				}
+			} );
+
+		}
 	}
 
 	private String findSelection( String[] testCases )
@@ -282,34 +366,79 @@ public class SoapUiProjectSelector
 			return testCases[0];
 	}
 
+	public void onComponentRelease()
+	{
+		context.removeEventListener( PropertyEvent.class, propertyEventListener );
+		projectFile.getOwner().removeEventListener( PropertyEvent.class, propertyEventListener );
+	}
+
 	private class ProjectSelector extends PopupControl
 	{
 		private final Parent parent;
 
+		/**
+		 * This is created every time the user clicks on the project button - so cleanup is needed after hiding it
+		 *
+		 * @param parent the parent
+		 */
 		private ProjectSelector( Parent parent )
 		{
 			this.parent = parent;
+			Preconditions.checkNotNull( loaduiProjectDir, "LoadUI Project Directory must not be null" );
 
+			setStyle( "-fx-border-radius: 3;" );
 			setAutoHide( true );
 
-			FilePicker picker = new FilePicker( "Select SoapUI project",
-					"SoapUI Project Files", "*.xml" );
-			picker.selectedProperty().bindBidirectional( Properties.convert( projectFile ) );
+			final SoapUiFilePicker picker = new SoapUiFilePicker( "Select SoapUI project",
+					"SoapUI Project Files", "*.xml",
+					BeanInjector.getBean( FilePickerDialogFactory.class ),
+					loaduiProjectDir.getAbsoluteFile(),
+					projectFile, settings.getUserProjectRelativePathProperty() );
 
-			VBox vBox = VBoxBuilder
+			setOnHidden( new javafx.event.EventHandler<WindowEvent>()
+			{
+				@Override
+				public void handle( WindowEvent windowEvent )
+				{
+					picker.onHide();
+				}
+			} );
+
+			Button closeButton = new Button( "Close" );
+			closeButton.setId( "close-soapui-project-selector" );
+			closeButton.setOnAction( new javafx.event.EventHandler<ActionEvent>()
+			{
+				@Override
+				public void handle( ActionEvent actionEvent )
+				{
+					hide();
+				}
+			} );
+
+			HBox buttonBox = HBoxBuilder.create()
+					.alignment( Pos.BOTTOM_RIGHT )
+					.minWidth( 300 )
+					.children( closeButton )
+					.build();
+
+			VBox mainBox = VBoxBuilder
 					.create()
 					.styleClass( "project-selector" )
 					.fillWidth( true )
-					.prefWidth( 325 )
-					.prefHeight( 160 )
+					.prefWidth( 625 )
 					.spacing( 10 )
 					.padding( new Insets( 10 ) )
-					.style( "-fx-background-color: #f4f4f4;" )
-					.children( new Label( "SoapUI Project" ), picker, new Label( "TestSuite" ), testSuiteCombo,
-							new Label( "TestCase" ), testCaseCombo )
+					.style( "-fx-background-color: #f4f4f4;" +
+							" -fx-border-style: solid;" +
+							" -fx-border-color: black;" +
+							" -fx-border-radius: 3;" )
+					.children( new Label( "SoapUI Project" ), picker,
+							new Label( "TestSuite" ), testSuiteCombo,
+							new Label( "TestCase" ), testCaseCombo,
+							buttonBox )
 					.build();
 
-			bridge.getChildren().setAll( StackPaneBuilder.create().children( vBox ).build() );
+			bridge.getChildren().setAll( StackPaneBuilder.create().children( mainBox ).build() );
 		}
 
 		public void display()
@@ -338,7 +467,7 @@ public class SoapUiProjectSelector
 				Property<?> property = event.getProperty();
 				if( property == projectFile )
 				{
-					component.onProjectUpdated( projectFile.getValue() );
+					component.onProjectUpdated( getProjectFile() );
 				}
 				else if( property == testSuite )
 				{

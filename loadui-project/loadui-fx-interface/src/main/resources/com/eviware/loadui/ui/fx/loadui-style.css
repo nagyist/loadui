@@ -683,6 +683,10 @@
 	-fx-spacing: 15.0;
 }
 
+.tool-box-expander .scroll-pane {
+	-fx-background-color: transparent;
+}
+
 .tool-box-expander .item-holder {
 	-fx-alignment: top-left;  
 	-fx-backgroundFill: rgb(68.0,68.0,68.0,0.8);

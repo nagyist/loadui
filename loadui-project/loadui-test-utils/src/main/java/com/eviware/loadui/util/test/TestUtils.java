@@ -93,4 +93,23 @@ public class TestUtils
 			throw new RuntimeException( e );
 		}
 	}
+
+	public static void awaitConditionSilent( Callable<Boolean> condition, int timeoutInSeconds )
+	{
+		long timeout = System.currentTimeMillis() + timeoutInSeconds * 1000;
+		try
+		{
+			while( !condition.call() )
+			{
+				Thread.sleep( 10 );
+				if( System.currentTimeMillis() > timeout )
+				{
+					return;
+				}
+			}
+		} catch( Exception e )
+		{
+			throw new RuntimeException( e );
+		}
+	}
 }

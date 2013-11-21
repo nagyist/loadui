@@ -15,14 +15,6 @@
  */
 package com.eviware.loadui.components.soapui.utils;
 
-import java.io.File;
-import java.util.Arrays;
-
-import javax.annotation.Nonnull;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.integration.SoapUIProjectLoader;
 import com.eviware.soapui.SoapUIExtensionClassLoader;
@@ -30,18 +22,7 @@ import com.eviware.soapui.SoapUIExtensionClassLoader.SoapUIClassLoaderState;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.WsdlProjectPro;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
-import com.eviware.soapui.impl.wsdl.teststeps.AMFRequestTestStep;
-import com.eviware.soapui.impl.wsdl.teststeps.HttpTestRequest;
-import com.eviware.soapui.impl.wsdl.teststeps.HttpTestRequestStep;
-import com.eviware.soapui.impl.wsdl.teststeps.JdbcRequestTestStep;
-import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequest;
-import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
-import com.eviware.soapui.impl.wsdl.teststeps.WsdlDataSourceLoopTestStep;
-import com.eviware.soapui.impl.wsdl.teststeps.WsdlDataSourceTestStep;
-import com.eviware.soapui.impl.wsdl.teststeps.WsdlMessageAssertion;
-import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestRequest;
-import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestRequestStep;
-import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStep;
+import com.eviware.soapui.impl.wsdl.teststeps.*;
 import com.eviware.soapui.model.testsuite.Assertable;
 import com.eviware.soapui.model.testsuite.TestAssertion;
 import com.eviware.soapui.model.testsuite.TestCase;
@@ -49,6 +30,12 @@ import com.eviware.soapui.model.testsuite.TestStep;
 import com.eviware.soapui.support.GroovyUtils;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import java.io.File;
+import java.util.Arrays;
 
 public class SoapUiProjectUtils
 {
@@ -67,8 +54,8 @@ public class SoapUiProjectUtils
 
 	/**
 	 * Disables all soapUI assertions for the specified TestCase.
-	 * 
-	 * @param testCase
+	 *
+	 * @param testCase to disable assertions for
 	 */
 	public static void disableSoapUIAssertions( @Nonnull TestCase testCase )
 	{
@@ -81,10 +68,9 @@ public class SoapUiProjectUtils
 	 * If project is composite, this will create non composite copy and return
 	 * copy referencing it. If project is non composite same file will be
 	 * returned.
-	 * 
-	 * @param originalProjectFile
-	 *           SoapUI project that needs to be checked if it is composite or
-	 *           not.
+	 *
+	 * @param originalProjectFile SoapUI project that needs to be checked if it is composite or
+	 * not.
 	 * @return Reference to non-composite soapUi project
 	 */
 	public static File makeNonCompositeCopy( File originalProjectFile )
@@ -96,7 +82,7 @@ public class SoapUiProjectUtils
 			WsdlProject project;
 			try
 			{
-				// load project if it is not loaded
+				log.info( "Loading project located at: {}", originalProjectFile.getAbsolutePath() );
 				project = SoapUIProjectLoader.getInstance().getProject( originalProjectFile.getAbsolutePath() );
 
 				if( project instanceof WsdlProjectPro )
@@ -104,6 +90,7 @@ public class SoapUiProjectUtils
 					Boolean composite = ( ( WsdlProjectPro )project ).isComposite();
 					if( composite )
 					{
+						log.info( "Making composite project non-composite so LoadUI can run it: {}", project.getPath() );
 						( ( WsdlProjectPro )project ).setComposite( false );
 						project.save();
 						// non composite project must be unloaded here

@@ -39,6 +39,7 @@ import com.eviware.loadui.components.soapui.layout.MetricsDisplay;
 import com.eviware.loadui.components.soapui.layout.MiscLayoutComponents;
 import com.eviware.loadui.components.soapui.layout.SoapUiProjectSelector;
 import com.eviware.loadui.components.soapui.testStepsTable.TestStepsTableModel;
+import com.eviware.loadui.components.soapui.utils.CompositeProjectUtils;
 import com.eviware.loadui.components.soapui.utils.SoapUiProjectUtils;
 import com.eviware.loadui.impl.component.ActivityStrategies;
 import com.eviware.loadui.impl.component.categories.RunnerBase;
@@ -83,6 +84,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -93,9 +95,6 @@ public class SoapUISamplerComponent extends RunnerBase
 	/**
 	 * Creates a real deep copy of a TestCaseConfig, since .copy() doesn't quite
 	 * do it.
-	 *
-	 * @param config
-	 * @return
 	 */
 	private static TestCaseConfig deepCopy( TestCaseConfig config )
 	{
@@ -109,22 +108,20 @@ public class SoapUISamplerComponent extends RunnerBase
 		{
 			log.error( "Failed manual copy, using .copy() instead: ", e );
 			return ( TestCaseConfig )config.copy();
-		} finally
+		}
+		finally
 		{
 			state.restore();
 		}
 	}
 
 	public static final String PROJECT_FILE_WORKING_COPY = "_projectFileworkingCopy";
-	public static final String PROJECT_RELATIVE_PATH = "projectRelativePath";
-
 	public static final String SOAPUI_CONTEXT_PARAM = "soapui_context";
-
 	public static final String PROPERTIES = SoapUISamplerComponent.class.getSimpleName() + "_properties";
 	private static final String DISABLED_TESTSTEPS = "disabledTestSteps";
 	public static final String TYPE = SoapUISamplerComponent.class.getName();
 
-	@SuppressWarnings("hiding")
+	@SuppressWarnings( "hiding" )
 	private static final Logger log = LoggerFactory.getLogger( SoapUISamplerComponent.class );
 
 	private static final Joiner.MapJoiner mapJoiner = Joiner.on( ',' ).withKeyValueSeparator( "=" );
@@ -142,11 +139,6 @@ public class SoapUISamplerComponent extends RunnerBase
 	 */
 	private final Property<File> projectFileWorkingCopy;
 
-	/*
-	 * project relative path. this is also non relevant on agents, since the path
-	 * used there is always different than on controller.
-	 */
-	private final Property<String> projectRelativePath;
 	private final Property<String> testSteps_isDisabled;
 
 	private final TestStepNotifier testStepNotifier = new TestStepNotifier();
@@ -172,7 +164,6 @@ public class SoapUISamplerComponent extends RunnerBase
 	private final GeneralSettings generalSettings;
 
 	private final ScheduledExecutorService executor;
-	private File loaduiProjectFolder;
 	private final Map<String, StatisticVariable.Mutable> timeTakenVariableMap = new HashMap<>();
 	private final Map<String, StatisticVariable.Mutable> responseSizeVariableMap = new HashMap<>();
 
@@ -191,6 +182,7 @@ public class SoapUISamplerComponent extends RunnerBase
 
 	private final TestStepsTableModel testStepsTableModel;
 	private final MetricsDisplay metricsDisplay;
+	private final CompositeProjectUtils compositeProjectUtils = new CompositeProjectUtils();
 
 	public SoapUISamplerComponent( ComponentContext context )
 	{
@@ -205,7 +197,6 @@ public class SoapUISamplerComponent extends RunnerBase
 		context.setSignature( errorTerminal, resultSignature );
 
 		projectFileWorkingCopy = context.createProperty( PROJECT_FILE_WORKING_COPY, File.class );
-		projectRelativePath = context.createProperty( PROJECT_RELATIVE_PATH, String.class, null, false );
 
 		testSteps_isDisabled = context.createProperty( DISABLED_TESTSTEPS, String.class, "" );
 
@@ -213,7 +204,15 @@ public class SoapUISamplerComponent extends RunnerBase
 
 		testStepsTableModel = new TestStepsTableModel( this );
 		generalSettings = GeneralSettings.newInstance( context, runner );
-		projectSelector = SoapUiProjectSelector.newInstance( this, context, runner );
+
+		File loaduiProjectFolder = null;
+
+		if( LoadUI.isController() )
+		{
+			loaduiProjectFolder = project.getProjectFile().getParentFile();
+		}
+
+		projectSelector = SoapUiProjectSelector.newInstance( this, context, runner, generalSettings, loaduiProjectFolder );
 
 		SoapUiProjectUtils.registerJdbcDrivers();
 
@@ -222,16 +221,8 @@ public class SoapUISamplerComponent extends RunnerBase
 		// the controller.
 		if( context.isController() )
 		{
-			loaduiProjectFolder = project.getProjectFile().getParentFile();
-			if( generalSettings.getUseProjectRelativePath() )
-			{
-				// If relative path is used, calculate real (absolute) path and set
-				// it.
-				File relativeFile = new File( loaduiProjectFolder, projectRelativePath.getValue() );
-				if( relativeFile.exists() )
-					projectSelector.setProjectFile( relativeFile );
-			}
-			projectFileWorkingCopy.setValue( SoapUiProjectUtils.makeNonCompositeCopy( projectSelector.getProjectFile() ) );
+			File projectFile = projectSelector.getProjectFile();
+			setProjectFileWorkingCopyWith( projectFile );
 		}
 
 		setProject( projectFileWorkingCopy.getValue() );
@@ -357,6 +348,15 @@ public class SoapUISamplerComponent extends RunnerBase
 				}
 			}
 		} );
+	}
+
+	private void setProjectFileWorkingCopyWith( File projectFile )
+	{
+		if( projectFile != null && projectFile.isDirectory() )
+		{
+			projectFile = compositeProjectUtils.fromCompositeDirectory( projectFile );
+		}
+		projectFileWorkingCopy.setValue( projectFile );
 	}
 
 	private void clearAndCreateSettingTabs( ComponentContext context )
@@ -504,7 +504,6 @@ public class SoapUISamplerComponent extends RunnerBase
 	private void unsetProject()
 	{
 		projectFileWorkingCopy.setValue( null );
-		projectRelativePath.setValue( null );
 		runner.setTestCase( null );
 		runner.setTestSuite( null );
 		projectSelector.reset();
@@ -512,10 +511,11 @@ public class SoapUISamplerComponent extends RunnerBase
 
 	public void onProjectUpdated( File projectFile )
 	{
+		log.debug( "SoapUI Project file updated to {}", projectFile );
 		if( getContext().isController() && !reloadingProject )
 		{
-			projectRelativePath.setValue( SoapUIComponentActivator.findRelativePath( loaduiProjectFolder, projectFile ) );
-			projectFileWorkingCopy.setValue( SoapUiProjectUtils.makeNonCompositeCopy( projectFile ) );
+			log.debug( "Updating SoapUI Project working copy" );
+			setProjectFileWorkingCopyWith( projectFile );
 		}
 	}
 
@@ -534,7 +534,7 @@ public class SoapUISamplerComponent extends RunnerBase
 				Property<?> property = event.getProperty();
 				if( property == projectFileWorkingCopy && !reloadingProject )
 				{
-					log.debug( "setting project" );
+					log.debug( "Setting SoapUI Project to {}", projectFileWorkingCopy.getValue() );
 					setProject( projectFileWorkingCopy.getValue() );
 				}
 				else if( property == testSteps_isDisabled || property == generalSettings.getForceSharedDatasourcesProperty() )
@@ -610,6 +610,8 @@ public class SoapUISamplerComponent extends RunnerBase
 		executor.shutdown();
 		testStepsTableModel.release();
 		metricsDisplay.release();
+		getContext().removeEventListener( ActionEvent.class, actionListener );
+		projectSelector.onComponentRelease();
 	}
 
 	private final class TestStepNotifier extends TestRunListenerAdapter
@@ -740,7 +742,8 @@ public class SoapUISamplerComponent extends RunnerBase
 				{
 					getContext().getCounter( CanvasItem.ASSERTION_COUNTER ).increment();
 				}
-			} finally
+			}
+			finally
 			{
 				if( testCase != null )
 				{
@@ -887,7 +890,8 @@ public class SoapUISamplerComponent extends RunnerBase
 			catch( Exception e )
 			{
 				log.debug( "Error reloading SoapUI project: {} ", e );
-			} finally
+			}
+			finally
 			{
 				state.restore();
 			}
@@ -897,7 +901,7 @@ public class SoapUISamplerComponent extends RunnerBase
 		{
 			if( project == null || testSuiteName == null )
 			{
-				projectSelector.setTestSuites( new String[0] );
+				projectSelector.setTestSuites();
 				return;
 			}
 			log.debug( "Setting SoapUI TestSuite to {}", testSuiteName );
@@ -910,7 +914,7 @@ public class SoapUISamplerComponent extends RunnerBase
 				String[] testCases = ModelSupport.getNames( testSuite.getTestCaseList() );
 				if( testCases.length == 0 )
 				{
-					projectSelector.setTestCases( new String[0] );
+					projectSelector.setTestCases();
 				}
 				else
 				{
@@ -931,7 +935,8 @@ public class SoapUISamplerComponent extends RunnerBase
 			catch( Exception e )
 			{
 				log.debug( "Error when setting TestSuite {}", e );
-			} finally
+			}
+			finally
 			{
 				state.restore();
 			}
@@ -957,7 +962,9 @@ public class SoapUISamplerComponent extends RunnerBase
 		{
 			if( testSuite == null || testCaseName == null )
 			{
-				projectSelector.setTestCases( new String[0] );
+				projectSelector.setTestCases();
+				testStepsInvocationCount.invalidateAll();
+				testStepsTableModel.clearTestCase();
 				return;
 			}
 
@@ -1005,7 +1012,8 @@ public class SoapUISamplerComponent extends RunnerBase
 			catch( Exception e )
 			{
 				log.error( "An error occured when trying to set TestCase.", e );
-			} finally
+			}
+			finally
 			{
 				state.restore();
 				getContext().setInvalid( soapuiTestCase == null );
@@ -1136,7 +1144,8 @@ public class SoapUISamplerComponent extends RunnerBase
 				catch( Exception e )
 				{
 					e.printStackTrace();
-				} finally
+				}
+				finally
 				{
 					state.restore();
 				}
@@ -1146,9 +1155,15 @@ public class SoapUISamplerComponent extends RunnerBase
 					{
 						// this will trigger change of projectFileWorkingCopy in
 						// context listener
-						projectSelector.setProjectFile( new File( file ) );
-						projectRelativePath.setValue( SoapUIComponentActivator.findRelativePath( loaduiProjectFolder,
-								projectSelector.getProjectFile() ) );
+						try
+						{
+							log.info( "UPDATING PROJECT FILE IN THE SELECTOR BECAUSE PROJECT WAS UPDATED" );
+							projectSelector.setProjectFile( new File( file ).getCanonicalFile() );
+						}
+						catch( IOException e )
+						{
+							e.printStackTrace();
+						}
 					}
 					else
 					{
@@ -1172,8 +1187,8 @@ public class SoapUISamplerComponent extends RunnerBase
 			String[] testSuites = ModelSupport.getNames( project.getTestSuiteList() );
 			if( testSuites.length == 0 )
 			{
-				projectSelector.setTestSuites( new String[0] );
-				projectSelector.setTestCases( new String[0] );
+				projectSelector.setTestSuites();
+				projectSelector.setTestCases();
 				projectSelector.setTestCase( null );
 			}
 			else
@@ -1188,6 +1203,9 @@ public class SoapUISamplerComponent extends RunnerBase
 			}
 			else
 				setTestSuite( current );
+
+			log.info( "UPDATING PROJECT FILE IN THE SELECTOR BECAUSE PROJECT WAS INIT ED" );
+			projectSelector.setProjectFile( new File( project.getPath() ) );
 		}
 	}
 
@@ -1217,7 +1235,8 @@ public class SoapUISamplerComponent extends RunnerBase
 				}
 			}
 			runners.clear();
-		} finally
+		}
+		finally
 		{
 			state.restore();
 		}

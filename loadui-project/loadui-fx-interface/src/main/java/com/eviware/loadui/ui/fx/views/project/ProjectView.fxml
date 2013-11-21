@@ -39,7 +39,8 @@
                 <Region styleClass="graphic"/>
             </graphic>
         </Button>
-        <Button fx:id="closeProjectButton" id="closeProjectButton" styleClass="toolbar-button" onAction="#closeProject">
+        <Button fx:id="closeProjectButton" id="closeProjectButton" styleClass="toolbar-button"
+                onAction="#stopAndRequestCloseProject">
             <graphic>
                 <Region styleClass="graphic"/>
             </graphic>
@@ -57,7 +58,7 @@
             <MenuItem fx:id="clone" id="clone" text="Rename..."
                       onAction="#renameProject"/>
             <SeparatorMenuItem/>
-            <MenuItem fx:id="close" id="close" text="Close" onAction="#closeProject"/>
+            <MenuItem fx:id="close" id="close" text="Close" onAction="#stopAndRequestCloseProject"/>
         </items>
     </MenuButton>
 </fx:root>

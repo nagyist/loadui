@@ -2,3 +2,13 @@
  * SoapUI Project Selector
  */
  
+/*******************************************************************************
+ *                                                                             *
+ * MenuButton                                                                  *
+ *                                                                             *
+ ******************************************************************************/
+
+.soapui-project-menu-button:openvertically:showing {
+    -fx-background-color: AUTHOR;
+}
+

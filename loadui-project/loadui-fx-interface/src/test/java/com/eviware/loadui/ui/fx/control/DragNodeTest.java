@@ -15,6 +15,7 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
+import org.junit.After;
 import org.loadui.testfx.MouseMotion;
 import org.loadui.testfx.categories.TestFX;
 import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
@@ -42,8 +43,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static javafx.beans.binding.Bindings.when;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.loadui.testfx.Assertions.verifyThat;
 
 @Category(TestFX.class)
 public class DragNodeTest
@@ -89,6 +93,12 @@ public class DragNodeTest
 		FXTestUtils.bringToFront( stage );
 	}
 
+	@After
+	public void waitForAnimation()
+	{
+		controller.sleep( 500 ); // wait for any animation to finish;
+	}
+
 	@Test
 	public void shouldDragAndRelease()
 	{
@@ -107,6 +117,8 @@ public class DragNodeTest
 	public void shouldAcceptAndDrop() throws InterruptedException
 	{
 		Node dropArea = stage.getScene().lookup( "#droprect" );
+		verifyThat( dropArea, is(notNullValue()) );
+
 		final CountDownLatch dropLatch = new CountDownLatch( 1 );
 
 		dropArea.addEventHandler( DraggableEvent.ANY, new EventHandler<DraggableEvent>()
@@ -129,9 +141,9 @@ public class DragNodeTest
 
 		assertFalse( dragNode.isAcceptable() );
 
-		MouseMotion dragging = controller.drag( dragNode.getDragSource() ).via( dropArea );
+		MouseMotion dragging = controller.drag( dragNode.getDragSource() ).via( dropArea ).sleep( 200 );
 
-		assertTrue( dragNode.isAcceptable() );
+		verifyThat( dragNode.isAcceptable(), is(true) );
 
 		dragging.drop();
 
