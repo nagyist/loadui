@@ -31,9 +31,10 @@ public class OpenCloseProjects extends FxIntegrationTestBase
 	@Test
 	public void enterState() throws Exception
 	{
+
 		int count = 0;
 
-		while( count < 6 )
+		while( count < 100 )
 		{
 			connect( LoadUiRobot.Component.FIXED_RATE_GENERATOR ).to( LoadUiRobot.Component.WEB_PAGE_RUNNER );
 			click( ".component-view .text-field" ).type( "win-srvmontest" );
@@ -56,8 +57,12 @@ public class OpenCloseProjects extends FxIntegrationTestBase
 
 			usedMemory_eachIteration.add( measureUsedMemory() );
 			assertNoMemoryLeaked();
+
 		}
+
 	}
+
+
 
 	private void createAssertion()
 	{
