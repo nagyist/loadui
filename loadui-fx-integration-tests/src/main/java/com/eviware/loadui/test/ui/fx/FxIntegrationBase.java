@@ -1,6 +1,7 @@
 package com.eviware.loadui.test.ui.fx;
 
 import com.eviware.loadui.api.model.ProjectItem;
+import com.eviware.loadui.api.model.WorkspaceItem;
 import com.eviware.loadui.api.model.WorkspaceProvider;
 import com.eviware.loadui.ui.fx.util.test.ComponentHandle;
 import com.eviware.loadui.ui.fx.util.test.LoadUiRobot;
@@ -25,10 +26,8 @@ import static com.google.code.tempusfugit.temporal.Timeout.timeout;
 import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.fail;
 import static org.loadui.testfx.Matchers.nodeVisible;
 import static org.loadui.testfx.Matchers.visible;
-
 
 /**
  * @author Henrik
@@ -170,7 +169,7 @@ public class FxIntegrationBase extends GuiTest
 		System.out.println( "Component node: " + componentNode );
 		Set<Node> knobs = findAll( "#knob", componentNode );
 
-		Node knob = Lists.newArrayList(knobs).get( number - 1 );
+		Node knob = Lists.newArrayList( knobs ).get( number - 1 );
 
 		return new KnobHandle( knob );
 	}
@@ -245,8 +244,12 @@ public class FxIntegrationBase extends GuiTest
 
 	public static ProjectItem getProjectItem()
 	{
-		return BeanInjector.getBean( WorkspaceProvider.class ).getWorkspace()
-				.getProjects().iterator().next();
+		return getWorkspaceItem().getProjects().iterator().next();
+	}
+
+	public static WorkspaceItem getWorkspaceItem()
+	{
+		return BeanInjector.getBean( WorkspaceProvider.class ).getWorkspace();
 	}
 
 	public class KnobHandle
@@ -271,21 +274,4 @@ public class FxIntegrationBase extends GuiTest
 		}
 	}
 
-	public void waitAndClick( final String query )
-	{
-		TestUtils.awaitConditionSilent( new Callable<Boolean>()
-		{
-			@Override
-			public Boolean call() throws Exception
-			{
-				return exists( query );
-			}
-		}, 5 );
-
-		if(!exists( query ))
-		{
-			fail("Expected to find match for query \"" + query + "\" within wait period but failed. Captured screen shot: " + captureScreenshot().getAbsolutePath());
-		}
-		click( query );
-	}
 }
