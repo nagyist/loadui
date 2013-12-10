@@ -86,16 +86,16 @@ cm.maxTotal = 50000
 cm.defaultMaxPerRoute = 50000
 
 //Properties
-createProperty('url', String) {->
+url = createProperty('url', String) {->
     validateUrl()
 }
-createProperty('outputBody', Boolean, false)
+outputBody = createProperty('outputBody', Boolean, false)
 
-createProperty('errorCodeList', String)
+errorCodeList = createProperty('errorCodeList', String)
 
-createProperty('proxyHost', String)
-createProperty('proxyPort', Long)
-createProperty('proxyUsername', String)
+proxyHost = createProperty('proxyHost', String)
+proxyPort = createProperty('proxyPort', Long)
+proxyUsername = createProperty('proxyUsername', String)
 proxyPassword = createProperty('_proxyPassword', String)
 authUsername = createProperty('_authUsername', String)
 authPassword = createProperty('_authPassword', String)
