@@ -106,8 +106,10 @@ public class EventSupport implements EventFirer, Releasable
 			@Override
 			public void run()
 			{
-				for( ListenerEntry<?> listenerEntry : new HashSet<>( listeners ) )
+				Iterator<ListenerEntry<?>> it = listeners.iterator();
+				while( it.hasNext() )
 				{
+					ListenerEntry<?> listenerEntry = it.next();
 					if( listenerEntry.type.isInstance( event ) )
 					{
 						if( listenerEntry.listener != null )
@@ -124,7 +126,7 @@ public class EventSupport implements EventFirer, Releasable
 							else
 							{
 								log.debug( "Weak listener reference garbage collected" );
-								listeners.remove( listenerEntry );
+								it.remove();
 							}
 						}
 					}
