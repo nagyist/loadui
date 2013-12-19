@@ -15,30 +15,22 @@
  */
 package com.eviware.loadui.launcher;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.eviware.loadui.launcher.api.GroovyCommand;
+import com.eviware.loadui.launcher.impl.FileGroovyCommand;
+import com.eviware.loadui.launcher.impl.ResourceGroovyCommand;
 import javafx.application.Application;
 import javafx.concurrent.Task;
 import javafx.stage.Stage;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
-import com.eviware.loadui.launcher.api.GroovyCommand;
-import com.eviware.loadui.launcher.impl.FileGroovyCommand;
-import com.eviware.loadui.launcher.impl.ResourceGroovyCommand;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 public class LoadUICommandLineLauncher extends LoadUILauncher
 {
@@ -58,6 +50,7 @@ public class LoadUICommandLineLauncher extends LoadUILauncher
 	protected static final String STATISTICS_REPORT_INCLUDE_SUMMARY_OPTION = "s";
 	protected static final String STATISTICS_REPORT_COMPARE_OPTION = "c";
 	protected static final String ABORT_ONGOING_REQUESTS_OPTION = "A";
+	protected static final String EXPORT_ALL_RAW_DATA_OPTION = "R";
 
 	public static void main( String[] args )
 	{
@@ -122,7 +115,7 @@ public class LoadUICommandLineLauncher extends LoadUILauncher
 	@Override
 	protected void processCommandLine( CommandLine cmd )
 	{
-		try (InputStream is = getClass().getResourceAsStream( "/packages-extra.txt" ))
+		try(InputStream is = getClass().getResourceAsStream( "/packages-extra.txt" ))
 		{
 			if( is != null )
 			{
@@ -177,10 +170,12 @@ public class LoadUICommandLineLauncher extends LoadUILauncher
 					cmd.hasOption( REPORT_FORMAT_OPTION ) ? cmd.getOptionValue( REPORT_FORMAT_OPTION ) : "PDF" );
 
 			String[] statisticPageOptionValues = cmd.getOptionValues( STATISTICS_REPORT_OPTION );
-			List<String> statisticPages = statisticPageOptionValues == null ? Collections.<String> emptyList() : Arrays
+			List<String> statisticPages = statisticPageOptionValues == null ? Collections.<String>emptyList() : Arrays
 					.asList( statisticPageOptionValues );
 
 			attributes.put( "statisticPages", statisticPages );
+			attributes.put( "exportRawData", cmd.getOptionValue( EXPORT_ALL_RAW_DATA_OPTION ) );
+
 			attributes.put( "compare", cmd.getOptionValue( STATISTICS_REPORT_COMPARE_OPTION ) );
 
 			attributes.put( "abort", cmd.getOptionValue( ABORT_ONGOING_REQUESTS_OPTION ) );
@@ -202,7 +197,7 @@ public class LoadUICommandLineLauncher extends LoadUILauncher
 	}
 
 	@Override
-	@SuppressWarnings( "static-access" )
+	@SuppressWarnings("static-access")
 	protected Options createOptions()
 	{
 		Options options = super.createOptions();
@@ -219,6 +214,9 @@ public class LoadUICommandLineLauncher extends LoadUILauncher
 				.withDescription(
 						"Sets the agents to use for the test ( usage -" + AGENT_OPTION
 								+ " <ip>[:<port>][=<scenario>[,<scenario>] ...] )" ).hasArgs().create( AGENT_OPTION ) );
+
+		options.addOption( EXPORT_ALL_RAW_DATA_OPTION, "rawData", true, "Exports all the RAW data that can be generated from existing charts" );
+
 		options.addOption( FILE_OPTION, "file", true, "Executes the specified Groovy script file" );
 		options.addOption( LOCAL_OPTION, "local", false, "Executes TestCases in local mode" );
 		options.addOption( REPORT_DIR_OPTION, "reports", true, "Generates reports and saves them in specified folder" );
