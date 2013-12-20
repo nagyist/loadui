@@ -174,7 +174,10 @@ public class LoadUICommandLineLauncher extends LoadUILauncher
 					.asList( statisticPageOptionValues );
 
 			attributes.put( "statisticPages", statisticPages );
-			attributes.put( "exportRawData", cmd.getOptionValue( EXPORT_ALL_RAW_DATA_OPTION ) );
+
+			if(cmd.hasOption( EXPORT_ALL_RAW_DATA_OPTION)){
+				System.setProperty( "loadui.dataexport", cmd.getOptionValue( EXPORT_ALL_RAW_DATA_OPTION ) );
+			}
 
 			attributes.put( "compare", cmd.getOptionValue( STATISTICS_REPORT_COMPARE_OPTION ) );
 
