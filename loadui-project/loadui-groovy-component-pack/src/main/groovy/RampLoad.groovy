@@ -15,7 +15,7 @@
 // 
 
 /**
- * Ramps up, holds steady and then ramps down the "Classic" load situation with concurrent users.
+ * Ramps up, holds steady and then ramps down the "Classic" way.
  *
  * @id com.eviware.RampLoad
  * @name Ramp Load
@@ -45,6 +45,7 @@ triggersSent = 0
 calculateAcceleration()
 currentlyRunning = 0
 peakLimit = 0
+hasPeaked = false;
 
 latestAction = 'NONE'
 
@@ -59,6 +60,7 @@ onAction( 'START' ) {
 onAction( 'STOP' ) {
     latestAction = 'STOP'
     peakLimit = 0
+    hasPeaked = false
     future?.cancel( true )
     cancellingFuture?.cancel( true )
     startTime = null
@@ -96,9 +98,11 @@ onDisconnect = { outgoing, incoming ->
 
 scheduleNext = { wakeTime ->
     def t0 = getT0()
+    log.info( "scheduleNext t0: " + t0 + ", hasPeaked: " + hasPeaked + ", rampLength.value " + rampLength.value)
 
-    if( t0 >= rampLength.value ) {
+    if( t0 >= rampLength.value && !hasPeaked) {
 
+        hasPeaked = true
         peakLimit = peakLoad.value
 
         def delay = 1000000/peakLoad.value
@@ -107,12 +111,14 @@ scheduleNext = { wakeTime ->
         cancellingFuture = schedule( {
             future?.cancel( true )
             a = a*-1
+            log.info( "Scheduling next to " + rampLength.value)
             scheduleNext( rampLength.value )
         }, peakLength.value, TimeUnit.SECONDS )
     }
     else if( t0 >= 0 ) {
 
         triggersSent = 0
+
         peakLimit =  Math.floor( t0 * Math.abs( a ) )
 
         while( triggersSent < ( peakLimit - currentlyRunning ) ) {
@@ -124,6 +130,7 @@ scheduleNext = { wakeTime ->
 
         future?.cancel( true )
         def diff = Math.abs( t1 - getT0() )
+        log.info("peakLimit: " + peakLimit + ", diff: " + diff + ", a: " + a + " t0: " + t0 + ", t1: " + t1);
         if( !Double.isNaN( diff ) ) {
             future = schedule( {
                 if(peakLimit >= 1){
