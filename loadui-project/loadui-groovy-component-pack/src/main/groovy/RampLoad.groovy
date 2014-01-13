@@ -98,7 +98,6 @@ onDisconnect = { outgoing, incoming ->
 
 scheduleNext = { wakeTime ->
     def t0 = getT0()
-    log.info( "scheduleNext t0: " + t0 + ", hasPeaked: " + hasPeaked + ", rampLength.value " + rampLength.value)
 
     if( t0 >= rampLength.value && !hasPeaked) {
 
@@ -111,7 +110,6 @@ scheduleNext = { wakeTime ->
         cancellingFuture = schedule( {
             future?.cancel( true )
             a = a*-1
-            log.info( "Scheduling next to " + rampLength.value)
             scheduleNext( rampLength.value )
         }, peakLength.value, TimeUnit.SECONDS )
     }
@@ -130,7 +128,6 @@ scheduleNext = { wakeTime ->
 
         future?.cancel( true )
         def diff = Math.abs( t1 - getT0() )
-        log.info("peakLimit: " + peakLimit + ", diff: " + diff + ", a: " + a + " t0: " + t0 + ", t1: " + t1);
         if( !Double.isNaN( diff ) ) {
             future = schedule( {
                 if(peakLimit >= 1){
