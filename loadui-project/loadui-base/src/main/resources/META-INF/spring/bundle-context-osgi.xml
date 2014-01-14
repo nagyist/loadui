@@ -23,6 +23,9 @@
 	<osgi:service interface="com.eviware.loadui.api.addon.AddonRegistry"
 		ref="addonRegistry" />
 
+    <osgi:service interface="com.eviware.loadui.api.model.ProjectBuilder"
+        ref="projectBuilder" />
+
 	<osgi:service interface="com.eviware.loadui.api.model.WorkspaceProvider"
 		ref="workspaceProvider" />
 

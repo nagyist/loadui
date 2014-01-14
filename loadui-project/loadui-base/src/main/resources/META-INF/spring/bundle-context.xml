@@ -27,6 +27,12 @@
         <constructor-arg ref="conversionService"/>
     </bean>
 
+    <bean id="projectBuilder"
+          class="com.eviware.loadui.impl.model.canvas.project.ProjectBuilderImpl">
+        <constructor-arg ref="workspaceProvider"/>
+        <constructor-arg ref="componentRegistry"/>
+    </bean>
+
     <bean id="counterSynchronizer" class="com.eviware.loadui.impl.counter.CounterSynchronizerImpl"/>
 
     <bean id="conversionService"
