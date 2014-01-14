@@ -178,7 +178,7 @@ def currentTime() {
 }
 
 def calculateAcceleration() {
-    if( rampLength > 0 ){
+    if( rampLength.value > 0 ){
         a = peakLoad.value / rampLength.value
     }else{
         a = peakLoad.value;
