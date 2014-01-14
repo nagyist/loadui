@@ -109,7 +109,7 @@ scheduleNext = { wakeTime ->
         future = scheduleAtFixedRate( { trigger() }, delay, delay, TimeUnit.MICROSECONDS )
         cancellingFuture = schedule( {
             future?.cancel( true )
-            a = a*-1
+            a = -a
             scheduleNext( rampLength.value )
         }, peakLength.value, TimeUnit.SECONDS )
     }
@@ -138,6 +138,9 @@ scheduleNext = { wakeTime ->
         }else{
             peakLimit = 0
         }
+    }
+    if(t0 < 0){
+        peakLimit = 0
     }
 }
 
@@ -175,5 +178,10 @@ def currentTime() {
 }
 
 def calculateAcceleration() {
-    a = peakLoad.value / rampLength.value
+    if( rampLength > 0 ){
+        a = peakLoad.value / rampLength.value
+    }else{
+        a = peakLoad.value;
+    }
+
 }
