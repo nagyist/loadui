@@ -16,9 +16,8 @@
 package com.eviware.loadui.ui.fx.views.workspace;
 
 import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.api.model.ProjectRef;
-import com.eviware.loadui.api.model.WorkspaceItem;
+import com.eviware.loadui.api.component.ComponentRegistry;
+import com.eviware.loadui.api.model.*;
 import com.eviware.loadui.ui.fx.MenuItemsProvider;
 import com.eviware.loadui.ui.fx.MenuItemsProvider.Options;
 import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
@@ -29,6 +28,7 @@ import com.eviware.loadui.ui.fx.filechooser.LoadUIFileChooser;
 import com.eviware.loadui.ui.fx.filechooser.LoadUIFileChooserBuilder;
 import com.eviware.loadui.ui.fx.util.*;
 import com.eviware.loadui.ui.fx.views.projectref.ProjectRefView;
+import com.eviware.loadui.util.BeanInjector;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -40,10 +40,7 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.ContextMenuBuilder;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
+import javafx.scene.control.*;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -55,10 +52,11 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import com.eviware.loadui.util.projects.ComponentBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Random;
 
 import static com.eviware.loadui.ui.fx.util.ObservableLists.bindSorted;
 import static javafx.beans.binding.Bindings.bindContent;
@@ -79,6 +77,8 @@ public class WorkspaceView extends StackPane
 	private final ObservableList<ProjectRef> projectRefList;
 	private final ObservableList<ProjectRefView> projectRefViews;
 
+	private ProjectBuilderFactory projectProvider;
+
 	@FXML
 	@SuppressWarnings( "unused" )
 	private VBox carouselArea;
@@ -93,11 +93,19 @@ public class WorkspaceView extends StackPane
 
 	@FXML
 	@SuppressWarnings( "unused" )
+	private TextField projectNameField;
+
+
+	@FXML
+	@SuppressWarnings( "unused" )
 	private WebView webView;
 	private ObservableList<ReadOnlyStringProperty> labelProperties;
 
 	public WorkspaceView( final WorkspaceItem workspace )
 	{
+		projectProvider = BeanInjector.getBean( ProjectBuilderFactory.class );
+
+
 		this.workspace = workspace;
 		projectRefList = ObservableLists.fx( ObservableLists.ofCollection( workspace, WorkspaceItem.PROJECT_REFS,
 				ProjectRef.class, workspace.getProjectRefs() ) );
@@ -175,6 +183,7 @@ public class WorkspaceView extends StackPane
 			}
 		} );
 		webView.getEngine().load( props.getProperty( "starter.page.url" ) + "?version=" + LoadUI.version() );
+
 	}
 
 	public ToolBox<Label> getToolbox()
@@ -278,6 +287,23 @@ public class WorkspaceView extends StackPane
 	public void openHelpPage()
 	{
 		UIUtils.openInExternalBrowser( HELPER_PAGE_URL );
+	}
+
+	@FXML
+	@SuppressWarnings( "unused" )
+	public void projectBuilder()
+	{
+
+		if (projectNameField.getText().isEmpty()){
+			projectNameField.setText( "Example Project #" + new Random().nextInt( 200 ) );
+		}
+		ComponentRegistry registry = BeanInjector.getBean( ComponentRegistry.class );
+		ProjectItem project = projectProvider.newInstance().create().label( projectNameField.getText() ).build();
+
+		ComponentBuilder.WithProjectAndComponentRegistry componentGenerator = ComponentBuilder.create().project( project ).componentRegistry( registry );
+
+		ComponentItem item = componentGenerator.labeled( "Fixed Rate" ).child( componentGenerator.labeled( "Web Page Runner" ).build() ).build();
+
 	}
 
 	@FXML

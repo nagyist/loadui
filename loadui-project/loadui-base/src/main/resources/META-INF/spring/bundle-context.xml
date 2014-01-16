@@ -28,7 +28,7 @@
     </bean>
 
     <bean id="projectBuilder"
-          class="com.eviware.loadui.impl.model.canvas.project.ProjectBuilderImpl">
+          class="com.eviware.loadui.impl.model.canvas.project.ProjectBuilderFactoryImpl">
         <constructor-arg ref="workspaceProvider"/>
         <constructor-arg ref="componentRegistry"/>
     </bean>
