@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created by osten on 1/16/14.
@@ -39,7 +38,28 @@ public class ProjectBuilderImpl implements ProjectBuilder
 	@Override
 	public ProjectBuilder where( File where )
 	{
-		blueprint.setWhere( where );
+		blueprint.setProjectFile( where );
+		return this;
+	}
+
+	@Override
+	public ProjectBuilder requestsLimit( Long requests )
+	{
+		blueprint.setRequestLimit( requests );
+		return this;
+	}
+
+	@Override
+	public ProjectBuilder timeLimit( Long seconds )
+	{
+		blueprint.setTimeLimit( seconds );
+		return this;
+	}
+
+	@Override
+	public ProjectBuilder assertionLimit( Long assertionFailures )
+	{
+		blueprint.setAssertionFailureLimit( assertionFailures );
 		return this;
 	}
 
@@ -51,32 +71,18 @@ public class ProjectBuilderImpl implements ProjectBuilder
 	}
 
 	@Override
-	public ProjectBuilder save()
+	public ProjectBuilder importProject( boolean bool )
 	{
-		blueprint.setSave( true );
+		blueprint.importProject( bool );
    	return this;
 	}
 
 	@Override
-	public ProjectBuilder components( ComponentItem... components )
-	{
-		/*if(components.length > 0){
-
-			ComponentItem parentComponent = components[0];
-
-         for( int i = 1; i < components.length; i++ ){
-            ComponentItem currentComponent = components[i];
-			}
-		}*/
-		return this;
-	}
-
-	@Override
-	public ProjectItem build()
+	public ProjectRef build()
 	{
 		ProjectRef project = assemble( blueprint );
 		workspaceProvider.loadDefaultWorkspace();
-		return project.getProject();
+		return project;
 	}
 
 	private boolean save( File file ){
@@ -92,10 +98,15 @@ public class ProjectBuilderImpl implements ProjectBuilder
 	}
 
 	private ProjectRef assemble( ProjectBlueprint blueprint ){
-		ProjectRef project = workspaceProvider.getWorkspace().createProject( blueprint.getWhere(), blueprint.getLabel(), true );
+
+		ProjectRef project = workspaceProvider.getWorkspace().createProject( blueprint.getProjectFile(), blueprint.getLabel(), true );
 		project.setLabel( blueprint.getLabel() );
 
-		if( blueprint.isSave() ){
+      project.getProject().setLimit( CanvasItem.REQUEST_COUNTER, blueprint.getRequestLimit() );
+		project.getProject().setLimit( CanvasItem.TIMER_COUNTER, blueprint.getTimeLimit() );
+		project.getProject().setLimit( CanvasItem.FAILURE_COUNTER, blueprint.getTimeLimit() );
+
+		if( blueprint.importProject() ){
 		 	save( project.getProjectFile() );
 		}
 
@@ -104,44 +115,56 @@ public class ProjectBuilderImpl implements ProjectBuilder
 
 	private class ProjectBlueprint
 	{
-		private boolean save;
-		private File where;
+		private static final boolean DEFAULT_IMPORT_PROJECT = false;
+		private static final long DEFAULT_REQUEST_LIMIT = 0;
+		private static final long DEFAULT_ASSERTION_FAILURE_LIMIT = 0;
+		private static final long DEFAULT_TIME_LIMIT = 0;
+
+		private boolean importProject;
+		private File projectFile;
 		private List<List<ComponentItem>> componentChains;
 		private String label;
+		private long requestLimit;
+		private long timeLimit;
+		private long assertionFailureLimit;
 
 		public ProjectBlueprint(){
 
-			setComponentChains( new ArrayList<List<ComponentItem>>() );
-			setSave( false );
 			try
 			{
-				setWhere( File.createTempFile( "loadui-project", ".xml" ) );
+				setProjectFile( File.createTempFile( "loadui-project", ".xml" ) );
 			}
 			catch( IOException e )
 			{
 				log.error( "cannot create a temporary project" );
 			}
-			setLabel( where.getName() );
+			setLabel( projectFile.getName() );
+
+			setComponentChains( new ArrayList<List<ComponentItem>>() );
+			importProject( DEFAULT_IMPORT_PROJECT );
+			setRequestLimit( DEFAULT_REQUEST_LIMIT );
+			setAssertionFailureLimit( DEFAULT_ASSERTION_FAILURE_LIMIT );
+			setTimeLimit( DEFAULT_TIME_LIMIT );
 		}
 
-		public boolean isSave()
+		public boolean importProject()
 		{
-			return save;
+			return importProject;
 		}
 
-		public void setSave( boolean shouldSave )
+		public void importProject( boolean importProject )
 		{
-			this.save = shouldSave;
+			this.importProject = importProject;
 		}
 
-		public File getWhere()
+		public File getProjectFile()
 		{
-			return where;
+			return projectFile;
 		}
 
-		public void setWhere( File where )
+		public void setProjectFile( File where )
 		{
-			this.where = where;
+			this.projectFile = where;
 		}
 
 		public List<List<ComponentItem>> getComponentChains()
@@ -162,6 +185,36 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		public void setLabel( String label )
 		{
 			this.label = label;
+		}
+
+		public long getRequestLimit()
+		{
+			return requestLimit;
+		}
+
+		public void setRequestLimit( long requestLimit )
+		{
+			this.requestLimit = requestLimit;
+		}
+
+		public long getTimeLimit()
+		{
+			return timeLimit;
+		}
+
+		public void setTimeLimit( long timeLimit )
+		{
+			this.timeLimit = timeLimit;
+		}
+
+		public long getAssertionFailureLimit()
+		{
+			return assertionFailureLimit;
+		}
+
+		public void setAssertionFailureLimit( long assertionFailureLimit )
+		{
+			this.assertionFailureLimit = assertionFailureLimit;
 		}
 	}
 }

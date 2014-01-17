@@ -18,6 +18,7 @@ package com.eviware.loadui.ui.fx.views.workspace;
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.component.ComponentRegistry;
 import com.eviware.loadui.api.model.*;
+import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.ui.fx.MenuItemsProvider;
 import com.eviware.loadui.ui.fx.MenuItemsProvider.Options;
 import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
@@ -298,12 +299,49 @@ public class WorkspaceView extends StackPane
 			projectNameField.setText( "Example Project #" + new Random().nextInt( 200 ) );
 		}
 		ComponentRegistry registry = BeanInjector.getBean( ComponentRegistry.class );
-		ProjectItem project = projectProvider.newInstance().create().label( projectNameField.getText() ).build();
 
-		ComponentBuilder.WithProjectAndComponentRegistry componentGenerator = ComponentBuilder.create().project( project ).componentRegistry( registry );
+		final ProjectRef project = projectProvider
+				.newInstance()
+				.create()
+				.assertionLimit( 200L )
+				.timeLimit( 500L )
+				.requestsLimit( 20000L )
+				.label( projectNameField.getText() )
+				.build();
 
-		ComponentItem item = componentGenerator.labeled( "Fixed Rate" ).child( componentGenerator.labeled( "Web Page Runner" ).build() ).build();
+		ComponentBuilder.WithProjectAndComponentRegistry generateComponent = ComponentBuilder.create().project( project.getProject() ).componentRegistry( registry );
 
+		ComponentItem runner = generateComponent
+				.labeled( "Web Page Runner" )
+				.property( "url", String.class, "http://05ten.se" )
+				.build();
+
+		ComponentItem rate = generateComponent
+				.labeled( "Fixed Rate" )
+				.property( "rate", Long.class, 1337L )
+				.returnLink( true )
+				.child( runner )
+				.build();
+
+		projectRefCarousel.setSelected( Iterables.find( projectRefCarousel.getItems(), new Predicate<ProjectRefView>()
+		{
+			@Override
+			public boolean apply( ProjectRefView view )
+			{
+				return project.getProjectFile().getAbsolutePath().equals( view.getProjectRef().getProjectFile().getAbsolutePath() );
+			}
+		}, Iterables.getFirst( projectRefCarousel.getItems(), null ) ) );
+
+		/*
+		System.out.println("Properties of a Fixed Rate Generator:\n========================================");
+		for(Property<?> p : rate.getProperties()){
+			System.out.println( "Key: " + p.getKey() + ", Value: " + p.getStringValue() + ", Type: " + p.getType());
+		}
+
+		System.out.println("Properties of a Web Page Runner: \n========================================");
+		for(Property<?> p : runner.getProperties()){
+			System.out.println( "Key: " + p.getKey() + ", Value: " + p.getStringValue() + ", Type: " + p.getType());
+		} */
 	}
 
 	@FXML
