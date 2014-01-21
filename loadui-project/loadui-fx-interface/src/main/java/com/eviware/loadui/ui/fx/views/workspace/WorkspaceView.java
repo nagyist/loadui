@@ -16,9 +16,9 @@
 package com.eviware.loadui.ui.fx.views.workspace;
 
 import com.eviware.loadui.LoadUI;
+import com.eviware.loadui.api.component.ComponentCreationException;
 import com.eviware.loadui.api.component.ComponentRegistry;
 import com.eviware.loadui.api.model.*;
-import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.ui.fx.MenuItemsProvider;
 import com.eviware.loadui.ui.fx.MenuItemsProvider.Options;
 import com.eviware.loadui.ui.fx.api.input.DraggableEvent;
@@ -292,9 +292,8 @@ public class WorkspaceView extends StackPane
 
 	@FXML
 	@SuppressWarnings( "unused" )
-	public void projectBuilder()
+	public void projectBuilder() throws ComponentCreationException
 	{
-
 		if (projectNameField.getText().isEmpty()){
 			projectNameField.setText( "Example Project #" + new Random().nextInt( 200 ) );
 		}
@@ -311,16 +310,19 @@ public class WorkspaceView extends StackPane
 
 		ComponentBuilder.WithProjectAndComponentRegistry generateComponent = ComponentBuilder.create().project( project.getProject() ).componentRegistry( registry );
 
-		ComponentItem runner = generateComponent
-				.labeled( "Web Page Runner" )
-				.property( "url", String.class, "http://05ten.se" )
-				.build();
-
 		ComponentItem rate = generateComponent
-				.labeled( "Fixed Rate" )
+				.type( "Fixed Rate" )
 				.property( "rate", Long.class, 1337L )
 				.returnLink( true )
-				.child( runner )
+				.child(
+						generateComponent
+								.type( "Web Page Runner" )
+								.property( "url", String.class, "http://05ten.se" )
+								.child(										generateComponent
+												.type( "Table Log" )
+												.build() )
+								.build()
+				)
 				.build();
 
 		projectRefCarousel.setSelected( Iterables.find( projectRefCarousel.getItems(), new Predicate<ProjectRefView>()
@@ -331,17 +333,6 @@ public class WorkspaceView extends StackPane
 				return project.getProjectFile().getAbsolutePath().equals( view.getProjectRef().getProjectFile().getAbsolutePath() );
 			}
 		}, Iterables.getFirst( projectRefCarousel.getItems(), null ) ) );
-
-		/*
-		System.out.println("Properties of a Fixed Rate Generator:\n========================================");
-		for(Property<?> p : rate.getProperties()){
-			System.out.println( "Key: " + p.getKey() + ", Value: " + p.getStringValue() + ", Type: " + p.getType());
-		}
-
-		System.out.println("Properties of a Web Page Runner: \n========================================");
-		for(Property<?> p : runner.getProperties()){
-			System.out.println( "Key: " + p.getKey() + ", Value: " + p.getStringValue() + ", Type: " + p.getType());
-		} */
 	}
 
 	@FXML

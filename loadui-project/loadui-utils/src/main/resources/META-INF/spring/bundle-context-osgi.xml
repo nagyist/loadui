@@ -3,6 +3,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
                       http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi-1.0.xsd">
-	
-	<osgi:service ref="messageTestEventFactory" interface="com.eviware.loadui.api.testevents.TestEvent$Factory" />
+
+    <osgi:reference interface="com.eviware.loadui.api.model.WorkspaceProvider" id="workspaceProvider" />
+
+    <osgi:service ref="messageTestEventFactory" interface="com.eviware.loadui.api.testevents.TestEvent$Factory" />
+
+    <osgi:service ref="projectBuilder" interface="com.eviware.loadui.api.model.ProjectBuilderFactory"/>
+
 </beans>

@@ -1,4 +1,4 @@
-package com.eviware.loadui.impl.model.canvas.project;
+package com.eviware.loadui.util.projects;
 
 import com.eviware.loadui.api.component.ComponentRegistry;
 import com.eviware.loadui.api.model.*;
@@ -13,17 +13,15 @@ public class ProjectBuilderFactoryImpl implements ProjectBuilderFactory
 {
 
 	private WorkspaceProvider workspaceProvider;
-	private ComponentRegistry componentRegistry;
 
-	public ProjectBuilderFactoryImpl( WorkspaceProvider workspaceProvider, ComponentRegistry componentRegistry )
+	public ProjectBuilderFactoryImpl( WorkspaceProvider workspaceProvider )
 	{
 		this.workspaceProvider = workspaceProvider;
-		this.componentRegistry = componentRegistry;
 	}
 
 	public ProjectBuilderImpl newInstance()
 	{
-	  return new ProjectBuilderImpl( workspaceProvider, componentRegistry );
+	  return new ProjectBuilderImpl( workspaceProvider );
 	}
 }
 

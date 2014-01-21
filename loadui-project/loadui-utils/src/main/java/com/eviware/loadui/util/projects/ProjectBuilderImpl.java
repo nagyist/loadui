@@ -13,76 +13,21 @@ import java.util.List;
 /**
  * Created by osten on 1/16/14.
  */
-
 public class ProjectBuilderImpl implements ProjectBuilder
 {
-	private ComponentRegistry componentRegistry;
 	private WorkspaceProvider workspaceProvider;
-	ProjectBlueprint blueprint;
 
 	Logger log = LoggerFactory.getLogger( ProjectBuilder.class );
 
-	public ProjectBuilderImpl( WorkspaceProvider workspaceProvider, ComponentRegistry componentRegistry )
+	public ProjectBuilderImpl( WorkspaceProvider workspaceProvider )
 	{
-		this.componentRegistry = componentRegistry;
 		this.workspaceProvider = workspaceProvider;
 	}
 
 	@Override
-	public ProjectBuilder create()
+	public ProjectBlueprint create()
 	{
-		blueprint = new ProjectBlueprint();
-		return this;
-	}
-
-	@Override
-	public ProjectBuilder where( File where )
-	{
-		blueprint.setProjectFile( where );
-		return this;
-	}
-
-	@Override
-	public ProjectBuilder requestsLimit( Long requests )
-	{
-		blueprint.setRequestLimit( requests );
-		return this;
-	}
-
-	@Override
-	public ProjectBuilder timeLimit( Long seconds )
-	{
-		blueprint.setTimeLimit( seconds );
-		return this;
-	}
-
-	@Override
-	public ProjectBuilder assertionLimit( Long assertionFailures )
-	{
-		blueprint.setAssertionFailureLimit( assertionFailures );
-		return this;
-	}
-
-	@Override
-	public ProjectBuilder label( String name )
-	{
-		blueprint.setLabel( name );
-		return this;
-	}
-
-	@Override
-	public ProjectBuilder importProject( boolean bool )
-	{
-		blueprint.importProject( bool );
-   	return this;
-	}
-
-	@Override
-	public ProjectRef build()
-	{
-		ProjectRef project = assemble( blueprint );
-		workspaceProvider.loadDefaultWorkspace();
-		return project;
+		return new ProjectBlueprint();
 	}
 
 	private boolean save( File file ){
@@ -104,23 +49,19 @@ public class ProjectBuilderImpl implements ProjectBuilder
 
       project.getProject().setLimit( CanvasItem.REQUEST_COUNTER, blueprint.getRequestLimit() );
 		project.getProject().setLimit( CanvasItem.TIMER_COUNTER, blueprint.getTimeLimit() );
-		project.getProject().setLimit( CanvasItem.FAILURE_COUNTER, blueprint.getTimeLimit() );
+		project.getProject().setLimit( CanvasItem.FAILURE_COUNTER, blueprint.getAssertionFailureLimit() );
 
-		if( blueprint.importProject() ){
-		 	save( project.getProjectFile() );
-		}
+		save( project.getProjectFile() );
 
 		return project;
 	}
 
-	private class ProjectBlueprint
+	public class ProjectBlueprint implements ProjectBuilder.ProjectBlueprint
 	{
-		private static final boolean DEFAULT_IMPORT_PROJECT = false;
 		private static final long DEFAULT_REQUEST_LIMIT = 0;
 		private static final long DEFAULT_ASSERTION_FAILURE_LIMIT = 0;
 		private static final long DEFAULT_TIME_LIMIT = 0;
 
-		private boolean importProject;
 		private File projectFile;
 		private List<List<ComponentItem>> componentChains;
 		private String label;
@@ -128,8 +69,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		private long timeLimit;
 		private long assertionFailureLimit;
 
-		public ProjectBlueprint(){
-
+      private ProjectBlueprint(){
 			try
 			{
 				setProjectFile( File.createTempFile( "loadui-project", ".xml" ) );
@@ -139,82 +79,111 @@ public class ProjectBuilderImpl implements ProjectBuilder
 				log.error( "cannot create a temporary project" );
 			}
 			setLabel( projectFile.getName() );
-
 			setComponentChains( new ArrayList<List<ComponentItem>>() );
-			importProject( DEFAULT_IMPORT_PROJECT );
 			setRequestLimit( DEFAULT_REQUEST_LIMIT );
 			setAssertionFailureLimit( DEFAULT_ASSERTION_FAILURE_LIMIT );
 			setTimeLimit( DEFAULT_TIME_LIMIT );
 		}
 
-		public boolean importProject()
-		{
-			return importProject;
-		}
-
-		public void importProject( boolean importProject )
-		{
-			this.importProject = importProject;
-		}
-
-		public File getProjectFile()
+      private File getProjectFile()
 		{
 			return projectFile;
 		}
 
-		public void setProjectFile( File where )
+		private void setProjectFile( File where )
 		{
 			this.projectFile = where;
 		}
 
-		public List<List<ComponentItem>> getComponentChains()
+		private List<List<ComponentItem>> getComponentChains()
 		{
 			return componentChains;
 		}
 
-		public void setComponentChains( List<List<ComponentItem>> componentChains )
+		private void setComponentChains( List<List<ComponentItem>> componentChains )
 		{
 			this.componentChains = componentChains;
 		}
 
-		public String getLabel()
+		private String getLabel()
 		{
 			return label;
 		}
 
-		public void setLabel( String label )
+		private void setLabel( String label )
 		{
 			this.label = label;
 		}
 
-		public long getRequestLimit()
+		private long getRequestLimit()
 		{
 			return requestLimit;
 		}
 
-		public void setRequestLimit( long requestLimit )
+		private void setRequestLimit( long requestLimit )
 		{
 			this.requestLimit = requestLimit;
 		}
 
-		public long getTimeLimit()
+		private long getTimeLimit()
 		{
 			return timeLimit;
 		}
 
-		public void setTimeLimit( long timeLimit )
+		private void setTimeLimit( long timeLimit )
 		{
 			this.timeLimit = timeLimit;
 		}
 
-		public long getAssertionFailureLimit()
+		private long getAssertionFailureLimit()
 		{
 			return assertionFailureLimit;
 		}
 
-		public void setAssertionFailureLimit( long assertionFailureLimit )
+		private void setAssertionFailureLimit( long assertionFailureLimit )
 		{
 			this.assertionFailureLimit = assertionFailureLimit;
+		}
+
+		@Override
+		public ProjectBlueprint where( File where )
+		{
+			projectFile = where;
+			return this;
+		}
+
+		@Override
+		public ProjectBlueprint requestsLimit( Long requests )
+		{
+			setRequestLimit( requests );
+			return this;
+		}
+
+		@Override
+		public ProjectBlueprint timeLimit( Long seconds )
+		{
+			setTimeLimit( seconds );
+			return this;
+		}
+
+		@Override
+		public ProjectBlueprint assertionLimit( Long assertionFailures )
+		{
+			setAssertionFailureLimit( assertionFailures );
+			return this;
+		}
+
+		@Override
+		public ProjectBlueprint label( String name )
+		{
+			setLabel( name );
+			return this;
+		}
+
+		@Override
+		public ProjectRef build()
+		{
+		   return assemble( this );
 		}
 	}
 }
