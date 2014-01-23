@@ -1,5 +1,6 @@
 package com.eviware.loadui.components.soapui.utils;
 
+import com.eviware.soapui.support.NullProgressDialog;
 import com.eviware.x.dialogs.XDialogs;
 import com.eviware.x.dialogs.XProgressDialog;
 
@@ -55,25 +56,25 @@ public class NoOpXDialogs implements XDialogs
 	@Override
 	public String prompt( String s, String s2, String s3 )
 	{
-		return null;
+		return "";
 	}
 
 	@Override
 	public String prompt( String s, String s2 )
 	{
-		return null;
+		return "";
 	}
 
 	@Override
 	public Object prompt( String s, String s2, Object[] objects )
 	{
-		return null;
+		return "";
 	}
 
 	@Override
 	public Object prompt( String s, String s2, Object[] objects, String s3 )
 	{
-		return null;
+		return "";
 	}
 
 	@Override
@@ -85,7 +86,7 @@ public class NoOpXDialogs implements XDialogs
 	@Override
 	public XProgressDialog createProgressDialog( String s, int i, String s2, boolean b )
 	{
-		return null;
+		return new NullProgressDialog();
 	}
 
 	@Override
@@ -103,6 +104,6 @@ public class NoOpXDialogs implements XDialogs
 	@Override
 	public String selectXPath( String s, String s2, String s3, String s4 )
 	{
-		return null;
+		return "";
 	}
 }
