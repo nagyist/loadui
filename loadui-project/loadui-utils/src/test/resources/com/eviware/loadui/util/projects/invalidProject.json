@@ -1,0 +1,27 @@
+{
+	"loadRecipe":
+		{
+			"limits":
+			[
+				{
+					"type" : "requestLimit",
+					"maxValue" : 200
+				}
+			],
+			"scenarios":
+			[
+				{
+					"runner":"HTTP",
+					"loadProfile":
+					{
+					   "type":"concurrent",
+                  "keyFrames":
+                  [
+
+                  ]
+					}
+				}
+			]
+		}
+	}
+}
