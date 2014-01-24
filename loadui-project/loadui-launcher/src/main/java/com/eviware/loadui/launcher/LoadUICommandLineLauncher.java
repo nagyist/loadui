@@ -15,30 +15,20 @@
  */
 package com.eviware.loadui.launcher;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.eviware.loadui.launcher.api.GroovyCommand;
+import com.eviware.loadui.launcher.impl.FileGroovyCommand;
+import com.eviware.loadui.launcher.impl.ResourceGroovyCommand;
 import javafx.application.Application;
 import javafx.concurrent.Task;
 import javafx.stage.Stage;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
-import com.eviware.loadui.launcher.api.GroovyCommand;
-import com.eviware.loadui.launcher.impl.FileGroovyCommand;
-import com.eviware.loadui.launcher.impl.ResourceGroovyCommand;
+import java.io.File;
+import java.util.*;
 
 public class LoadUICommandLineLauncher extends LoadUILauncher
 {
@@ -122,27 +112,6 @@ public class LoadUICommandLineLauncher extends LoadUILauncher
 	@Override
 	protected void processCommandLine( CommandLine cmd )
 	{
-		try (InputStream is = getClass().getResourceAsStream( "/packages-extra.txt" ))
-		{
-			if( is != null )
-			{
-				StringBuilder out = new StringBuilder();
-				byte[] b = new byte[4096];
-				for( int n; ( n = is.read( b ) ) != -1; )
-					out.append( new String( b, 0, n ) );
-
-				String extra = configProps.getProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, "" );
-				if( !extra.isEmpty() )
-					out.append( "," ).append( extra );
-
-				configProps.setProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, out.toString() );
-			}
-		}
-		catch( IOException e )
-		{
-			e.printStackTrace();
-		}
-
 		Map<String, Object> attributes = new HashMap<>();
 
 		if( cmd.hasOption( PROJECT_OPTION ) )

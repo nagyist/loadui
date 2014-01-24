@@ -73,15 +73,20 @@ public abstract class LoadUILauncher
 		{
 			if( arg.contains( "cmd" ) )
 			{
-				List<String> argList = new ArrayList<>( Arrays.asList( args ) );
-				argList.remove( arg );
-				String[] newArgs = argList.toArray( new String[argList.size()] );
-				Application.launch( CommandApplication.class, newArgs );
+				launchCmdRunner( args, arg );
 				return;
 			}
 		}
 
 		Application.launch( FXApplication.class, args );
+	}
+
+	private static void launchCmdRunner( String[] args, String arg )
+	{
+		List<String> argList = new ArrayList<>( Arrays.asList( args ) );
+		argList.remove( arg );
+		String[] newArgs = argList.toArray( new String[argList.size()] );
+		Application.launch( CommandApplication.class, newArgs );
 	}
 
 	private static void printLoadUIASCIILogo()
@@ -344,6 +349,8 @@ public abstract class LoadUILauncher
 			ensureNoOtherInstance();
 		}
 
+		processOsgiExtraPackages();
+
 		processCommandLine( cmd );
 
 		framework = new FrameworkFactory().newFramework( configProps );
@@ -406,7 +413,7 @@ public abstract class LoadUILauncher
 
 			try
 			{
-				@SuppressWarnings( "resource" )
+				@SuppressWarnings("resource")
 				RandomAccessFile randomAccessFile = new RandomAccessFile( lockFile, "rw" );
 				FileLock lock = randomAccessFile.getChannel().tryLock();
 				if( lock == null )
@@ -429,6 +436,30 @@ public abstract class LoadUILauncher
 		{
 			e.printStackTrace();
 			exitInError();
+		}
+	}
+
+	private void processOsgiExtraPackages()
+	{
+		try (InputStream is = getClass().getResourceAsStream( "/packages-extra.txt" ))
+		{
+			if( is != null )
+			{
+				StringBuilder out = new StringBuilder();
+				byte[] b = new byte[4096];
+				for( int n; ( n = is.read( b ) ) != -1; )
+					out.append( new String( b, 0, n ) );
+
+				String extra = configProps.getProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, "" );
+				if( !extra.isEmpty() )
+					out.append( "," ).append( extra );
+
+				configProps.setProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, out.toString() );
+			}
+		}
+		catch( IOException e )
+		{
+			e.printStackTrace();
 		}
 	}
 
