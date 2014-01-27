@@ -47,7 +47,7 @@ public class ProjectPlaybackTest extends SimpleWebTestBase
 	{
 		ProjectItem project = getProjectItem();
 
-		long veryHighLoad = 10_000;
+		long veryHighLoad = 5_000;
 		turnKnobIn( FIXED_RATE_GENERATOR ).to( veryHighLoad );
 
 		setMaxConcurrentRequestsTo( 1_000 );

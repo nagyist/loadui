@@ -15,16 +15,16 @@
  */
 package com.eviware.loadui.impl.statistics;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
 import com.eviware.loadui.api.statistics.EntryAggregator;
 import com.eviware.loadui.api.statistics.StatisticVariable;
 import com.eviware.loadui.api.statistics.StatisticsManager;
 import com.eviware.loadui.api.statistics.StatisticsWriterFactory;
 import com.eviware.loadui.api.statistics.store.Entry;
 import com.google.common.collect.Iterables;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * 
@@ -126,13 +126,11 @@ public class ThroughputStatisticsWriter extends AbstractStatisticsWriter
 
 			double tpsSum = 0;
 			double bpsSum = 0;
-			long minTime = Long.MAX_VALUE;
 			long maxTime = -1;
 			for( Entry entry : entries )
 			{
 				bpsSum += entry.getValue( Stats.BPS.name() ).doubleValue();
 				tpsSum += entry.getValue( Stats.TPS.name() ).doubleValue();
-				minTime = Math.min( minTime, entry.getTimestamp() );
 				maxTime = Math.max( maxTime, entry.getTimestamp() );
 			}
 

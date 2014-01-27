@@ -27,15 +27,15 @@
 import java.util.concurrent.TimeUnit
 
 //Properties
-createProperty( 'rate', Long, 10 ) { schedule() }
-createProperty( 'unit', String, 'Sec' ) { schedule() }
+rate = createProperty( 'rate', Long, 10 ) { schedule() }
+unit = createProperty( 'unit', String, 'Sec' ) { schedule() }
 
 onReplace( stateProperty ) { value ->
 	if( value ) schedule()
 	else future?.cancel( true )
 }
 
-createProperty( 'burstSize', Long, 1 )
+burstSize = createProperty( 'burstSize', Long, 1 )
 
 triggerBurst = { 
 	burstSize.value.times {
