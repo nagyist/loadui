@@ -14,9 +14,7 @@ import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
-/**
- * Created by osten on 1/23/14.
- */
+
 public class LoadRecipeParserTest
 {
 	@Test

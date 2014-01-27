@@ -2,9 +2,6 @@ package com.eviware.loadui.api.model;
 
 import java.io.File;
 
-/**
- * Created by osten on 1/16/14.
- */
 public interface ProjectBuilder
 {
 	/**
@@ -46,6 +43,13 @@ public interface ProjectBuilder
 		 * @return
 		 */
 		public ProjectBlueprint assertionLimit( Long assertionFailures );
+
+		/**
+		 * Creates a LoadUI Scenario
+		 * @param label
+		 * @return
+		 */
+		public ProjectBlueprint scenario( String label );
 
 		/**
 		 * Label of the project.

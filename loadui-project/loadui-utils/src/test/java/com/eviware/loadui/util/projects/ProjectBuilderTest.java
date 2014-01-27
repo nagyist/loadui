@@ -5,20 +5,19 @@ import com.eviware.loadui.api.model.ProjectBuilder;
 import com.eviware.loadui.api.model.WorkspaceProvider;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import static org.mockito.Mockito.*;
 
-/**
- * Created by osten on 1/20/14.
- */
 public class ProjectBuilderTest
 {
 	private ProjectBuilder builder;
 	@Before
 	public void setup(){
-		//builder = new ProjectBuilderImpl( mock(WorkspaceProvider.class), mock( ComponentRegistry.class) );
+
 	}
 
+	@Ignore
 	@Test
 	public void blueprintShouldBeAccordingToBuild(){
 

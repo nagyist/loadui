@@ -18,9 +18,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * Created by osten on 1/16/14.
- */
+
 public class ComponentBuilder
 {
 	private ProjectItem project;

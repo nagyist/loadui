@@ -25,6 +25,7 @@ import static javafx.beans.binding.Bindings.when;
 
 import javax.annotation.Nullable;
 
+import com.eviware.loadui.ui.fx.control.fields.ValidatableNode;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -39,12 +40,11 @@ import javafx.scene.layout.VBoxBuilder;
 import javafx.util.Pair;
 
 import com.eviware.loadui.api.assertion.Constraint;
-import com.eviware.loadui.ui.fx.control.fields.Validatable;
 import com.eviware.loadui.ui.fx.control.fields.ValidatableLongField;
 import com.eviware.loadui.util.assertion.RangeConstraint;
 import com.google.common.base.Predicate;
 
-public class ConstraintPane extends VBox implements Validatable
+public class ConstraintPane extends VBox implements ValidatableNode
 {
 	private final ValidatableLongField minField;
 	private final ValidatableLongField maxField;

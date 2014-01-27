@@ -6,9 +6,6 @@ import com.eviware.loadui.util.projects.ProjectBuilderImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Created by osten on 1/14/14.
- */
 public class ProjectBuilderFactoryImpl implements ProjectBuilderFactory
 {
 

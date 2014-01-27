@@ -5,16 +5,16 @@
 			[
 				{
 					"type" : "requestLimit",
-					"maxValue" : 200
+					"value" : 200
 				}
 			],
 			"scenarios":
 			[
 				{
-					"runner":"HTTP",
+					"executor":"HTTP",
 					"loadProfile":
 					{
-					   "type":"concurrent",
+					   "philosophy":"concurrent",
                   "keyFrames":
                   [
 

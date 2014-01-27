@@ -17,6 +17,7 @@ package com.eviware.loadui.ui.fx.views.assertions;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.eviware.loadui.ui.fx.control.fields.ValidatableNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,6 @@ import com.eviware.loadui.api.statistics.Statistic;
 import com.eviware.loadui.api.statistics.StatisticHolder;
 import com.eviware.loadui.api.statistics.StatisticVariable;
 import com.eviware.loadui.api.traits.Labeled;
-import com.eviware.loadui.ui.fx.control.fields.Validatable;
 import com.eviware.loadui.ui.fx.util.TreeUtils;
 import com.eviware.loadui.util.StringUtils;
 import javafx.beans.property.BooleanProperty;
@@ -44,7 +44,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class AssertableTree extends TreeView<Labeled> implements Validatable
+public class AssertableTree extends TreeView<Labeled> implements ValidatableNode
 {
 	protected static final Logger log = LoggerFactory.getLogger( AssertableTree.class );
 

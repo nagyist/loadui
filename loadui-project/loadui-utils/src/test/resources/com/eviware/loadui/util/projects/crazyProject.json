@@ -23,35 +23,35 @@
                   "keyFrames":
                   	[
                   		{
-                  			"rate":10,
+                  			"value":10,
                   			"time":0
                   		},
                   		{
-                  			"rate":200,
+                  			"value":200,
                   			"time":50
                   		},
                   		{
-                  			"rate":200,
+                  			"value":200,
                   			"time":150
                   		},
                   		{
-                  			"rate":10,
+                  			"value":10,
                   			"time":200
                   		},
 								{
-                  			"rate":10,
+                  			"value":10,
                   			"time":250
                   		},
                   		{
-                  			"rate":200,
+                  			"value":200,
                   			"time":300
                   		},
                   		{
-                  			"rate":200,
+                  			"value":200,
                   			"time":450
                   		},
                   		{
-                  			"rate":10,
+                  			"value":10,
                   			"time":20000
                   		}
                   	]
@@ -73,19 +73,19 @@
                               "keyFrames":
                               	[
                               		{
-                              			"rate":10,
+                              			"value":10,
                               			"time":0
                               		},
                               		{
-                              			"rate":200,
+                              			"value":200,
                               			"time":50
                               		},
                               		{
-                              			"rate":200,
+                              			"value":200,
                               			"time":150
                               		},
                               		{
-                              			"rate":10,
+                              			"value":10,
                               			"time":200
                               		}
                               	]
@@ -107,19 +107,19 @@
                               "keyFrames":
                               	[
                               		{
-                              			"rate":10,
+                              			"value":10,
                               			"time":0
                               		},
                               		{
-                              			"rate":200,
+                              			"value":200,
                               			"time":50
                               		},
                               		{
-                              			"rate":200,
+                              			"value":200,
                               			"time":150
                               		},
                               		{
-                              			"rate":10,
+                              			"value":10,
                               			"time":200
                               		}
                               	]
@@ -141,54 +141,19 @@
                               "keyFrames":
                               	[
                               		{
-                              			"rate":10,
+                              			"value":10,
                               			"time":0
                               		},
                               		{
-                              			"rate":200,
+                              			"value":200,
                               			"time":50
                               		},
                               		{
-                              			"rate":200,
+                              			"value":200,
                               			"time":150
                               		},
                               		{
-                              			"rate":10,
-                              			"time":200
-                              		}
-                              	]
-            					},
-            					"properties":
-            					[
-            						{
-            							"key":"script",
-            							"value":"http://05ten.se/dejaclickExample.dcl",
-            							"type":"String"
-            						}
-            					]
-            				},
-
-            {
-            					"label":"Ramp until stable load test then ramp down 1",
-            					"runner":"DejaClick",
-            					"loadProfile":{
-            					   "type":"concurrent",
-                              "keyFrames":
-                              	[
-                              		{
-                              			"rate":10,
-                              			"time":0
-                              		},
-                              		{
-                              			"rate":200,
-                              			"time":50
-                              		},
-                              		{
-                              			"rate":200,
-                              			"time":150
-                              		},
-                              		{
-                              			"rate":10,
+                              			"value":10,
                               			"time":200
                               		}
                               	]
@@ -211,19 +176,54 @@
                               "keyFrames":
                               	[
                               		{
-                              			"rate":10,
+                              			"value":10,
                               			"time":0
                               		},
                               		{
-                              			"rate":200,
+                              			"value":200,
                               			"time":50
                               		},
                               		{
-                              			"rate":200,
+                              			"value":200,
                               			"time":150
                               		},
                               		{
-                              			"rate":10,
+                              			"value":10,
+                              			"time":200
+                              		}
+                              	]
+            					},
+            					"properties":
+            					[
+            						{
+            							"key":"script",
+            							"value":"http://05ten.se/dejaclickExample.dcl",
+            							"type":"String"
+            						}
+            					]
+            				},
+
+            {
+            					"label":"Ramp until stable load test then ramp down 1",
+            					"runner":"DejaClick",
+            					"loadProfile":{
+            					   "type":"concurrent",
+                              "keyFrames":
+                              	[
+                              		{
+                              			"value":10,
+                              			"time":0
+                              		},
+                              		{
+                              			"value":200,
+                              			"time":50
+                              		},
+                              		{
+                              			"value":200,
+                              			"time":150
+                              		},
+                              		{
+                              			"value":10,
                               			"time":200
                               		}
                               	]
@@ -245,19 +245,19 @@
                               "keyFrames":
                               	[
                               		{
-                              			"rate":10,
+                              			"value":10,
                               			"time":0
                               		},
                               		{
-                              			"rate":200,
+                              			"value":200,
                               			"time":50
                               		},
                               		{
-                              			"rate":200,
+                              			"value":200,
                               			"time":150
                               		},
                               		{
-                              			"rate":10,
+                              			"value":10,
                               			"time":200
                               		}
                               	]
@@ -280,11 +280,11 @@
 						"keyFrames":
 							[
 								{
-									"rate":50,
+									"value":50,
 									"time":0
 								},
 								{
-									"rate":50,
+									"value":50,
 									"time":200
 								}
 							]

@@ -23,19 +23,19 @@
                   "keyFrames":
                   	[
                   		{
-                  			"rate":10,
+                  			"value":10,
                   			"time":0
                   		},
                   		{
-                  			"rate":200,
+                  			"value":200,
                   			"time":50
                   		},
                   		{
-                  			"rate":200,
+                  			"value":200,
                   			"time":150
                   		},
                   		{
-                  			"rate":10,
+                  			"value":10,
                   			"time":200
                   		}
                   	]
@@ -58,11 +58,11 @@
 						"keyFrames":
 							[
 								{
-									"rate":50,
+									"value":50,
 									"time":0
 								},
 								{
-									"rate":50,
+									"value":50,
 									"time":200
 								}
 							]

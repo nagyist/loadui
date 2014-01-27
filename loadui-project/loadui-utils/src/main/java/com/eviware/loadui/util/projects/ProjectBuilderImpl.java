@@ -10,9 +10,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by osten on 1/16/14.
- */
 public class ProjectBuilderImpl implements ProjectBuilder
 {
 	private WorkspaceProvider workspaceProvider;
@@ -170,6 +167,13 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		public ProjectBlueprint assertionLimit( Long assertionFailures )
 		{
 			setAssertionFailureLimit( assertionFailures );
+			return this;
+		}
+
+		@Override
+		public ProjectBuilder.ProjectBlueprint scenario( String label )
+		{
+			//TODO Create scenario
 			return this;
 		}
 
