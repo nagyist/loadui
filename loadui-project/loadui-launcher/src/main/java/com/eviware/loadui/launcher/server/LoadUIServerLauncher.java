@@ -1,20 +1,6 @@
-/*
- * Copyright 2013 SmartBear Software
- * 
- * Licensed under the EUPL, Version 1.1 or - as soon they will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the Licence.
- * You may obtain a copy of the Licence at:
- * 
- * http://ec.europa.eu/idabc/eupl
- * 
- * Unless required by applicable law or agreed to in writing, software distributed under the Licence is
- * distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the Licence for the specific language governing permissions and limitations
- * under the Licence.
- */
-package com.eviware.loadui.launcher;
+package com.eviware.loadui.launcher.server;
 
+import com.eviware.loadui.launcher.HeadlessFxLauncherBase;
 import com.eviware.loadui.launcher.api.GroovyCommand;
 import com.eviware.loadui.launcher.impl.FileGroovyCommand;
 import com.eviware.loadui.launcher.impl.ResourceGroovyCommand;
@@ -25,7 +11,10 @@ import org.apache.commons.cli.Options;
 import java.io.File;
 import java.util.*;
 
-public class LoadUICommandLineLauncher extends HeadlessFxLauncherBase
+/**
+ * @author renato
+ */
+public class LoadUIServerLauncher extends HeadlessFxLauncherBase
 {
 	protected static final String LOCAL_OPTION = "l";
 	protected static final String FILE_OPTION = "f";
@@ -44,7 +33,8 @@ public class LoadUICommandLineLauncher extends HeadlessFxLauncherBase
 	protected static final String STATISTICS_REPORT_COMPARE_OPTION = "c";
 	protected static final String ABORT_ONGOING_REQUESTS_OPTION = "A";
 
-	public LoadUICommandLineLauncher( String[] args )
+
+	public LoadUIServerLauncher( String[] args )
 	{
 		super( args );
 	}

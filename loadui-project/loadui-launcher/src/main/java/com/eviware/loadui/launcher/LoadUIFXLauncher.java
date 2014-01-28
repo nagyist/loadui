@@ -30,7 +30,6 @@ import org.apache.commons.cli.CommandLine;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.logging.Logger;
 
@@ -51,26 +50,7 @@ public class LoadUIFXLauncher extends LoadUILauncher
 	@Override
 	protected void processCommandLine( CommandLine cmdLine )
 	{
-		try(InputStream is = getClass().getResourceAsStream( "/packages-extra.txt" ))
-		{
-			if( is != null )
-			{
-				StringBuilder out = new StringBuilder();
-				byte[] b = new byte[4096];
-				for( int n; ( n = is.read( b ) ) != -1; )
-					out.append( new String( b, 0, n ) );
 
-				String extra = configProps.getProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, "" );
-				if( !extra.isEmpty() )
-					out.append( "," ).append( extra );
-
-				configProps.setProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, out.toString() );
-			}
-		}
-		catch( IOException e )
-		{
-			e.printStackTrace();
-		}
 	}
 
 	public static class FXApplication extends Application
