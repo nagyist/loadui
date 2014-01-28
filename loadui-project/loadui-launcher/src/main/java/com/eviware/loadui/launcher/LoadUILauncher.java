@@ -212,7 +212,7 @@ public abstract class LoadUILauncher
 		}
 	}
 
-	protected void init()
+	public void init()
 	{
 		String extra = configProps.getProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, "" );
 		configProps.put( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA,
@@ -319,7 +319,7 @@ public abstract class LoadUILauncher
 
 	private void processOsgiExtraPackages()
 	{
-		try (InputStream is = getClass().getResourceAsStream( "/packages-extra.txt" ))
+		try(InputStream is = getClass().getResourceAsStream( "/packages-extra.txt" ))
 		{
 			if( is != null )
 			{
@@ -350,8 +350,11 @@ public abstract class LoadUILauncher
 		}
 		catch( InterruptedException e )
 		{
+		} finally
+		{
+			System.exit( -1 );
 		}
-		System.exit( -1 );
+
 	}
 
 	protected void printUsageAndQuit()
@@ -362,7 +365,7 @@ public abstract class LoadUILauncher
 		OSGiUtils.shutdown();
 	}
 
-	protected void start()
+	public void start()
 	{
 		try
 		{
