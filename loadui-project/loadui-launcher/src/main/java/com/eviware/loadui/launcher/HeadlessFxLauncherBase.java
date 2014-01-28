@@ -4,7 +4,6 @@ import com.eviware.loadui.launcher.api.GroovyCommand;
 import javafx.application.Application;
 import javafx.concurrent.Task;
 import javafx.stage.Stage;
-import org.apache.commons.cli.CommandLine;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -22,22 +21,15 @@ public abstract class HeadlessFxLauncherBase extends LoadUILauncher
 		super( args );
 	}
 
-	public GroovyCommand getCommand()
+	protected void setCommand( GroovyCommand command )
+	{
+		this.command = command;
+	}
+
+	protected GroovyCommand getCommand()
 	{
 		return command;
 	}
-
-	@Override
-	protected final void processCommandLine( CommandLine cmdLine )
-	{
-		command = createCommand( cmdLine );
-		if( command == null )
-		{
-			printUsageAndQuit();
-		}
-	}
-
-	protected abstract GroovyCommand createCommand( CommandLine cmdLine );
 
 	@Override
 	protected void beforeBundlesStart( Bundle[] bundles )
@@ -106,12 +98,6 @@ public abstract class HeadlessFxLauncherBase extends LoadUILauncher
 					launcher = createLauncher( getParameters().getRaw().toArray( new String[0] ) );
 					launcher.init();
 					launcher.start();
-
-					GroovyCommand command = launcher.getCommand();
-
-					if( command != null )
-						framework.getBundleContext().registerService( GroovyCommand.class.getName(), command, null );
-
 					return null;
 				}
 			};
@@ -124,8 +110,9 @@ public abstract class HeadlessFxLauncherBase extends LoadUILauncher
 		@Override
 		public void stop() throws Exception
 		{
-			launcher.framework.getBundleContext().getBundle( 0 ).stop();
+			launcher.stop();
 		}
+
 	}
 
 }

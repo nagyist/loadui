@@ -50,7 +50,15 @@ public class LoadUICommandLineLauncher extends HeadlessFxLauncherBase
 	}
 
 	@Override
-	protected GroovyCommand createCommand( CommandLine cmd )
+	public void start()
+	{
+		super.start();
+		if( getCommand() != null )
+			publishService( GroovyCommand.class, getCommand(), null );
+	}
+
+	@Override
+	protected void processCommandLine( CommandLine cmd )
 	{
 		Map<String, Object> attributes = new HashMap<>();
 
@@ -98,16 +106,17 @@ public class LoadUICommandLineLauncher extends HeadlessFxLauncherBase
 
 			attributes.put( "retainZoom", cmd.hasOption( RETAIN_SAVED_ZOOM_LEVELS ) );
 
-			return new ResourceGroovyCommand( "/RunTest.groovy", attributes );
+			setCommand( new ResourceGroovyCommand( "/RunTest.groovy", attributes ) );
 		}
 		else if( cmd.hasOption( FILE_OPTION ) )
 		{
-			return new FileGroovyCommand( new File( cmd.getOptionValue( FILE_OPTION ) ), attributes );
+			setCommand( new FileGroovyCommand( new File( cmd.getOptionValue( FILE_OPTION ) ), attributes ) );
 		}
 		else
 		{
-			return null;
+			printUsageAndQuit();
 		}
+
 	}
 
 	@Override

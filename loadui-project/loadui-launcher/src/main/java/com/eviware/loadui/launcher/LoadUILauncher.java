@@ -33,6 +33,7 @@ import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Dictionary;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -57,7 +58,7 @@ public abstract class LoadUILauncher
 
 	private final static Logger log = Logger.getLogger( LoadUILauncher.class.getName() );
 
-	protected static Framework framework;
+	private Framework framework;
 	protected final Properties configProps;
 	protected final String[] argv;
 	private final Options options;
@@ -377,6 +378,18 @@ public abstract class LoadUILauncher
 		{
 			e.printStackTrace();
 		}
+	}
+
+	public void stop() throws Exception
+	{
+		framework.getBundleContext().getBundle( 0 ).stop();
+	}
+
+	public <K> void publishService( Class<K> serviceClass,
+											  K service,
+											  Dictionary<String, ?> properties )
+	{
+		framework.getBundleContext().registerService( serviceClass, service, properties );
 	}
 
 	protected Options createOptions()
