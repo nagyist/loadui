@@ -1,23 +1,35 @@
 package com.eviware.loadui.util.projects;
 
+import com.eviware.loadui.api.component.ComponentCreationException;
+import com.eviware.loadui.api.component.ComponentDescriptor;
 import com.eviware.loadui.api.component.ComponentRegistry;
+import com.eviware.loadui.api.component.categories.RunnerCategory;
 import com.eviware.loadui.api.model.*;
+import com.eviware.loadui.api.property.Property;
+import com.eviware.loadui.api.terminal.InputTerminal;
+import com.eviware.loadui.api.terminal.OutputTerminal;
+import com.eviware.loadui.api.terminal.Terminal;
+import com.eviware.loadui.util.CanvasItemNameGenerator;
+import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class ProjectBuilderImpl implements ProjectBuilder
 {
 	private WorkspaceProvider workspaceProvider;
+	private ComponentRegistry componentRegistry;
 
 	Logger log = LoggerFactory.getLogger( ProjectBuilder.class );
 
-	public ProjectBuilderImpl( WorkspaceProvider workspaceProvider )
+	public ProjectBuilderImpl( ComponentRegistry componentRegistry, WorkspaceProvider workspaceProvider )
 	{
+		this.componentRegistry = componentRegistry;
 		this.workspaceProvider = workspaceProvider;
 	}
 
@@ -27,7 +39,8 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		return new ProjectBlueprint();
 	}
 
-	private boolean save( File file ){
+	private boolean save( File file )
+	{
 		try
 		{
 			workspaceProvider.getWorkspace().importProject( file, true );
@@ -39,19 +52,133 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		}
 	}
 
-	private ProjectRef assemble( ProjectBlueprint blueprint ){
+	private ProjectRef assembleProjectByBlueprint( ProjectBlueprint blueprint )
+	{
 
 		ProjectRef project = workspaceProvider.getWorkspace().createProject( blueprint.getProjectFile(), blueprint.getLabel(), true );
 		project.setLabel( blueprint.getLabel() );
 
-      project.getProject().setLimit( CanvasItem.REQUEST_COUNTER, blueprint.getRequestLimit() );
+		project.getProject().setLimit( CanvasItem.REQUEST_COUNTER, blueprint.getRequestLimit() );
 		project.getProject().setLimit( CanvasItem.TIMER_COUNTER, blueprint.getTimeLimit() );
 		project.getProject().setLimit( CanvasItem.FAILURE_COUNTER, blueprint.getAssertionFailureLimit() );
+
+		assembleComponentsByBlueprint( project, blueprint.getComponentBlueprints() );
 
 		save( project.getProjectFile() );
 
 		return project;
 	}
+
+	private void assembleComponentsByBlueprint( ProjectRef project, List<ComponentBlueprint> componentBlueprint )
+	{
+
+		for( ComponentBlueprint blueprint : componentBlueprint )
+		{
+			try
+			{
+				assembleComponent( project, blueprint );
+			}
+			catch( ComponentCreationException e )
+			{
+				log.error( "Cannot create component. " + e.getMessage() );
+			}
+		}
+	}
+
+	public ComponentItem assembleComponent( ProjectRef project, ComponentBlueprint blueprint ) throws ComponentCreationException
+	{
+		ComponentDescriptor descriptor = componentRegistry.findDescriptor( blueprint.getComponentType() );
+
+		try
+		{
+			Preconditions.checkNotNull( descriptor );
+		}
+		catch( NullPointerException e )
+		{
+			throw new ComponentCreationException( "Component descriptor " + blueprint.getComponentType() + " does not exist in the component-registry." );
+		}
+
+		String label = CanvasItemNameGenerator.generateComponentName( project.getProject(), descriptor.getLabel() );
+		ComponentItem parentComponent = project.getProject().createComponent( label, descriptor );
+
+		if( !blueprint.getChildren().isEmpty() )
+		{
+			for( ComponentBlueprint child : blueprint.getChildren()){
+				ComponentItem childComponent = assembleComponent( project, child );
+				connectToChild( project, parentComponent, childComponent );
+
+				if( blueprint.isConcurrentUsers() )
+				{
+					applyConcurrentUsersConnection( project, parentComponent, childComponent );
+				}
+			}
+		}
+
+		modifyProperties( parentComponent, blueprint.getProperties() );
+
+     	return parentComponent;
+	}
+
+	private void applyConcurrentUsersConnection( ProjectRef project, ComponentItem parentComponent, ComponentItem childComponent )
+	{
+
+		String runningTerminal = "runningTerminal";
+		boolean parentHasRunningTerminal = parentComponent.getTerminalByName( runningTerminal ) != null;
+
+		if( parentHasRunningTerminal )
+		{
+			parentComponent.getTerminalByName( runningTerminal );
+			CanvasItem canvas = project.getProject().getCanvas();
+
+			if( childComponent.getCategory().equals( RunnerCategory.CATEGORY ) )
+			{
+				Terminal currentlyRunning = childComponent.getTerminalByName( RunnerCategory.CURRENLY_RUNNING_TERMINAL );
+				Terminal runningInputTerminal = parentComponent.getTerminalByName( runningTerminal );
+				canvas.connect( ( OutputTerminal )currentlyRunning, ( InputTerminal )runningInputTerminal );
+			}
+		}else{
+			log.error( "Cannot apply additional connection for concurrent users. Can't find the runningTerminal on parent component. " );
+		}
+	}
+
+	private void modifyProperties( ComponentItem component, List<ComponentBlueprint.PropertyDescriptor> properties )
+	{
+		for( ComponentBlueprint.PropertyDescriptor newProperty : properties )
+		{
+			Property<?> componentProperty = component.getProperty( newProperty.getKey() );
+
+			if( newProperty.getType().getSimpleName().equals( componentProperty.getType().getSimpleName() ) )
+			{
+				componentProperty.setValue( newProperty.getValue() );
+			}
+			else
+			{
+				throw new IllegalArgumentException( "Value of property " + newProperty.getKey() + " is of type " + component.getType() + " and is not applicable to " + newProperty.getType() );
+			}
+		}
+	}
+
+	private void connectToChild( ProjectRef project, ComponentItem parent, ComponentItem child )
+	{
+		Iterator<Terminal> terminals = parent.getTerminals().iterator();
+		Terminal parentTerminal = terminals.next();
+
+		while( parentTerminal instanceof InputTerminal )
+		{
+			parentTerminal = terminals.next();
+		}
+
+		Iterator<Terminal> childTerminals = child.getTerminals().iterator();
+		Terminal childTerminal = childTerminals.next();
+
+		while( childTerminal instanceof OutputTerminal )
+		{
+			childTerminal = childTerminals.next();
+		}
+
+		project.getProject().getCanvas().connect( ( OutputTerminal )parentTerminal, ( InputTerminal )childTerminal );
+	}
+
 
 	public class ProjectBlueprint implements ProjectBuilder.ProjectBlueprint
 	{
@@ -60,13 +187,14 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		private static final long DEFAULT_TIME_LIMIT = 0;
 
 		private File projectFile;
-		private List<List<ComponentItem>> componentChains;
+		private List<ComponentBlueprint> components;
 		private String label;
 		private long requestLimit;
 		private long timeLimit;
 		private long assertionFailureLimit;
 
-      private ProjectBlueprint(){
+		private ProjectBlueprint()
+		{
 			try
 			{
 				setProjectFile( File.createTempFile( "loadui-project", ".xml" ) );
@@ -76,13 +204,13 @@ public class ProjectBuilderImpl implements ProjectBuilder
 				log.error( "cannot create a temporary project" );
 			}
 			setLabel( projectFile.getName() );
-			setComponentChains( new ArrayList<List<ComponentItem>>() );
+			setComponentBlueprints( new ArrayList<ComponentBlueprint>() );
 			setRequestLimit( DEFAULT_REQUEST_LIMIT );
 			setAssertionFailureLimit( DEFAULT_ASSERTION_FAILURE_LIMIT );
 			setTimeLimit( DEFAULT_TIME_LIMIT );
 		}
 
-      private File getProjectFile()
+		private File getProjectFile()
 		{
 			return projectFile;
 		}
@@ -92,14 +220,14 @@ public class ProjectBuilderImpl implements ProjectBuilder
 			this.projectFile = where;
 		}
 
-		private List<List<ComponentItem>> getComponentChains()
+		private List<ComponentBlueprint> getComponentBlueprints()
 		{
-			return componentChains;
+			return components;
 		}
 
-		private void setComponentChains( List<List<ComponentItem>> componentChains )
+		private void setComponentBlueprints( List<ComponentBlueprint> components )
 		{
-			this.componentChains = componentChains;
+			this.components = components;
 		}
 
 		private String getLabel()
@@ -150,6 +278,17 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		}
 
 		@Override
+		public ProjectBuilder.ProjectBlueprint components( ComponentBlueprint... components )
+		{
+
+			for( ComponentBlueprint blueprint : components )
+			{
+				this.components.add( blueprint );
+			}
+			return this;
+		}
+
+		@Override
 		public ProjectBlueprint requestsLimit( Long requests )
 		{
 			setRequestLimit( requests );
@@ -187,7 +326,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		@Override
 		public ProjectRef build()
 		{
-		   return assemble( this );
+			return assembleProjectByBlueprint( this );
 		}
 	}
 }

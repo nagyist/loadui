@@ -21,6 +21,12 @@ public interface ProjectBuilder
 		public ProjectBlueprint where( File where );
 
 		/**
+		 * Add additional components to this project by using component blueprints.
+		 * @return
+		 */
+		public ProjectBlueprint components( ComponentBlueprint... components );
+
+		/**
 		 * The requests limit of the project
 		 *
 		 * @param requests
