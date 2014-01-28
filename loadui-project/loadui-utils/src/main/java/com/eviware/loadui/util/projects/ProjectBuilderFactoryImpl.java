@@ -10,15 +10,17 @@ public class ProjectBuilderFactoryImpl implements ProjectBuilderFactory
 {
 
 	private WorkspaceProvider workspaceProvider;
+	private ComponentRegistry componentRegistry;
 
-	public ProjectBuilderFactoryImpl( WorkspaceProvider workspaceProvider )
+	public ProjectBuilderFactoryImpl( WorkspaceProvider workspaceProvider, ComponentRegistry componentRegistry )
 	{
 		this.workspaceProvider = workspaceProvider;
+		this.componentRegistry = componentRegistry;
 	}
 
 	public ProjectBuilderImpl newInstance()
 	{
-	  return new ProjectBuilderImpl( workspaceProvider );
+	  return new ProjectBuilderImpl( componentRegistry, workspaceProvider );
 	}
 }
 

@@ -30,6 +30,7 @@ import com.eviware.loadui.ui.fx.filechooser.LoadUIFileChooserBuilder;
 import com.eviware.loadui.ui.fx.util.*;
 import com.eviware.loadui.ui.fx.views.projectref.ProjectRefView;
 import com.eviware.loadui.util.BeanInjector;
+import com.eviware.loadui.util.projects.ComponentBuilder;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -53,7 +54,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.eviware.loadui.util.projects.ComponentBuilder;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -302,27 +303,20 @@ public class WorkspaceView extends StackPane
 		final ProjectRef project = projectProvider
 				.newInstance()
 				.create()
+				.components( ComponentBuilder.create().type( "Fixed Rate" ).arrival().property( "rate", Long.class, 1337L )
+						.child(
+						       ComponentBuilder.create().type( "Web Page Runner" )
+										 .property( "url", String.class, "http://05ten.se" )
+										 .child(
+												 ComponentBuilder.create().type( "Table Log" ).build(),
+												 ComponentBuilder.create().type( "Table Log" ).build() )
+										 .build()
+						).build() )
+
 				.assertionLimit( 200L )
 				.timeLimit( 500L )
 				.requestsLimit( 20000L )
 				.label( projectNameField.getText() )
-				.build();
-
-		ComponentBuilder.WithProjectAndComponentRegistry generateComponent = ComponentBuilder.create().project( project.getProject() ).componentRegistry( registry );
-
-		ComponentItem rate = generateComponent
-				.type( "Fixed Rate" )
-				.property( "rate", Long.class, 1337L )
-				.returnLink( true )
-				.child(
-						generateComponent
-								.type( "Web Page Runner" )
-								.property( "url", String.class, "http://05ten.se" )
-								.child(										generateComponent
-												.type( "Table Log" )
-												.build() )
-								.build()
-				)
 				.build();
 
 		projectRefCarousel.setSelected( Iterables.find( projectRefCarousel.getItems(), new Predicate<ProjectRefView>()

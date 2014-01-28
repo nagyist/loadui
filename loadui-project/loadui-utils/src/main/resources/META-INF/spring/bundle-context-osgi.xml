@@ -6,6 +6,8 @@
 
     <osgi:reference interface="com.eviware.loadui.api.model.WorkspaceProvider" id="workspaceProvider" />
 
+    <osgi:reference interface="com.eviware.loadui.api.component.ComponentRegistry" id="componentRegistry"/>
+
     <osgi:service ref="messageTestEventFactory" interface="com.eviware.loadui.api.testevents.TestEvent$Factory" />
 
     <osgi:service ref="projectBuilder" interface="com.eviware.loadui.api.model.ProjectBuilderFactory"/>

@@ -1,214 +1,114 @@
 package com.eviware.loadui.util.projects;
 
-import com.eviware.loadui.api.component.ComponentCreationException;
-import com.eviware.loadui.api.component.ComponentDescriptor;
-import com.eviware.loadui.api.component.ComponentRegistry;
-import com.eviware.loadui.api.component.categories.RunnerCategory;
-import com.eviware.loadui.api.model.CanvasItem;
-import com.eviware.loadui.api.model.ComponentItem;
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.api.property.Property;
-import com.eviware.loadui.api.terminal.InputTerminal;
-import com.eviware.loadui.api.terminal.OutputTerminal;
-import com.eviware.loadui.api.terminal.Terminal;
-import com.eviware.loadui.util.CanvasItemNameGenerator;
-import com.google.common.base.Preconditions;
+import com.eviware.loadui.api.model.ComponentBlueprint;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 
 public class ComponentBuilder
 {
-	private ProjectItem project;
-	private ComponentRegistry componentRegistry;
-	private String labeled;
-	private List<PropertyDescriptor> properties;
-	private boolean returnConnection;
-	private List<ComponentItem> children;
 
-	private ComponentBuilder( ProjectItem project, ComponentRegistry componentRegistry, String label )
+	private String componentType;
+	private List<ComponentBlueprint> child;
+	private List<ComponentBlueprint.PropertyDescriptor> properties;
+	private boolean concurrentUsers;
+
+	private ComponentBuilder( String componentType )
 	{
-		this.project = project;
-		this.componentRegistry = componentRegistry;
-		this.labeled = label;
-		this.returnConnection = false;
-		children = new ArrayList<ComponentItem>();
-		properties = new ArrayList<PropertyDescriptor>();
+		this.child = new ArrayList<>();
+		this.componentType = componentType;
+		this.properties = new ArrayList<>();
+		this.concurrentUsers = false;
+	}
+
+	public ComponentBuilder child( ComponentBlueprint... componentBlueprints )
+	{
+		for( ComponentBlueprint component : componentBlueprints ){
+			this.child.add( component );
+		}
+		return this;
 	}
 
 	public <T> ComponentBuilder property( String key, Class<T> propertyType, Object value )
 	{
-		properties.add( new PropertyDescriptor( key, propertyType, value ) );
+		this.properties.add( new PropertyDescriptor( key, propertyType, value ) );
 		return this;
 	}
 
-	public ComponentBuilder child( ComponentItem... components )
+	public ComponentBuilder concurrent()
 	{
-		for ( ComponentItem component : components ){
-			children.add( component );
-		}
-
+		this.concurrentUsers = true;
 		return this;
 	}
 
-	public ComponentBuilder returnLink( boolean returnLink )
+	public ComponentBuilder arrival()
 	{
-		this.returnConnection = returnLink;
+		this.concurrentUsers = false;
 		return this;
 	}
 
-	public ComponentItem build() throws ComponentCreationException
+	public ComponentBlueprintImpl build()
 	{
-		ComponentDescriptor descriptor = componentRegistry.findDescriptor( labeled );
-
-		try
-		{
-			Preconditions.checkNotNull( descriptor );
-		}
-		catch( NullPointerException e )
-		{
-			throw new ComponentCreationException( "Component descriptor " + labeled + " does not exist in the component-registry." );
-		}
-
-		String label = CanvasItemNameGenerator.generateComponentName( project.getCanvas(), descriptor.getLabel() );
-		ComponentItem component = project.createComponent( label, descriptor );
-
-		connectToChildren( component );
-		modifyProperties( component );
-
-		if( returnConnection )
-		{
-			applyReturnConnection( component );
-		}
-
-		return component;
+		return new ComponentBlueprintImpl( componentType, child, properties, concurrentUsers );
 	}
 
-	private void applyReturnConnection( ComponentItem component )
+	public static WithType create()
 	{
-		String runningTerminal = "runningTerminal";
-		boolean hasRunningTerminal = component.getTerminalByName( runningTerminal ) != null;
+		return new WithType();
+	}
 
-		if( !children.isEmpty() && hasRunningTerminal )
+	public static class WithType
+	{
+		public ComponentBuilder type( String componentType )
 		{
-			component.getTerminalByName( runningTerminal );
-			CanvasItem canvas = project.getProject().getCanvas();
-
-			for( ComponentItem child : children )
-			{
-				if( child.getCategory().equals( RunnerCategory.CATEGORY ) )
-				{
-					Terminal currentlyRunning = child.getTerminalByName( RunnerCategory.CURRENLY_RUNNING_TERMINAL );
-					Terminal runningInputTerminal = component.getTerminalByName( runningTerminal );
-					canvas.connect( ( OutputTerminal )currentlyRunning, ( InputTerminal )runningInputTerminal );
-				}
-			}
+			return new ComponentBuilder( componentType );
 		}
 	}
 
-	private void modifyProperties( ComponentItem component )
+	public class ComponentBlueprintImpl implements ComponentBlueprint
 	{
-		for( PropertyDescriptor<?> newProperty : properties )
-		{
-			Property<?> componentProperty = component.getProperty( newProperty.getKey() );
+		private String componentType;
+		private List<ComponentBlueprint> children;
+		private List<PropertyDescriptor> properties;
+		private boolean concurrentUsers;
 
-			if( newProperty.getType().getSimpleName().equals( componentProperty.getType().getSimpleName() ) )
-			{
-				componentProperty.setValue( newProperty.getValue() );
-			}
-			else
-			{
-				throw new IllegalArgumentException( "Value of property " + newProperty.getKey() + " is of type " + component.getType() + " and is not applicable to " + newProperty.getType() );
-			}
+		public ComponentBlueprintImpl( String componentType, List<ComponentBlueprint> children, List<ComponentBlueprint.PropertyDescriptor> properties, boolean concurrentUsers ){
+
+			this.componentType = componentType;
+			this.children = children;
+			this.properties = properties;
+			this.concurrentUsers = concurrentUsers;
+		}
+
+		public String getComponentType()
+		{
+			return componentType;
+		}
+
+		public List<ComponentBlueprint> getChildren()
+		{
+			return children;
+		}
+
+		public List<PropertyDescriptor> getProperties()
+		{
+			return properties;
+		}
+
+		public boolean isConcurrentUsers()
+		{
+			return concurrentUsers;
 		}
 	}
 
-	private void connectToChildren( ComponentItem component )
+	public class PropertyDescriptor<Type extends Class> implements ComponentBlueprint.PropertyDescriptor<Type>
 	{
-		if( !children.isEmpty() )
-		{
-
-			Iterator<Terminal> terminals = component.getTerminals().iterator();
-			Terminal parentTerminal = terminals.next();
-
-
-			for( ComponentItem child : children )
-			{
-				while( parentTerminal instanceof InputTerminal )
-				{
-					parentTerminal = terminals.next();
-				}
-
-				Iterator<Terminal> childTerminals = child.getTerminals().iterator();
-				Terminal childTerminal = childTerminals.next();
-
-				while( childTerminal instanceof OutputTerminal )
-				{
-					childTerminal = childTerminals.next();
-				}
-
-				project.getCanvas().connect( ( OutputTerminal )parentTerminal, ( InputTerminal )childTerminal );
-			}
-		}
-	}
-
-	public static WithNoArguments create()
-	{
-		return new WithNoArguments();
-	}
-
-	public static class WithNoArguments
-	{
-
-		public WithProject project( ProjectItem project )
-		{
-			return new WithProject( project );
-		}
-	}
-
-	public static class WithProject
-	{
-		private ProjectItem project;
-
-		private WithProject( ProjectItem project )
-		{
-			this.project = project;
-		}
-
-		public WithProjectAndComponentRegistry componentRegistry( ComponentRegistry registry )
-		{
-			return new WithProjectAndComponentRegistry( project, registry );
-		}
-	}
-
-	public static class WithProjectAndComponentRegistry
-	{
-
-		private ProjectItem project;
-		private ComponentRegistry componentRegistry;
-
-		private WithProjectAndComponentRegistry( ProjectItem project, ComponentRegistry componentRegistry )
-		{
-			this.project = project;
-			this.componentRegistry = componentRegistry;
-		}
-
-		public ComponentBuilder type( String label )
-		{
-			return new ComponentBuilder( project, componentRegistry, label );
-		}
-	}
-
-	private class PropertyDescriptor<Type extends Class>
-	{
-
 		private Type type;
 		private String key;
 		private Object value;
 
-		PropertyDescriptor( String propertyName, Type type, Object value )
+		private PropertyDescriptor( String propertyName, Type type, Object value )
 		{
 			this.type = type;
 			this.key = propertyName;

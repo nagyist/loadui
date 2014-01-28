@@ -10,5 +10,6 @@
     <bean id="projectBuilder"
           class="com.eviware.loadui.util.projects.ProjectBuilderFactoryImpl">
         <constructor-arg ref="workspaceProvider"/>
+        <constructor-arg ref="componentRegistry"/>
     </bean>
 </beans>
