@@ -51,7 +51,11 @@ createProperty('randomDelay', Integer, 0)
 
 total( 'waitingTotal' ) { waitingCount.get() }
 
-workspace = canvas.project?.workspace
+def workspace = null
+if(controller) {
+	workspace = canvas.project?.workspace
+}
+	
 fixDisplay = { displayNA = canvas instanceof SceneItem && !workspace?.localMode }
 
 def workspaceListener = null
