@@ -13,21 +13,18 @@
 // express or implied. See the Licence for the specific language governing permissions and limitations
 // under the Licence.
 //
-
-import com.eviware.loadui.api.events.BaseEvent
-import com.eviware.loadui.api.model.ProjectItem
-import com.eviware.loadui.api.model.SceneItem
-import com.eviware.loadui.api.model.WorkspaceItem
-import com.eviware.loadui.api.model.CanvasItem
-import com.eviware.loadui.api.events.EventHandler
 import com.eviware.loadui.api.events.CollectionEvent
+import com.eviware.loadui.api.events.EventHandler
 import com.eviware.loadui.api.execution.TestRunner
 import com.eviware.loadui.api.execution.TestState
-import com.eviware.loadui.api.messaging.MessageListener
 import com.eviware.loadui.api.messaging.MessageEndpoint
+import com.eviware.loadui.api.messaging.MessageListener
 import com.eviware.loadui.api.model.AgentItem
-import com.eviware.loadui.api.statistics.store.ExecutionManager
+import com.eviware.loadui.api.model.CanvasItem
+import com.eviware.loadui.api.model.SceneItem
+import com.eviware.loadui.api.model.WorkspaceItem
 import com.eviware.loadui.api.statistics.ProjectExecutionManager
+import com.eviware.loadui.api.statistics.store.ExecutionManager
 import com.eviware.loadui.api.reporting.ReportingManager
 import com.eviware.loadui.util.BeanInjector
 import com.eviware.loadui.util.FormattingUtils
@@ -309,6 +306,5 @@ sleep 1000
 project.release()
 
 workspace.removeEventListener( CollectionEvent, workspaceCollectionListener )
-workspace.release()
 
 return success

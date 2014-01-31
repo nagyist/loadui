@@ -5,29 +5,27 @@ import org.junit.Test;
 
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
-import java.util.Map;
 
+import static com.eviware.loadui.launcher.server.LoadUiServerProjectWatcher.ProjectFileListener;
 import static com.eviware.loadui.launcher.server.LoadUiServerProjectWatcher.ProjectFileReactor;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public class ProjectFileReactorTest
 {
 
 	ProjectFileReactor reactor;
-	LoadUiProjectRunner mockRunner;
-	Map<String, Object> attrs;
+	ProjectFileListener listener;
 
 	@Before
 	public void before()
 	{
-		mockRunner = mock( LoadUiProjectRunner.class );
-		attrs = mock( Map.class );
+		listener = mock( ProjectFileListener.class );
 
-		reactor = new LoadUiServerProjectWatcher.ProjectFileReactor( attrs, mockRunner )
+		reactor = new LoadUiServerProjectWatcher.ProjectFileReactor( listener )
 		{
+
 		};
 	}
 
@@ -42,7 +40,7 @@ public class ProjectFileReactorTest
 
 		boolean continueWatching = reactor.handle( mockEvent );
 
-		verify( mockRunner ).runProject( changedPath, attrs );
+		verify( listener ).onProjectFileCreated( changedPath );
 		assertThat( continueWatching, is( true ) );
 	}
 
@@ -57,7 +55,7 @@ public class ProjectFileReactorTest
 
 		boolean continueWatching = reactor.handle( mockEvent );
 
-		verify( mockRunner, never() ).runProject( any( Path.class ), any( Map.class ) );
+		verify( listener, never() ).onProjectFileCreated( changedPath );
 		assertThat( continueWatching, is( true ) );
 	}
 
@@ -76,7 +74,7 @@ public class ProjectFileReactorTest
 
 		boolean continueWatching = reactor.handle( mockEvent );
 
-		verify( mockRunner, never() ).runProject( any( Path.class ), any( Map.class ) );
+		verify( listener, never() ).onProjectFileCreated( changedPath );
 		assertThat( continueWatching, is( true ) );
 	}
 

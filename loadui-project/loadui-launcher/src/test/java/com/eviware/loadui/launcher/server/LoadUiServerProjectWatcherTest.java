@@ -44,8 +44,7 @@ public class LoadUiServerProjectWatcherTest
 		ProjectFileReactor mockProjFileReactor = mock( ProjectFileReactor.class );
 
 		when( mockReactorProvider.getProjectFileReactor(
-				eq( attrs ), eq( mockRunner ),
-				any( ProjectFileNotWatchableListener.class ) ) )
+				any( ProjectFileListener.class ) ) )
 				.thenReturn( mockProjFileReactor );
 
 		projectWatcher.watchForProjectToRun( projectsLocation, attrs );

@@ -60,14 +60,20 @@ public class LoadUiServerProjectWatcher
 	{
 		pathWatcher.whenEventHappens( StandardWatchEventKinds.ENTRY_CREATE,
 				projectsLocation,
-				reactorProvider.getProjectFileReactor( attributes, projectRunner,
-						new ProjectFileNotWatchableListener()
+				reactorProvider.getProjectFileReactor(
+						new ProjectFileListener()
 						{
 							@Override
 							public void onProjectFileNotWatchable()
 							{
 								log.info( "Projects directory cannot be watched anymore. Watching its parent until it comes back again" );
 								waitForProjectLocationToBeCreatedThenWatchIt( pathWatcher, projectsLocation, attributes );
+							}
+
+							@Override
+							public void onProjectFileCreated( Path projectFile )
+							{
+								projectRunner.runProject( files.makeAbsolute( projectsLocation, projectFile ), attributes );
 							}
 						} ) );
 	}
@@ -100,16 +106,14 @@ public class LoadUiServerProjectWatcher
 	protected static class PathWatcherReactorProvider
 	{
 
-		public Reactor getProjectFileReactor( Map<String, Object> attributes,
-														  LoadUiProjectRunner projectRunner,
-														  final ProjectFileNotWatchableListener projectFileNotWatchableListener )
+		public Reactor getProjectFileReactor( final ProjectFileListener projectFileListener )
 		{
-			return new ProjectFileReactor( attributes, projectRunner )
+			return new ProjectFileReactor( projectFileListener )
 			{
 				@Override
 				public void onCannotWatchPath()
 				{
-					projectFileNotWatchableListener.onProjectFileNotWatchable();
+					projectFileListener.onProjectFileNotWatchable();
 				}
 			};
 		}
@@ -134,20 +138,20 @@ public class LoadUiServerProjectWatcher
 		void onProjectsLocationCreated();
 	}
 
-	protected static interface ProjectFileNotWatchableListener
+	protected static interface ProjectFileListener
 	{
 		void onProjectFileNotWatchable();
+
+		void onProjectFileCreated( Path projectFile );
 	}
 
 	protected static abstract class ProjectFileReactor extends Reactor
 	{
-		private final Map<String, Object> attributes;
-		private final LoadUiProjectRunner projectRunner;
+		private final ProjectFileListener listener;
 
-		public ProjectFileReactor( Map<String, Object> attributes, LoadUiProjectRunner projectRunner )
+		public ProjectFileReactor( ProjectFileListener listener )
 		{
-			this.attributes = attributes;
-			this.projectRunner = projectRunner;
+			this.listener = listener;
 		}
 
 		@Override
@@ -158,7 +162,7 @@ public class LoadUiServerProjectWatcher
 				Path changedFile = ( Path )event.context();
 				log.info( "Detected creation of potential project file: " + changedFile );
 				if( changedFile.toString().endsWith( ".xml" ) )
-					projectRunner.runProject( changedFile, attributes );
+					listener.onProjectFileCreated( changedFile );
 			}
 			catch( Exception e )
 			{
@@ -167,6 +171,7 @@ public class LoadUiServerProjectWatcher
 			}
 			return true;
 		}
+
 	}
 
 	protected static abstract class ProjectsLocationReactor extends Reactor

@@ -66,6 +66,10 @@ public class LoadUIServerLauncher extends HeadlessFxLauncherBase implements Load
 		//FIXME TEMPORARY
 		attributes.put( "limits", cmd.hasOption( LIMITS_OPTION ) ? cmd.getOptionValue( LIMITS_OPTION ).split( ":" )
 				: null );
+		attributes.put( "workspaceFile", null );
+		attributes.put( "testCase", null );
+		attributes.put( "localMode", true );
+		attributes.put( "agents", new HashMap<>() );
 
 		projectWatcher.watchForProjectToRun( projectsLocation, attributes );
 
