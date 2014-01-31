@@ -53,13 +53,13 @@ public class LoadUICommandLineLauncher extends HeadlessFxLauncherBase
 	public void start()
 	{
 		super.start();
-		if( getCommand() != null )
-			publishService( GroovyCommand.class, getCommand(), null );
+		publishService( GroovyCommand.class, getCommand(), null );
 	}
 
 	@Override
 	protected void processCommandLine( CommandLine cmd )
 	{
+		System.out.println( "Command line launcher processing command-line options" );
 		Map<String, Object> attributes = new HashMap<>();
 
 		if( cmd.hasOption( PROJECT_OPTION ) )

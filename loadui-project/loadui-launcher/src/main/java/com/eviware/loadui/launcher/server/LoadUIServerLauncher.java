@@ -1,17 +1,21 @@
 package com.eviware.loadui.launcher.server;
 
+import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.launcher.HeadlessFxLauncherBase;
+import com.eviware.loadui.launcher.api.GroovyCommand;
 import com.eviware.loadui.launcher.impl.ResourceGroovyCommand;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
  * @author renato
  */
-public class LoadUIServerLauncher extends HeadlessFxLauncherBase
+public class LoadUIServerLauncher extends HeadlessFxLauncherBase implements LoadUiProjectRunner
 {
 	protected static final String REPORT_DIR_OPTION = "r";
 	protected static final String RETAIN_SAVED_ZOOM_LEVELS = "z";
@@ -20,17 +24,27 @@ public class LoadUIServerLauncher extends HeadlessFxLauncherBase
 	protected static final String STATISTICS_REPORT_INCLUDE_SUMMARY_OPTION = "s";
 	protected static final String STATISTICS_REPORT_COMPARE_OPTION = "c";
 	protected static final String ABORT_ONGOING_REQUESTS_OPTION = "A";
+	protected static final String PROJECTS_LOCATION_OPTION = "p";
+	protected static final String LIMITS_OPTION = "L";
 
+	private final Path DEFAULT_PROJ_LOCATION = Paths.get( System.getProperty( LoadUI.LOADUI_HOME ), "projects" );
+	private final LoadUiServerProjectWatcher projectWatcher;
 
 	public LoadUIServerLauncher( String[] args )
 	{
 		super( args );
+		projectWatcher = new LoadUiServerProjectWatcher( this );
 	}
 
 	@Override
 	protected void processCommandLine( CommandLine cmd )
 	{
+		System.out.println( "Server launcher processing command line" );
 		Map<String, Object> attributes = new HashMap<>();
+
+		Path projectsLocation = cmd.hasOption( PROJECTS_LOCATION_OPTION ) ?
+				Paths.get( cmd.getOptionValue( PROJECTS_LOCATION_OPTION ) ) :
+				DEFAULT_PROJ_LOCATION;
 
 		attributes.put( "reportFolder", cmd.getOptionValue( REPORT_DIR_OPTION ) );
 		attributes.put( "reportFormat",
@@ -49,16 +63,29 @@ public class LoadUIServerLauncher extends HeadlessFxLauncherBase
 
 		attributes.put( "retainZoom", cmd.hasOption( RETAIN_SAVED_ZOOM_LEVELS ) );
 
+		//FIXME TEMPORARY
+		attributes.put( "limits", cmd.hasOption( LIMITS_OPTION ) ? cmd.getOptionValue( LIMITS_OPTION ).split( ":" )
+				: null );
+
+		projectWatcher.watchForProjectToRun( projectsLocation, attributes );
+
+	}
+
+	private ResourceGroovyCommand createCommand( Map<String, Object> attributes )
+	{
 		ResourceGroovyCommand command = new ResourceGroovyCommand( "/RunTest.groovy", attributes );
 		command.setExit( false );
 		setCommand( command );
+		return command;
 	}
 
 	@Override
-	@SuppressWarnings("static-access")
+	@SuppressWarnings( "static-access" )
 	protected Options createOptions()
 	{
 		Options options = super.createOptions();
+
+		options.addOption( PROJECTS_LOCATION_OPTION, "projectsdir", true, "Sets the Projects directory" );
 		options.addOption( REPORT_DIR_OPTION, "reports", true, "Generates reports and saves them in specified folder" );
 		options
 				.addOption( REPORT_FORMAT_OPTION, "format", true,
@@ -82,7 +109,20 @@ public class LoadUIServerLauncher extends HeadlessFxLauncherBase
 
 		options.addOption( RETAIN_SAVED_ZOOM_LEVELS, false, "Use the saved zoom levels for charts from the project." );
 
+		//FIXME TEMPORARY
+		options.addOption( LIMITS_OPTION, "limits", true,
+				"Sets the limits (<SECONDS>:<REQUESTS>:<FAILURES>) for the execution (e.g. -L 60:0:200 )" );
+
 		return options;
+	}
+
+	@Override
+	public void runProject( Path projectPath, Map<String, Object> attributes )
+	{
+		System.out.println( "Starting project " + projectPath );
+		attributes.put( "projectFile", projectPath.toFile() );
+		setCommand( createCommand( attributes ) );
+		publishService( GroovyCommand.class, getCommand(), null );
 	}
 
 }

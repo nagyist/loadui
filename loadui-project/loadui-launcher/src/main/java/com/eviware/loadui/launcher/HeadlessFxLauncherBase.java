@@ -2,7 +2,6 @@ package com.eviware.loadui.launcher;
 
 import com.eviware.loadui.launcher.api.GroovyCommand;
 import javafx.application.Application;
-import javafx.concurrent.Task;
 import javafx.stage.Stage;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -89,16 +88,23 @@ public abstract class HeadlessFxLauncherBase extends LoadUILauncher
 		{
 			System.out.println( getClass().getName() + " starting" );
 
-			Task<Void> task = new Task<Void>()
+			Runnable task = new Runnable()
 			{
 				@Override
-				protected Void call() throws Exception
+				public void run()
 				{
-					System.setSecurityManager( null );
-					launcher = createLauncher( getParameters().getRaw().toArray( new String[0] ) );
-					launcher.init();
-					launcher.start();
-					return null;
+					try
+					{
+						System.setSecurityManager( null );
+						launcher = createLauncher( getParameters().getRaw().toArray( new String[0] ) );
+						launcher.init();
+						launcher.start();
+					}
+					catch( Exception e )
+					{
+						e.printStackTrace();
+						exitInError();
+					}
 				}
 			};
 

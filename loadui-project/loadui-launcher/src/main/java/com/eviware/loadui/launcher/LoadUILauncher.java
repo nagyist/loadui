@@ -389,7 +389,8 @@ public abstract class LoadUILauncher
 											  K service,
 											  Dictionary<String, ?> properties )
 	{
-		framework.getBundleContext().registerService( serviceClass, service, properties );
+		if( service != null )
+			framework.getBundleContext().registerService( serviceClass, service, properties );
 	}
 
 	protected Options createOptions()
