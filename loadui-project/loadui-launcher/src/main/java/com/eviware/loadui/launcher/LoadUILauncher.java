@@ -58,7 +58,7 @@ public abstract class LoadUILauncher
 
 	private final static Logger log = Logger.getLogger( LoadUILauncher.class.getName() );
 
-	private Framework framework;
+	protected Framework framework;
 	protected final Properties configProps;
 	protected final String[] argv;
 	private final Options options;
