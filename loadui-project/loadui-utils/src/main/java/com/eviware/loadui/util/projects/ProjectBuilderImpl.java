@@ -104,7 +104,9 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		if( !blueprint.getChildren().isEmpty() )
 		{
 			for( ComponentBlueprint child : blueprint.getChildren()){
+
 				ComponentItem childComponent = assembleComponent( project, child );
+
 				connectToChild( project, parentComponent, childComponent );
 
 				if( blueprint.isConcurrentUsers() )
@@ -113,7 +115,6 @@ public class ProjectBuilderImpl implements ProjectBuilder
 				}
 			}
 		}
-
 		modifyProperties( parentComponent, blueprint.getProperties() );
 
      	return parentComponent;
@@ -122,22 +123,21 @@ public class ProjectBuilderImpl implements ProjectBuilder
 	private void applyConcurrentUsersConnection( ProjectRef project, ComponentItem parentComponent, ComponentItem childComponent )
 	{
 
-		String runningTerminal = "runningTerminal";
-		boolean parentHasRunningTerminal = parentComponent.getTerminalByName( runningTerminal ) != null;
+		String sampleCountTerminal = "Sample Count";
+		boolean parentHasSampleCountTerminal = parentComponent.getTerminalByName( sampleCountTerminal ) != null;
 
-		if( parentHasRunningTerminal )
+		if( parentHasSampleCountTerminal )
 		{
-			parentComponent.getTerminalByName( runningTerminal );
+			parentComponent.getTerminalByName( sampleCountTerminal );
 			CanvasItem canvas = project.getProject().getCanvas();
-
-			if( childComponent.getCategory().equals( RunnerCategory.CATEGORY ) )
+			if( childComponent.getCategory().equalsIgnoreCase( RunnerCategory.CATEGORY ) )
 			{
 				Terminal currentlyRunning = childComponent.getTerminalByName( RunnerCategory.CURRENLY_RUNNING_TERMINAL );
-				Terminal runningInputTerminal = parentComponent.getTerminalByName( runningTerminal );
+				Terminal runningInputTerminal = parentComponent.getTerminalByName( sampleCountTerminal );
 				canvas.connect( ( OutputTerminal )currentlyRunning, ( InputTerminal )runningInputTerminal );
 			}
 		}else{
-			log.error( "Cannot apply additional connection for concurrent users. Can't find the runningTerminal on parent component. " );
+			log.error("Cannot apply additional connection for concurrent users. Can't find the runningTerminal on child component or Sample Count on parent.");
 		}
 	}
 
