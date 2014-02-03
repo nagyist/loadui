@@ -63,7 +63,8 @@ public class LoadUIServerLauncher extends HeadlessFxLauncherBase implements Load
 
 		attributes.put( "retainZoom", cmd.hasOption( RETAIN_SAVED_ZOOM_LEVELS ) );
 
-		//FIXME TEMPORARY
+		// FIXME this options is being allowed only temporarily so we can easily stop tests with a limit
+		// once SaaS is able to control tests, we should probably remove this
 		attributes.put( "limits", cmd.hasOption( LIMITS_OPTION ) ? cmd.getOptionValue( LIMITS_OPTION ).split( ":" )
 				: null );
 		attributes.put( "workspaceFile", null );
@@ -84,7 +85,7 @@ public class LoadUIServerLauncher extends HeadlessFxLauncherBase implements Load
 	}
 
 	@Override
-	@SuppressWarnings( "static-access" )
+	@SuppressWarnings("static-access")
 	protected Options createOptions()
 	{
 		Options options = super.createOptions();

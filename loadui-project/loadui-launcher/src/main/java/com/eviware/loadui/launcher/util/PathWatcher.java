@@ -108,7 +108,7 @@ public abstract class PathWatcher
 			this.reactor = reactor;
 
 			watcher = path.getFileSystem().newWatchService();
-			path.register( watcher, StandardWatchEventKinds.ENTRY_CREATE );
+			path.register( watcher, eventKind );
 		}
 
 		@Override
@@ -117,13 +117,10 @@ public abstract class PathWatcher
 			log.info( "******* Executing PathWatcher *******" );
 			try
 			{
-				boolean keepWatching = true;
-
-				while( keepWatching )
+				do
 				{
 					log.info( "PathWatcher waiting for events" );
-					keepWatching = waitForEvent();
-				}
+				} while( waitForEvent() );
 			}
 			catch( InterruptedException ie )
 			{
