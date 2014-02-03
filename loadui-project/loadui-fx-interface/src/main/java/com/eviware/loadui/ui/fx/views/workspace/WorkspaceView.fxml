@@ -61,11 +61,6 @@
 			</ToolBox>
 			<VBox fx:id="carouselArea" spacing="27">
 				<Carousel fx:id="projectRefCarousel" text="Projects" prefWidth="320" prefHeight="220" />
-                <HBox>
-                    <Label text="Project Name"/>
-                    <TextField fx:id="projectNameField"/>
-                </HBox>
-                <Button text="ProjectBuilder" onAction="#projectBuilder"/>
             </VBox>
 			<StackPane styleClass="web-container">
 				<WebView fx:id="webView" prefWidth="580" prefHeight="562" />

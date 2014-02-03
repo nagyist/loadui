@@ -79,8 +79,6 @@ public class WorkspaceView extends StackPane
 	private final ObservableList<ProjectRef> projectRefList;
 	private final ObservableList<ProjectRefView> projectRefViews;
 
-	private ProjectBuilderFactory projectProvider;
-
 	@FXML
 	@SuppressWarnings( "unused" )
 	private VBox carouselArea;
@@ -105,9 +103,6 @@ public class WorkspaceView extends StackPane
 
 	public WorkspaceView( final WorkspaceItem workspace )
 	{
-		projectProvider = BeanInjector.getBean( ProjectBuilderFactory.class );
-
-
 		this.workspace = workspace;
 		projectRefList = ObservableLists.fx( ObservableLists.ofCollection( workspace, WorkspaceItem.PROJECT_REFS,
 				ProjectRef.class, workspace.getProjectRefs() ) );
@@ -289,44 +284,6 @@ public class WorkspaceView extends StackPane
 	public void openHelpPage()
 	{
 		UIUtils.openInExternalBrowser( HELPER_PAGE_URL );
-	}
-
-	@FXML
-	@SuppressWarnings( "unused" )
-	public void projectBuilder() throws ComponentCreationException
-	{
-		if (projectNameField.getText().isEmpty()){
-			projectNameField.setText( "Example Project #" + new Random().nextInt( 200 ) );
-		}
-		ComponentRegistry registry = BeanInjector.getBean( ComponentRegistry.class );
-
-		final ProjectRef project = projectProvider
-				.newInstance()
-				.create()
-				.components( ComponentBuilder.create().type( "Fixed Rate" ).arrival().property( "rate", Long.class, 1337L )
-						.child(
-						       ComponentBuilder.create().type( "Web Page Runner" )
-										 .property( "url", String.class, "http://05ten.se" )
-										 .child(
-												 ComponentBuilder.create().type( "Table Log" ).build(),
-												 ComponentBuilder.create().type( "Table Log" ).build() )
-										 .build()
-						).build() )
-
-				.assertionLimit( 200L )
-				.timeLimit( 500L )
-				.requestsLimit( 20000L )
-				.label( projectNameField.getText() )
-				.build();
-
-		projectRefCarousel.setSelected( Iterables.find( projectRefCarousel.getItems(), new Predicate<ProjectRefView>()
-		{
-			@Override
-			public boolean apply( ProjectRefView view )
-			{
-				return project.getProjectFile().getAbsolutePath().equals( view.getProjectRef().getProjectFile().getAbsolutePath() );
-			}
-		}, Iterables.getFirst( projectRefCarousel.getItems(), null ) ) );
 	}
 
 	@FXML
