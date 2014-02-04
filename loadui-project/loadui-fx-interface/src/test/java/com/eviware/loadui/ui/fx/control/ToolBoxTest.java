@@ -168,9 +168,9 @@ public class ToolBoxTest
 				.click( getSecondExpanderButton() );
 
 		waitUntil( ".tool-box-expander", exists() );
-		Set<Node> scrollBars = Sets.filter( findAll( ".tool-box-expander .scroll-bar" ), noSkins );
+		Iterable<Node> scrollBars = Iterables.filter( findAll( ".tool-box-expander .scroll-bar" ), noSkins );
 
-		verifyThat( scrollBars, is( visible() ) );
+ 		verifyThat( scrollBars, anyOf( is( visible() ) ) );
 
 		controller.click( ".nav.up" ); // to remove expander
 	}
@@ -181,9 +181,9 @@ public class ToolBoxTest
 		controller.move( toolbox )
 				.click( ".expander-button" );
 
-		Set<Node> scrollBars = Sets.filter( findAll( ".tool-box-expander .scroll-bar" ), noSkins );
+		Iterable<Node> scrollBars = Iterables.filter( findAll( ".tool-box-expander .scroll-bar" ), noSkins );
 
-		verifyThat( scrollBars, not( is( visible() ) ) );
+		verifyThat( scrollBars, not( anyOf( is( visible() ) ) ) );
 
 		controller.click( ".nav.up" ); // to remove expander
 	}
