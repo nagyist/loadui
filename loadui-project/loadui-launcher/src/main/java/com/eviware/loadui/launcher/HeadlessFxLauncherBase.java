@@ -70,6 +70,10 @@ public abstract class HeadlessFxLauncherBase extends LoadUILauncher
 
 		boolean in( Set<String> set )
 		{
+			if( name == null )
+			{
+				return false;
+			}
 			for( String item : set )
 				if( name.contains( item ) )
 					return true;
