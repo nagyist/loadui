@@ -55,7 +55,7 @@ import static org.junit.Assert.*;
 import static org.loadui.testfx.Assertions.verifyThat;
 import static org.loadui.testfx.GuiTest.*;
 import static org.loadui.testfx.matchers.NodeExistsMatcher.exists;
-import static org.loadui.testfx.matchers.VisibleMatcher.visible;
+import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 
 @Category(TestFX.class)
 public class ToolBoxTest
@@ -170,8 +170,7 @@ public class ToolBoxTest
 		waitUntil( ".tool-box-expander", exists() );
 		Set<Node> scrollBars = Sets.filter( findAll( ".tool-box-expander .scroll-bar" ), noSkins );
 
-		verifyThat( scrollBars, hasItem( is( visible() ) ) );
-		;
+		verifyThat( scrollBars, is( visible() ) );
 
 		controller.click( ".nav.up" ); // to remove expander
 	}
@@ -184,7 +183,7 @@ public class ToolBoxTest
 
 		Set<Node> scrollBars = Sets.filter( findAll( ".tool-box-expander .scroll-bar" ), noSkins );
 
-		verifyThat( scrollBars, not( hasItem( is( visible() ) ) ) );
+		verifyThat( scrollBars, not( is( visible() ) ) );
 
 		controller.click( ".nav.up" ); // to remove expander
 	}

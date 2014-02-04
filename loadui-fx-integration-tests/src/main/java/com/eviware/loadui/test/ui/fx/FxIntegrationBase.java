@@ -26,8 +26,7 @@ import static com.google.code.tempusfugit.temporal.Timeout.timeout;
 import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
-import static org.loadui.testfx.Matchers.nodeVisible;
-import static org.loadui.testfx.Matchers.visible;
+import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 
 /**
  * @author Henrik
@@ -233,7 +232,7 @@ public class FxIntegrationBase extends GuiTest
 		if( panel.isVisible() && panel.getOpacity() > 0.99 )
 		{
 			click( "#hide-notification-panel" );
-			waitUntil( panel, is( not( nodeVisible() ) ) );
+			waitUntil( panel, is( not( visible() ) ) );
 		}
 	}
 
