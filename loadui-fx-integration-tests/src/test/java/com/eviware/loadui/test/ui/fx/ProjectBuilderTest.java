@@ -1,96 +1,86 @@
 package com.eviware.loadui.test.ui.fx;
 
+import com.eviware.loadui.api.model.CanvasItem;
 import com.eviware.loadui.api.model.ProjectBuilder;
 import com.eviware.loadui.api.model.ProjectBuilderFactory;
-import com.eviware.loadui.api.model.ProjectRef;
+import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.terminal.Terminal;
-import com.eviware.loadui.test.TestState;
-import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.OpenSourceFxLoadedState;
 import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.projects.ComponentBuilder;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.core.Is.is;
 
-@Category( IntegrationTest.class )
-public class ProjectBuilderTest extends FxIntegrationTestBase
+public class ProjectBuilderTest
 {
-	@Override
-	public TestState getStartingState()
+	private ProjectItem project;
+	private ProjectBuilder projectBuilder;
+
+	@Before
+	public void enterState()
 	{
-		return OpenSourceFxLoadedState.STATE;
+		//Given
+		OpenSourceFxLoadedState.STATE.enter();
+		projectBuilder = BeanInjector.getBean( ProjectBuilderFactory.class ).newInstance();
 	}
 
 	@Test
 	public void shouldCreateTheSimplestOfProjects()
 	{
-		//Given
-		ProjectBuilder projectBuilder = BeanInjector.getBean( ProjectBuilderFactory.class ).newInstance();
-		HasProjects carousel = new HasProjects();
-
 		//When
-		ProjectRef project = projectBuilder.create().build();
+		project = projectBuilder.create().build().getProject();
 
 		//Then
-		carousel.assertProjectExistsWithName( project.getLabel() );
-		assertThat( "Component count", project.getProject().getChildren().size(), equalTo( 0 ) );
-
-		//Finally
-		project.delete( true );
+		assertThat( "Component count", project.getComponents(), is( empty() ) );
 	}
 
 	@Test
 	public void shouldCreateAProjectContainingConnectedComponents()
 	{
-		//Given
-		ProjectBuilder projectBuilder = BeanInjector.getBean( ProjectBuilderFactory.class ).newInstance();
-		HasProjects carousel = new HasProjects();
-
 		//When
-		ProjectRef project = projectBuilder.create()
+		project = projectBuilder.create()
 				.components(
 						ComponentBuilder.create().type( "Fixed Rate" ).property( "rate", Long.class, 10L ).child(
 								ComponentBuilder.create().type( "Web Page Runner" ).property( "url", String.class, "win-srvmontest" ).build()
 						).build()
 				)
-				.build();
+				.build().getProject();
 
 		//Then
-		carousel.assertProjectExistsWithName( project.getLabel() );
-		assertThat( "Component count", project.getProject().getChildren().size(), equalTo( 0 ) );
-		assertThat( "Connections count", project.getProject().getConnections().size(), equalTo( 1 ) );
-		assertThat( "Fixed Rate created", project.getProject().getCanvas().getComponentByLabel( "Fixed Rate 1" ).getProperty( "rate" ).getStringValue(), equalTo( "10" ) );
-		assertThat( "Web Page Runner created", project.getProject().getCanvas().getComponentByLabel( "Web Page Runner 1" ).getProperty( "url" ).getStringValue(), equalTo( "win-srvmontest" ) );
+		CanvasItem canvas = project.getCanvas();
+		assertThat( "Components exist", canvas.getComponents(), is( not( empty() ) ) );
+		assertThat( "Connections count", canvas.getCanvas().getConnections().size(), equalTo( 1 ) );
+		assertThat( "Fixed Rate created", canvas.getComponentByLabel( "Fixed Rate 1" ).getProperty( "rate" ).getStringValue(), equalTo( "10" ) );
+		assertThat( "Web Page Runner created", project.getCanvas().getComponentByLabel( "Web Page Runner 1" ).getProperty( "url" ).getStringValue(), equalTo( "win-srvmontest" ) );
 
-		//Finally
-		project.delete( true );
 	}
 
 	@Test
 	public void shouldCreateAConcurrentUsersProject()
 	{
-		//Given
-		ProjectBuilder projectBuilder = BeanInjector.getBean( ProjectBuilderFactory.class ).newInstance();
-
-		//When
-		ProjectRef project = projectBuilder.create()
+		project = projectBuilder.create()
 				.components(
 						ComponentBuilder.create().type( "Fixed Load" ).concurrent().property( "load", Long.class, 2L ).child(
 								ComponentBuilder.create().type( "Web Page Runner" ).property( "url", String.class, "win-srvmontest" ).build()
 						).build()
 				)
-				.build();
+				.build().getProject();
 
 		//Then
-		assertThat( "Project contains Fixed Load", project.getProject().getCanvas().getComponentByLabel( "Fixed Load 1" ), notNullValue() );
-		Terminal sampleCount = project.getProject().getCanvas().getComponentByLabel( "Fixed Load 1" ).getTerminalByName( "Sample Count" );
+		assertThat( "Project should contain Fixed Load", project.getCanvas().getComponentByLabel( "Fixed Load 1" ), notNullValue() );
+		Terminal sampleCount = project.getCanvas().getComponentByLabel( "Fixed Load 1" ).getTerminalByName( "Sample Count" );
 		assertThat( "Connected as a concurrent-users scenario", sampleCount.getConnections().size(), equalTo( 1 ) );
+	}
 
-		//Finally
-		project.delete( true );
+	@After
+	public void leaveState()
+	{
+		project.delete();
 	}
 }

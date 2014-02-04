@@ -69,10 +69,10 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		return project;
 	}
 
-	private void assembleComponentsByBlueprint( ProjectRef project, List<ComponentBlueprint> componentBlueprint )
+	private void assembleComponentsByBlueprint( ProjectRef project, List<ComponentBlueprint> componentBlueprints )
 	{
 
-		for( ComponentBlueprint blueprint : componentBlueprint )
+		for( ComponentBlueprint blueprint : componentBlueprints )
 		{
 			try
 			{
@@ -280,8 +280,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		@Override
 		public ProjectBuilder.ProjectBlueprint components( ComponentBlueprint... components )
 		{
-
-			for( ComponentBlueprint blueprint : components )
+        	for( ComponentBlueprint blueprint : components )
 			{
 				this.components.add( blueprint );
 			}
