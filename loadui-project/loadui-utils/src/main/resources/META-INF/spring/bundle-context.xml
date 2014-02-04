@@ -6,4 +6,10 @@
 	<bean id="beanInjectorContextSetter" class="com.eviware.loadui.util.BeanInjector$ContextSetter" />
 	
 	<bean id="messageTestEventFactory" class="com.eviware.loadui.util.testevents.MessageTestEvent$Factory" />
+
+    <bean id="projectBuilder"
+          class="com.eviware.loadui.util.projects.ProjectBuilderFactoryImpl">
+        <constructor-arg ref="workspaceProvider"/>
+        <constructor-arg ref="componentRegistry"/>
+    </bean>
 </beans>

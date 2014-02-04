@@ -16,13 +16,9 @@
 package com.eviware.loadui.launcher;
 
 import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.launcher.LoadUICommandLineLauncher.CommandApplication;
-import com.eviware.loadui.launcher.LoadUIFXLauncher.FXApplication;
 import com.eviware.loadui.launcher.api.OSGiUtils;
 import com.eviware.loadui.launcher.util.BndUtils;
 import com.eviware.loadui.launcher.util.ErrorHandler;
-import javafx.application.Application;
-import javafx.scene.text.Font;
 import org.apache.commons.cli.*;
 import org.apache.felix.framework.FrameworkFactory;
 import org.apache.felix.main.AutoProcessor;
@@ -37,9 +33,7 @@ import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Dictionary;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -64,122 +58,7 @@ public abstract class LoadUILauncher
 
 	private final static Logger log = Logger.getLogger( LoadUILauncher.class.getName() );
 
-	public static void main( String[] args )
-	{
-		ensureFontsAvailableForJavaFX();
-		printLoadUIASCIILogo();
-
-		for( String arg : args )
-		{
-			if( arg.contains( "cmd" ) )
-			{
-				List<String> argList = new ArrayList<>( Arrays.asList( args ) );
-				argList.remove( arg );
-				String[] newArgs = argList.toArray( new String[argList.size()] );
-				Application.launch( CommandApplication.class, newArgs );
-				return;
-			}
-		}
-
-		Application.launch( FXApplication.class, args );
-	}
-
-	private static void printLoadUIASCIILogo()
-	{
-		System.out.println(
-				"                                                 \n" +
-						"                    .:::.                        \n" +
-						"                  .==:::::.                      \n" +
-						"                .====:::::::.                    \n" +
-						"              .======:::::::::.                  \n" +
-						"            .========:::::::::::.                \n" +
-						"          .:=========:::::::::::::.              \n" +
-						"        .:::=========:::::::::::::::.            \n" +
-						"       :::::=========:::::::::::::::::           \n" +
-						"       :::::=========:::::::::::::::::           \n" +
-						"        ':::=========:::::::::::::::'            \n" +
-						"          ':======================'              \n" +
-						"            '==================='                \n" +
-						"              '==============='                  \n" +
-						"                '==========='                    \n" +
-						"                  ':::::::'                      \n" +
-						"                    ':::'                        \n" +
-						"                                                 \n" +
-						"                                                 \n" +
-						" ::                       ::  ::   ::  ::::      \n" +
-						" ::                       ::  ::   ::   ::       \n" +
-						" ::      ::::   ::::: ::::::  ::   ::   ::       \n" +
-						" ::     ::  :: ::  :: ::  ::  ::   ::   ::       \n" +
-						" ::::::  ::::   ::: : ::::::   :::::   ::::      \n" +
-						"\n" +
-						"     	        LoadUI " + LoadUI.version() + "\n\n"
-		);
-	}
-
-	private static void ensureFontsAvailableForJavaFX()
-	{
-		if( !isJavaFXFontsAvailable() )
-		{
-			log.info( "Preparing fonts for JavaFX2" );
-			if( installTrueTypeFont() )
-			{
-				log.info( "Restarting JRE for changes to take effect." );
-				LoadUI.restart();
-			}
-			else
-			{
-				System.err.println( "Failed to install TrueType fonts\nLoadUI depends on JavaFX that depends on TrueType fonts to work." );
-				System.exit( -1 );
-			}
-		}
-	}
-
-	private static boolean isJavaFXFontsAvailable()
-	{
-		try
-		{
-			//If a Unix-based System is lacking TrueType fonts for JavaFX this causes a NullPointerException
-			//This is because Oracle took a decision not to support Type-1 Post-script Fonts for JavaFX.
-			//Many components give a call to this method, so we need to support it by installing fonts.
-			Font.getDefault();
-			return true;
-		}
-		catch( NullPointerException e )
-		{
-			return false;
-		}
-	}
-
-	private static boolean installTrueTypeFont()
-	{
-		String workingDir = LoadUI.getWorkingDir().getAbsolutePath();
-		workingDir = workingDir.substring( 0, workingDir.length() - 1 );
-		String userHome = System.getProperty( "user.home" );
-
-		try
-		{
-			ProcessBuilder pb = new ProcessBuilder();
-
-			Process currentProcess = pb.command( "/bin/mkdir", "-p", userHome + "/.fonts" ).start();
-			currentProcess.waitFor();
-
-			currentProcess = pb.command( "/bin/cp", "-rf", workingDir + "jre/lib/fonts", userHome + "/.fonts" ).start();
-			currentProcess.waitFor();
-
-			currentProcess = pb.command( "/usr/bin/fc-cache" ).start();
-			currentProcess.waitFor();
-
-			return true;
-		}
-		catch( InterruptedException | IOException e )
-		{
-			log.warning( "Unable to install LoadUI fonts on local system\n" );
-			e.printStackTrace();
-			return false;
-		}
-	}
-
-	protected static Framework framework;
+	protected Framework framework;
 	protected final Properties configProps;
 	protected final String[] argv;
 	private final Options options;
@@ -201,24 +80,7 @@ public abstract class LoadUILauncher
 
 		File buildInfoFile = new File( LoadUI.getWorkingDir(), "res/buildinfo.txt" );
 
-		//Workaround for some versions of Java 6 which have a known SSL issue
-		String versionString = System.getProperty( "java.version", "0.0.0_00" );
-		try
-		{
-			if( versionString.startsWith( "1.6" ) && versionString.contains( "_" ) )
-			{
-				int updateVersion = Integer.parseInt( versionString.split( "_", 2 )[1] );
-				if( updateVersion > 27 )
-				{
-					log.info( "Detected Java version " + versionString + ", disabling CBC Protection." );
-					System.setProperty( "jsse.enableCBCProtection", "false" );
-				}
-			}
-		}
-		catch( Exception e )
-		{
-			e.printStackTrace();
-		}
+		applyJava6sslIssueWorkaround();
 
 		if( buildInfoFile.exists() )
 		{
@@ -317,6 +179,28 @@ public abstract class LoadUILauncher
 		Main.copySystemProperties( configProps );
 	}
 
+	private void applyJava6sslIssueWorkaround()
+	{
+		//Workaround for some versions of Java 6 which have a known SSL issue
+		String versionString = System.getProperty( "java.version", "0.0.0_00" );
+		try
+		{
+			if( versionString.startsWith( "1.6" ) && versionString.contains( "_" ) )
+			{
+				int updateVersion = Integer.parseInt( versionString.split( "_", 2 )[1] );
+				if( updateVersion > 27 )
+				{
+					log.info( "Detected Java version " + versionString + ", disabling CBC Protection." );
+					System.setProperty( "jsse.enableCBCProtection", "false" );
+				}
+			}
+		}
+		catch( Exception e )
+		{
+			e.printStackTrace();
+		}
+	}
+
 	private void parseSystemProperties()
 	{
 		for( String option : cmd.getOptionValues( SYSTEM_PROPERTY_OPTION ) )
@@ -329,7 +213,7 @@ public abstract class LoadUILauncher
 		}
 	}
 
-	protected void init()
+	public void init()
 	{
 		String extra = configProps.getProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, "" );
 		configProps.put( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA,
@@ -343,6 +227,8 @@ public abstract class LoadUILauncher
 		{
 			ensureNoOtherInstance();
 		}
+
+		processOsgiExtraPackages();
 
 		processCommandLine( cmd );
 
@@ -406,7 +292,7 @@ public abstract class LoadUILauncher
 
 			try
 			{
-				@SuppressWarnings( "resource" )
+				@SuppressWarnings("resource")
 				RandomAccessFile randomAccessFile = new RandomAccessFile( lockFile, "rw" );
 				FileLock lock = randomAccessFile.getChannel().tryLock();
 				if( lock == null )
@@ -432,6 +318,30 @@ public abstract class LoadUILauncher
 		}
 	}
 
+	private void processOsgiExtraPackages()
+	{
+		try(InputStream is = getClass().getResourceAsStream( "/packages-extra.txt" ))
+		{
+			if( is != null )
+			{
+				StringBuilder out = new StringBuilder();
+				byte[] b = new byte[4096];
+				for( int n; ( n = is.read( b ) ) != -1; )
+					out.append( new String( b, 0, n ) );
+
+				String extra = configProps.getProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, "" );
+				if( !extra.isEmpty() )
+					out.append( "," ).append( extra );
+
+				configProps.setProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, out.toString() );
+			}
+		}
+		catch( IOException e )
+		{
+			e.printStackTrace();
+		}
+	}
+
 	protected final static void exitInError()
 	{
 		try
@@ -441,8 +351,11 @@ public abstract class LoadUILauncher
 		}
 		catch( InterruptedException e )
 		{
+		} finally
+		{
+			System.exit( -1 );
 		}
-		System.exit( -1 );
+
 	}
 
 	protected void printUsageAndQuit()
@@ -453,7 +366,7 @@ public abstract class LoadUILauncher
 		OSGiUtils.shutdown();
 	}
 
-	protected void start()
+	public void start()
 	{
 		try
 		{
@@ -465,6 +378,19 @@ public abstract class LoadUILauncher
 		{
 			e.printStackTrace();
 		}
+	}
+
+	public void stop() throws Exception
+	{
+		framework.getBundleContext().getBundle( 0 ).stop();
+	}
+
+	public <K> void publishService( Class<K> serviceClass,
+											  K service,
+											  Dictionary<String, ?> properties )
+	{
+		if( service != null )
+			framework.getBundleContext().registerService( serviceClass, service, properties );
 	}
 
 	protected Options createOptions()

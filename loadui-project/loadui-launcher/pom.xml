@@ -22,7 +22,7 @@
 						</manifest>
 						<manifestEntries>
 							<JavaFX-Version>2.2</JavaFX-Version>
-							<JavaFX-Application-Class>com.eviware.loadui.launcher.LoadUILauncher</JavaFX-Application-Class>
+							<JavaFX-Application-Class>com.eviware.loadui.launcher.LoadUIStarter</JavaFX-Application-Class>
 						</manifestEntries>
 					</archive>
 				</configuration>
@@ -101,5 +101,27 @@
 			<artifactId>bndlib</artifactId>
 			<version>1.50.0</version>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>14.0.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.tempus-fugit</groupId>
+            <artifactId>tempus-fugit</artifactId>
+            <version>1.1</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hamcrest</groupId>
+                    <artifactId>hamcrest-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.hamcrest</groupId>
+                    <artifactId>hamcrest-library</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
 </project>

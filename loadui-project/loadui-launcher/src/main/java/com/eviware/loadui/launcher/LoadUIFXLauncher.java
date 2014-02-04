@@ -30,7 +30,6 @@ import org.apache.commons.cli.CommandLine;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.logging.Logger;
 
@@ -51,26 +50,7 @@ public class LoadUIFXLauncher extends LoadUILauncher
 	@Override
 	protected void processCommandLine( CommandLine cmdLine )
 	{
-		try(InputStream is = getClass().getResourceAsStream( "/packages-extra.txt" ))
-		{
-			if( is != null )
-			{
-				StringBuilder out = new StringBuilder();
-				byte[] b = new byte[4096];
-				for( int n; ( n = is.read( b ) ) != -1; )
-					out.append( new String( b, 0, n ) );
 
-				String extra = configProps.getProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, "" );
-				if( !extra.isEmpty() )
-					out.append( "," ).append( extra );
-
-				configProps.setProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, out.toString() );
-			}
-		}
-		catch( IOException e )
-		{
-			e.printStackTrace();
-		}
 	}
 
 	public static class FXApplication extends Application
@@ -142,14 +122,13 @@ public class LoadUIFXLauncher extends LoadUILauncher
 				{
 					System.setSecurityManager( null );
 
-					//FIXME Create an empty array ignoring any parameters? Why?
 					launcher = createLauncher( getParameters().getRaw().toArray( new String[0] ) );
 					launcher.init();
 					launcher.start();
 
 					if( "false".equals( noFx ) )
 					{
-						framework.getBundleContext().registerService( Stage.class, stage,
+						launcher.publishService( Stage.class, stage,
 								new Hashtable<String, Object>() );
 					}
 					return null;
@@ -167,7 +146,7 @@ public class LoadUIFXLauncher extends LoadUILauncher
 		@Override
 		public void stop() throws Exception
 		{
-			framework.getBundleContext().getBundle( 0 ).stop();
+			launcher.stop();
 		}
 	}
 }

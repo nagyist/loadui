@@ -32,7 +32,7 @@ public class WorkspaceLoadedStateTest
 	@Before
 	public void enterState()
 	{
-		WorkspaceLoadedState.STATE.enter();
+		ControllerStartedState.getState().enter();
 		workspace = WorkspaceLoadedState.STATE.getWorkspace();
 	}
 
