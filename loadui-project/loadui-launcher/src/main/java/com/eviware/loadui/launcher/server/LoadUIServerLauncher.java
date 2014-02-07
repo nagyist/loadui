@@ -9,7 +9,6 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -27,7 +26,6 @@ public class LoadUIServerLauncher extends HeadlessFxLauncherBase implements Load
 	protected static final String PROJECTS_LOCATION_OPTION = "p";
 	protected static final String LIMITS_OPTION = "L";
 
-	private final Path DEFAULT_PROJ_LOCATION = Paths.get( System.getProperty( LoadUI.LOADUI_HOME ), "projects" );
 	private final LoadUiServerProjectWatcher projectWatcher;
 
 	public LoadUIServerLauncher( String[] args )
@@ -42,9 +40,7 @@ public class LoadUIServerLauncher extends HeadlessFxLauncherBase implements Load
 		System.out.println( "Server launcher processing command line" );
 		Map<String, Object> attributes = new HashMap<>();
 
-		Path projectsLocation = cmd.hasOption( PROJECTS_LOCATION_OPTION ) ?
-				Paths.get( cmd.getOptionValue( PROJECTS_LOCATION_OPTION ) ) :
-				DEFAULT_PROJ_LOCATION;
+		Path projectsLocation = projectsLocation();
 
 		attributes.put( "reportFolder", cmd.getOptionValue( REPORT_DIR_OPTION ) );
 		attributes.put( "reportFormat",
@@ -76,6 +72,11 @@ public class LoadUIServerLauncher extends HeadlessFxLauncherBase implements Load
 
 	}
 
+	protected Path projectsLocation()
+	{
+		return LoadUI.serverProjectsLocation();
+	}
+
 	private ResourceGroovyCommand createCommand( Map<String, Object> attributes )
 	{
 		ResourceGroovyCommand command = new ResourceGroovyCommand( "/RunTest.groovy", attributes );
@@ -90,7 +91,6 @@ public class LoadUIServerLauncher extends HeadlessFxLauncherBase implements Load
 	{
 		Options options = super.createOptions();
 
-		options.addOption( PROJECTS_LOCATION_OPTION, "projectsdir", true, "Sets the Projects directory" );
 		options.addOption( REPORT_DIR_OPTION, "reports", true, "Generates reports and saves them in specified folder" );
 		options
 				.addOption( REPORT_FORMAT_OPTION, "format", true,

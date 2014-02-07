@@ -9,22 +9,51 @@ import java.util.List;
 public class ComponentBuilder
 {
 
-	private String componentType;
+	/**
+	 * LoadUI known components
+	 */
+	public enum LoadUiComponent
+	{
+		FIXED_RATE( "Fixed Rate" ),
+		WEB_RUNNER( "Web Page Runner" ),
+		FIXED_LOAD( "Fixed Load" ),
+		RAMP_LOAD( "Ramp Load" ),
+		DEJA_RUNNER( "DejaClick Runner" ),
+		TABLE_LOG( "Table Log" );
+		//TODO add more components as required
+
+		private final String name;
+
+		private LoadUiComponent( String name )
+		{
+			this.name = name;
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+
+	}
+
+	private LoadUiComponent component;
 	private List<ComponentBlueprint> child;
 	private List<ComponentBlueprint.PropertyDescriptor> properties;
 	private boolean concurrentUsers;
 
-	private ComponentBuilder( String componentType )
+	private ComponentBuilder( LoadUiComponent component )
 	{
 		this.child = new ArrayList<>();
-		this.componentType = componentType;
+		this.component = component;
 		this.properties = new ArrayList<>();
 		this.concurrentUsers = false;
 	}
 
 	public ComponentBuilder child( ComponentBlueprint... componentBlueprints )
 	{
-		for( ComponentBlueprint component : componentBlueprints ){
+		for( ComponentBlueprint component : componentBlueprints )
+		{
 			this.child.add( component );
 		}
 		return this;
@@ -50,7 +79,7 @@ public class ComponentBuilder
 
 	public ComponentBlueprintImpl build()
 	{
-		return new ComponentBlueprintImpl( componentType, child, properties, concurrentUsers );
+		return new ComponentBlueprintImpl( component.getName(), child, properties, concurrentUsers );
 	}
 
 	public static WithType create()
@@ -60,9 +89,9 @@ public class ComponentBuilder
 
 	public static class WithType
 	{
-		public ComponentBuilder type( String componentType )
+		public ComponentBuilder type( LoadUiComponent component )
 		{
-			return new ComponentBuilder( componentType );
+			return new ComponentBuilder( component );
 		}
 	}
 
@@ -73,7 +102,8 @@ public class ComponentBuilder
 		private List<PropertyDescriptor> properties;
 		private boolean concurrentUsers;
 
-		public ComponentBlueprintImpl( String componentType, List<ComponentBlueprint> children, List<ComponentBlueprint.PropertyDescriptor> properties, boolean concurrentUsers ){
+		public ComponentBlueprintImpl( String componentType, List<ComponentBlueprint> children, List<ComponentBlueprint.PropertyDescriptor> properties, boolean concurrentUsers )
+		{
 
 			this.componentType = componentType;
 			this.children = children;

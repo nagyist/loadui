@@ -18,6 +18,7 @@ package com.eviware.loadui;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -103,6 +104,12 @@ public class LoadUI
 		return Boolean.parseBoolean( System.getProperty( "loadui.pro" ) );
 	}
 
+
+	public static Path serverProjectsLocation()
+	{
+		return Paths.get( System.getProperty( LOADUI_HOME ), "projects" );
+	}
+
 	/**
 	 * Gets the directory from where all relative paths should be resolved.
 	 *
@@ -134,7 +141,9 @@ public class LoadUI
 		if( f.exists() )
 		{
 			executable = f.getAbsolutePath();
-		}else{
+		}
+		else
+		{
 			executable = "java";
 		}
 

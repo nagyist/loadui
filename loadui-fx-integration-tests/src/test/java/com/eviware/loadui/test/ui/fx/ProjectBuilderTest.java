@@ -11,12 +11,16 @@ import com.eviware.loadui.util.projects.ComponentBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.loadui.testfx.categories.TestFX;
 
+import static com.eviware.loadui.util.projects.ComponentBuilder.LoadUiComponent.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.core.Is.is;
 
+@Category( TestFX.class )
 public class ProjectBuilderTest
 {
 	private ProjectItem project;
@@ -46,8 +50,8 @@ public class ProjectBuilderTest
 		//When
 		project = projectBuilder.create()
 				.components(
-						ComponentBuilder.create().type( "Fixed Rate" ).property( "rate", Long.class, 10L ).child(
-								ComponentBuilder.create().type( "Web Page Runner" ).property( "url", String.class, "win-srvmontest" ).build()
+						ComponentBuilder.create().type( FIXED_RATE ).property( "rate", Long.class, 10L ).child(
+								ComponentBuilder.create().type( WEB_RUNNER ).property( "url", String.class, "win-srvmontest" ).build()
 						).build()
 				)
 				.build().getProject();
@@ -66,8 +70,8 @@ public class ProjectBuilderTest
 	{
 		project = projectBuilder.create()
 				.components(
-						ComponentBuilder.create().type( "Fixed Load" ).concurrent().property( "load", Long.class, 2L ).child(
-								ComponentBuilder.create().type( "Web Page Runner" ).property( "url", String.class, "win-srvmontest" ).build()
+						ComponentBuilder.create().type( FIXED_LOAD ).concurrent().property( "load", Long.class, 2L ).child(
+								ComponentBuilder.create().type( WEB_RUNNER ).property( "url", String.class, "win-srvmontest" ).build()
 						).build()
 				)
 				.build().getProject();
