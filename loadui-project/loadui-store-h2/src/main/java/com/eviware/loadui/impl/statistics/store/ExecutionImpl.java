@@ -383,7 +383,7 @@ public class ExecutionImpl implements Execution, Releasable
 	private void loadAttributes()
 	{
 		FileInputStream fis = null;
-		try
+		try ( FileInputStream dis = new FileInputStream ( propertiesFile ) )
 		{
 			fis = new FileInputStream( propertiesFile );
 			attributes.load( fis );
@@ -397,10 +397,6 @@ public class ExecutionImpl implements Execution, Releasable
 		catch( IOException e )
 		{
 			log.error( "Could not load execution properties file!", e );
-		}
-		finally
-		{
-			Closeables.closeQuietly( fis );
 		}
 	}
 

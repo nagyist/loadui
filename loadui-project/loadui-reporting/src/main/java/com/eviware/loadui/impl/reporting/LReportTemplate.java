@@ -81,10 +81,9 @@ public class LReportTemplate
 		StringBuilder result = new StringBuilder();
 		File reportFile = new File( path );
 		this.lastModified = reportFile.lastModified();
-		BufferedReader reader = null;
-		try
+
+		try( BufferedReader reader = new BufferedReader( new FileReader( reportFile )))
 		{
-			reader = new BufferedReader( new FileReader( reportFile ) );
 			String line = null;
 			while( ( line = reader.readLine() ) != null )
 			{
@@ -98,10 +97,6 @@ public class LReportTemplate
 		catch( IOException e )
 		{
 			log.error( "Error reading report template file " + path, e );
-		}
-		finally
-		{
-			Closeables.closeQuietly( reader );
 		}
 		return result.toString();
 	}
