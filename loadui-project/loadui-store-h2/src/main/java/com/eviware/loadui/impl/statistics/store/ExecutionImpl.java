@@ -382,11 +382,9 @@ public class ExecutionImpl implements Execution, Releasable
 
 	private void loadAttributes()
 	{
-		FileInputStream fis = null;
 		try ( FileInputStream dis = new FileInputStream ( propertiesFile ) )
 		{
-			fis = new FileInputStream( propertiesFile );
-			attributes.load( fis );
+			attributes.load( dis );
 			length = Long.parseLong( attributes.getProperty( KEY_LENGTH, "0" ) );
 			icon = ( Image )TypeConverter.stringToObject( getAttribute( KEY_ICON, null ), BufferedImage.class );
 		}
