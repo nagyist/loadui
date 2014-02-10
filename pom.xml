@@ -31,6 +31,7 @@
         <mockitoVersion>1.9.5</mockitoVersion>
         <objenesisVersion>1.0</objenesisVersion>
         <testFxVersion>2.7.5</testFxVersion>
+        <guavaVersion>16.0</guavaVersion>
     </properties>
 
     <modules>
