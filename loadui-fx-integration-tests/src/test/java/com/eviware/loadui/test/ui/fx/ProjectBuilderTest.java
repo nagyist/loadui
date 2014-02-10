@@ -5,6 +5,7 @@ import com.eviware.loadui.api.model.ProjectBuilder;
 import com.eviware.loadui.api.model.ProjectBuilderFactory;
 import com.eviware.loadui.api.model.ProjectItem;
 import com.eviware.loadui.api.terminal.Terminal;
+import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.states.OpenSourceFxLoadedState;
 import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.projects.ComponentBuilder;
@@ -20,7 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.core.Is.is;
 
-@Category( TestFX.class )
+@Category( IntegrationTest.class )
 public class ProjectBuilderTest
 {
 	private ProjectItem project;
