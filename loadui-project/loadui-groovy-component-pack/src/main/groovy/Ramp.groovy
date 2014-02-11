@@ -69,6 +69,14 @@ reset = {
 		targetReached = true
 		currentRate = end.value()
 	}
+
+	if ( unit.value == "Sec" )
+		msPerUnit = 1000
+	if ( unit.value == "Min" )
+		msPerUnit = 60000
+	if ( unit.value == "Hour" )
+		msPerUnit = 3600000
+
 	scheduled = false
 }
 
@@ -110,16 +118,7 @@ schedule = {
 }
 
 addEventListener( PropertyEvent ) { event ->
-	if ( event.event == PropertyEvent.Event.VALUE ) {
-		
-		if( event.property == unit ) {
-			if ( unit.value == "Sec" )
-				msPerUnit = 1000
-			if ( unit.value == "Min" )
-				msPerUnit = 60000
-			if ( unit.value == "Hour" )
-				msPerUnit = 3600000
-		}
+	if ( event.event == PropertyEvent.Event.VALUE ) {	
 		
 		future?.cancel()
 		
