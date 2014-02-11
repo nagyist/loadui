@@ -57,7 +57,7 @@ public interface Track extends Deletable
 	public Entry getNextEntry( String source, long timestamp );
 
 	/**
-	 * @see getNextEntry(String, int)
+	 * @see #getNextEntry(String, long)
 	 */
 	public Entry getNextEntry( String source, long timestamp, int interpolationLevel );
 
@@ -75,7 +75,7 @@ public interface Track extends Deletable
 	public Iterable<Entry> getRange( String source, long startTime, long endTime );
 
 	/**
-	 * @see getRange(String, int, int)
+	 * @see #getRange(String, long, long)
 	 */
 	public Iterable<Entry> getRange( String source, long startTime, long endTime, int interpolationLevel );
 

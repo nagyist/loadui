@@ -15,11 +15,11 @@
  */
 package com.eviware.loadui.api.statistics.store;
 
-import java.util.Collection;
-
 import com.eviware.loadui.api.events.EventFirer;
 import com.eviware.loadui.api.serialization.ListenableValue;
 import com.eviware.loadui.api.testevents.TestEvent;
+
+import java.util.Collection;
 
 /**
  * Manages existing Executions, creating new ones, etc.
@@ -72,7 +72,7 @@ public interface ExecutionManager extends EventFirer
 	public Execution startExecution( String executionId, long startTime, String label );
 
 	/**
-	 * @see com.eviware.loadui.api.statistics.store.getCurrentExecution
+	 * @see ExecutionManager#getCurrentExecution()
 	 */
 	public Execution startExecution( String executionId, long startTime );
 
@@ -91,9 +91,8 @@ public interface ExecutionManager extends EventFirer
 	public void archiveExecution( String executionId );
 
 	/**
-	 * Registers a TrackDescriptor, providing the structure of a Track.
+	 * Registers a TrackDescriptor.
 	 * 
-	 * @param trackId
 	 * @param trackDescriptor
 	 */
 	public void registerTrackDescriptor( TrackDescriptor trackDescriptor );
@@ -111,17 +110,9 @@ public interface ExecutionManager extends EventFirer
 	 * returned.
 	 * 
 	 * @param trackId
-	 * @param trackStructure
 	 * @return
 	 */
 	public Track getTrack( String trackId );
-
-	/**
-	 * Gets a Collection of all registered TrackDescriptors.
-	 * 
-	 * @return
-	 */
-	public Collection<String> getTrackIds();
 
 	/**
 	 * Writes an Entry to the Track for the specified source. Instead of calling
@@ -132,7 +123,7 @@ public interface ExecutionManager extends EventFirer
 	public void writeEntry( String trackId, Entry entry, String source );
 
 	/**
-	 * @see writeEntry(String, Entry, String)
+	 * @see #writeEntry(String, Entry, String)
 	 */
 	public void writeEntry( String trackId, Entry entry, String source, int interpolationLevel );
 

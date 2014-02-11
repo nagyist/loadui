@@ -15,12 +15,12 @@
  */
 package com.eviware.loadui.util.statistics.store;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.eviware.loadui.api.statistics.store.ExecutionListener;
 import com.eviware.loadui.api.statistics.store.ExecutionManager;
 import com.eviware.loadui.api.statistics.store.TrackDescriptor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ExecutionChangeSupport
 {
@@ -29,12 +29,6 @@ public class ExecutionChangeSupport
 	public void addExecutionListener( ExecutionListener el )
 	{
 		listeners.add( el );
-	}
-
-	public void fireExecutionPaused( ExecutionManager.State oldState )
-	{
-		for( ExecutionListener el : new ArrayList<>( listeners ) )
-			el.executionPaused( oldState );
 	}
 
 	public void fireExecutionStarted( ExecutionManager.State oldState )

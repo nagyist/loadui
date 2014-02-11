@@ -13,7 +13,7 @@
  * express or implied. See the Licence for the specific language governing permissions and limitations
  * under the Licence.
  */
-package com.eviware.loadui.impl.statistics.store.testevents;
+package com.eviware.loadui.util.statistics.store;
 
 import com.eviware.loadui.api.testevents.TestEvent;
 

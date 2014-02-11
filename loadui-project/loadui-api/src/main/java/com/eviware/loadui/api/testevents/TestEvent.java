@@ -61,7 +61,8 @@ public interface TestEvent
 		 * Instantiates a TestEvent of the Factories type, using the given data.
 		 * 
 		 * @param timestamp
-		 * @param data
+		 * @param sourceData
+		 * @param entryData
 		 * @return
 		 */
 		public T createTestEvent( long timestamp, byte[] sourceData, byte[] entryData );
@@ -118,8 +119,7 @@ public interface TestEvent
 	 * about the TestExecution, as well as the TestExecution itself.
 	 * 
 	 * @author dain.nilsson
-	 * 
-	 * @param <T>
+	 *
 	 */
 	public interface Entry
 	{

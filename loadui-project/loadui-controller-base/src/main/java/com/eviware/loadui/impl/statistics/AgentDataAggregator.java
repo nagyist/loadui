@@ -298,11 +298,6 @@ public class AgentDataAggregator implements StatisticsAggregator
 		}
 
 		@Override
-		public void executionPaused( State oldState )
-		{
-		}
-
-		@Override
 		public void executionStopped( State oldState )
 		{
 			log.debug( "Stop signal received" );

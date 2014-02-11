@@ -17,8 +17,6 @@ package com.eviware.loadui.api.testevents;
 
 import javax.annotation.Nullable;
 
-import com.eviware.loadui.api.testevents.TestEvent;
-
 /**
  * Instantiates a TestEvent from the stored TestEvent data, using available
  * EventTest.Factories.
@@ -35,7 +33,7 @@ public interface TestEventRegistry
 	 * @return
 	 */
 	@Nullable
-	public TestEvent.Factory<?> lookupFactory( String type );
+	public TestEvent.Factory<TestEvent> lookupFactory( String type );
 
 	/**
 	 * Gets the TestEvent.Factory registered for the given type, if available.

@@ -15,25 +15,6 @@
  */
 package com.eviware.loadui.impl.statistics.store;
 
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.EventObject;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.events.BaseEvent;
 import com.eviware.loadui.api.events.EventHandler;
 import com.eviware.loadui.api.statistics.store.Execution;
@@ -47,18 +28,24 @@ import com.eviware.loadui.api.testevents.TestEventTypeDescriptor;
 import com.eviware.loadui.api.traits.Releasable;
 import com.eviware.loadui.impl.statistics.db.util.TypeConverter;
 import com.eviware.loadui.impl.statistics.store.testevents.TestEventData;
-import com.eviware.loadui.impl.statistics.store.testevents.TestEventEntryImpl;
 import com.eviware.loadui.impl.statistics.store.testevents.TestEventSourceConfig;
 import com.eviware.loadui.impl.statistics.store.testevents.TestEventSourceDescriptorImpl;
 import com.eviware.loadui.util.ReleasableUtils;
 import com.eviware.loadui.util.events.EventSupport;
+import com.eviware.loadui.util.statistics.store.TestEventEntryImpl;
 import com.eviware.loadui.util.testevents.UnknownTestEvent;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.*;
 
 /**
  * Execution implementation

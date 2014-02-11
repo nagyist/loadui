@@ -15,9 +15,6 @@
  */
 package com.eviware.loadui.util.testevents;
 
-import java.util.Collections;
-import java.util.Set;
-
 import com.eviware.loadui.api.testevents.MessageLevel;
 import com.eviware.loadui.api.testevents.TestEvent;
 import com.eviware.loadui.api.testevents.TestEvent.Factory;
@@ -25,8 +22,13 @@ import com.eviware.loadui.api.testevents.TestEventManager;
 import com.eviware.loadui.api.testevents.TestEventRegistry;
 import com.google.common.collect.MapMaker;
 
+import java.util.Collections;
+import java.util.Set;
+
 public abstract class AbstractTestEventManager implements TestEventManager
 {
+	protected static final String CHANNEL = "/" + TestEventManager.class.getSimpleName();
+
 	protected final TestEventRegistry testEventRegistry;
 	protected final Set<TestEventObserver> observers = Collections.newSetFromMap( new MapMaker().weakKeys()
 			.<TestEventObserver, Boolean> makeMap() );
