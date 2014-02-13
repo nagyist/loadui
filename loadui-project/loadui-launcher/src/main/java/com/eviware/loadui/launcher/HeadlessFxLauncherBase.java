@@ -20,6 +20,12 @@ public abstract class HeadlessFxLauncherBase extends LoadUILauncher
 		super( args );
 	}
 
+	@Override
+	protected final void processOsgiExtraPackages()
+	{
+		JavaFxStarter.addJavaFxOsgiExtraPackages( configProps );
+	}
+
 	protected void setCommand( GroovyCommand command )
 	{
 		this.command = command;

@@ -48,6 +48,12 @@ public class LoadUIFXLauncher extends LoadUILauncher
 	}
 
 	@Override
+	protected void processOsgiExtraPackages()
+	{
+		JavaFxStarter.addJavaFxOsgiExtraPackages( configProps );
+	}
+
+	@Override
 	protected void processCommandLine( CommandLine cmdLine )
 	{
 
@@ -70,7 +76,7 @@ public class LoadUIFXLauncher extends LoadUILauncher
 			final String agent = getParameters().getNamed().get( "agent" );
 
 			if( "true".equals( agent ) )
-				setDefaultSystemProperty( "loadui.instance", "agent" );
+				setDefaultSystemProperty( LoadUI.INSTANCE, "agent" );
 
 			if( "false".equals( noFx ) )
 			{
