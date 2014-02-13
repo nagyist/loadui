@@ -18,6 +18,8 @@ public class ComponentBuilder
 		WEB_RUNNER( "Web Page Runner" ),
 		FIXED_LOAD( "Fixed Load" ),
 		RAMP_LOAD( "Ramp Load" ),
+		RAMP_RATE( "Ramp Rate" ),
+		RAMP_SEQUENCE( "Ramp Sequence" ),
 		DEJA_RUNNER( "DejaClick Runner" ),
 		TABLE_LOG( "Table Log" );
 		//TODO add more components as required
