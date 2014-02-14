@@ -1,31 +1,26 @@
 package com.eviware.loadui.components.soapui;
 
-import static com.eviware.loadui.components.soapui.TestCasePropertiesNode.OVERRIDING_VALUE_PREFIX;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import javax.xml.namespace.QName;
-
-import org.apache.xmlbeans.SchemaType;
+import com.eviware.loadui.api.component.ComponentContext;
+import com.eviware.loadui.api.property.Property;
+import com.eviware.loadui.components.soapui.utils.PropertyOverrider;
+import com.eviware.loadui.ui.fx.util.TestingProperty;
+import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
+import com.eviware.soapui.model.testsuite.TestProperty;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import com.eviware.loadui.api.component.ComponentContext;
-import com.eviware.loadui.api.property.Property;
-import com.eviware.loadui.components.soapui.TestCasePropertiesNode;
-import com.eviware.loadui.ui.fx.util.TestingProperty;
-import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
-import com.eviware.soapui.model.ModelItem;
-import com.eviware.soapui.model.testsuite.TestProperty;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import static com.eviware.loadui.components.soapui.utils.PropertyOverrider.OVERRIDING_VALUE_PREFIX;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class TestCasePropertiesNodeTest
 {
@@ -168,7 +163,7 @@ public class TestCasePropertiesNodeTest
 		overridingProperties.add( new TestingProperty<String>( String.class, "p2", "newValue" ) );
 
 		System.out.println( testCase.getPropertyList().size() );
-		TestCasePropertiesNode.overrideTestCaseProperties( testCase, overridingProperties );
+		PropertyOverrider.overrideTestCaseProperties( testCase, overridingProperties );
 
 		List<TestProperty> data = testCase.getPropertyList();
 

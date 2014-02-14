@@ -15,10 +15,10 @@
  */
 package com.eviware.loadui.components.soapui;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Callable;
-
+import com.eviware.loadui.api.component.ComponentContext;
+import com.eviware.loadui.components.soapui.utils.PropertyOverrider;
+import com.eviware.soapui.model.testsuite.TestCase;
+import com.eviware.soapui.model.testsuite.TestProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
@@ -31,67 +31,21 @@ import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-
-import javax.annotation.concurrent.Immutable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eviware.loadui.api.component.ComponentContext;
-import com.eviware.loadui.api.property.Property;
-import com.eviware.loadui.api.terminal.TerminalMessage;
-import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
-import com.eviware.soapui.model.testsuite.TestCase;
-import com.eviware.soapui.model.testsuite.TestProperty;
+import javax.annotation.concurrent.Immutable;
+import java.util.concurrent.Callable;
 
-final public class TestCasePropertiesNode extends VBox
+final public class TestCaseTableView extends VBox
 {
-	public static final String OVERRIDING_VALUE_PREFIX = "_valueToOverride_";
 
-	protected static final Logger log = LoggerFactory.getLogger( TestCasePropertiesNode.class );
-
-	/**
-	 * Applies context properties to a TestCase from an incoming message.
-	 * 
-	 * @param testCase
-	 * @param contextProperties
-	 */
-
-	public static void overrideTestCaseProperties( WsdlTestCase testCase, Collection<Property<?>> contextProperties )
-	{
-		log.debug( "1setting property:" );
-		for( Property<?> contextProperty : contextProperties )
-		{
-
-			if( contextProperty.getKey().startsWith( OVERRIDING_VALUE_PREFIX ) )
-			{
-				log.debug( "setting property:" + contextProperty.getKey() + ", " + contextProperty.getValue() );
-				testCase.setPropertyValue( contextProperty.getKey().replaceFirst( OVERRIDING_VALUE_PREFIX, "" ),
-						contextProperty.getValue() + "" );
-			}
-		}
-	}
-
-	/**
-	 * Applies triggerMessage properties to a TestCase from an incoming message.
-	 * 
-	 * @param testCase
-	 * @param triggerMessage
-	 */
-
-	public static void overrideTestCaseProperties( WsdlTestCase testCase, TerminalMessage triggerMessage )
-	{
-		for( String name : testCase.getPropertyNames() )
-		{
-			if( triggerMessage.containsKey( name ) )
-				testCase.setPropertyValue( name, String.valueOf( triggerMessage.get( name ) ) );
-		}
-	}
+	protected static final Logger log = LoggerFactory.getLogger( TestCaseTableView.class );
 
 	/**
 	 * Creates a tableView that displays editable Properties from the given
 	 * ComponentContext and TestCase.
-	 * 
+	 *
 	 * @param component
 	 * @param context
 	 * @return
@@ -109,35 +63,19 @@ final public class TestCasePropertiesNode extends VBox
 
 				if( testCase != null )
 				{
-					table.getItems().setAll( applyOveriddenProperties( testCase.getPropertyList(), context ) );
+					table.getItems().setAll(
+							PropertyOverrider.applyOveriddenProperties( testCase.getPropertyList(), context ) );
 				}
 				else
 				{
 					table.getItems().clear();
 				}
 
-				TestCasePropertiesNode node = new TestCasePropertiesNode();
+				TestCaseTableView node = new TestCaseTableView();
 				node.getChildren().addAll( new Label( "TestCase Properties" ), table );
 				return node;
 			}
 		};
-	}
-
-	private static List<TestProperty> applyOveriddenProperties( List<TestProperty> customProperties,
-			ComponentContext context )
-	{
-		for( TestProperty p : customProperties )
-		{
-			Property<?> savedProperty = context.getProperty( OVERRIDING_VALUE_PREFIX + p.getName() );
-
-			if( savedProperty != null )
-			{
-				p.setValue( savedProperty.getValue() + "" );
-			}
-		}
-
-		return customProperties;
-
 	}
 
 	@Immutable
@@ -209,7 +147,7 @@ final public class TestCasePropertiesNode extends VBox
 
 		private void setOrCreateContextProperty( ComponentContext context, String name, String value )
 		{
-			String propertyName = OVERRIDING_VALUE_PREFIX + name;
+			String propertyName = PropertyOverrider.OVERRIDING_VALUE_PREFIX + name;
 
 			if( context.getProperty( propertyName ) == null )
 			{
