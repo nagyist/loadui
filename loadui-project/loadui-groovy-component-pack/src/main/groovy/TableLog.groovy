@@ -273,6 +273,7 @@ validateLogFilePath = { filePath ->
 addTimestampToFileName = { it.replaceAll('^(.*?)(\\.\\w+)?$', '$1-'+System.currentTimeMillis()+'$2') }
 
 refreshLayout = {
+    if ( !controller ) return;
 	rebuildTable()
 	layout(layout: 'wrap 4') {
 		node( component: table, constraints: 'span' )
@@ -306,7 +307,7 @@ refreshLayout = {
 		}
 	}
 }
-if( controller ) refreshLayout()
+refreshLayout()
 
 void withFileWriter( createIfNull = true, closure ) {
 	synchronized( writerLock ) {
