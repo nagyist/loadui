@@ -18,6 +18,7 @@ package com.eviware.loadui.impl.statistics.store;
 import com.eviware.loadui.api.addressable.AddressableRegistry;
 import com.eviware.loadui.api.messaging.BroadcastMessageEndpoint;
 import com.eviware.loadui.api.messaging.MessageEndpoint;
+import com.eviware.loadui.api.statistics.store.ExecutionManager;
 import com.eviware.loadui.api.testevents.TestEvent;
 import com.eviware.loadui.api.testevents.TestEventRegistry;
 import com.eviware.loadui.api.traits.Releasable;
@@ -38,7 +39,7 @@ public class TestEventManagerImpl extends AbstractTestEventManager implements Re
 	private final TestEventReceiver eventReceiver;
 
 	public TestEventManagerImpl( final TestEventRegistry testEventRegistry,
-										  ExecutionManagerImpl manager,
+										  ExecutionManager manager,
 										  BroadcastMessageEndpoint endpoint,
 										  AddressableRegistry addressableRegistry,
 										  final TestEventInterpolator interpolator )
