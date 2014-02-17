@@ -1,4 +1,4 @@
-// 
+//
 // Copyright 2013 SmartBear Software
 // 
 // Licensed under the EUPL, Version 1.1 or - as soon they will be approved by the European Commission - subsequent
@@ -22,10 +22,6 @@
  * @category flow
  * @nonBlocking true
  */
-
-import javafx.scene.control.Slider
-import javafx.beans.InvalidationListener
-
 //Here to support Splitters created in loadUI 1.0, remove in the future:
 try { renameProperty( 'outputs', 'numOutputs' ) } catch( e ) {}
 
@@ -108,13 +104,15 @@ def compensateProbabilities( changedProperty, diff ) {
 }
 
 createProperty( 'type', String, "Round-Robin" ) {
-	refreshLayout()
+	if ( controller ) refreshLayout()
 }
 
-slider = new Slider(min: 2, max: 10, majorTickUnit:1, minorTickCount:0, showTickLabels: true, snapToTicks: true, showTickMarks: true)
-invalidator = { if(!slider.valueChanging) numOutputs.value = slider.value } as InvalidationListener
-slider.valueChangingProperty().addListener( invalidator )
-slider.valueProperty().addListener( invalidator )
+if ( controller ) {
+    slider = slider(min: 2, max: 10, majorTickUnit:1, minorTickCount:0, showTickLabels: true, snapToTicks: true, showTickMarks: true)
+    invalidator = invalidationListener { if(!slider.valueChanging) numOutputs.value = slider.value }
+    slider.valueChangingProperty().addListener( invalidator )
+    slider.valueProperty().addListener( invalidator )
+}
 
 createProperty( 'numOutputs', Integer, 2 ) { outputCount ->
 	while( outgoingTerminalList.size() < outputCount ) {
@@ -140,9 +138,10 @@ createProperty( 'numOutputs', Integer, 2 ) { outputCount ->
 		latestChanged.remove( i )
 		deleteProperty( terminalProbabilities.remove( i )?.key )
 	}
-	
-	slider.value = outputCount
-	refreshLayout()
+	if ( controller ) {
+        slider.value = outputCount
+        refreshLayout()
+    }
 }
 
 random = new Random()

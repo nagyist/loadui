@@ -6,6 +6,8 @@ import groovy.lang.Closure;
 import groovy.lang.MissingMethodException;
 import groovy.util.ObjectGraphBuilder;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -36,7 +38,7 @@ public class JavaFxResolver implements GroovyResolver.Methods
 		builder.setClassLoader( getClass().getClassLoader() );
 
 		// TODO add support for more JavaFX stuff - only added what was necessary for current components to run
-		classesByPackage.put( "javafx.scene.control", asList( "tableView", "tableColumn" ) );
+		classesByPackage.put( "javafx.scene.control", asList( "tableView", "tableColumn", "slider" ) );
 	}
 
 	@Nullable
@@ -109,6 +111,19 @@ public class JavaFxResolver implements GroovyResolver.Methods
 						public void changed( ObservableValue<?> observableValue, Object old, Object current )
 						{
 							closure.call( observableValue, old, current );
+						}
+					};
+				}
+				if( methodName.equals( "invalidationListener" ) )
+				{
+					Preconditions.checkArgument( args.length >= 1 );
+					final Closure<?> closure = ( Closure<?> )args[0];
+					return new InvalidationListener()
+					{
+						@Override
+						public void invalidated( Observable observable )
+						{
+							closure.call( observable );
 						}
 					};
 				}
