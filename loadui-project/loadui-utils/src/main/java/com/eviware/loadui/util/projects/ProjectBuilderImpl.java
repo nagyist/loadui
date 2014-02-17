@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -34,9 +35,9 @@ public class ProjectBuilderImpl implements ProjectBuilder
 	}
 
 	@Override
-	public ProjectBlueprint create()
+	public ProjectBlueprintImp create()
 	{
-		return new ProjectBlueprint();
+		return new ProjectBlueprintImp();
 	}
 
 	private boolean save( File file )
@@ -52,7 +53,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		}
 	}
 
-	private ProjectRef assembleProjectByBlueprint( ProjectBlueprint blueprint )
+	private ProjectRef assembleProjectByBlueprint( ProjectBlueprintImp blueprint )
 	{
 
 		ProjectRef project = workspaceProvider.getWorkspace().createProject( blueprint.getProjectFile(), blueprint.getLabel(), true );
@@ -180,7 +181,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 	}
 
 
-	public class ProjectBlueprint implements ProjectBuilder.ProjectBlueprint
+	public class ProjectBlueprintImp implements ProjectBuilder.ProjectBlueprint
 	{
 		private static final long DEFAULT_REQUEST_LIMIT = 0;
 		private static final long DEFAULT_ASSERTION_FAILURE_LIMIT = 0;
@@ -193,7 +194,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		private long timeLimit;
 		private long assertionFailureLimit;
 
-		private ProjectBlueprint()
+		private ProjectBlueprintImp()
 		{
 			try
 			{
@@ -271,7 +272,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		}
 
 		@Override
-		public ProjectBlueprint where( File where )
+		public ProjectBlueprintImp where( File where )
 		{
 			projectFile = where;
 			return this;
@@ -280,29 +281,26 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		@Override
 		public ProjectBuilder.ProjectBlueprint components( ComponentBlueprint... components )
 		{
-        	for( ComponentBlueprint blueprint : components )
-			{
-				this.components.add( blueprint );
-			}
+			Collections.addAll( this.components, components );
 			return this;
 		}
 
 		@Override
-		public ProjectBlueprint requestsLimit( Long requests )
+		public ProjectBlueprintImp requestsLimit( Long requests )
 		{
 			setRequestLimit( requests );
 			return this;
 		}
 
 		@Override
-		public ProjectBlueprint timeLimit( Long seconds )
+		public ProjectBlueprintImp timeLimit( Long seconds )
 		{
 			setTimeLimit( seconds );
 			return this;
 		}
 
 		@Override
-		public ProjectBlueprint assertionLimit( Long assertionFailures )
+		public ProjectBlueprintImp assertionLimit( Long assertionFailures )
 		{
 			setAssertionFailureLimit( assertionFailures );
 			return this;
@@ -316,7 +314,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		}
 
 		@Override
-		public ProjectBlueprint label( String name )
+		public ProjectBlueprintImp label( String name )
 		{
 			setLabel( name );
 			return this;

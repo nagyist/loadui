@@ -3,6 +3,7 @@ package com.eviware.loadui.util.projects;
 import com.eviware.loadui.api.model.ComponentBlueprint;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -54,10 +55,7 @@ public class ComponentBuilder
 
 	public ComponentBuilder child( ComponentBlueprint... componentBlueprints )
 	{
-		for( ComponentBlueprint component : componentBlueprints )
-		{
-			this.child.add( component );
-		}
+		Collections.addAll( this.child, componentBlueprints );
 		return this;
 	}
 
@@ -126,6 +124,20 @@ public class ComponentBuilder
 		public List<PropertyDescriptor> getProperties()
 		{
 			return properties;
+		}
+
+		@Override
+		public PropertyDescriptor getProperty( String id )
+		{
+			for( PropertyDescriptor property : properties )
+			{
+				if( property.getKey().equals( id ) )
+				{
+					return property;
+				}
+			}
+
+			return null;
 		}
 
 		public boolean isConcurrentUsers()
