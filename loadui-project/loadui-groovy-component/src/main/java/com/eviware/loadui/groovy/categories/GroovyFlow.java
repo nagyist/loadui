@@ -23,7 +23,6 @@ import com.eviware.loadui.api.terminal.OutputTerminal;
 import com.eviware.loadui.api.terminal.TerminalMessage;
 import com.eviware.loadui.groovy.GroovyBehaviorProvider;
 import com.eviware.loadui.groovy.GroovyBehaviorSupport;
-import com.eviware.loadui.groovy.JavaFxBehaviorSupport;
 import com.eviware.loadui.impl.component.categories.FlowBase;
 import com.eviware.loadui.util.ReleasableUtils;
 
@@ -37,7 +36,7 @@ public class GroovyFlow extends FlowBase
 	{
 		super( context );
 
-		scriptSupport = new JavaFxBehaviorSupport( scriptUpdateFirer, this, context );
+		scriptSupport = new GroovyBehaviorSupport( scriptUpdateFirer, this, context );
 	}
 
 	@Override

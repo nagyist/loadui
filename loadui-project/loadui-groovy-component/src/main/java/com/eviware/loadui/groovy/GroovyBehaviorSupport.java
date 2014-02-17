@@ -116,7 +116,8 @@ public class GroovyBehaviorSupport implements Releasable
 				new TerminalHolderResolver( context, log ),
 				new StatisticHolderResolver( context.getComponent() ),
 				new ScheduledExecutionResolver(),
-				noRelease( new JavaBeanGroovyResolver( context ) )
+				noRelease( new JavaBeanGroovyResolver( context ) ),
+				new JavaFxResolver()
 		};
 	}
 
