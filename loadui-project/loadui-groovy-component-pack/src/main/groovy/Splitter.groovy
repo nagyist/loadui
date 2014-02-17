@@ -193,8 +193,8 @@ refreshLayout = {
 					property( property:terminalProbabilities[i], label:'%', min: 0, max: 100, step: 1, enabled:moreThanOneTerminal, layout: 'ins -15, center', constraints: "w 32!, gap "+gap+" "+gap )
 				}
 				else {
-					box( widget: 'display', layout: 'center', constraints: "w 48!, h 24!, gap "+gap+" "+gap ) {
-						node( content: countDisplays[i], constraints: 'pad -6 -4' )
+					box( widget: 'display', layout: 'center', constraints: "w 56!, h 24!, gap "+gap+" "+gap ) {
+                        node( content: countDisplays[i], constraints: 'pad -16 -1' )
 					}
 				}
 			}
