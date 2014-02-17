@@ -47,6 +47,7 @@ import com.eviware.loadui.impl.component.ActivityStrategies;
 import com.eviware.loadui.impl.component.categories.RunnerBase;
 import com.eviware.loadui.impl.layout.*;
 import com.eviware.loadui.integration.SoapUIProjectLoader;
+import com.eviware.loadui.util.ReleasableUtils;
 import com.eviware.soapui.SoapUIExtensionClassLoader;
 import com.eviware.soapui.SoapUIExtensionClassLoader.SoapUIClassLoaderState;
 import com.eviware.soapui.config.LoadTestConfig;
@@ -611,11 +612,8 @@ public class SoapUISamplerComponent extends RunnerBase
 	public void onRelease()
 	{
 		super.onRelease();
-		runner.release();
+		ReleasableUtils.releaseAll( runner, testStepsTableModel, metricsDisplay );
 		executor.shutdown();
-		if( testStepsTableModel != null )
-			testStepsTableModel.release();
-		metricsDisplay.release();
 		getContext().removeEventListener( ActionEvent.class, actionListener );
 		projectSelector.onComponentRelease();
 	}
@@ -965,8 +963,7 @@ public class SoapUISamplerComponent extends RunnerBase
 		{
 			if( testSuite == null || testCaseName == null )
 			{
-				if( projectSelector != null )
-					projectSelector.setTestCases();
+				projectSelector.setTestCases();
 				testStepsInvocationCount.invalidateAll();
 				if( testStepsTableModel != null )
 					testStepsTableModel.clearTestCase();
