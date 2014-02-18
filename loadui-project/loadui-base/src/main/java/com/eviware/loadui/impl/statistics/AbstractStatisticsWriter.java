@@ -15,35 +15,29 @@
  */
 package com.eviware.loadui.impl.statistics;
 
-import java.util.Map;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.api.statistics.EntryAggregator;
-import com.eviware.loadui.api.statistics.StatisticVariable;
-import com.eviware.loadui.api.statistics.StatisticsAggregator;
-import com.eviware.loadui.api.statistics.StatisticsManager;
-import com.eviware.loadui.api.statistics.StatisticsWriter;
+import com.eviware.loadui.api.statistics.*;
 import com.eviware.loadui.api.statistics.store.Entry;
 import com.eviware.loadui.api.statistics.store.TrackDescriptor;
 import com.eviware.loadui.util.BeanInjector;
+import com.eviware.loadui.util.statistics.StatisticVariableIdentifierImpl;
 import com.eviware.loadui.util.statistics.store.EntryImpl;
 import com.eviware.loadui.util.statistics.store.TrackDescriptorImpl;
 import com.google.common.collect.ImmutableMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 public abstract class AbstractStatisticsWriter implements StatisticsWriter
 {
-	@SuppressWarnings( "unused" )
+	@SuppressWarnings("unused")
 	private final static Logger log = LoggerFactory.getLogger( AbstractStatisticsWriter.class );
 
 	public static final String DELAY = "delay";
 	public static final String NAMES = "names";
 
 	private final StatisticVariable variable;
-	private final String id;
 	private final TrackDescriptor descriptor;
 
 	private final StatisticsAggregator aggregator;
@@ -56,12 +50,15 @@ public abstract class AbstractStatisticsWriter implements StatisticsWriter
 	private final Map<String, Object> config;
 
 	public AbstractStatisticsWriter( StatisticsManager manager, StatisticVariable variable,
-			Map<String, Class<? extends Number>> values, Map<String, Object> config, EntryAggregator entryAggregator )
+												Map<String, Class<? extends Number>> values, Map<String, Object> config, EntryAggregator entryAggregator )
 	{
 		this.config = config;
 		this.variable = variable;
-		id = DigestUtils.md5Hex( variable.getStatisticHolder().getId() + variable.getLabel() + getType() );
-		descriptor = new TrackDescriptorImpl( id, values, entryAggregator );
+		StatisticVariableIdentifier identifier = new StatisticVariableIdentifierImpl(
+				variable.getStatisticHolder().getId(), variable.getLabel(), getType() );
+
+		descriptor = new TrackDescriptorImpl( identifier, values, entryAggregator );
+
 		delay = config.containsKey( DELAY ) ? ( ( Number )config.get( DELAY ) ).longValue() : manager
 				.getMinimumWriteDelay();
 
@@ -86,7 +83,7 @@ public abstract class AbstractStatisticsWriter implements StatisticsWriter
 	@Override
 	public String getId()
 	{
-		return id;
+		return descriptor.getId();
 	}
 
 	@Override
@@ -111,7 +108,7 @@ public abstract class AbstractStatisticsWriter implements StatisticsWriter
 				return;
 
 			lastFlushed = entry.getTimestamp();
-			aggregator.addEntry( id, entry );
+			aggregator.addEntry( descriptor.getId(), entry );
 		}
 	}
 
@@ -123,7 +120,7 @@ public abstract class AbstractStatisticsWriter implements StatisticsWriter
 	/**
 	 * Builder for use in at( int timestamp ) to make writing data to the proper
 	 * Track easy.
-	 * 
+	 *
 	 * @author dain.nilsson
 	 */
 	protected static class EntryBuilder
