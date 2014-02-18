@@ -15,24 +15,15 @@
  */
 package com.eviware.loadui.components.soapui;
 
-import static org.loadui.testfx.GuiTest.targetWindow;
-import static org.loadui.testfx.GuiTest.wrap;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
-import org.loadui.testfx.categories.TestFX;
-import org.loadui.testfx.GuiTest;
+import com.eviware.loadui.api.component.ComponentContext;
+import com.eviware.loadui.api.property.Property;
+import com.eviware.loadui.components.soapui.utils.PropertyOverrider;
+import com.eviware.loadui.ui.fx.util.TestingProperty;
+import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
+import com.eviware.soapui.model.testsuite.TestProperty;
+import com.google.common.util.concurrent.SettableFuture;
+import com.sun.javafx.scene.control.skin.LabeledText;
+import com.sun.javafx.scene.control.skin.TableRowSkin;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.GroupBuilder;
@@ -44,27 +35,31 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.loadui.testfx.FXScreenController;
+import org.loadui.testfx.FXTestUtils;
+import org.loadui.testfx.GuiTest;
+import org.loadui.testfx.categories.TestFX;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import com.eviware.loadui.api.component.ComponentContext;
-import com.eviware.loadui.api.property.Property;
-import com.eviware.loadui.components.soapui.SoapUISamplerComponent;
-import com.eviware.loadui.components.soapui.TestCasePropertiesNode;
-import com.eviware.loadui.ui.fx.util.TestingProperty;
-import org.loadui.testfx.FXScreenController;
-import org.loadui.testfx.FXTestUtils;
-import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
-import com.eviware.soapui.model.testsuite.TestProperty;
-import com.google.common.util.concurrent.SettableFuture;
-import com.sun.javafx.scene.control.skin.LabeledText;
-import com.sun.javafx.scene.control.skin.TableRowSkin;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.*;
+import static org.loadui.testfx.GuiTest.targetWindow;
+import static org.loadui.testfx.GuiTest.wrap;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @Category( TestFX.class )
 public class TestCasePropertiesNodeGuiTest
@@ -191,7 +186,7 @@ public class TestCasePropertiesNodeGuiTest
 			public void run()
 			{
 				resetProperties();
-				Callable<Node> propertiesNode = TestCasePropertiesNode.createTableView( createComponentMock(),
+				Callable<Node> propertiesNode = TestCaseTableView.createTableView( createComponentMock(),
 						createContextMock() );
 
 				try
@@ -294,7 +289,7 @@ public class TestCasePropertiesNodeGuiTest
 	public void outputPropertiesShouldHaveOvveriddebPrefix()
 	{
 		editCell( ".column1-row3", "edit1" );
-		assertTrue( outputProperties.get( 0 ).getKey().startsWith( TestCasePropertiesNode.OVERRIDING_VALUE_PREFIX ) );
+		assertTrue( outputProperties.get( 0 ).getKey().startsWith( PropertyOverrider.OVERRIDING_VALUE_PREFIX ) );
 	}
 
 	@Test
@@ -311,7 +306,7 @@ public class TestCasePropertiesNodeGuiTest
 	public void savedPropertiesShouldBeUsed()
 	{
 		outputProperties.clear();
-		outputProperties.add( new TestingProperty<>( String.class, TestCasePropertiesNode.OVERRIDING_VALUE_PREFIX + "p2",
+		outputProperties.add( new TestingProperty<>( String.class, PropertyOverrider.OVERRIDING_VALUE_PREFIX + "p2",
 				"newValue" ) );
 		resetTable();
 		setIndexStyleclassToCells();

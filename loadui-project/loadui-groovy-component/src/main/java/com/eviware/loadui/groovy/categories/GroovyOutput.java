@@ -15,8 +15,6 @@
  */
 package com.eviware.loadui.groovy.categories;
 
-import java.util.Map;
-
 import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.model.AgentItem;
 import com.eviware.loadui.api.summary.MutableChapter;
@@ -27,6 +25,8 @@ import com.eviware.loadui.groovy.GroovyBehaviorProvider;
 import com.eviware.loadui.groovy.GroovyBehaviorSupport;
 import com.eviware.loadui.impl.component.categories.OutputBase;
 import com.eviware.loadui.util.ReleasableUtils;
+
+import java.util.Map;
 
 public class GroovyOutput extends OutputBase
 {

@@ -1,4 +1,4 @@
-// 
+//
 // Copyright 2013 SmartBear Software
 // 
 // Licensed under the EUPL, Version 1.1 or - as soon they will be approved by the European Commission - subsequent
@@ -22,10 +22,6 @@
  * @category flow
  * @nonBlocking true
  */
-
-import javafx.scene.control.Slider
-import javafx.beans.InvalidationListener
-
 //Here to support Splitters created in loadUI 1.0, remove in the future:
 try { renameProperty( 'outputs', 'numOutputs' ) } catch( e ) {}
 
@@ -108,13 +104,15 @@ def compensateProbabilities( changedProperty, diff ) {
 }
 
 createProperty( 'type', String, "Round-Robin" ) {
-	refreshLayout()
+	if ( controller ) refreshLayout()
 }
 
-slider = new Slider(min: 2, max: 10, majorTickUnit:1, minorTickCount:0, showTickLabels: true, snapToTicks: true, showTickMarks: true)
-invalidator = { if(!slider.valueChanging) numOutputs.value = slider.value } as InvalidationListener
-slider.valueChangingProperty().addListener( invalidator )
-slider.valueProperty().addListener( invalidator )
+if ( controller ) {
+    slider = slider(min: 2, max: 10, majorTickUnit:1, minorTickCount:0, showTickLabels: true, snapToTicks: true, showTickMarks: true)
+    invalidator = invalidationListener { if(!slider.valueChanging) numOutputs.value = slider.value }
+    slider.valueChangingProperty().addListener( invalidator )
+    slider.valueProperty().addListener( invalidator )
+}
 
 createProperty( 'numOutputs', Integer, 2 ) { outputCount ->
 	while( outgoingTerminalList.size() < outputCount ) {
@@ -140,9 +138,10 @@ createProperty( 'numOutputs', Integer, 2 ) { outputCount ->
 		latestChanged.remove( i )
 		deleteProperty( terminalProbabilities.remove( i )?.key )
 	}
-	
-	slider.value = outputCount
-	refreshLayout()
+	if ( controller ) {
+        slider.value = outputCount
+        refreshLayout()
+    }
 }
 
 random = new Random()
@@ -194,8 +193,8 @@ refreshLayout = {
 					property( property:terminalProbabilities[i], label:'%', min: 0, max: 100, step: 1, enabled:moreThanOneTerminal, layout: 'ins -15, center', constraints: "w 32!, gap "+gap+" "+gap )
 				}
 				else {
-					box( widget: 'display', layout: 'center', constraints: "w 48!, h 24!, gap "+gap+" "+gap ) {
-						node( content: countDisplays[i], constraints: 'pad -6 -4' )
+					box( widget: 'display', layout: 'center', constraints: "w 56!, h 24!, gap "+gap+" "+gap ) {
+                        node( content: countDisplays[i], constraints: 'pad -16 -1' )
 					}
 				}
 			}

@@ -15,17 +15,6 @@
  */
 package com.eviware.loadui.groovy;
 
-import static com.eviware.loadui.util.groovy.resolvers.DelegatingResolver.noRelease;
-import groovy.lang.Binding;
-import groovy.lang.GroovyRuntimeException;
-import groovy.lang.MissingPropertyException;
-
-import java.beans.PropertyChangeEvent;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.events.ActionEvent;
 import com.eviware.loadui.api.events.BaseEvent;
@@ -43,14 +32,19 @@ import com.eviware.loadui.util.groovy.ClassLoaderRegistry;
 import com.eviware.loadui.util.groovy.GroovyEnvironment;
 import com.eviware.loadui.util.groovy.GroovyResolver;
 import com.eviware.loadui.util.groovy.ParsedGroovyScript;
-import com.eviware.loadui.util.groovy.resolvers.DelegatingResolver;
-import com.eviware.loadui.util.groovy.resolvers.JavaBeanGroovyResolver;
-import com.eviware.loadui.util.groovy.resolvers.PropertyHolderResolver;
-import com.eviware.loadui.util.groovy.resolvers.ScheduledExecutionResolver;
-import com.eviware.loadui.util.groovy.resolvers.StatisticHolderResolver;
-import com.eviware.loadui.util.groovy.resolvers.TerminalHolderResolver;
+import com.eviware.loadui.util.groovy.resolvers.*;
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
+import groovy.lang.Binding;
+import groovy.lang.GroovyRuntimeException;
+import groovy.lang.MissingPropertyException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.beans.PropertyChangeEvent;
+import java.util.Set;
+
+import static com.eviware.loadui.util.groovy.resolvers.DelegatingResolver.noRelease;
 
 public class GroovyBehaviorSupport implements Releasable
 {
@@ -74,9 +68,10 @@ public class GroovyBehaviorSupport implements Releasable
 
 	private GroovyEnvironment groovyEnv;
 	private GroovyResolver resolver;
+	PropertyHolderResolver propertyHolderResolver;
 
 	public GroovyBehaviorSupport( GroovyBehaviorProvider behaviorProvider, BaseCategory behavior,
-			ComponentContext context )
+											ComponentContext context )
 	{
 		id = context.getAttribute( ID_ATTRIBUTE, context.getAttribute( ComponentItem.TYPE, context.getLabel() ) );
 		log = LoggerFactory.getLogger( "com.eviware.loadui.groovy.component." + id );
@@ -109,6 +104,23 @@ public class GroovyBehaviorSupport implements Releasable
 		return groovyEnv;
 	}
 
+	protected GroovyResolver[] provideGroovyResolvers()
+	{
+		propertyHolderResolver = new PropertyHolderResolver( context, log );
+		return new GroovyResolver[] {
+				noRelease( new JavaBeanGroovyResolver( groovyContext ) ),
+				noRelease( new JavaBeanGroovyResolver( behavior ) ),
+				new TotalResolver( behavior ),
+				new ComponentTestExecutionResolver( context ),
+				propertyHolderResolver,
+				new TerminalHolderResolver( context, log ),
+				new StatisticHolderResolver( context.getComponent() ),
+				new ScheduledExecutionResolver(),
+				noRelease( new JavaBeanGroovyResolver( context ) ),
+				new JavaFxResolver()
+		};
+	}
+
 	private void updateScript( String scriptText )
 	{
 		if( scriptText == null )
@@ -118,19 +130,15 @@ public class GroovyBehaviorSupport implements Releasable
 		groovyContext.reset();
 
 		ParsedGroovyScript headers = new ParsedGroovyScript( scriptText );
-		PropertyHolderResolver propertyHolderResolver = new PropertyHolderResolver( context, log );
 
-		resolver = new DelegatingResolver( noRelease( new JavaBeanGroovyResolver( groovyContext ) ),
-				noRelease( new JavaBeanGroovyResolver( behavior ) ), new TotalResolver( behavior ),
-				new ComponentTestExecutionResolver( context ), propertyHolderResolver, new TerminalHolderResolver( context,
-						log ), new StatisticHolderResolver( context.getComponent() ), new ScheduledExecutionResolver(),
-				noRelease( new JavaBeanGroovyResolver( context ) ) );
+		resolver = new DelegatingResolver( provideGroovyResolvers() );
 
 		Binding binding = new Binding();
 		groovyEnv = GroovyEnvironment.newInstance( headers, id, "com.eviware.loadui.groovy.component", clr,
 				classLoaderId, resolver, binding );
 
 		propertyHolderResolver.invokeReplaceHandlers();
+
 		try
 		{
 			Object defaultStatistics = binding.getVariable( "defaultStatistics" );

@@ -50,7 +50,7 @@ public abstract class LoadUILauncher
 	protected static final String LOADUI_BUILD_DATE = "loadui.build.date";
 	protected static final String LOADUI_BUILD_NUMBER = "loadui.build.number";
 
-	protected static final String ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA = "org.osgi.framework.system.packages.extra";
+	public static final String ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA = "org.osgi.framework.system.packages.extra";
 	protected static final String NOFX_OPTION = "nofx";
 	protected static final String SYSTEM_PROPERTY_OPTION = "D";
 	protected static final String HELP_OPTION = "h";
@@ -318,29 +318,7 @@ public abstract class LoadUILauncher
 		}
 	}
 
-	private void processOsgiExtraPackages()
-	{
-		try(InputStream is = getClass().getResourceAsStream( "/packages-extra.txt" ))
-		{
-			if( is != null )
-			{
-				StringBuilder out = new StringBuilder();
-				byte[] b = new byte[4096];
-				for( int n; ( n = is.read( b ) ) != -1; )
-					out.append( new String( b, 0, n ) );
-
-				String extra = configProps.getProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, "" );
-				if( !extra.isEmpty() )
-					out.append( "," ).append( extra );
-
-				configProps.setProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, out.toString() );
-			}
-		}
-		catch( IOException e )
-		{
-			e.printStackTrace();
-		}
-	}
+	protected abstract void processOsgiExtraPackages();
 
 	protected final static void exitInError()
 	{
@@ -430,7 +408,7 @@ public abstract class LoadUILauncher
 		setDefaultSystemProperty( "loadui.ssl.keyStorePassword", "password" );
 		setDefaultSystemProperty( "loadui.ssl.trustStorePassword", "password" );
 
-		setDefaultSystemProperty( "loadui.instance", "controller" );
+		setDefaultSystemProperty( LoadUI.INSTANCE, "controller" );
 
 		File loaduiHome = new File( System.getProperty( LOADUI_HOME ) );
 		System.out.println( "LoadUI Home: " + loaduiHome.getAbsolutePath() );

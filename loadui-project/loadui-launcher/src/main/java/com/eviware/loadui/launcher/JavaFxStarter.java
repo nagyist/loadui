@@ -5,7 +5,11 @@ import javafx.application.Application;
 import javafx.scene.text.Font;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.logging.Logger;
+
+import static com.eviware.loadui.launcher.LoadUILauncher.ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA;
 
 public abstract class JavaFxStarter
 {
@@ -89,6 +93,30 @@ public abstract class JavaFxStarter
 			log.warning( "Unable to install LoadUI fonts on local system\n" );
 			e.printStackTrace();
 			return false;
+		}
+	}
+
+	public static void addJavaFxOsgiExtraPackages( Properties configProps )
+	{
+		try(InputStream is = JavaFxStarter.class.getResourceAsStream( "/packages-extra.txt" ))
+		{
+			if( is != null )
+			{
+				StringBuilder out = new StringBuilder();
+				byte[] b = new byte[4096];
+				for( int n; ( n = is.read( b ) ) != -1; )
+					out.append( new String( b, 0, n ) );
+
+				String extra = configProps.getProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, "" );
+				if( !extra.isEmpty() )
+					out.append( "," ).append( extra );
+
+				configProps.setProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, out.toString() );
+			}
+		}
+		catch( IOException e )
+		{
+			e.printStackTrace();
 		}
 	}
 
