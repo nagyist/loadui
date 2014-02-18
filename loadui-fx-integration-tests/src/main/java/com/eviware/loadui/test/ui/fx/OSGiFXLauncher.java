@@ -91,7 +91,7 @@ public class OSGiFXLauncher extends LoadUIFXLauncher
 				}
 			}
 
-		config.put( "org.osgi.framework.system.packages.extra", apiPackages.toString() );
+		config.put( LoadUILauncher.ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, apiPackages.toString() );
 		config.setProperty( "felix.auto.deploy.dir", ControllerFXWrapper.bundleDir.getAbsolutePath() );
 
 		super.init();
