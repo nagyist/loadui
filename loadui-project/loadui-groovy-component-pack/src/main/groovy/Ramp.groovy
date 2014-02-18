@@ -18,7 +18,7 @@
  * Sends signals at a decreasing or increasing rate until it gets to a prespecified level
  *
  * @id com.eviware.Ramp
- * @name Ramp Rate
+ * @name Ramp
  * @help http://www.loadui.org/Generators/ramp-updown-component.html
  * @category generators
  * @nonBlocking true

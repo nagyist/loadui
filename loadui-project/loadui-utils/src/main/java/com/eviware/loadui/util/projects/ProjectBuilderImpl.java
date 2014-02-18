@@ -35,9 +35,9 @@ public class ProjectBuilderImpl implements ProjectBuilder
 	}
 
 	@Override
-	public ProjectBlueprintImp create()
+	public LoadUiProjectBlueprint create()
 	{
-		return new ProjectBlueprintImp();
+		return new LoadUiProjectBlueprint();
 	}
 
 	private boolean save( File file )
@@ -53,7 +53,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		}
 	}
 
-	private ProjectRef assembleProjectByBlueprint( ProjectBlueprintImp blueprint )
+	private ProjectRef assembleProjectByBlueprint( LoadUiProjectBlueprint blueprint )
 	{
 
 		ProjectRef project = workspaceProvider.getWorkspace().createProject( blueprint.getProjectFile(), blueprint.getLabel(), true );
@@ -181,7 +181,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 	}
 
 
-	public class ProjectBlueprintImp implements ProjectBuilder.ProjectBlueprint
+	public class LoadUiProjectBlueprint implements ProjectBuilder.ProjectBlueprint
 	{
 		private static final long DEFAULT_REQUEST_LIMIT = 0;
 		private static final long DEFAULT_ASSERTION_FAILURE_LIMIT = 0;
@@ -194,7 +194,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		private long timeLimit;
 		private long assertionFailureLimit;
 
-		private ProjectBlueprintImp()
+		private LoadUiProjectBlueprint()
 		{
 			try
 			{
@@ -272,49 +272,49 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		}
 
 		@Override
-		public ProjectBlueprintImp where( File where )
+		public ProjectBlueprint where( File where )
 		{
 			projectFile = where;
 			return this;
 		}
 
 		@Override
-		public ProjectBuilder.ProjectBlueprint components( ComponentBlueprint... components )
+		public ProjectBlueprint components( ComponentBlueprint... components )
 		{
 			Collections.addAll( this.components, components );
 			return this;
 		}
 
 		@Override
-		public ProjectBlueprintImp requestsLimit( Long requests )
+		public ProjectBlueprint requestsLimit( Long requests )
 		{
 			setRequestLimit( requests );
 			return this;
 		}
 
 		@Override
-		public ProjectBlueprintImp timeLimit( Long seconds )
+		public ProjectBlueprint timeLimit( Long seconds )
 		{
 			setTimeLimit( seconds );
 			return this;
 		}
 
 		@Override
-		public ProjectBlueprintImp assertionLimit( Long assertionFailures )
+		public ProjectBlueprint assertionLimit( Long assertionFailures )
 		{
 			setAssertionFailureLimit( assertionFailures );
 			return this;
 		}
 
 		@Override
-		public ProjectBuilder.ProjectBlueprint scenario( String label )
+		public ProjectBlueprint scenario( String label )
 		{
 			//TODO Create scenario
 			return this;
 		}
 
 		@Override
-		public ProjectBlueprintImp label( String name )
+		public ProjectBlueprint label( String name )
 		{
 			setLabel( name );
 			return this;
