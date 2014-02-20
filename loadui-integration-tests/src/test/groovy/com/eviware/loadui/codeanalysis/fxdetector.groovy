@@ -20,21 +20,15 @@ def traverse( File file ) {
 }
 
 def containsFX( File file ){
-    String[] fileContents = file.text.split("\n")
-    for( String line : fileContents ){
-        if ( line.startsWith("import") ){
-            if(line.contains("javafx")){
-                return true;
-            }
-        }
-    }
-    return false;
+    def lines = []
+    file.eachLine{ line -> lines << line}.any { it.startsWith( 'import' ) && it.contains( 'javafx' )}
 }
 
 def execute(  ) {
 
     def scriptDir = getClass().protectionDomain.codeSource.location.path as String
     String loadui = "loadui";
+
     if( scriptDir.contains( loadui ) ){
 
         String[] tmp = scriptDir.split( loadui )

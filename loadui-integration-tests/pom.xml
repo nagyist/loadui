@@ -100,7 +100,7 @@
                              <goal>execute</goal>
                          </goals>
                          <configuration>
-                             <source>${pom.basedir}\src\test\groovy\com\eviware\loadui\codeanalysis\FXdetector.groovy</source>
+                             <source>${pom.basedir}\src\test\groovy\com\eviware\loadui\codeanalysis\fxdetector.groovy</source>
                          </configuration>
                      </execution>
                  </executions>
