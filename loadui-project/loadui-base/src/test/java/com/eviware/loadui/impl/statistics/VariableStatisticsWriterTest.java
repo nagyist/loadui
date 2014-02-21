@@ -15,35 +15,27 @@
  */
 package com.eviware.loadui.impl.statistics;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.LinkedList;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
-import com.eviware.loadui.api.statistics.StatisticHolder;
-import com.eviware.loadui.api.statistics.StatisticVariable;
-import com.eviware.loadui.api.statistics.StatisticsAggregator;
-import com.eviware.loadui.api.statistics.StatisticsManager;
+import com.eviware.loadui.api.statistics.*;
 import com.eviware.loadui.api.statistics.store.Entry;
 import com.eviware.loadui.api.statistics.store.ExecutionManager;
 import com.eviware.loadui.impl.statistics.VariableStatisticsWriter.Factory;
 import com.eviware.loadui.util.test.BeanInjectorMocker;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
+import java.util.Collections;
+import java.util.LinkedList;
+
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 public class VariableStatisticsWriterTest
 {
@@ -65,7 +57,7 @@ public class VariableStatisticsWriterTest
 		when( statisticsManagerMock.getMinimumWriteDelay() ).thenReturn( 1000L );
 
 		StatisticsAggregator aggregator = mock( StatisticsAggregator.class );
-		new BeanInjectorMocker( ImmutableMap.<Class<?>, Object> of( StatisticsAggregator.class, aggregator ) );
+		new BeanInjectorMocker( ImmutableMap.<Class<?>, Object>of( StatisticsAggregator.class, aggregator ) );
 		doAnswer( new Answer<Void>()
 		{
 			@Override
@@ -77,7 +69,7 @@ public class VariableStatisticsWriterTest
 		} ).when( aggregator ).addEntry( anyString(), ( Entry )anyObject() );
 
 		writer = factory.createStatisticsWriter( statisticsManagerMock, variableMock,
-				Collections.<String, Object> emptyMap() );
+				Collections.<String, Object>emptyMap() );
 	}
 
 	@Test
@@ -92,12 +84,12 @@ public class VariableStatisticsWriterTest
 		Entry entry = writer.output();
 
 		assertNotNull( entry );
-		Number value = entry.getValue( VariableStatisticsWriter.Stats.VALUE.name() );
+		Number value = entry.getValue( StatisticsWriter.VariableStats.VALUE.name() );
 		assertThat( value, instanceOf( Double.class ) );
 		assertThat( ( Double )value, is( 100.0 ) );
 
 		Entry e = flushedEntries.pop();
 		assertThat( e.getTimestamp(), is( 1000L ) );
-		assertEquals( 87.5, e.getValue( VariableStatisticsWriter.Stats.VALUE.name() ) );
+		assertEquals( 87.5, e.getValue( StatisticsWriter.VariableStats.VALUE.name() ) );
 	}
 }

@@ -113,4 +113,39 @@ public interface StatisticsWriter extends Addressable
 			this.description = description;
 		}
 	}
+
+	public enum CounterStats
+	{
+		TOTAL( "The number of %v in total since the last time the project was started or resetted." ),
+		PER_SECOND( "The number of %v per second." );
+
+		public final String description;
+
+		CounterStats()
+		{
+			this.description = this.name() + " of %v.";
+		}
+
+		CounterStats( String description )
+		{
+			this.description = description;
+		}
+	}
+
+	public enum VariableStats
+	{
+		VALUE( "The number of %v." );
+
+		public final String description;
+
+		VariableStats()
+		{
+			this.description = this.name() + " of %v.";
+		}
+
+		VariableStats( String description )
+		{
+			this.description = description;
+		}
+	}
 }
