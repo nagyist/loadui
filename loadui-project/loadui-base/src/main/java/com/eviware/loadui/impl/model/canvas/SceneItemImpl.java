@@ -93,7 +93,6 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 	private final ProjectListener projectListener;
 	private final TerminalHolderSupport terminalHolderSupport;
 	private final InputTerminal stateTerminal;
-	private final Map<AgentItem, Map<?, ?>> remoteStatistics = new ConcurrentHashMap<>();
 	private long version;
 	private boolean propagate = true;
 	private boolean isRunningInLocalMode = true;
@@ -306,26 +305,7 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 	public void onComplete( EventFirer source )
 	{
 		log.debug( "Scene onComplete method called, was local mode when started? {}", isRunningInLocalMode );
-		boolean isAgent = !LoadUI.isController();
-
-		if( isAgent )
-		{
-			Map<String, Object> data = new HashMap<>();
-			data.put( AgentItem.SCENE_ID, getId() );
-
-			for( ComponentItem component : getComponents() )
-				data.put( component.getId(), component.getBehavior().collectStatisticsData() );
-
-			messageEndpoint.sendMessage( AgentItem.AGENT_CHANNEL, data );
-			log.debug( "Sending statistics data from {}", this );
-		}
-		else if( isRunningInLocalMode || getActiveAgentsRunningThis().isEmpty() )
-		{
-			System.out.println( "I am complete!!! Running local mode? " + isRunningInLocalMode + " or no active agents are running scene " + getLabel() );
-			setCompleted( true );
-		}
-		// else set completed only after Agent(s) send statistics for this scene
-
+		setCompleted( true );
 	}
 
 	private Collection<? extends AgentItem> getActiveAgentsRunningThis()
@@ -373,39 +353,10 @@ public class SceneItemImpl extends CanvasItemImpl<SceneItemConfig> implements Sc
 		}
 	}
 
-	private boolean haveAllActiveAgentsProvidedStats()
-	{
-		for( AgentItem agent : getActiveAgentsRunningThis() )
-			if( !remoteStatistics.containsKey( agent ) )
-				return false;
-		return true;
-	}
-
-	public void handleStatisticsData( AgentItem source, Map<?, ?> data )
-	{
-		remoteStatistics.put( source, data );
-		log.debug( "{} got statistics data from {}", this, source );
-		if( !haveAllActiveAgentsProvidedStats() )
-			return;
-
-		for( ComponentItem component : getComponents() )
-		{
-			String cId = component.getId();
-			Map<AgentItem, Object> cData = new HashMap<>();
-			for( Entry<AgentItem, Map<?, ?>> e : remoteStatistics.entrySet() )
-				cData.put( e.getKey(), e.getValue().get( cId ) );
-			component.getBehavior().handleStatisticsData( cData );
-		}
-
-		setCompleted( true );
-	}
-
-
 	@Override
 	protected void reset()
 	{
 		super.reset();
-		remoteStatistics.clear();
 	}
 
 	@Override

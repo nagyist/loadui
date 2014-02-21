@@ -125,18 +125,6 @@ class AgentListener implements EventHandler<BaseEvent>, MessageListener, Releasa
 						message.get( AgentItem.DEFINE_SCENE ) );
 			}
 		}
-		else if( message.containsKey( AgentItem.SCENE_ID ) )
-		{
-			Map<?, ?> map = ( Map )data;
-			Addressable scene = projectItem.getRegistry().lookup( ( String )map.remove( AgentItem.SCENE_ID ) );
-			if( scene instanceof SceneItemImpl )
-			{
-				synchronized( scene )
-				{
-					( ( SceneItemImpl )scene ).handleStatisticsData( agent, map );
-				}
-			}
-		}
 		else
 		{
 			Object agentStarted = message.get( AgentItem.STARTED );
@@ -147,26 +135,6 @@ class AgentListener implements EventHandler<BaseEvent>, MessageListener, Releasa
 
 				if( assignment != null )
 					assignment.setLoaded( true );
-
-//				if( scene.isRunning() && !projectItem.getWorkspace().isLocalMode() )
-//				{
-//
-//					if( scene.isRunning() && !scene.getProject().getWorkspace().isLocalMode() )
-//					{
-//						final String canvasId = ( String )agentStarted;
-//						BeanInjector.getBean( ExecutorService.class ).execute( new Runnable()
-//						{
-//							@Override
-//							public void run()
-//							{
-//								for( Phase phase : Arrays.asList( Phase.PRE_START, Phase.START, Phase.POST_START ) )
-//								{
-//									messageAwaiterFactory.create( agent, canvasId, phase ).await();
-//								}
-//							}
-//						} );
-//					}
-//				}
 
 				if( scene.isRunning() && !projectItem.getWorkspace().isLocalMode() )
 				{
