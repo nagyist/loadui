@@ -601,49 +601,6 @@ public abstract class RunnerBase extends BaseCategory implements RunnerCategory,
 		}
 	}
 
-	@Override
-	public Object collectStatisticsData()
-	{
-		Map<String, Object> data = new HashMap<>();
-		data.put( "min", minTime );
-		data.put( "max", maxTime );
-		data.put( "avg", avgTime );
-		data.put( "sumTotalSquares", sumTotalSquares );
-
-		Set<SampleStats> stats = new HashSet<>();
-		stats.addAll( getTopSamples() );
-		stats.addAll( getBottomSamples() );
-		if( !stats.isEmpty() )
-		{
-			StringBuilder s = new StringBuilder();
-			for( SampleStats stat : stats )
-				s.append( stat.getTime() + ":" + stat.getTimeTaken() + ":" + stat.getSize() + ";" );
-			data.put( "samples", s.toString() );
-		}
-		return data;
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public void handleStatisticsData( Map<AgentItem, Object> statisticsData )
-	{
-		Preconditions.checkArgument( statisticsData.size() > 0, "Cannot process empty statistics data" );
-		long avgSum = 0;
-		for( Object data : statisticsData.values() )
-		{
-			try
-			{
-				avgSum = processStatistic( avgSum, data );
-			}
-			catch( Exception e )
-			{
-				log.error( "Could not handle stat {}", data );
-				log.error( "Reason:", e );
-			}
-		}
-		avgTime = avgSum / statisticsData.size();
-	}
-
 	private long processStatistic( long avgSum, Object data )
 	{
 		Preconditions.checkArgument( Map.class.isInstance( data ) );
