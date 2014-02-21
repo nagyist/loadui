@@ -40,21 +40,11 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		return new LoadUiProjectBlueprint();
 	}
 
-	private boolean save( File file )
-	{
-		try
-		{
-			workspaceProvider.getWorkspace().importProject( file, true );
-			return true;
-		}
-		catch( IOException e )
-		{
-			return false;
-		}
-	}
-
 	private ProjectRef assembleProjectByBlueprint( LoadUiProjectBlueprint blueprint )
 	{
+		if(workspaceProvider.isWorkspaceLoaded()){
+			workspaceProvider.loadDefaultWorkspace();
+		}
 
 		ProjectRef project = workspaceProvider.getWorkspace().createProject( blueprint.getProjectFile(), blueprint.getLabel(), true );
 		project.setLabel( blueprint.getLabel() );
@@ -65,7 +55,8 @@ public class ProjectBuilderImpl implements ProjectBuilder
 
 		assembleComponentsByBlueprint( project, blueprint.getComponentBlueprints() );
 
-		save( project.getProjectFile() );
+		project.getProject().save();
+		workspaceProvider.getWorkspace().save();
 
 		return project;
 	}
@@ -98,7 +89,6 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		{
 			throw new ComponentCreationException( "Component descriptor " + blueprint.getComponentType() + " does not exist in the component-registry." );
 		}
-
 		String label = CanvasItemNameGenerator.generateComponentName( project.getProject(), descriptor.getLabel() );
 		ComponentItem parentComponent = project.getProject().createComponent( label, descriptor );
 
@@ -198,7 +188,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		{
 			try
 			{
-				setProjectFile( File.createTempFile( "loadui-project", ".xml" ) );
+				setProjectFile( File.createTempFile( "loadui-project-", ".xml" ) );
 			}
 			catch( IOException e )
 			{
@@ -272,9 +262,9 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		}
 
 		@Override
-		public ProjectBlueprint where( File where )
+		public ProjectBlueprint where( File folder )
 		{
-			projectFile = where;
+			projectFile = new File ( folder.getPath() + "/" + projectFile.getName() );
 			return this;
 		}
 
