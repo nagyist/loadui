@@ -28,13 +28,12 @@ public interface TestEventManager
 	 * 
 	 * @param testEvent
 	 */
-	public <T extends TestEvent> void logTestEvent( TestEvent.Source<T> source, T testEvent );
+	public void logTestEvent( TestEvent.Source<? extends TestEvent> source, TestEvent testEvent );
 
 	/**
 	 * Logs a message to the TestEventLog, using the current system time as the
 	 * timestamp.
 	 * 
-	 * @see logMessage( MessageLevel level, String message )
 	 * @param level
 	 * @param message
 	 */

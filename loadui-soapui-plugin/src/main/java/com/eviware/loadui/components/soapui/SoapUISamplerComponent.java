@@ -40,11 +40,14 @@ import com.eviware.loadui.components.soapui.layout.MiscLayoutComponents;
 import com.eviware.loadui.components.soapui.layout.SoapUiProjectSelector;
 import com.eviware.loadui.components.soapui.testStepsTable.TestStepsTableModel;
 import com.eviware.loadui.components.soapui.utils.CompositeProjectUtils;
+import com.eviware.loadui.components.soapui.utils.PropertyOverrider;
+import com.eviware.loadui.components.soapui.utils.SoapUiProjectHolder;
 import com.eviware.loadui.components.soapui.utils.SoapUiProjectUtils;
 import com.eviware.loadui.impl.component.ActivityStrategies;
 import com.eviware.loadui.impl.component.categories.RunnerBase;
 import com.eviware.loadui.impl.layout.*;
 import com.eviware.loadui.integration.SoapUIProjectLoader;
+import com.eviware.loadui.util.ReleasableUtils;
 import com.eviware.soapui.SoapUIExtensionClassLoader;
 import com.eviware.soapui.SoapUIExtensionClassLoader.SoapUIClassLoaderState;
 import com.eviware.soapui.config.LoadTestConfig;
@@ -108,8 +111,7 @@ public class SoapUISamplerComponent extends RunnerBase
 		{
 			log.error( "Failed manual copy, using .copy() instead: ", e );
 			return ( TestCaseConfig )config.copy();
-		}
-		finally
+		} finally
 		{
 			state.restore();
 		}
@@ -151,15 +153,15 @@ public class SoapUISamplerComponent extends RunnerBase
 	private boolean reloadingProject;
 	WsdlTestCase soapuiTestCase;
 
-	private final SoapUiProjectSelector projectSelector;
+	private final SoapUiProjectHolder projectSelector;
 	private final SoapUILoadTestRunner loadTestRunner = new SoapUILoadTestRunner( this );
 	@CheckForNull
 	private WsdlLoadTestContext loadTestRunContext = null;
 	final DummyLoadTest soapuiLoadTest = new DummyLoadTest( this );
 	private final OutputTerminal errorTerminal;
 	private final AtomicLong sampleIndex = new AtomicLong();
-	private final ActionLayoutComponentImpl runOnceAction;
-	private final LayoutComponentImpl openInSoapUIAction;
+	private ActionLayoutComponentImpl runOnceAction;
+	private LayoutComponentImpl openInSoapUIAction;
 
 	private final GeneralSettings generalSettings;
 
@@ -180,7 +182,9 @@ public class SoapUISamplerComponent extends RunnerBase
 				}
 			} );
 
-	private final TestStepsTableModel testStepsTableModel;
+	@CheckForNull //"This is null in headless mode"
+	private TestStepsTableModel testStepsTableModel;
+
 	private final MetricsDisplay metricsDisplay;
 	private final CompositeProjectUtils compositeProjectUtils = new CompositeProjectUtils();
 
@@ -202,7 +206,7 @@ public class SoapUISamplerComponent extends RunnerBase
 
 		ProjectItem project = context.getCanvas().getProject();
 
-		testStepsTableModel = new TestStepsTableModel( this );
+		testStepsTableModel = LoadUI.isHeadless() ? null : new TestStepsTableModel( this );
 		generalSettings = GeneralSettings.newInstance( context, runner );
 
 		File loaduiProjectFolder = null;
@@ -212,7 +216,9 @@ public class SoapUISamplerComponent extends RunnerBase
 			loaduiProjectFolder = project.getProjectFile().getParentFile();
 		}
 
-		projectSelector = SoapUiProjectSelector.newInstance( this, context, runner, generalSettings, loaduiProjectFolder );
+		projectSelector = LoadUI.isHeadless() ?
+				SoapUiProjectHolder.newInstance( this, context, runner, generalSettings, loaduiProjectFolder ) :
+				SoapUiProjectSelector.newInstance( this, context, runner, generalSettings, loaduiProjectFolder );
 
 		SoapUiProjectUtils.registerJdbcDrivers();
 
@@ -233,93 +239,92 @@ public class SoapUISamplerComponent extends RunnerBase
 
 		getContext().setInvalid( soapuiTestCase == null );
 
-		LayoutContainer layout = new LayoutContainerImpl( "gap 10 5", "", "align top", "" );
-		LayoutContainer box = new LayoutContainerImpl( "ins 0", "", "align top", "" );
-
-		box.add( projectSelector.buildLayout() );
-
-		layout.add( box );
-		layout.add( new SeparatorLayoutComponentImpl( false, "newline, growx, spanx" ) );
-
-		box = new LayoutContainerImpl( "wrap 3, ins 0", "", "align top", "" );
+		metricsDisplay = new MetricsDisplay( this );
 
 		if( !LoadUI.isHeadless() )
 		{
+			LayoutContainer layout = new LayoutContainerImpl( "gap 10 5", "", "align top", "" );
+			LayoutContainer box = new LayoutContainerImpl( "ins 0", "", "align top", "" );
+
+			box.add( projectSelector.buildLayout() );
+
+			layout.add( box );
+			layout.add( new SeparatorLayoutComponentImpl( false, "newline, growx, spanx" ) );
+
+			box = new LayoutContainerImpl( "wrap 3, ins 0", "", "align top", "" );
+
 			box.add( testStepsTableModel.buildLayout() );
+
+			MiscLayoutComponents miscLayoutComponents = new MiscLayoutComponents();
+
+			openInSoapUIAction = miscLayoutComponents.buildOpenInSoapUiButton(
+					projectSelector.getProjectFileName(),
+					projectSelector.getTestSuite(),
+					projectSelector.getTestCase() );
+
+			box.add( openInSoapUIAction );
+
+			runOnceAction = new ActionLayoutComponentImpl( ImmutableMap.<String, Object>builder() //
+					.put( ActionLayoutComponentImpl.LABEL, "Run Once" ) //
+					.put( ActionLayoutComponentImpl.ACTION, new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							getContext().triggerAction( RunnerCategory.SAMPLE_ACTION, Scope.COMPONENT );
+						}
+					} ).build() );
+
+			runOnceAction.setEnabled( soapuiTestCase != null );
+			box.add( runOnceAction );
+
+			ActionLayoutComponentImpl abortRunningAction = new ActionLayoutComponentImpl( ImmutableMap
+					.<String, Object>builder() //
+					.put( ActionLayoutComponentImpl.LABEL, "Abort Running TestCases" ) //
+					.put( ActionLayoutComponentImpl.ACTION, new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							getContext().triggerAction( "ABORT", Scope.COMPONENT );
+						}
+					} ).build() );
+
+			box.add( abortRunningAction );
+
+			layout.add( box );
+			layout.add( new SeparatorLayoutComponentImpl( true, "grow y" ) );
+
+			LayoutContainer wrapperBox = new LayoutContainerImpl( "wrap, ins 0", "", "align top", "" );
+
+
+			LayoutContainer metrics = metricsDisplay.buildLayout();
+
+			wrapperBox.add( metrics );
+
+			LayoutContainer compactLayout = new LayoutContainerImpl( Collections.<String, Object>emptyMap() );
+			compactLayout.add( metrics );
+			context.setCompactLayout( compactLayout );
+
+			wrapperBox.add( new ActionLayoutComponentImpl( ImmutableMap.<String, Object>builder()
+					.put( ActionLayoutComponentImpl.LABEL, "Reset" )
+					.put( PropertyLayoutComponentImpl.CONSTRAINTS, "align right" )
+					.put( ActionLayoutComponentImpl.ACTION, new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							metricsDisplay.setResetValues( getSampleCounter().get(), getDiscardCounter().get(),
+									getFailureCounter().get() );
+						}
+					} ).build() ) );
+
+			layout.add( wrapperBox );
+
+			clearAndCreateSettingTabs( context );
+
+			context.setLayout( layout );
 		}
-		else
-		{
-			log.debug( "Skipping creation of SoapUI Runner's TestStepsTable, since in headless mode." );
-		}
-
-		MiscLayoutComponents miscLayoutComponents = new MiscLayoutComponents();
-
-		openInSoapUIAction = miscLayoutComponents.buildOpenInSoapUiButton(
-				projectSelector.getProjectFileName(),
-				projectSelector.getTestSuite(),
-				projectSelector.getTestCase() );
-
-		box.add( openInSoapUIAction );
-
-		runOnceAction = new ActionLayoutComponentImpl( ImmutableMap.<String, Object>builder() //
-				.put( ActionLayoutComponentImpl.LABEL, "Run Once" ) //
-				.put( ActionLayoutComponentImpl.ACTION, new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						getContext().triggerAction( RunnerCategory.SAMPLE_ACTION, Scope.COMPONENT );
-					}
-				} ).build() );
-
-		runOnceAction.setEnabled( soapuiTestCase != null );
-		box.add( runOnceAction );
-
-		ActionLayoutComponentImpl abortRunningAction = new ActionLayoutComponentImpl( ImmutableMap
-				.<String, Object>builder() //
-				.put( ActionLayoutComponentImpl.LABEL, "Abort Running TestCases" ) //
-				.put( ActionLayoutComponentImpl.ACTION, new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						getContext().triggerAction( "ABORT", Scope.COMPONENT );
-					}
-				} ).build() );
-
-		box.add( abortRunningAction );
-
-		layout.add( box );
-		layout.add( new SeparatorLayoutComponentImpl( true, "grow y" ) );
-
-		LayoutContainer wrapperBox = new LayoutContainerImpl( "wrap, ins 0", "", "align top", "" );
-
-		metricsDisplay = new MetricsDisplay( this );
-		LayoutContainer metrics = metricsDisplay.buildLayout();
-
-		wrapperBox.add( metrics );
-
-		LayoutContainer compactLayout = new LayoutContainerImpl( Collections.<String, Object>emptyMap() );
-		compactLayout.add( metrics );
-		context.setCompactLayout( compactLayout );
-
-		wrapperBox.add( new ActionLayoutComponentImpl( ImmutableMap.<String, Object>builder()
-				.put( ActionLayoutComponentImpl.LABEL, "Reset" )
-				.put( PropertyLayoutComponentImpl.CONSTRAINTS, "align right" )
-				.put( ActionLayoutComponentImpl.ACTION, new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						metricsDisplay.setResetValues( getSampleCounter().get(), getDiscardCounter().get(),
-								getFailureCounter().get() );
-					}
-				} ).build() ) );
-
-		layout.add( wrapperBox );
-
-		clearAndCreateSettingTabs( context );
-		context.setLayout( layout );
 
 		executor = Executors.newSingleThreadScheduledExecutor( new ThreadFactoryBuilder().setDaemon( true )
 				.setNameFormat( "soapUI-runner-%d" ).build() );
@@ -368,7 +373,7 @@ public class SoapUISamplerComponent extends RunnerBase
 				"align top", "" );
 
 		HashMap<String, Callable<Node>> nodeMap = new HashMap<>();
-		nodeMap.put( "component", TestCasePropertiesNode.createTableView( this, context ) );
+		nodeMap.put( "component", TestCaseTableView.createTableView( this, context ) );
 
 		settingsTestCaseTab.add( new LayoutComponentImpl( nodeMap ) );
 
@@ -415,8 +420,9 @@ public class SoapUISamplerComponent extends RunnerBase
 		}
 		else if( !projectFile.exists() )
 		{
-			showMessage( "Specified SoapUI project file " + projectFile.getAbsolutePath()
-					+ " does not exist. File may have been moved, renamed or deleted." );
+			if( !LoadUI.isHeadless() )
+				showMessage( "Specified SoapUI project file " + projectFile.getAbsolutePath()
+						+ " does not exist. File may have been moved, renamed or deleted." );
 			return;
 		}
 
@@ -606,10 +612,8 @@ public class SoapUISamplerComponent extends RunnerBase
 	public void onRelease()
 	{
 		super.onRelease();
-		runner.release();
+		ReleasableUtils.releaseAll( runner, testStepsTableModel, metricsDisplay );
 		executor.shutdown();
-		testStepsTableModel.release();
-		metricsDisplay.release();
 		getContext().removeEventListener( ActionEvent.class, actionListener );
 		projectSelector.onComponentRelease();
 	}
@@ -712,8 +716,8 @@ public class SoapUISamplerComponent extends RunnerBase
 			{
 				testCase = getTestCase();
 				testCaseRevisions.put( testCase, testCaseRevisionCount );
-				TestCasePropertiesNode.overrideTestCaseProperties( testCase, getContext().getProperties() );
-				TestCasePropertiesNode.overrideTestCaseProperties( testCase, triggerMessage );
+				PropertyOverrider.overrideTestCaseProperties( testCase, getContext().getProperties() );
+				PropertyOverrider.overrideTestCaseProperties( testCase, triggerMessage );
 				testCase.addTestRunListener( testStepNotifier );
 
 				// Use existing context if available
@@ -742,8 +746,7 @@ public class SoapUISamplerComponent extends RunnerBase
 				{
 					getContext().getCounter( CanvasItem.ASSERTION_COUNTER ).increment();
 				}
-			}
-			finally
+			} finally
 			{
 				if( testCase != null )
 				{
@@ -810,7 +813,7 @@ public class SoapUISamplerComponent extends RunnerBase
 		{
 			for( Property<?> property : context.getProperties() )
 			{
-				if( property.getKey().startsWith( TestCasePropertiesNode.OVERRIDING_VALUE_PREFIX ) )
+				if( property.getKey().startsWith( PropertyOverrider.OVERRIDING_VALUE_PREFIX ) )
 				{
 					context.deleteProperty( property.getKey() );
 				}
@@ -890,8 +893,7 @@ public class SoapUISamplerComponent extends RunnerBase
 			catch( Exception e )
 			{
 				log.debug( "Error reloading SoapUI project: {} ", e );
-			}
-			finally
+			} finally
 			{
 				state.restore();
 			}
@@ -935,8 +937,7 @@ public class SoapUISamplerComponent extends RunnerBase
 			catch( Exception e )
 			{
 				log.debug( "Error when setting TestSuite {}", e );
-			}
-			finally
+			} finally
 			{
 				state.restore();
 			}
@@ -964,7 +965,8 @@ public class SoapUISamplerComponent extends RunnerBase
 			{
 				projectSelector.setTestCases();
 				testStepsInvocationCount.invalidateAll();
-				testStepsTableModel.clearTestCase();
+				if( testStepsTableModel != null )
+					testStepsTableModel.clearTestCase();
 				return;
 			}
 
@@ -1012,8 +1014,7 @@ public class SoapUISamplerComponent extends RunnerBase
 			catch( Exception e )
 			{
 				log.error( "An error occured when trying to set TestCase.", e );
-			}
-			finally
+			} finally
 			{
 				state.restore();
 				getContext().setInvalid( soapuiTestCase == null );
@@ -1021,9 +1022,8 @@ public class SoapUISamplerComponent extends RunnerBase
 					runOnceAction.setEnabled( soapuiTestCase != null );
 			}
 			testStepsInvocationCount.invalidateAll();
-			testStepsTableModel.updateTestCase( soapuiTestCase );
-			// testCasePropertiesNode.putTestCaseProperties(
-			// runner.getTestCase().getPropertyList() ); //TODO
+			if( testStepsTableModel != null )
+				testStepsTableModel.updateTestCase( soapuiTestCase );
 
 			for( Map.Entry<String, Value<Number>> entry : totalValues.entrySet() )
 			{
@@ -1144,8 +1144,7 @@ public class SoapUISamplerComponent extends RunnerBase
 				catch( Exception e )
 				{
 					e.printStackTrace();
-				}
-				finally
+				} finally
 				{
 					state.restore();
 				}
@@ -1235,8 +1234,7 @@ public class SoapUISamplerComponent extends RunnerBase
 				}
 			}
 			runners.clear();
-		}
-		finally
+		} finally
 		{
 			state.restore();
 		}

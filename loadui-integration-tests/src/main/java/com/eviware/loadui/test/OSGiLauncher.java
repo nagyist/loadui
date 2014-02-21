@@ -15,13 +15,12 @@
  */
 package com.eviware.loadui.test;
 
-import java.util.Properties;
-
+import com.eviware.loadui.launcher.LoadUILauncher;
 import org.apache.commons.cli.CommandLine;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
-import com.eviware.loadui.launcher.LoadUILauncher;
+import java.util.Properties;
 
 public class OSGiLauncher extends LoadUILauncher
 {
@@ -39,6 +38,12 @@ public class OSGiLauncher extends LoadUILauncher
 	public void init()
 	{
 		super.init();
+	}
+
+	@Override
+	protected void processOsgiExtraPackages()
+	{
+
 	}
 
 	@Override

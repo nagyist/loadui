@@ -15,13 +15,13 @@
  */
 package com.eviware.loadui.api.statistics;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
 import com.eviware.loadui.api.serialization.ListenableValue;
 import com.eviware.loadui.api.serialization.Resolver;
 import com.eviware.loadui.api.statistics.store.Execution;
 import com.eviware.loadui.api.traits.Labeled;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 /**
  * A recording of a value which changes over time, which can be mapped into a
@@ -67,30 +67,6 @@ public interface Statistic<T extends Number> extends ListenableValue<T>, Labeled
 	 */
 	@Nonnull
 	public Iterable<DataPoint<T>> getPeriod( long start, long end, int interpolationLevel, Execution execution );
-
-	/**
-	 * execution defaults to the current Execution.
-	 * 
-	 * @see getPeriod(int, int, int, Execution)
-	 */
-	@Nonnull
-	public Iterable<DataPoint<T>> getPeriod( long start, long end, int interpolationLevel );
-
-	/**
-	 * interpolationLevel defaults to 0.
-	 * 
-	 * @see getPeriod(int, int, int, Execution)
-	 */
-	@Nonnull
-	public Iterable<DataPoint<T>> getPeriod( long start, long end );
-
-	/**
-	 * Gets the timestamp of when the last value was recorded, expressed as the
-	 * number of milliseconds since the beginning of the Execution.
-	 * 
-	 * @return
-	 */
-	public long getTimestamp();
 
 	/**
 	 * Gets the latest DataPoint stored for a particular interpolation level.

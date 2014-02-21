@@ -119,10 +119,9 @@ public class FileToReferenceConverter implements Converter<File, Reference>
 		@Override
 		public void run()
 		{
-			FileInputStream fis = null;
-			try
+			try (FileInputStream fis = new FileInputStream( file ) )
 			{
-				fis = new FileInputStream( file );
+
 				byte[] buf = new byte[1024];
 				byte[] res;
 				try
@@ -146,10 +145,8 @@ public class FileToReferenceConverter implements Converter<File, Reference>
 			catch( FileNotFoundException e )
 			{
 				throw new RuntimeException( e );
-			}
-			finally
-			{
-				Closeables.closeQuietly( fis );
+			}catch(IOException e){
+				//quietly close connection
 			}
 		}
 	}

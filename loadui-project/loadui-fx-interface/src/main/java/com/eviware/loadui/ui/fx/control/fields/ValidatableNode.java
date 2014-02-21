@@ -17,7 +17,7 @@ package com.eviware.loadui.ui.fx.control.fields;
 
 import javafx.beans.property.ReadOnlyBooleanProperty;
 
-public interface Validatable
+public interface ValidatableNode
 {
 	ReadOnlyBooleanProperty isValidProperty();
 

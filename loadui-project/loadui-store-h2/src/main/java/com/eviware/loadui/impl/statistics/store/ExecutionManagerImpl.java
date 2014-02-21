@@ -15,25 +15,6 @@
  */
 package com.eviware.loadui.impl.statistics.store;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EventObject;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
-
-import javax.sql.DataSource;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.events.BaseEvent;
 import com.eviware.loadui.api.events.CollectionEvent;
@@ -43,12 +24,7 @@ import com.eviware.loadui.api.model.CanvasItem;
 import com.eviware.loadui.api.model.WorkspaceItem;
 import com.eviware.loadui.api.model.WorkspaceProvider;
 import com.eviware.loadui.api.serialization.ListenableValue.ValueListener;
-import com.eviware.loadui.api.statistics.store.Entry;
-import com.eviware.loadui.api.statistics.store.Execution;
-import com.eviware.loadui.api.statistics.store.ExecutionListener;
-import com.eviware.loadui.api.statistics.store.ExecutionManager;
-import com.eviware.loadui.api.statistics.store.Track;
-import com.eviware.loadui.api.statistics.store.TrackDescriptor;
+import com.eviware.loadui.api.statistics.store.*;
 import com.eviware.loadui.api.testevents.TestEvent;
 import com.eviware.loadui.api.testevents.TestEventRegistry;
 import com.eviware.loadui.api.traits.Releasable;
@@ -57,13 +33,7 @@ import com.eviware.loadui.impl.statistics.db.DataSourceProvider;
 import com.eviware.loadui.impl.statistics.db.DatabaseMetadata;
 import com.eviware.loadui.impl.statistics.db.TableRegistry;
 import com.eviware.loadui.impl.statistics.db.table.TableBase;
-import com.eviware.loadui.impl.statistics.db.table.model.DataTable;
-import com.eviware.loadui.impl.statistics.db.table.model.InterpolationLevelTable;
-import com.eviware.loadui.impl.statistics.db.table.model.SourceMetadataTable;
-import com.eviware.loadui.impl.statistics.db.table.model.TestEventSourceTable;
-import com.eviware.loadui.impl.statistics.db.table.model.TestEventTable;
-import com.eviware.loadui.impl.statistics.db.table.model.TestEventTypeTable;
-import com.eviware.loadui.impl.statistics.db.table.model.TrackMetadataTable;
+import com.eviware.loadui.impl.statistics.db.table.model.*;
 import com.eviware.loadui.impl.statistics.db.util.FileUtil;
 import com.eviware.loadui.impl.statistics.store.testevents.TestEventData;
 import com.eviware.loadui.impl.statistics.store.testevents.TestEventSourceConfig;
@@ -72,6 +42,7 @@ import com.eviware.loadui.impl.statistics.store.testevents.TestEventTypeDescript
 import com.eviware.loadui.util.FormattingUtils;
 import com.eviware.loadui.util.ReleasableUtils;
 import com.eviware.loadui.util.events.EventSupport;
+import com.eviware.loadui.util.statistics.AdjustedEntry;
 import com.eviware.loadui.util.statistics.ExecutionListenerAdapter;
 import com.eviware.loadui.util.statistics.store.ExecutionChangeSupport;
 import com.google.common.base.Function;
@@ -80,22 +51,23 @@ import com.google.common.base.Supplier;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
+import java.io.File;
+import java.io.FileFilter;
+import java.sql.SQLException;
+import java.util.*;
+
+import static com.eviware.loadui.util.statistics.ChartUtils.keyFor;
 
 /**
  * Implementation of execution manager. Basically main class for data handling.
  * Handles tables, database data sources etc.
- * 
+ *
  * @author predrag.vucetic
- * 
  */
 public abstract class ExecutionManagerImpl<Type extends DataSource> implements ExecutionManager,
 		DataSourceProvider<Type>, Releasable
@@ -350,7 +322,7 @@ public abstract class ExecutionManagerImpl<Type extends DataSource> implements E
 	}
 
 	private synchronized void createTrackSourceLevelTable( String dbName, String trackId, int interpolationLevel,
-			String source )
+																			 String source )
 	{
 		if( tableRegistry.getTable( dbName, buildDataTableName( trackId, interpolationLevel, source ) ) != null )
 		{
@@ -434,7 +406,7 @@ public abstract class ExecutionManagerImpl<Type extends DataSource> implements E
 	public final Collection<Execution> getExecutions()
 	{
 		if( loadedExecutionsFromDisk )
-			return ImmutableSet.<Execution> copyOf( executionMap.values() );
+			return ImmutableSet.<Execution>copyOf( executionMap.values() );
 		else
 			return readExecutionsFromDisk();
 	}
@@ -471,12 +443,12 @@ public abstract class ExecutionManagerImpl<Type extends DataSource> implements E
 
 		if( currentExecution != null && executionState != State.STOPPED )
 		{
-			return Sets.difference( ImmutableSet.<Execution> copyOf( executionMap.values() ),
+			return Sets.difference( ImmutableSet.<Execution>copyOf( executionMap.values() ),
 					ImmutableSet.of( currentExecution ) );
 		}
 
 		loadedExecutionsFromDisk = true;
-		return ImmutableSet.<Execution> copyOf( executionMap.values() );
+		return ImmutableSet.<Execution>copyOf( executionMap.values() );
 	}
 
 	@Override
@@ -502,9 +474,8 @@ public abstract class ExecutionManagerImpl<Type extends DataSource> implements E
 	 * from TrackMetadataTable, creates Track object instances and them to newly
 	 * created execution. Tracks and tables are created just for existing tracks
 	 * (registered track descriptors)
-	 * 
-	 * @param executionId
-	 *           ID of execution that has to be loaded
+	 *
+	 * @param executionId ID of execution that has to be loaded
 	 * @return Loaded execution
 	 */
 	public final Execution loadExecution( String executionId )
@@ -601,8 +572,7 @@ public abstract class ExecutionManagerImpl<Type extends DataSource> implements E
 				catch( SQLException e )
 				{
 					throw new RuntimeException( "Execution " + executionId + " is corrupted and can't be loaded", e );
-				}
-				finally
+				} finally
 				{
 					createdTableList.clear();
 					tracksToCreate.clear();
@@ -623,12 +593,6 @@ public abstract class ExecutionManagerImpl<Type extends DataSource> implements E
 	public void unregisterTrackDescriptor( String trackId )
 	{
 		ecs.fireTrackUnregistered( trackDescriptors.remove( trackId ) );
-	}
-
-	@Override
-	public Collection<String> getTrackIds()
-	{
-		return Collections.unmodifiableSet( trackDescriptors.keySet() );
 	}
 
 	@Override
@@ -656,7 +620,7 @@ public abstract class ExecutionManagerImpl<Type extends DataSource> implements E
 			timestamp -= ( currentExecution.getStartTime() ); //+ totalPause );
 
 			AdjustedEntry adjustedEntry = new AdjustedEntry( entry, timestamp );
-			String key = trackId + ":" + source + ":" + String.valueOf( interpolationLevel );
+			String key = keyFor( trackId, source, interpolationLevel );
 			latestEntries.put( key, adjustedEntry );
 
 			currentExecution.updateLength( timestamp );
@@ -694,12 +658,12 @@ public abstract class ExecutionManagerImpl<Type extends DataSource> implements E
 	@Override
 	public Entry getLastEntry( String trackId, String source, int interpolationLevel )
 	{
-		return latestEntries.get( trackId + ":" + source + ":" + String.valueOf( interpolationLevel ) );
+		return latestEntries.get( keyFor( trackId, source, interpolationLevel ) );
 	}
 
 	@Override
 	public void writeTestEvent( String typeLabel, TestEvent.Source<?> source, long timestamp, byte[] testEventData,
-			int interpolationLevel )
+										 int interpolationLevel )
 	{
 		if( currentExecution != null && executionState == State.STARTED )
 		{
@@ -900,7 +864,7 @@ public abstract class ExecutionManagerImpl<Type extends DataSource> implements E
 	}
 
 	public <T extends TestEvent> Iterable<TestEventData> readTestEvents( String executionId, int offset, int limit,
-			Iterable<TestEventSourceConfig> sources )
+																								Iterable<TestEventSourceConfig> sources )
 	{
 		try
 		{
@@ -924,7 +888,7 @@ public abstract class ExecutionManagerImpl<Type extends DataSource> implements E
 	}
 
 	public <T extends TestEvent> Iterable<TestEventData> readTestEventRange( String executionId, final long startTime,
-			final long endTime, int interpolationLevel, Iterable<TestEventSourceConfig> sources )
+																									 final long endTime, int interpolationLevel, Iterable<TestEventSourceConfig> sources )
 	{
 		try
 		{
@@ -954,7 +918,7 @@ public abstract class ExecutionManagerImpl<Type extends DataSource> implements E
 	}
 
 	private static List<Long> getSourceIds( Iterable<TestEventSourceConfig> sources,
-			TestEventSourceTable eventSourceTable )
+														 TestEventSourceTable eventSourceTable )
 	{
 		List<String> hashes = Lists.newArrayList( Iterables.transform( sources,
 				new Function<TestEventSourceConfig, String>()
@@ -969,8 +933,8 @@ public abstract class ExecutionManagerImpl<Type extends DataSource> implements E
 	}
 
 	private Iterable<TestEventData> parseTestEventDbResults( final String executionId,
-			final TestEventSourceTable eventSourceTable, List<Map<String, Object>> eventDataList,
-			final int interpolationLevel )
+																				final TestEventSourceTable eventSourceTable, List<Map<String, Object>> eventDataList,
+																				final int interpolationLevel )
 	{
 		return Iterables.transform( eventDataList, new Function<Map<String, Object>, TestEventData>()
 		{
@@ -989,7 +953,7 @@ public abstract class ExecutionManagerImpl<Type extends DataSource> implements E
 	}
 
 	private TestEventSourceConfig makeTestEventSourceConfig( String executionId, Long sourceId,
-			TestEventSourceTable eventSourceTable )
+																				TestEventSourceTable eventSourceTable )
 	{
 		Map<String, Object> s = eventSourceTable.getById( sourceId );
 		String sourceLabel = ( String )s.get( TestEventSourceTable.STATIC_FIELD_LABEL );
@@ -1072,7 +1036,7 @@ public abstract class ExecutionManagerImpl<Type extends DataSource> implements E
 	}
 
 	public Map<String, Object> readNext( String executionId, String trackId, String source, long startTime,
-			int interpolationLevel ) throws SQLException
+													 int interpolationLevel ) throws SQLException
 	{
 		TableBase dtd = tableRegistry.getTable( getExecution( executionId ).getExecutionDir().getName(),
 				buildDataTableName( trackId, interpolationLevel, source ) );
@@ -1104,7 +1068,7 @@ public abstract class ExecutionManagerImpl<Type extends DataSource> implements E
 	}
 
 	public Iterable<Map<String, Object>> read( String executionId, String trackId, String source, long startTime,
-			long endTime, int interpolationLevel ) throws SQLException
+															 long endTime, int interpolationLevel ) throws SQLException
 	{
 		TableBase dtd = tableRegistry.getTable( getExecution( executionId ).getExecutionDir().getName(),
 				buildDataTableName( trackId, interpolationLevel, source ) );
@@ -1320,47 +1284,16 @@ public abstract class ExecutionManagerImpl<Type extends DataSource> implements E
 
 	@Override
 	public void addEntryListener( String trackId, String source, int interpolationLevel,
-			ValueListener<? super Entry> listener )
+											ValueListener<? super Entry> listener )
 	{
-		listeners.put( trackId + ":" + source + ":" + String.valueOf( interpolationLevel ), listener );
+		listeners.put( keyFor( trackId, source, interpolationLevel ), listener );
 	}
 
 	@Override
 	public void removeEntryListener( String trackId, String source, int interpolationLevel,
-			ValueListener<? super Entry> listener )
+												ValueListener<? super Entry> listener )
 	{
-		listeners.remove( trackId + ":" + source + ":" + String.valueOf( interpolationLevel ), listener );
-	}
-
-	private static class AdjustedEntry implements Entry
-	{
-		private final Entry delegate;
-		private final long timestamp;
-
-		public AdjustedEntry( Entry delegate, long timestamp )
-		{
-			this.delegate = delegate;
-			this.timestamp = timestamp;
-		}
-
-		@Override
-		public long getTimestamp()
-		{
-			return timestamp;
-		}
-
-		@Override
-		public Set<String> getNames()
-		{
-			return delegate.getNames();
-		}
-
-		@Override
-		public Number getValue( String name )
-		{
-			return delegate.getValue( name );
-		}
-
+		listeners.remove( keyFor( trackId, source, interpolationLevel ), listener );
 	}
 
 	private class WorkspaceListener implements EventHandler<BaseEvent>

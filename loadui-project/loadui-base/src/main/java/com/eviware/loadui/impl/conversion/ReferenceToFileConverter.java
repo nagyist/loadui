@@ -15,12 +15,7 @@
  */
 package com.eviware.loadui.impl.conversion;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -48,7 +43,6 @@ import com.eviware.loadui.api.messaging.MessageEndpoint;
 import com.eviware.loadui.api.messaging.MessageListener;
 import com.eviware.loadui.api.model.PropertyHolder;
 import com.eviware.loadui.impl.property.Reference;
-import com.google.common.io.Closeables;
 
 public class ReferenceToFileConverter implements Converter<Reference, File>, EventHandler<CollectionEvent>
 {
@@ -98,10 +92,9 @@ public class ReferenceToFileConverter implements Converter<Reference, File>, Eve
 					log.debug( "got waken up, was waiting for {}", source.getId() );
 				}
 			}
-			FileInputStream fis = null;
-			try
+
+			try (FileInputStream fis = new FileInputStream( target ) )
 			{
-				fis = new FileInputStream( target );
 				String md5Hex = DigestUtils.md5Hex( fis );
 				log.debug( "target is: {} and is {} bytes with hash " + md5Hex, target, target.length() );
 			}
@@ -109,10 +102,6 @@ public class ReferenceToFileConverter implements Converter<Reference, File>, Eve
 			{
 				log.error( "Exception while verifying hash", e );
 				e.printStackTrace();
-			}
-			finally
-			{
-				Closeables.closeQuietly( fis );
 			}
 		}
 
@@ -149,20 +138,15 @@ public class ReferenceToFileConverter implements Converter<Reference, File>, Eve
 
 	private boolean isFileHashValid( String hash )
 	{
-		FileInputStream fis = null;
-		try
+
+		try (FileInputStream fis = new FileInputStream( files.get( hash ) ))
 		{
-			fis = new FileInputStream( files.get( hash ) );
 			String md5Hex = DigestUtils.md5Hex( fis );
 			return hash.equals( md5Hex );
 		}
 		catch( IOException e )
 		{
 			return false;
-		}
-		finally
-		{
-			Closeables.closeQuietly( fis );
 		}
 	}
 
@@ -220,13 +204,11 @@ public class ReferenceToFileConverter implements Converter<Reference, File>, Eve
 						}
 						else if( FileToReferenceConverter.STOP.equals( entry.getValue() ) )
 						{
-							Closeables.closeQuietly( writers.remove( hash ) );
+							closeQuietly(  writers.remove( hash ) );
 							synchronized( file )
 							{
-								FileInputStream fis = null;
-								try
+								try ( FileInputStream fis = new FileInputStream( file ) )
 								{
-									fis = new FileInputStream( file );
 									String md5Hex = DigestUtils.md5Hex( fis );
 									if( hash.equals( md5Hex ) )
 									{
@@ -248,10 +230,6 @@ public class ReferenceToFileConverter implements Converter<Reference, File>, Eve
 								{
 									log.error( "Exception while verifying completed file", e );
 								}
-								finally
-								{
-									Closeables.closeQuietly( fis );
-								}
 							}
 						}
 						else if( writers.containsKey( hash ) )
@@ -268,6 +246,14 @@ public class ReferenceToFileConverter implements Converter<Reference, File>, Eve
 					}
 				}
 			}
+		}
+	}
+
+	private void closeQuietly( Closeable closeable ){
+		try{
+			 closeable.close();
+		}catch( IOException e){
+			//Quiet close
 		}
 	}
 

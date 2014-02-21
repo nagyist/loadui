@@ -32,11 +32,6 @@ public interface ExecutionListener
 	void executionStarted( State oldState );
 
 	/**
-	 * Execution paused, handle it.
-	 */
-	void executionPaused( State oldState );
-
-	/**
 	 * Execution stopped, handle it.
 	 */
 	void executionStopped( State oldState );

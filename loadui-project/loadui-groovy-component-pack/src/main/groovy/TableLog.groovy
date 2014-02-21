@@ -32,22 +32,14 @@ import java.io.FileInputStream
 import java.text.SimpleDateFormat
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.ConcurrentLinkedQueue
-
-import javafx.application.Platform
-import javafx.stage.FileChooser
-import javafx.scene.control.TableView
-import javafx.scene.control.TableColumn
-import javafx.util.Callback
-import javafx.beans.value.ObservableValue
-import javafx.beans.value.ChangeListener
 import java.util.concurrent.TimeUnit
+import com.eviware.loadui.LoadUI
 
 inputTerminal.description = 'Messages sent here will be displayed in the table.'
 likes( inputTerminal ) { true }
 
 table = null
 tableWriterFuture = null
-fileWriterFuture = null
 tableWriterDelay = 250
 final messageQueue = [] as LinkedList
 writer = null
@@ -64,8 +56,8 @@ createProperty( 'appendSaveFile', Boolean, false )
 createProperty( 'formatTimestamps', Boolean, true )
 createProperty( 'addHeaders', Boolean, false )
 
-cellFactory = { val -> { it -> val.value[val.tableColumn.text] } as ObservableValue } as Callback
-rebuildTable = { table = new TableView( prefHeight: 200, minWidth: 500 ) }
+cellFactory = LoadUI.headless ? null : javaFxCallback { val -> observableValue( { val.value[val.tableColumn.text] } ) }
+rebuildTable = { table = tableView( prefHeight: 200, minWidth: 500 ) }
 final tableColumns = [] as CopyOnWriteArraySet
 final addedColumns = []
 def latestHeader
@@ -194,13 +186,13 @@ buildFileName = {
 }
 
 synchronized startTableWriter() {
-	if ( !tableWriterFuture )
+	if ( controller && !tableWriterFuture )
 		tableWriterFuture = scheduleAtFixedRate( tableWriter, tableWriterDelay, tableWriterDelay, TimeUnit.MILLISECONDS )
 }
 
 void stopTableWriter() {
 	tableWriterFuture?.cancel( true )
-	tableWriter.run()
+    if ( controller ) tableWriter.run()
 	tableWriterFuture = null
 }
 
@@ -211,9 +203,9 @@ tableWriter = {
 			def added = iter.next()
 			iter.remove()
 			log.info "Adding column to Table Log: $added"
-			def column = new TableColumn( cellValueFactory: cellFactory, text: added, sortable: false )
-			column.widthProperty().addListener( { obs, oldVal, width -> setAttribute( "width_$added", "$width" ) } as ChangeListener )
-			newColumns << column
+			def column = tableColumn( cellValueFactory: cellFactory, text: added, sortable: false )
+            column.widthProperty().addListener( changeListener { obs, oldVal, width -> setAttribute( "width_$added", "$width" ) } )
+            newColumns << column
 			try {
 				column.width = Double.parseDouble( getAttribute( "width_$added", null ) )
 			} catch( e ) {
@@ -230,7 +222,7 @@ tableWriter = {
 	}
 	
 	if ( newMessages || excessItems || newColumns ) {
-		Platform.runLater {
+        inJavaFxThread {
 			if ( newColumns ) table.columns.addAll newColumns
 			if ( excessItems > 0 ) table.items.remove( 0, excessItems )
 			if ( newMessages ) table.items.addAll newMessages
@@ -281,6 +273,7 @@ validateLogFilePath = { filePath ->
 addTimestampToFileName = { it.replaceAll('^(.*?)(\\.\\w+)?$', '$1-'+System.currentTimeMillis()+'$2') }
 
 refreshLayout = {
+    if ( !controller ) return;
 	rebuildTable()
 	layout(layout: 'wrap 4') {
 		node( component: table, constraints: 'span' )
@@ -290,8 +283,7 @@ refreshLayout = {
 			refreshLayout()
 		} )
 		action( label: 'Save', action: {
-			def fileChooser = new FileChooser( title: 'Save log' )
-			fileChooser.extensionFilters.add( new FileChooser.ExtensionFilter( 'CSV', '*.csv' ) )
+			def fileChooser = fileChooser( ['CSV', '*.csv'],  title: 'Save log' )
 			def saveFile = fileChooser.showSaveDialog( table.scene.window )
 			if( saveFile ) {
 				def flushWriter = null
@@ -315,7 +307,7 @@ refreshLayout = {
 		}
 	}
 }
-if( controller ) refreshLayout()
+refreshLayout()
 
 void withFileWriter( createIfNull = true, closure ) {
 	synchronized( writerLock ) {

@@ -27,7 +27,7 @@ public interface BehaviorProvider
 	 * Creates and initializes a new ComponentBehavior.
 	 * 
 	 * @param descriptor
-	 *           A ComponentDescriptor describing the ComponentBehavior to
+	 *           A ComponentDescriptor describing the C'omponentBehavior to
 	 *           create. It must be supported by the BehaviorProvider.
 	 * @param context
 	 *           The ComponentContext to make available to the ComponentBehavior.

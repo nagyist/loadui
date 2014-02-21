@@ -15,23 +15,21 @@
  */
 package com.eviware.loadui.cmd;
 
+import com.eviware.loadui.api.model.WorkspaceProvider;
+import com.eviware.loadui.launcher.api.GroovyCommand;
+import com.eviware.loadui.launcher.api.OSGiUtils;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
+import org.codehaus.groovy.control.CompilationFailedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-
-import org.codehaus.groovy.control.CompilationFailedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.eviware.loadui.api.model.WorkspaceProvider;
-import com.eviware.loadui.launcher.api.GroovyCommand;
-import com.eviware.loadui.launcher.api.OSGiUtils;
 
 public class CommandRunner
 {
@@ -104,6 +102,7 @@ public class CommandRunner
 
 			if( command.exitOnCompletion() )
 			{
+				workspaceProvider.getWorkspace().release();
 				if( result instanceof Number )
 					OSGiUtils.shutdown( ( ( Number )result ).intValue() );
 				else if( result instanceof Boolean )

@@ -15,18 +15,17 @@
  */
 package com.eviware.loadui.impl.statistics;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.statistics.store.Entry;
 import com.eviware.loadui.api.statistics.store.ExecutionManager;
 import com.eviware.loadui.api.statistics.store.ExecutionManager.State;
 import com.eviware.loadui.api.statistics.store.Track;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class StatisticsInterpolator
 {
@@ -150,7 +149,7 @@ public class StatisticsInterpolator
 			if( entries.isEmpty() || track == null )
 				return null;
 
-			Entry entry = track.getTrackDescriptor().getEntryAggregator().aggregate( entries, false );
+			Entry entry = track.getEntryAggregator().aggregate( entries, false );
 			entries.clear();
 
 			return entry;

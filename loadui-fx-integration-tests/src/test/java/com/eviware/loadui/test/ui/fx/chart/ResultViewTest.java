@@ -35,7 +35,7 @@ import static org.junit.Assert.assertThat;
 import static org.loadui.testfx.Assertions.verifyThat;
 import static org.loadui.testfx.FXTestUtils.awaitEvents;
 import static org.loadui.testfx.FXTestUtils.getOrFail;
-import static org.loadui.testfx.Matchers.visible;
+import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
 
 @Category(IntegrationTest.class)

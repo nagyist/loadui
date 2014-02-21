@@ -15,15 +15,14 @@
  */
 package com.eviware.loadui.util.statistics;
 
+import com.google.common.collect.ImmutableList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableList;
 
 public class ChartUtils
 {
@@ -53,4 +52,10 @@ public class ChartUtils
 
 		return color;
 	}
+
+	public static String keyFor( String trackId, String source, int interpolationLevel )
+	{
+		return trackId + ":" + source + ":" + String.valueOf( interpolationLevel );
+	}
+
 }

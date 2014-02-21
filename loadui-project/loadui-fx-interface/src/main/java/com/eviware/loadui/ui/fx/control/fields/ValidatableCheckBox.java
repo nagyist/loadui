@@ -20,7 +20,7 @@ import javafx.scene.control.CheckBox;
 
 import com.eviware.loadui.ui.fx.util.Properties;
 
-public class ValidatableCheckBox extends CheckBox implements Field<Boolean>, Validatable
+public class ValidatableCheckBox extends CheckBox implements Field<Boolean>, ValidatableNode
 {
 	public ValidatableCheckBox( String label )
 	{

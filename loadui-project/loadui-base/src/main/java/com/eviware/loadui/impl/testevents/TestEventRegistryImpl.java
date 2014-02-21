@@ -15,14 +15,13 @@
  */
 package com.eviware.loadui.impl.testevents;
 
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.testevents.TestEvent;
 import com.eviware.loadui.api.testevents.TestEventRegistry;
 import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 public class TestEventRegistryImpl implements TestEventRegistry
 {
@@ -43,9 +42,9 @@ public class TestEventRegistryImpl implements TestEventRegistry
 	}
 
 	@Override
-	public TestEvent.Factory<?> lookupFactory( String type )
+	public TestEvent.Factory<TestEvent> lookupFactory( String type )
 	{
-		return eventFactories.get( type );
+		return ( TestEvent.Factory<TestEvent> )eventFactories.get( type );
 	}
 
 	@Override

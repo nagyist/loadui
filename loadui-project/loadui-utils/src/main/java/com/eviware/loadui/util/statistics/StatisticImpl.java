@@ -15,8 +15,6 @@
  */
 package com.eviware.loadui.util.statistics;
 
-import java.util.Collections;
-
 import com.eviware.loadui.api.serialization.ListenableValue;
 import com.eviware.loadui.api.statistics.DataPoint;
 import com.eviware.loadui.api.statistics.Statistic;
@@ -29,6 +27,8 @@ import com.eviware.loadui.util.StringUtils;
 import com.eviware.loadui.util.serialization.ListenableValueSupport;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+
+import java.util.Collections;
 
 public class StatisticImpl<T extends Number> implements Statistic<T>
 {
@@ -112,25 +112,6 @@ public class StatisticImpl<T extends Number> implements Statistic<T>
 						return new DataPointImpl<>( entry.getTimestamp(), ( T )entry.getValue( name ) );
 					}
 				} );
-	}
-
-	@Override
-	public Iterable<DataPoint<T>> getPeriod( long start, long end, int interpolationLevel )
-	{
-		return getPeriod( start, end, interpolationLevel, manager.getCurrentExecution() );
-	}
-
-	@Override
-	public Iterable<DataPoint<T>> getPeriod( long start, long end )
-	{
-		return getPeriod( start, end, 0, manager.getCurrentExecution() );
-	}
-
-	@Override
-	public long getTimestamp()
-	{
-		Entry lastEntry = manager.getLastEntry( trackId, source );
-		return lastEntry == null ? -1 : lastEntry.getTimestamp();
 	}
 
 	@Override

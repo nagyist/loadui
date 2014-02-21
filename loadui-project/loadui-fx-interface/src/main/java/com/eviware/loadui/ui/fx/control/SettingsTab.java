@@ -23,6 +23,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import com.eviware.loadui.ui.fx.control.fields.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -41,13 +42,7 @@ import javax.annotation.Nonnull;
 import com.eviware.loadui.api.layout.ActionLayoutComponent;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
-import com.eviware.loadui.ui.fx.control.fields.Field;
-import com.eviware.loadui.ui.fx.control.fields.Validatable;
-import com.eviware.loadui.ui.fx.control.fields.ValidatableCheckBox;
-import com.eviware.loadui.ui.fx.control.fields.ValidatableComboBoxField;
-import com.eviware.loadui.ui.fx.control.fields.ValidatableLongField;
-import com.eviware.loadui.ui.fx.control.fields.ValidatableStringField;
-import com.eviware.loadui.ui.fx.control.fields.ValidatableTextField;
+import com.eviware.loadui.ui.fx.control.fields.ValidatableNode;
 import com.eviware.loadui.ui.fx.util.UIUtils;
 import com.google.common.base.Objects;
 import com.google.common.base.Predicates;
@@ -392,7 +387,7 @@ public class SettingsTab extends Tab
 		boolean wasValid = true;
 		Iterable<Field<?>> allFields = Iterables.concat( fieldToLoaduiProperty.keySet(), fieldToJavafxProperty.keySet(),
 				fieldToFieldSaveHandler.keySet() );
-		for( Validatable field : allFields )
+		for( ValidatableNode field : allFields )
 		{
 			wasValid = wasValid && field.isValid();
 		}

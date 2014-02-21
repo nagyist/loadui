@@ -36,11 +36,10 @@ public class Init
 
 	public void initJIDE()
 	{
-		InputStream licenseStream = null;
-		try
+
+		try ( InputStream licenseStream = Init.class.getResourceAsStream( "/properties/jide.properties" ) )
 		{
 			Properties jidedata = new Properties();
-			licenseStream = Init.class.getResourceAsStream( "/properties/jide.properties" );
 			jidedata.load( licenseStream );
 			String company = jidedata.getProperty( "company" );
 			log.debug( "Initializing JIDE for {}", company );
@@ -49,10 +48,6 @@ public class Init
 		catch( Exception e )
 		{
 			log.error( "Failed to initialize JIDE:", e );
-		}
-		finally
-		{
-			Closeables.closeQuietly( licenseStream );
 		}
 	}
 }

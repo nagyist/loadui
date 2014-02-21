@@ -22,11 +22,6 @@ import com.eviware.loadui.api.statistics.store.TrackDescriptor;
 public abstract class ExecutionListenerAdapter implements ExecutionListener
 {
 	@Override
-	public void executionPaused( ExecutionManager.State oldState )
-	{
-	}
-
-	@Override
 	public void executionStarted( ExecutionManager.State oldState )
 	{
 	}

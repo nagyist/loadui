@@ -15,32 +15,17 @@
  */
 package com.eviware.loadui.launcher;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javafx.application.Application;
-import javafx.concurrent.Task;
-import javafx.stage.Stage;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
-
 import com.eviware.loadui.launcher.api.GroovyCommand;
 import com.eviware.loadui.launcher.impl.FileGroovyCommand;
 import com.eviware.loadui.launcher.impl.ResourceGroovyCommand;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
 
-public class LoadUICommandLineLauncher extends LoadUILauncher
+import java.io.File;
+import java.util.*;
+
+public class LoadUICommandLineLauncher extends HeadlessFxLauncherBase
 {
 	protected static final String LOCAL_OPTION = "l";
 	protected static final String FILE_OPTION = "f";
@@ -59,90 +44,22 @@ public class LoadUICommandLineLauncher extends LoadUILauncher
 	protected static final String STATISTICS_REPORT_COMPARE_OPTION = "c";
 	protected static final String ABORT_ONGOING_REQUESTS_OPTION = "A";
 
-	public static void main( String[] args )
-	{
-		Application.launch( CommandApplication.class, args );
-	}
-
 	public LoadUICommandLineLauncher( String[] args )
 	{
 		super( args );
 	}
 
-	private static GroovyCommand command;
-
 	@Override
-	protected void beforeBundlesStart( Bundle[] bundles )
+	public void start()
 	{
-		final Set<String> doNotStart = new HashSet<>( Arrays.asList( "loadui-pro-fx" ) );
-
-		for( Bundle bundle : bundles )
-		{
-			if( is( bundle ).in( doNotStart ) )
-			{
-				try
-				{
-					System.out.println( "Uninstalling bundle: " + bundle.getSymbolicName() );
-					bundle.uninstall();
-				}
-				catch( BundleException e )
-				{
-					e.printStackTrace();
-				}
-			}
-		}
-
-	}
-
-	private ContainsSimilarItem is( Bundle bundle )
-	{
-		return new ContainsSimilarItem( bundle.getSymbolicName() );
-	}
-
-	private class ContainsSimilarItem
-	{
-
-		String name;
-
-		public ContainsSimilarItem( String name )
-		{
-			this.name = name;
-		}
-
-		boolean in( Set<String> set )
-		{
-			for( String item : set )
-				if( name.contains( item ) )
-					return true;
-			return false;
-		}
-
+		super.start();
+		publishService( GroovyCommand.class, getCommand(), null );
 	}
 
 	@Override
 	protected void processCommandLine( CommandLine cmd )
 	{
-		try (InputStream is = getClass().getResourceAsStream( "/packages-extra.txt" ))
-		{
-			if( is != null )
-			{
-				StringBuilder out = new StringBuilder();
-				byte[] b = new byte[4096];
-				for( int n; ( n = is.read( b ) ) != -1; )
-					out.append( new String( b, 0, n ) );
-
-				String extra = configProps.getProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, "" );
-				if( !extra.isEmpty() )
-					out.append( "," ).append( extra );
-
-				configProps.setProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, out.toString() );
-			}
-		}
-		catch( IOException e )
-		{
-			e.printStackTrace();
-		}
-
+		System.out.println( "Command line launcher processing command-line options" );
 		Map<String, Object> attributes = new HashMap<>();
 
 		if( cmd.hasOption( PROJECT_OPTION ) )
@@ -177,7 +94,7 @@ public class LoadUICommandLineLauncher extends LoadUILauncher
 					cmd.hasOption( REPORT_FORMAT_OPTION ) ? cmd.getOptionValue( REPORT_FORMAT_OPTION ) : "PDF" );
 
 			String[] statisticPageOptionValues = cmd.getOptionValues( STATISTICS_REPORT_OPTION );
-			List<String> statisticPages = statisticPageOptionValues == null ? Collections.<String> emptyList() : Arrays
+			List<String> statisticPages = statisticPageOptionValues == null ? Collections.<String>emptyList() : Arrays
 					.asList( statisticPageOptionValues );
 
 			attributes.put( "statisticPages", statisticPages );
@@ -189,20 +106,21 @@ public class LoadUICommandLineLauncher extends LoadUILauncher
 
 			attributes.put( "retainZoom", cmd.hasOption( RETAIN_SAVED_ZOOM_LEVELS ) );
 
-			command = new ResourceGroovyCommand( "/RunTest.groovy", attributes );
+			setCommand( new ResourceGroovyCommand( "/RunTest.groovy", attributes ) );
 		}
 		else if( cmd.hasOption( FILE_OPTION ) )
 		{
-			command = new FileGroovyCommand( new File( cmd.getOptionValue( FILE_OPTION ) ), attributes );
+			setCommand( new FileGroovyCommand( new File( cmd.getOptionValue( FILE_OPTION ) ), attributes ) );
 		}
 		else
 		{
 			printUsageAndQuit();
 		}
+
 	}
 
 	@Override
-	@SuppressWarnings( "static-access" )
+	@SuppressWarnings("static-access")
 	protected Options createOptions()
 	{
 		Options options = super.createOptions();
@@ -247,46 +165,4 @@ public class LoadUICommandLineLauncher extends LoadUILauncher
 		return options;
 	}
 
-	public static class CommandApplication extends Application
-	{
-		private LoadUILauncher launcher;
-
-		@Override
-		public void start( final Stage stage ) throws Exception
-		{
-			System.out.println( "CommandApplication starting" );
-
-			Task<Void> task = new Task<Void>()
-			{
-				@Override
-				protected Void call() throws Exception
-				{
-					System.setSecurityManager( null );
-					launcher = createLauncher( getParameters().getRaw().toArray( new String[0] ) );
-					launcher.init();
-					launcher.start();
-
-					System.out.println( "command: " + command );
-
-					if( command != null )
-						framework.getBundleContext().registerService( GroovyCommand.class.getName(), command, null );
-
-					return null;
-				}
-			};
-
-			new Thread( task ).start();
-		}
-
-		protected LoadUILauncher createLauncher( String[] args )
-		{
-			return new LoadUICommandLineLauncher( args );
-		}
-
-		@Override
-		public void stop() throws Exception
-		{
-			launcher.framework.getBundleContext().getBundle( 0 ).stop();
-		}
-	}
 }
