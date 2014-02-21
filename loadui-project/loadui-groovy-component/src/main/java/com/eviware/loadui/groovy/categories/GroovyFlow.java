@@ -72,20 +72,6 @@ public class GroovyFlow extends FlowBase
 	}
 
 	@Override
-	public Object collectStatisticsData()
-	{
-		Object result = scriptSupport.getEnvironment().invokeClosure( true, false, "collectStatisticsData" );
-		return result != null ? result : super.collectStatisticsData();
-	}
-
-	@Override
-	public void handleStatisticsData( Map<AgentItem, Object> statisticsData )
-	{
-		super.handleStatisticsData( statisticsData );
-		scriptSupport.getEnvironment().invokeClosure( true, false, "handleStatisticsData", statisticsData );
-	}
-
-	@Override
 	public void generateSummary( MutableChapter summary )
 	{
 		super.generateSummary( summary );

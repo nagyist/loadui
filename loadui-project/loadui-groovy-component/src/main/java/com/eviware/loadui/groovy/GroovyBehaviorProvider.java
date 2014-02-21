@@ -183,10 +183,6 @@ public class GroovyBehaviorProvider implements BehaviorProvider, EventFirer, Rel
 			{
 				return new GroovyFlow( this, context );
 			}
-			else if( AnalysisCategory.CATEGORY.equalsIgnoreCase( category ) )
-			{
-				return new GroovyAnalysis( this, context );
-			}
 			else if( OutputCategory.CATEGORY.equalsIgnoreCase( category ) )
 			{
 				return new GroovyOutput( this, context );

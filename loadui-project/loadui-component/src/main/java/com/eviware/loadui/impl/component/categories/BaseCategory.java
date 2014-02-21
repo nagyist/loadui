@@ -163,17 +163,6 @@ public abstract class BaseCategory implements ComponentBehavior
 	}
 
 	@Override
-	public Object collectStatisticsData()
-	{
-		return null;
-	}
-
-	@Override
-	public void handleStatisticsData( Map<AgentItem, Object> statisticsData )
-	{
-	}
-
-	@Override
 	public void generateSummary( MutableChapter summary )
 	{
 	}
