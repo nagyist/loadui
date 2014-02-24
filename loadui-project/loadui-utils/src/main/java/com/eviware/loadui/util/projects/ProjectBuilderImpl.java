@@ -60,8 +60,10 @@ public class ProjectBuilderImpl implements ProjectBuilder
 			assembleComponentsByBlueprint( project, blueprint.getComponentBlueprints() );
 
 			project.getProject().save();
+			project.setEnabled( false );
 
 			where = new File( blueprint.getProjectDirectory().getPath() + "/" + project.getProjectFile().getName() );
+
 			Files.move( project.getProjectFile(), where );
 
 			return project;
