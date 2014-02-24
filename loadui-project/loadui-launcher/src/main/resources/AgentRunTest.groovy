@@ -19,6 +19,7 @@ import com.eviware.loadui.api.execution.TestRunner
 import com.eviware.loadui.api.model.CanvasItem
 import com.eviware.loadui.api.model.WorkspaceItem
 import com.eviware.loadui.api.statistics.store.ExecutionListener
+import com.eviware.loadui.api.statistics.store.TrackDescriptor
 import com.eviware.loadui.api.statistics.store.ExecutionManager
 import com.eviware.loadui.util.BeanInjector
 import com.eviware.loadui.util.FormattingUtils
@@ -127,36 +128,33 @@ ExecutionManager executionManager = BeanInjector.getBean( ExecutionManager )
 
 final testStopped = new AtomicBoolean( false )
 
-def executionListener = [
-        executionStopped: { ExecutionManager.State oldState ->
-            testStopped.set( true )
-        },
-        executionStopped: { _ -> },
-        trackRegistered: { _ -> },
-	    trackUnregistered: { _ -> }
-] as ExecutionListener
+def executionListener = new ExecutionListener() {
+    void executionStopped( ExecutionManager.State oldState ) {
+        testStopped.set( true )
+    }
+    void executionStarted( ExecutionManager.State oldState ) {}
+    void trackRegistered( TrackDescriptor trackDescriptor ) {}
+    void trackUnregistered( TrackDescriptor trackDescriptor ) {}
+}
 
 executionManager.addExecutionListener( executionListener )
-
-def time = target.getCounter( CanvasItem.TIMER_COUNTER )
-def samples = target.getCounter( CanvasItem.SAMPLE_COUNTER )
-def failures = target.getCounter( CanvasItem.FAILURE_COUNTER )
 
 try {
     def testRunner = BeanInjector.getBean( TestRunner )
     testRunner.enqueueExecution( target )
 
-//wait until execution stops
+    def time = target.getCounter( CanvasItem.TIMER_COUNTER )
+    def samples = target.getCounter( CanvasItem.SAMPLE_COUNTER )
+    def failures = target.getCounter( CanvasItem.FAILURE_COUNTER )
+
+    //wait until execution stops
     while ( !testStopped.get() ) {
         log.info "Time: ${FormattingUtils.formatTime( time.value )} Requests: ${samples.value} Failures: ${failures.value} Running? ${testStopped}"
         sleep 1000
     }
-} finally {
-    executionManager.removeExecutionListener( executionListener )
-}
 
-//Shutdown
-log.info """
+    //Shutdown
+    log.info """
 
 ------------------------------------
  TEST EXECUTION COMPLETED
@@ -164,6 +162,12 @@ log.info """
 ------------------------------------
 
 """
+
+
+} finally {
+    executionManager.removeExecutionListener( executionListener )
+}
+
 
 def success = project.getLimit( CanvasItem.FAILURE_COUNTER ) == -1 || project.getCounter( CanvasItem.FAILURE_COUNTER ).get() < project.getLimit( CanvasItem.FAILURE_COUNTER )
 
