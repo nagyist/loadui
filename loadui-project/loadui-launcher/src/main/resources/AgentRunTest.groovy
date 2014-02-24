@@ -130,7 +130,10 @@ final testStopped = new AtomicBoolean( false )
 def executionListener = [
         executionStopped: { ExecutionManager.State oldState ->
             testStopped.set( true )
-        }
+        },
+        executionStopped: { _ -> },
+        trackRegistered: { _ -> },
+	    trackUnregistered: { _ -> }
 ] as ExecutionListener
 
 executionManager.addExecutionListener( executionListener )
