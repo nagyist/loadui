@@ -100,6 +100,8 @@ proxyPassword = createProperty('_proxyPassword', String)
 authUsername = createProperty('_authUsername', String)
 authPassword = createProperty('_authPassword', String)
 
+def latencyVariable = addStatisticVariable( "Latency", '', "SAMPLE" )
+
 http = new DefaultHttpClient(cm)
 
 inlineUrlAuthUsername = null
@@ -234,6 +236,7 @@ sample = { message, sampleId ->
                         message['Bytes'] = EntityUtils.toString(response.entity).length()
                 }
 
+                determineLatency(response.entity.content, sampleId)
                 response.entity.consumeContent()
 
                 if (!runningSamples.remove(get)) {
@@ -267,6 +270,12 @@ sample = { message, sampleId ->
         throw new SampleCancelledException()
     }
 
+}
+
+def firstByte = new byte[1]
+determineLatency = { content, startTime ->
+    content.read(firstByte)
+    latencyVariable.update(System.currentTimeMillis(), (System.nanoTime() - startTime)/1000000)
 }
 
 onCancel = {
