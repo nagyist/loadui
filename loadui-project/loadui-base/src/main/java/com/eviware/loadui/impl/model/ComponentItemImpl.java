@@ -517,7 +517,8 @@ public class ComponentItemImpl extends ModelItemImpl<ComponentItemConfig> implem
 
 	private class Context implements ComponentContext
 	{
-		private final List<EventHandlerRegistration<?>> handlerRegistrations = new ArrayList<>();
+		private final List<EventHandlerRegistration<?>> handlerRegistrations = Collections
+				.synchronizedList( new ArrayList<EventHandlerRegistration<?>>() );
 
 		@Override
 		public InputTerminal createInput( String name, String label, String description )
@@ -889,9 +890,12 @@ public class ComponentItemImpl extends ModelItemImpl<ComponentItemConfig> implem
 		@Override
 		public void clearEventListeners()
 		{
-			for( EventHandlerRegistration<?> registration : handlerRegistrations )
-				registration.remove();
-			handlerRegistrations.clear();
+			synchronized( handlerRegistrations )
+			{
+				for( EventHandlerRegistration<?> registration : handlerRegistrations )
+					registration.remove();
+				handlerRegistrations.clear();
+			}
 		}
 
 		@Override
