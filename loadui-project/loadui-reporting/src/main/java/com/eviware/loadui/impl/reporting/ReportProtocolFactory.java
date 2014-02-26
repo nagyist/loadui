@@ -32,17 +32,8 @@ public class ReportProtocolFactory implements URLStreamHandlerFactory
 	{
 		if( "subreport".equals( protocol ) )
 		{
-			// log.debug( "Creating handler for protocol [" + protocol + "]" );
 			return new SubReportURLHandler( reportEngine );
 		}
-		//		else if( "logo".equals( protocol ) )
-		//		{
-		// log.debug( "Creating handler for protocol [" + protocol + "]" );
-		// return new LogoProtocolHandler();
-		//		}
-		// else log.debug( "Failed to create logo handler for protocol [" +
-		// protocol + "]" );
-
 		return null;
 	}
 }

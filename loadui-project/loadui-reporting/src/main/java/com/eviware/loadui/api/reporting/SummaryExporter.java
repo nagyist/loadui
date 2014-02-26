@@ -19,7 +19,5 @@ import com.eviware.loadui.api.summary.MutableSummary;
 
 public interface SummaryExporter
 {
-
 	void saveSummary( MutableSummary summary, String reportFolder, String reportFormat, String label );
-
 }

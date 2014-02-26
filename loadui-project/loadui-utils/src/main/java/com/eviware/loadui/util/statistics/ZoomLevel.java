@@ -13,7 +13,7 @@
  * express or implied. See the Licence for the specific language governing permissions and limitations
  * under the Licence.
  */
-package com.eviware.loadui.api.charting.line;
+package com.eviware.loadui.util.statistics;
 
 import javax.annotation.CheckForNull;
 
