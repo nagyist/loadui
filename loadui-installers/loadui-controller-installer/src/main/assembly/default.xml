@@ -8,7 +8,34 @@
 		<format>dir</format>
 	</formats>
 	<includeBaseDirectory>false</includeBaseDirectory>
-	<dependencySets>
+    <fileSets>
+        <fileSet>
+            <directory>/src/main/resources</directory>
+            <outputDirectory>/</outputDirectory>
+            <lineEnding>unix</lineEnding>
+            <includes>
+                <include>*.sh</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>/src/main/resources</directory>
+            <outputDirectory>/</outputDirectory>
+            <lineEnding>dos</lineEnding>
+            <includes>
+                <include>*.bat</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>/src/main/resources</directory>
+            <outputDirectory>/</outputDirectory>
+            <lineEnding>keep</lineEnding>
+            <excludes>
+                <exclude>*.bat</exclude>
+                <exclude>*.sh</exclude>
+            </excludes>
+        </fileSet>
+    </fileSets>
+    <dependencySets>
 		<dependencySet>
 			<useProjectArtifact>false</useProjectArtifact>
 			<outputDirectory>bundle</outputDirectory>
