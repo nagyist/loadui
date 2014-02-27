@@ -28,10 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -64,16 +61,10 @@ public class OSGiFXLauncher extends LoadUIFXLauncher
 		Application.launch( OSGiFXApplication.class, args );
 	}
 
-	public Properties getConfig()
-	{
-		return configProps;
-	}
-
 	@Override
 	public void init()
 	{
-		Properties config = getConfig();
-		config.setProperty( "felix.cache.rootdir", ControllerFXWrapper.baseDir.getAbsolutePath() );
+		configProps.put( "felix.cache.rootdir", ControllerFXWrapper.baseDir.getAbsolutePath() );
 
 
 		//Add the required packages that should be in the OSGi config file.
@@ -91,8 +82,8 @@ public class OSGiFXLauncher extends LoadUIFXLauncher
 				}
 			}
 
-		config.put( LoadUILauncher.ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, apiPackages.toString() );
-		config.setProperty( "felix.auto.deploy.dir", ControllerFXWrapper.bundleDir.getAbsolutePath() );
+		configProps.put( LoadUILauncher.ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, apiPackages.toString() );
+		configProps.put( "felix.auto.deploy.dir", ControllerFXWrapper.bundleDir.getAbsolutePath() );
 
 		super.init();
 	}

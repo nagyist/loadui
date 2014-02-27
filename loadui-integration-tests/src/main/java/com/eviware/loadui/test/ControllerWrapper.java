@@ -23,10 +23,7 @@ import org.osgi.framework.BundleException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -57,8 +54,8 @@ public class ControllerWrapper
 		System.setProperty( LoadUI.LOADUI_HOME, homeDir.getAbsolutePath() );
 
 		launcher = new OSGiLauncher( new String[] { "-nolock" } );
-		Properties config = launcher.getConfig();
-		config.setProperty( "felix.cache.rootdir", baseDir.getAbsolutePath() );
+		Map<String, String> config = launcher.getConfig();
+		config.put( "felix.cache.rootdir", baseDir.getAbsolutePath() );
 
 		File bundleDir = new File( baseDir, "bundle" );
 		copyRuntimeDirectories( bundleDir, baseDir );
@@ -110,7 +107,7 @@ public class ControllerWrapper
 			}
 		}
 
-		config.setProperty( "felix.auto.deploy.dir", bundleDir.getAbsolutePath() );
+		config.put( "felix.auto.deploy.dir", bundleDir.getAbsolutePath() );
 
 		launcher.init();
 		launcher.start();
