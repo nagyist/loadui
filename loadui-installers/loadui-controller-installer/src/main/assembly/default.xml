@@ -29,6 +29,7 @@
 			<outputDirectory>lib</outputDirectory>
 			<includes>
 				<include>com.eviware.loadui:loadui-launcher</include>
+                <include>com.eviware.loadui:loadui-api</include>
 			</includes>
 			<excludes>
 				<exclude>org.apache.felix:org.apache.felix.framework</exclude>
