@@ -1,39 +1,39 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	
-	<parent>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
         <groupId>com.eviware.loadui</groupId>
-		<artifactId>loadui-parent</artifactId>
+        <artifactId>loadui-parent</artifactId>
         <version>2.7.0-SNAPSHOT</version>
     </parent>
-	
-	<artifactId>loadui-installers</artifactId>
-	<packaging>pom</packaging>
-	<name>loadUI Installers</name>
-	<description>This project builds the loadUI installers</description>
-	<properties>
-		<devenv.install4jc>${env.INSTALL4J5_HOME}/bin/install4jc.exe</devenv.install4jc>
-		<install4jFileName>loadUI.install4j</install4jFileName>
-		<maven.build.timestamp.format>yyyy/MM/dd HH\:mm</maven.build.timestamp.format>
-		<loadui.build.date>${maven.build.timestamp}</loadui.build.date>
-		<loadui.build.number>INTERNAL</loadui.build.number>
-		<loadui.name>LoadUI</loadui.name>
-	</properties>
-	<pluginRepositories>
-		<pluginRepository>
-			<id>googlecode-maven-install4j</id>
-			<name>googlecode-maven-install4j</name>
-			<url>http://maven-install4j.googlecode.com/svn/m2-repo</url>
-		</pluginRepository>
-	</pluginRepositories>
-	
-	<modules>
-		<module>loadui-controller-installer</module>
-	</modules>
-	
-	<build>
-		<plugins>
+
+    <artifactId>loadui-installers</artifactId>
+    <packaging>pom</packaging>
+    <name>loadUI Installers</name>
+    <description>This project builds the loadUI installers</description>
+    <properties>
+        <devenv.install4jc>${env.INSTALL4J5_HOME}/bin/install4jc.exe</devenv.install4jc>
+        <install4jFileName>loadUI.install4j</install4jFileName>
+        <maven.build.timestamp.format>yyyy/MM/dd HH\:mm</maven.build.timestamp.format>
+        <loadui.build.date>${maven.build.timestamp}</loadui.build.date>
+        <loadui.build.number>INTERNAL</loadui.build.number>
+        <loadui.name>LoadUI</loadui.name>
+    </properties>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>googlecode-maven-install4j</id>
+            <name>googlecode-maven-install4j</name>
+            <url>http://maven-install4j.googlecode.com/svn/m2-repo</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <modules>
+        <module>loadui-controller-installer</module>
+    </modules>
+
+    <build>
+        <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -47,9 +47,6 @@
                         </goals>
                         <configuration>
                             <resources>
-                                <resource>
-                                    <directory>src/main/resources</directory>
-                                </resource>
                                 <resource>
                                     <directory>${project.basedir}/src/main/filtered_resources</directory>
                                     <filtering>true</filtering>
@@ -76,71 +73,71 @@
                     </execution>
                 </executions>
             </plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.2.2</version>
-				<executions>
-					<execution>
-						<id>default</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<descriptor>src/main/assembly/default.xml</descriptor>
-						</configuration>
-					</execution>
-				</executions>
-				<configuration>
-					<attach>false</attach>
-					<appendAssemblyId>false</appendAssemblyId>
-					<finalName>main</finalName>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>com.google.code.maven-install4j</groupId>
-				<artifactId>maven-install4j-plugin</artifactId>
-				<version>0.1.1</version>
-				<configuration>
-					<executable>${devenv.install4jc}</executable>
-					<releaseId>${project.version}</releaseId>
-					<attach>true</attach>
-					<skipOnMissingExecutable>true</skipOnMissingExecutable>
-					<compilerVariables>
-						<property>
-							<name>builddir</name>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2.2</version>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptor>src/main/assembly/default.xml</descriptor>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <attach>false</attach>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <finalName>main</finalName>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.google.code.maven-install4j</groupId>
+                <artifactId>maven-install4j-plugin</artifactId>
+                <version>0.1.1</version>
+                <configuration>
+                    <executable>${devenv.install4jc}</executable>
+                    <releaseId>${project.version}</releaseId>
+                    <attach>true</attach>
+                    <skipOnMissingExecutable>true</skipOnMissingExecutable>
+                    <compilerVariables>
+                        <property>
+                            <name>builddir</name>
                             <!-- Path relative to install4j config file -->
-							<value>../../../target/main</value>
-						</property>
+                            <value>../../../target/main</value>
+                        </property>
                         <property>
                             <name>mediadir</name>
                             <!-- Path relative to install4j config file -->
                             <value>../../../target</value>
                         </property>
-						<property>
-							<name>resourcedir</name>
-							<value>${project.build.directory}/install4j_resources</value>
-						</property>
-						<property>
-							<name>version</name>
-							<value>${project.parent.version}</value>
-						</property>
-						<property>
-							<name>SIGNTOOL_PATH</name>
-							<value>${maven.install4j.signtool}</value>
-						</property>
-						<property>
-							<name>CERT_PATH</name>
-							<value>${maven.install4j.cert}</value>
-						</property>
-						<property>
-							<name>CERT_PASS</name>
-							<value>${maven.install4j.cert.pass}</value>
-						</property>
-					</compilerVariables>
-				</configuration>
-			</plugin>
+                        <property>
+                            <name>resourcedir</name>
+                            <value>${project.build.directory}/install4j_resources</value>
+                        </property>
+                        <property>
+                            <name>version</name>
+                            <value>${project.parent.version}</value>
+                        </property>
+                        <property>
+                            <name>SIGNTOOL_PATH</name>
+                            <value>${maven.install4j.signtool}</value>
+                        </property>
+                        <property>
+                            <name>CERT_PATH</name>
+                            <value>${maven.install4j.cert}</value>
+                        </property>
+                        <property>
+                            <name>CERT_PASS</name>
+                            <value>${maven.install4j.cert.pass}</value>
+                        </property>
+                    </compilerVariables>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -161,8 +158,8 @@
                     </execution>
                 </executions>
             </plugin>
-		</plugins>
-	</build>
+        </plugins>
+    </build>
     <profiles>
         <profile>
             <id>sign-jars</id>
@@ -186,16 +183,16 @@
         </profile>
     </profiles>
 
-	<dependencies>
-		<dependency>
-			<groupId>com.eviware.loadui</groupId>
-			<artifactId>loadui-launcher</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.eviware.loadui</groupId>
-			<artifactId>loadui-soapui-plugin</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
-	</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>com.eviware.loadui</groupId>
+            <artifactId>loadui-launcher</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.eviware.loadui</groupId>
+            <artifactId>loadui-soapui-plugin</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+    </dependencies>
 </project>
