@@ -60,16 +60,6 @@ public class ReportingManagerImpl implements ReportingManager
 	}
 
 	@Override
-	public void createReport( @Nullable Summary summary )
-	{
-		if( summary == null )
-			log.warn( "Summary not provided, cannot create report" );
-		else
-			reportEngine.generateJasperReport( new SummaryDataSource( summary ), SUMMARY_REPORT, summary.getChapters()
-					.keySet().iterator().next() );
-	}
-
-	@Override
 	public void createReport( @Nullable Summary summary, File file, String format )
 	{
 		if( summary == null )
@@ -86,35 +76,12 @@ public class ReportingManagerImpl implements ReportingManager
 
 	@Override
 	public void createReport( String label, Execution execution, Collection<StatisticPage> pages,
-									  Map<Object, Image> charts )
-	{
-		reportEngine.generateJasperReport( new ExecutionDataSource( label, execution, pages, charts ), RESULTS_REPORT,
-				execution.getLabel() );
-	}
-
-	@Override
-	public void createReport( String label, Execution execution, Collection<StatisticPage> pages,
-									  Map<?, Image> charts, File file, String format )
-	{
-		try
-		{
-			reportEngine.generateJasperReport( new ExecutionDataSource( label, execution, pages, charts ), RESULTS_REPORT,
-					file, format );
-		}
-		catch( JRException e )
-		{
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void createReport( String label, Execution execution, Collection<StatisticPage> pages,
 									  Map<?, Image> charts, File jpFileToPrepend )
 	{
 		createReport( label, execution, pages, charts, getJpFromFile( jpFileToPrepend ) );
 	}
 
-	public void createReport( String label, Execution execution, Collection<StatisticPage> pages,
+	private void createReport( String label, Execution execution, Collection<StatisticPage> pages,
 									  Map<?, Image> charts, JasperPrint jpToPrepend )
 	{
 		reportEngine.generateJasperReport( new ExecutionDataSource( label, execution, pages, charts ), RESULTS_REPORT,
@@ -128,7 +95,7 @@ public class ReportingManagerImpl implements ReportingManager
 		createReport( label, execution, pages, charts, file, format, getJpFromFile( jpFileToPrepend ) );
 	}
 
-	public void createReport( String label, Execution execution, Collection<StatisticPage> pages,
+	private void createReport( String label, Execution execution, Collection<StatisticPage> pages,
 									  Map<?, Image> charts, File file, String format, JasperPrint jpToPrepend )
 	{
 		try
