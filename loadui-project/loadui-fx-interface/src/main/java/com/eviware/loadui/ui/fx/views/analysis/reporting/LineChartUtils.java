@@ -36,7 +36,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.eviware.loadui.api.charting.line.ZoomLevel.ALL;
+import static com.eviware.loadui.util.statistics.ZoomLevel.ALL;
 
 public class LineChartUtils
 {

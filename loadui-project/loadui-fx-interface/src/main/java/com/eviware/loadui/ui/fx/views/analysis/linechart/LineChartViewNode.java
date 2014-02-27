@@ -15,7 +15,6 @@
  */
 package com.eviware.loadui.ui.fx.views.analysis.linechart;
 
-import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
@@ -32,7 +31,7 @@ import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eviware.loadui.api.charting.line.ZoomLevel;
+import com.eviware.loadui.util.statistics.ZoomLevel;
 import com.eviware.loadui.api.execution.Phase;
 import com.eviware.loadui.api.execution.TestExecution;
 import com.eviware.loadui.api.execution.TestExecutionTask;

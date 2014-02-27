@@ -33,13 +33,6 @@ import java.util.Map;
 public interface ReportingManager
 {
 	/**
-	 * Creates a report for the given Summary and displays it to the user.
-	 *
-	 * @param summary summary
-	 */
-	public void createReport( @Nullable Summary summary );
-
-	/**
 	 * Creates a report for the given Summary and saves it to the specified file,
 	 * using the specified format.
 	 *
@@ -48,34 +41,6 @@ public interface ReportingManager
 	 * @param format format
 	 */
 	public void createReport( @Nullable Summary summary, File file, String format );
-
-	/**
-	 * Creates a Statistics Report using the given label, for the given
-	 * StatisticPages. The report is based in the Execution data and the given
-	 * charts. The report is shown to the user.
-	 *
-	 * @param label stats report label
-	 * @param execution execution
-	 * @param pages stats pages
-	 * @param charts charts
-	 */
-	public void createReport( String label, Execution execution, Collection<StatisticPage> pages,
-									  Map<Object, Image> charts );
-
-	/**
-	 * Creates a Statistics Report using the given label, for the given
-	 * StatisticPages. The report is based in the Execution data and the given
-	 * charts. The report is saved to the given file using the format specified.
-	 *
-	 * @param label stats report label
-	 * @param execution execution
-	 * @param pages stats pages
-	 * @param charts charts
-	 * @param file out file
-	 * @param format format
-	 */
-	public void createReport( String label, Execution execution, Collection<StatisticPage> pages,
-									  Map<?, Image> charts, File file, String format );
 
 	/**
 	 * Creates a Statistics Report (and prepends another report to it) using the
