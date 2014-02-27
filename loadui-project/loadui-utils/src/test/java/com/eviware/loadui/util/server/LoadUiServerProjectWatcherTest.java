@@ -1,6 +1,7 @@
-package com.eviware.loadui.launcher.server;
+package com.eviware.loadui.util.server;
 
-import com.eviware.loadui.launcher.util.PathWatcher;
+import com.eviware.loadui.util.files.FileSystemHelper;
+import com.eviware.loadui.util.files.PathWatcher;
 import com.google.common.collect.Maps;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,7 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
 import java.util.Map;
 
-import static com.eviware.loadui.launcher.server.LoadUiServerProjectWatcher.*;
+import static com.eviware.loadui.util.server.LoadUiServerProjectWatcher.*;
 import static junit.framework.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -19,7 +20,7 @@ public class LoadUiServerProjectWatcherTest
 {
 	LoadUiServerProjectWatcher projectWatcher;
 	FileSystemHelper mockFiles = mock( FileSystemHelper.class );
-	LoadUiProjectRunner mockRunner = mock( LoadUiProjectRunner.class );
+	LoadUiServerProjectRunner mockRunner = mock( LoadUiServerProjectRunner.class );
 	PathWatcher mockWatcher = mock( PathWatcher.class );
 	PathWatcherReactorProvider mockReactorProvider = mock( PathWatcherReactorProvider.class );
 

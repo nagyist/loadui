@@ -13,11 +13,11 @@
  * express or implied. See the Licence for the specific language governing permissions and limitations
  * under the Licence.
  */
-package com.eviware.loadui.launcher.impl;
+package com.eviware.loadui.util.command;
+
+import com.eviware.loadui.api.command.GroovyCommand;
 
 import java.util.Map;
-
-import com.eviware.loadui.launcher.api.GroovyCommand;
 
 public abstract class AbstractGroovyCommand implements GroovyCommand
 {
@@ -45,4 +45,5 @@ public abstract class AbstractGroovyCommand implements GroovyCommand
 	{
 		return exit;
 	}
+
 }

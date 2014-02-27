@@ -1,3 +1,4 @@
+package com.eviware.loadui.util
 //
 // Copyright 2011 SmartBear Software
 //

@@ -1,4 +1,4 @@
-package com.eviware.loadui.launcher.util;
+package com.eviware.loadui.util.files;
 
 import com.google.code.tempusfugit.temporal.Condition;
 import com.google.common.util.concurrent.SettableFuture;
@@ -15,14 +15,13 @@ import java.util.List;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Logger;
 
-import static com.eviware.loadui.launcher.util.PathWatcher.Reactor;
 import static com.google.code.tempusfugit.temporal.Duration.seconds;
 import static com.google.code.tempusfugit.temporal.Timeout.timeout;
 import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertThat;
 
 public class PathWatcherTest
 {
@@ -125,7 +124,7 @@ public class PathWatcherTest
 		final List<WatchEvent> capturedEvents = Collections.synchronizedList( new ArrayList<WatchEvent>() );
 
 		final SettableFuture<Boolean> isReady = SettableFuture.create();
-		pathWatcher.whenEventHappens( ENTRY_CREATE, testDir, new Reactor()
+		pathWatcher.whenEventHappens( ENTRY_CREATE, testDir, new PathWatcher.Reactor()
 		{
 			@Override
 			public void onReady()

@@ -1,4 +1,4 @@
-package com.eviware.loadui.launcher.util;
+package com.eviware.loadui.util.files;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;

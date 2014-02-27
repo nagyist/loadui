@@ -13,12 +13,13 @@
  * express or implied. See the Licence for the specific language governing permissions and limitations
  * under the Licence.
  */
-package com.eviware.loadui.launcher.api;
+package com.eviware.loadui.api.command;
 
 import java.util.Map;
 
 public interface GroovyCommand
 {
+
 	public String getScript();
 
 	public Map<String, Object> getAttributes();

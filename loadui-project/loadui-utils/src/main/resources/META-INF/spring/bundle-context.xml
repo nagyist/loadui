@@ -12,4 +12,21 @@
         <constructor-arg ref="workspaceProvider"/>
         <constructor-arg ref="componentRegistry"/>
     </bean>
+
+    <bean id="serverProjectRunner" class="com.eviware.loadui.util.server.LoadUiServerProjectRunner" lazy-init="true">
+        <constructor-arg ref="bundleContext" />
+    </bean>
+
+    <bean id="projectWatcher" class="com.eviware.loadui.util.server.LoadUiServerProjectWatcher" lazy-init="true">
+        <constructor-arg ref="serverProjectRunner" />
+    </bean>
+
+    <bean id="serverCli" class="com.eviware.loadui.util.cli.LoadUiServerCli" lazy-init="true">
+        <constructor-arg ref="projectWatcher" />
+    </bean>
+
+    <bean id="loadUiCommandLineCli" class="com.eviware.loadui.util.cli.LoadUiCommandLineCli" lazy-init="true">
+        <constructor-arg ref="serverProjectRunner" />
+    </bean>
+
 </beans>
