@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	
+
 	<parent>
         <groupId>com.eviware.loadui</groupId>
 		<artifactId>loadui-parent</artifactId>
         <version>2.7.0-SNAPSHOT</version>
     </parent>
-	
+
 	<artifactId>loadui-installers</artifactId>
 	<packaging>pom</packaging>
 	<name>loadUI Installers</name>
@@ -27,11 +27,11 @@
 			<url>http://maven-install4j.googlecode.com/svn/m2-repo</url>
 		</pluginRepository>
 	</pluginRepositories>
-	
+
 	<modules>
 		<module>loadui-controller-installer</module>
 	</modules>
-	
+
 	<build>
 		<plugins>
             <plugin>
@@ -47,9 +47,6 @@
                         </goals>
                         <configuration>
                             <resources>
-                                <resource>
-                                    <directory>src/main/resources</directory>
-                                </resource>
                                 <resource>
                                     <directory>${project.basedir}/src/main/filtered_resources</directory>
                                     <filtering>true</filtering>
