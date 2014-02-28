@@ -26,7 +26,7 @@ import javafx.scene.control.RadioMenuItemBuilder;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 
-import com.eviware.loadui.api.charting.line.ZoomLevel;
+import com.eviware.loadui.util.statistics.ZoomLevel;
 import com.eviware.loadui.util.StringUtils;
 
 public class ZoomMenuButton extends MenuButton

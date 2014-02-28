@@ -23,7 +23,7 @@ import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.paint.Color;
 
-import com.eviware.loadui.api.charting.line.ZoomLevel;
+import com.eviware.loadui.util.statistics.ZoomLevel;
 import com.eviware.loadui.api.statistics.model.chart.line.Segment;
 import com.eviware.loadui.api.statistics.store.Execution;
 
