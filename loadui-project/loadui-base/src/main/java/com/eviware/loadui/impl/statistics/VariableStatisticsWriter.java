@@ -15,16 +15,16 @@
  */
 package com.eviware.loadui.impl.statistics;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-
 import com.eviware.loadui.api.statistics.EntryAggregator;
 import com.eviware.loadui.api.statistics.StatisticVariable;
 import com.eviware.loadui.api.statistics.StatisticsManager;
 import com.eviware.loadui.api.statistics.StatisticsWriterFactory;
 import com.eviware.loadui.api.statistics.store.Entry;
 import com.google.common.collect.Iterables;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A StatisticsWriter used to calculate a raw value, where each update signifies
@@ -36,23 +36,6 @@ import com.google.common.collect.Iterables;
 public class VariableStatisticsWriter extends AbstractStatisticsWriter
 {
 	public static final String TYPE = "VARIABLE";
-
-	public enum Stats
-	{
-		VALUE( "The number of %v." );
-
-		private final String description;
-
-		Stats()
-		{
-			this.description = this.name() + " of %v.";
-		}
-
-		Stats( String description )
-		{
-			this.description = description;
-		}
-	}
 
 	private double sum = 0;
 	private double lastValue = Double.NaN;
@@ -97,7 +80,7 @@ public class VariableStatisticsWriter extends AbstractStatisticsWriter
 		if( lastUpdate < lastTimeFlushed )
 			lastUpdate = lastTimeFlushed;
 
-		return at( lastTimeFlushed ).put( Stats.VALUE.name(), value ).build();
+		return at( lastTimeFlushed ).put( VariableStats.VALUE.name(), value ).build();
 	}
 
 	@Override
@@ -132,13 +115,13 @@ public class VariableStatisticsWriter extends AbstractStatisticsWriter
 			for( Entry entry : entries )
 			{
 				maxTime = Math.max( maxTime, entry.getTimestamp() );
-				value += entry.getValue( Stats.VALUE.name() ).doubleValue();
+				value += entry.getValue( VariableStats.VALUE.name() ).doubleValue();
 			}
 
 			if( !parallel )
 				value /= entries.size();
 
-			return at( maxTime ).put( Stats.VALUE.name(), value ).build();
+			return at( maxTime ).put( VariableStats.VALUE.name(), value ).build();
 		}
 	}
 
@@ -155,14 +138,14 @@ public class VariableStatisticsWriter extends AbstractStatisticsWriter
 				StatisticVariable variable, Map<String, Object> config )
 		{
 			return new VariableStatisticsWriter( statisticsManager, variable,
-					Collections.<String, Class<? extends Number>> singletonMap( Stats.VALUE.name(), Double.class ), config );
+					Collections.<String, Class<? extends Number>>singletonMap( VariableStats.VALUE.name(), Double.class ), config );
 		}
 	}
 
 	@Override
 	public String getDescriptionForMetric( String metricName )
 	{
-		for( Stats s : Stats.values() )
+		for( VariableStats s : VariableStats.values() )
 		{
 			if( s.name().equals( metricName ) )
 				return s.description;

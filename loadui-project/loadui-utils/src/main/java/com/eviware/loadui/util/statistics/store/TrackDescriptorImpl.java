@@ -15,33 +15,34 @@
  */
 package com.eviware.loadui.util.statistics.store;
 
-import java.util.Map;
-
-import net.jcip.annotations.Immutable;
-
 import com.eviware.loadui.api.statistics.EntryAggregator;
+import com.eviware.loadui.api.statistics.StatisticVariableIdentifier;
 import com.eviware.loadui.api.statistics.store.TrackDescriptor;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
+import net.jcip.annotations.Immutable;
+
+import java.util.Map;
 
 /**
  * Immutable implementation of the TrackDescriptor, used to store the structure
  * of a Track.
- * 
+ *
  * @author dain.nilsson
  */
 
 @Immutable
 public class TrackDescriptorImpl implements TrackDescriptor
 {
-	private final String id;
+	private final StatisticVariableIdentifier identifier;
 	private final Map<String, Class<? extends Number>> structure;
 	private final EntryAggregator aggregator;
 
-	public TrackDescriptorImpl( String trackId, Map<String, Class<? extends Number>> structure,
-			EntryAggregator aggregator )
+	public TrackDescriptorImpl( StatisticVariableIdentifier identifier,
+										 Map<String, Class<? extends Number>> structure,
+										 EntryAggregator aggregator )
 	{
-		id = trackId;
+		this.identifier = identifier;
 		this.structure = ImmutableMap.copyOf( structure );
 		this.aggregator = aggregator;
 	}
@@ -49,7 +50,7 @@ public class TrackDescriptorImpl implements TrackDescriptor
 	@Override
 	public String getId()
 	{
-		return id;
+		return identifier.getHash();
 	}
 
 	@Override
@@ -69,4 +70,11 @@ public class TrackDescriptorImpl implements TrackDescriptor
 	{
 		return aggregator;
 	}
+
+	@Override
+	public StatisticVariableIdentifier getStatisticIdentifier()
+	{
+		return identifier;
+	}
+
 }

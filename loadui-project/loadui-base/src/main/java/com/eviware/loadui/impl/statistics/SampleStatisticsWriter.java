@@ -15,21 +15,16 @@
  */
 package com.eviware.loadui.impl.statistics;
 
+import com.eviware.loadui.api.statistics.*;
+import com.eviware.loadui.api.statistics.store.Entry;
+import com.google.common.collect.Iterables;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.TreeMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.eviware.loadui.api.statistics.EntryAggregator;
-import com.eviware.loadui.api.statistics.StatisticVariable;
-import com.eviware.loadui.api.statistics.StatisticsManager;
-import com.eviware.loadui.api.statistics.StatisticsWriter;
-import com.eviware.loadui.api.statistics.StatisticsWriterFactory;
-import com.eviware.loadui.api.statistics.store.Entry;
-import com.google.common.collect.Iterables;
 
 /**
  * StatisticsWriter for calculating the average of given values.
@@ -42,26 +37,6 @@ public class SampleStatisticsWriter extends AbstractStatisticsWriter
 
 	@SuppressWarnings( "unused" )
 	private static final Logger log = LoggerFactory.getLogger( SampleStatisticsWriter.class );
-
-	public enum Stats
-	{
-		AVERAGE( "The average %v." ), COUNT, SUM, STD_DEV( "The standard deviation of %v." ), STD_DEV_SUM, PERCENTILE_25TH(
-				"The 25th percentile of %v." ), PERCENTILE_75TH( "The 75th percentile of %v." ), PERCENTILE_90TH(
-				"The 90th percentile of %v." ), MEDIAN( "The median value of %v." ), MIN( "The mininum value of %v." ), MAX(
-				"The maximum value of %v." );
-
-		private final String description;
-
-		Stats()
-		{
-			this.description = this.name() + " of %v.";
-		}
-
-		Stats( String description )
-		{
-			this.description = description;
-		}
-	}
 
 	double sum = 0.0;
 	long count = 0L;
@@ -173,11 +148,11 @@ public class SampleStatisticsWriter extends AbstractStatisticsWriter
 
 		lastTimeFlushed = System.currentTimeMillis();
 
-		Entry e = at( lastTimeFlushed ).put( Stats.AVERAGE.name(), average ).put( Stats.COUNT.name(), count )
-				.put( Stats.SUM.name(), sum ).put( Stats.STD_DEV_SUM.name(), sumTotalSquare )
-				.put( Stats.STD_DEV.name(), stdDev ).put( Stats.PERCENTILE_25TH.name(), percentile25 )
-				.put( Stats.PERCENTILE_75TH.name(), percentile75 ).put( Stats.PERCENTILE_90TH.name(), percentile90 )
-				.put( Stats.MEDIAN.name(), percentile50 ).put( Stats.MIN.name(), min ).put( Stats.MAX.name(), max ).build();
+		Entry e = at( lastTimeFlushed ).put( SampleStats.AVERAGE.name(), average ).put( SampleStats.COUNT.name(), count )
+				.put( SampleStats.SUM.name(), sum ).put( SampleStats.STD_DEV_SUM.name(), sumTotalSquare )
+				.put( SampleStats.STD_DEV.name(), stdDev ).put( SampleStats.PERCENTILE_25TH.name(), percentile25 )
+				.put( SampleStats.PERCENTILE_75TH.name(), percentile75 ).put( SampleStats.PERCENTILE_90TH.name(), percentile90 )
+				.put( SampleStats.MEDIAN.name(), percentile50 ).put( SampleStats.MIN.name(), min ).put( SampleStats.MAX.name(), max ).build();
 
 		// reset counters
 		sum = 0;
@@ -225,25 +200,25 @@ public class SampleStatisticsWriter extends AbstractStatisticsWriter
 
 			for( Entry e : entries )
 			{
-				long count = e.getValue( Stats.COUNT.name() ).longValue();
-				double average = e.getValue( Stats.AVERAGE.name() ).doubleValue();
+				long count = e.getValue( SampleStats.COUNT.name() ).longValue();
+				double average = e.getValue( SampleStats.AVERAGE.name() ).doubleValue();
 
 				timestamp = Math.max( timestamp, e.getTimestamp() );
 
 				// median - not really median of all subpopulations, rather a weighted
 				// average of the subpopulations' medians (performance reasons).
-				median += count * e.getValue( Stats.MEDIAN.name() ).doubleValue();
-				percentile25 += count * e.getValue( Stats.PERCENTILE_25TH.name() ).doubleValue();
-				percentile75 += count * e.getValue( Stats.PERCENTILE_75TH.name() ).doubleValue();
-				percentile90 += count * e.getValue( Stats.PERCENTILE_90TH.name() ).doubleValue();
-				stddev += count * e.getValue( Stats.STD_DEV.name() ).doubleValue();
+				median += count * e.getValue( SampleStats.MEDIAN.name() ).doubleValue();
+				percentile25 += count * e.getValue( SampleStats.PERCENTILE_25TH.name() ).doubleValue();
+				percentile75 += count * e.getValue( SampleStats.PERCENTILE_75TH.name() ).doubleValue();
+				percentile90 += count * e.getValue( SampleStats.PERCENTILE_90TH.name() ).doubleValue();
+				stddev += count * e.getValue( SampleStats.STD_DEV.name() ).doubleValue();
 
 				// average
 				totalSum += count * average;
 				totalCount += count;
 
-				min = Math.min( min, e.getValue( Stats.MIN.name() ).doubleValue() );
-				max = Math.max( max, e.getValue( Stats.MAX.name() ).doubleValue() );
+				min = Math.min( min, e.getValue( SampleStats.MIN.name() ).doubleValue() );
+				max = Math.max( max, e.getValue( SampleStats.MAX.name() ).doubleValue() );
 			}
 
 			median = median / totalCount;
@@ -254,10 +229,10 @@ public class SampleStatisticsWriter extends AbstractStatisticsWriter
 
 			double totalAverage = totalSum / totalCount;
 
-			return at( timestamp ).put( Stats.AVERAGE.name(), totalAverage ).put( Stats.COUNT.name(), totalCount )
-					.put( Stats.STD_DEV.name(), stddev ).put( Stats.PERCENTILE_90TH.name(), percentile90 )
-					.put( Stats.PERCENTILE_25TH.name(), percentile25 ).put( Stats.PERCENTILE_75TH.name(), percentile75 )
-					.put( Stats.MEDIAN.name(), median ).put( Stats.MIN.name(), min ).put( Stats.MAX.name(), max ).build();
+			return at( timestamp ).put( SampleStats.AVERAGE.name(), totalAverage ).put( SampleStats.COUNT.name(), totalCount )
+					.put( SampleStats.STD_DEV.name(), stddev ).put( SampleStats.PERCENTILE_90TH.name(), percentile90 )
+					.put( SampleStats.PERCENTILE_25TH.name(), percentile25 ).put( SampleStats.PERCENTILE_75TH.name(), percentile75 )
+					.put( SampleStats.MEDIAN.name(), median ).put( SampleStats.MIN.name(), min ).put( SampleStats.MAX.name(), max ).build();
 		}
 	}
 
@@ -284,17 +259,17 @@ public class SampleStatisticsWriter extends AbstractStatisticsWriter
 			Map<String, Class<? extends Number>> trackStructure = new TreeMap<>();
 
 			// init statistics
-			trackStructure.put( Stats.AVERAGE.name(), Double.class );
-			trackStructure.put( Stats.MIN.name(), Double.class );
-			trackStructure.put( Stats.MAX.name(), Double.class );
+			trackStructure.put( SampleStats.AVERAGE.name(), Double.class );
+			trackStructure.put( SampleStats.MIN.name(), Double.class );
+			trackStructure.put( SampleStats.MAX.name(), Double.class );
 			// trackStructure.put( Stats.COUNT.name(), Double.class );
 			// trackStructure.put( Stats.SUM.name(), Double.class );
-			trackStructure.put( Stats.STD_DEV.name(), Double.class );
+			trackStructure.put( SampleStats.STD_DEV.name(), Double.class );
 			// trackStructure.put( Stats.STD_DEV_SUM.name(), Double.class );
-			trackStructure.put( Stats.PERCENTILE_25TH.name(), Double.class );
-			trackStructure.put( Stats.PERCENTILE_75TH.name(), Double.class );
-			trackStructure.put( Stats.PERCENTILE_90TH.name(), Double.class );
-			trackStructure.put( Stats.MEDIAN.name(), Double.class );
+			trackStructure.put( SampleStats.PERCENTILE_25TH.name(), Double.class );
+			trackStructure.put( SampleStats.PERCENTILE_75TH.name(), Double.class );
+			trackStructure.put( SampleStats.PERCENTILE_90TH.name(), Double.class );
+			trackStructure.put( SampleStats.MEDIAN.name(), Double.class );
 
 			return new SampleStatisticsWriter( statisticsManager, variable, trackStructure, config );
 		}
@@ -303,7 +278,7 @@ public class SampleStatisticsWriter extends AbstractStatisticsWriter
 	@Override
 	public String getDescriptionForMetric( String metricName )
 	{
-		for( Stats s : Stats.values() )
+		for( SampleStats s : SampleStats.values() )
 		{
 			if( s.name().equals( metricName ) )
 				return s.description;

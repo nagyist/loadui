@@ -79,7 +79,7 @@ public class LoadUIServerLauncher extends HeadlessFxLauncherBase implements Load
 
 	private ResourceGroovyCommand createCommand( Map<String, Object> attributes )
 	{
-		ResourceGroovyCommand command = new ResourceGroovyCommand( "/RunTest.groovy", attributes );
+		ResourceGroovyCommand command = new ResourceGroovyCommand( "/AgentRunTest.groovy", attributes );
 		command.setExit( false );
 		setCommand( command );
 		return command;

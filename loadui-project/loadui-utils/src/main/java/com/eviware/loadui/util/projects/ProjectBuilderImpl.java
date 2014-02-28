@@ -11,6 +11,7 @@ import com.eviware.loadui.api.terminal.OutputTerminal;
 import com.eviware.loadui.api.terminal.Terminal;
 import com.eviware.loadui.util.CanvasItemNameGenerator;
 import com.google.common.base.Preconditions;
+import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,34 +41,39 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		return new LoadUiProjectBlueprint();
 	}
 
-	private boolean save( File file )
+	private ProjectRef assembleProjectByBlueprint( LoadUiProjectBlueprint blueprint )
 	{
+		if( !workspaceProvider.isWorkspaceLoaded() )
+		{
+			workspaceProvider.loadDefaultWorkspace();
+		}
+
 		try
 		{
-			workspaceProvider.getWorkspace().importProject( file, true );
-			return true;
+			File where = File.createTempFile( "loadui-project-", ".xml" );
+			ProjectRef project = workspaceProvider.getWorkspace().createProject( where, where.getName(), true );
+
+			project.getProject().setLimit( CanvasItem.REQUEST_COUNTER, blueprint.getRequestLimit() );
+			project.getProject().setLimit( CanvasItem.TIMER_COUNTER, blueprint.getTimeLimit() );
+			project.getProject().setLimit( CanvasItem.FAILURE_COUNTER, blueprint.getAssertionFailureLimit() );
+
+			assembleComponentsByBlueprint( project, blueprint.getComponentBlueprints() );
+
+			project.getProject().save();
+			project.setEnabled( false );
+
+			where = new File( blueprint.getProjectDirectory().getPath() + "/" + project.getProjectFile().getName() );
+
+			Files.move( project.getProjectFile(), where );
+
+			return project;
 		}
 		catch( IOException e )
 		{
-			return false;
+			log.error( "Unable to assemble project from blueprint " + e.getMessage() );
+			e.printStackTrace();
 		}
-	}
-
-	private ProjectRef assembleProjectByBlueprint( LoadUiProjectBlueprint blueprint )
-	{
-
-		ProjectRef project = workspaceProvider.getWorkspace().createProject( blueprint.getProjectFile(), blueprint.getLabel(), true );
-		project.setLabel( blueprint.getLabel() );
-
-		project.getProject().setLimit( CanvasItem.REQUEST_COUNTER, blueprint.getRequestLimit() );
-		project.getProject().setLimit( CanvasItem.TIMER_COUNTER, blueprint.getTimeLimit() );
-		project.getProject().setLimit( CanvasItem.FAILURE_COUNTER, blueprint.getAssertionFailureLimit() );
-
-		assembleComponentsByBlueprint( project, blueprint.getComponentBlueprints() );
-
-		save( project.getProjectFile() );
-
-		return project;
+		return null;
 	}
 
 	private void assembleComponentsByBlueprint( ProjectRef project, List<ComponentBlueprint> componentBlueprints )
@@ -98,13 +104,13 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		{
 			throw new ComponentCreationException( "Component descriptor " + blueprint.getComponentType() + " does not exist in the component-registry." );
 		}
-
 		String label = CanvasItemNameGenerator.generateComponentName( project.getProject(), descriptor.getLabel() );
 		ComponentItem parentComponent = project.getProject().createComponent( label, descriptor );
 
 		if( !blueprint.getChildren().isEmpty() )
 		{
-			for( ComponentBlueprint child : blueprint.getChildren()){
+			for( ComponentBlueprint child : blueprint.getChildren() )
+			{
 
 				ComponentItem childComponent = assembleComponent( project, child );
 
@@ -118,7 +124,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		}
 		modifyProperties( parentComponent, blueprint.getProperties() );
 
-     	return parentComponent;
+		return parentComponent;
 	}
 
 	private void applyConcurrentUsersConnection( ProjectRef project, ComponentItem parentComponent, ComponentItem childComponent )
@@ -137,8 +143,10 @@ public class ProjectBuilderImpl implements ProjectBuilder
 				Terminal runningInputTerminal = parentComponent.getTerminalByName( sampleCountTerminal );
 				canvas.connect( ( OutputTerminal )currentlyRunning, ( InputTerminal )runningInputTerminal );
 			}
-		}else{
-			log.error("Cannot apply additional connection for concurrent users. Can't find the runningTerminal on child component or Sample Count on parent.");
+		}
+		else
+		{
+			log.error( "Cannot apply additional connection for concurrent users. Can't find the runningTerminal on child component or Sample Count on parent." );
 		}
 	}
 
@@ -196,27 +204,18 @@ public class ProjectBuilderImpl implements ProjectBuilder
 
 		private LoadUiProjectBlueprint()
 		{
-			try
-			{
-				setProjectFile( File.createTempFile( "loadui-project", ".xml" ) );
-			}
-			catch( IOException e )
-			{
-				log.error( "cannot create a temporary project" );
-			}
-			setLabel( projectFile.getName() );
 			setComponentBlueprints( new ArrayList<ComponentBlueprint>() );
 			setRequestLimit( DEFAULT_REQUEST_LIMIT );
 			setAssertionFailureLimit( DEFAULT_ASSERTION_FAILURE_LIMIT );
 			setTimeLimit( DEFAULT_TIME_LIMIT );
 		}
 
-		private File getProjectFile()
+		private File getProjectDirectory()
 		{
 			return projectFile;
 		}
 
-		private void setProjectFile( File where )
+		private void setProjectDirectory( File where )
 		{
 			this.projectFile = where;
 		}
@@ -272,9 +271,9 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		}
 
 		@Override
-		public ProjectBlueprint where( File where )
+		public ProjectBlueprint where( File folder )
 		{
-			projectFile = where;
+			projectFile = folder;
 			return this;
 		}
 

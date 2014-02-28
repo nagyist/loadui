@@ -16,6 +16,8 @@
 package com.eviware.loadui.test;
 
 import com.eviware.loadui.LoadUI;
+import com.eviware.loadui.launcher.JavaFxStarter;
+import com.eviware.loadui.launcher.LoadUILauncher;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
@@ -99,7 +101,8 @@ public class ControllerWrapper
 					for( String pkg : packages )
 						apiPackages.append( ", " ).append( pkg ).append( "; version=\"" ).append( version ).append( '"' );
 
-					config.put( "org.osgi.framework.system.packages.extra", apiPackages.toString() );
+					config.put( LoadUILauncher.ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, apiPackages.toString() );
+					JavaFxStarter.addJavaFxOsgiExtraPackages( config );
 				}
 
 				if( !bundle.delete() )

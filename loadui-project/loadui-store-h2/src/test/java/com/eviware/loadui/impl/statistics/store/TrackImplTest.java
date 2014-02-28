@@ -15,19 +15,8 @@
  */
 package com.eviware.loadui.impl.statistics.store;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.eviware.loadui.LoadUI;
+import com.eviware.loadui.api.statistics.StatisticVariableIdentifier;
 import com.eviware.loadui.api.statistics.store.Entry;
 import com.eviware.loadui.api.statistics.store.Track;
 import com.eviware.loadui.api.testevents.TestEventRegistry;
@@ -35,6 +24,18 @@ import com.eviware.loadui.util.statistics.store.EntryImpl;
 import com.eviware.loadui.util.statistics.store.TrackDescriptorImpl;
 import com.eviware.loadui.util.test.BeanInjectorMocker;
 import com.google.common.collect.Lists;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class TrackImplTest
 {
@@ -60,7 +61,9 @@ public class TrackImplTest
 		types.put( "c", Integer.class );
 		types.put( "d", Double.class );
 
-		TrackDescriptorImpl td = new TrackDescriptorImpl( "testTrack", types, null );
+		StatisticVariableIdentifier identifier = mock( StatisticVariableIdentifier.class );
+		when( identifier.getHash() ).thenReturn( "testTrack" );
+		TrackDescriptorImpl td = new TrackDescriptorImpl( identifier, types, null );
 		h2.registerTrackDescriptor( td );
 		track = h2.getTrack( "testTrack" );
 
