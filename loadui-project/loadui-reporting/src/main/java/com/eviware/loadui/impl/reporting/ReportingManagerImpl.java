@@ -128,7 +128,7 @@ public class ReportingManagerImpl implements ReportingManager
 		createReport( label, execution, pages, charts, file, format, getJpFromFile( jpFileToPrepend ) );
 	}
 
-	public void createReport( String label, Execution execution, Collection<StatisticPage> pages,
+	private void createReport( String label, Execution execution, Collection<StatisticPage> pages,
 									  Map<?, Image> charts, File file, String format, JasperPrint jpToPrepend )
 	{
 		try
