@@ -1,15 +1,15 @@
-package com.eviware.loadui.launcher.server;
+package com.eviware.loadui.util.server;
 
+import com.eviware.loadui.util.files.FileSystemHelper;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 
-import static com.eviware.loadui.launcher.server.LoadUiServerProjectWatcher.FileSystemHelper;
-import static com.eviware.loadui.launcher.server.LoadUiServerProjectWatcher.ProjectsLocationReactor;
+import static com.eviware.loadui.util.server.LoadUiServerProjectWatcher.ProjectsLocationReactor;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -24,7 +24,7 @@ public class ProjectsLocationReactorTest
 	@Before
 	public void before()
 	{
-		reactor = new LoadUiServerProjectWatcher.ProjectsLocationReactor( projectLocation, files )
+		reactor = new ProjectsLocationReactor( projectLocation, files )
 		{
 			@Override
 			public void onProjectsLocationCreated()

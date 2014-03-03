@@ -13,11 +13,13 @@
  * express or implied. See the Licence for the specific language governing permissions and limitations
  * under the Licence.
  */
-package com.eviware.loadui.launcher.impl;
+package com.eviware.loadui.util.command;
 
-import java.io.BufferedReader;
+import com.google.common.io.CharStreams;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Map;
 
 public final class ResourceGroovyCommand extends AbstractGroovyCommand
@@ -33,18 +35,13 @@ public final class ResourceGroovyCommand extends AbstractGroovyCommand
 	@Override
 	public String getScript()
 	{
-		StringBuilder s = new StringBuilder();
-		String line = null;
-		try (BufferedReader br = new BufferedReader( new InputStreamReader( getClass().getResourceAsStream( scriptName ) ) ))
+		try(Reader reader = new InputStreamReader( getClass().getResourceAsStream( scriptName ) ))
 		{
-			while( ( line = br.readLine() ) != null )
-				s.append( line ).append( "\n" );
+			return CharStreams.toString( reader );
 		}
-		catch( IOException e )
+		catch( IOException ioe )
 		{
-			throw new RuntimeException( e );
+			throw new RuntimeException( ioe );
 		}
-
-		return s.toString();
 	}
 }

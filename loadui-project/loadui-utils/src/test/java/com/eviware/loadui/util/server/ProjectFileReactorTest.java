@@ -1,4 +1,4 @@
-package com.eviware.loadui.launcher.server;
+package com.eviware.loadui.util.server;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -6,10 +6,10 @@ import org.junit.Test;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 
-import static com.eviware.loadui.launcher.server.LoadUiServerProjectWatcher.ProjectFileListener;
-import static com.eviware.loadui.launcher.server.LoadUiServerProjectWatcher.ProjectFileReactor;
+import static com.eviware.loadui.util.server.LoadUiServerProjectWatcher.ProjectFileListener;
+import static com.eviware.loadui.util.server.LoadUiServerProjectWatcher.ProjectFileReactor;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
 public class ProjectFileReactorTest

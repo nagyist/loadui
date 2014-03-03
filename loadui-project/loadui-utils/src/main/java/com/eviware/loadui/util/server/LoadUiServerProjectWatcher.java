@@ -1,29 +1,29 @@
-package com.eviware.loadui.launcher.server;
+package com.eviware.loadui.util.server;
 
-import com.eviware.loadui.launcher.util.PathWatcher;
 
-import java.nio.file.Files;
+import com.eviware.loadui.util.files.FileSystemHelper;
+import com.eviware.loadui.util.files.PathWatcher;
+
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import static com.eviware.loadui.launcher.util.PathWatcher.Reactor;
 
 public class LoadUiServerProjectWatcher
 {
 	static final Logger log = Logger.getLogger( LoadUiServerProjectWatcher.class.getName() );
-	private final LoadUiProjectRunner projectRunner;
+	private final LoadUiServerProjectRunner projectRunner;
 	private final FileSystemHelper files;
 	protected PathWatcherReactorProvider reactorProvider = new PathWatcherReactorProvider();
 
-	LoadUiServerProjectWatcher( LoadUiProjectRunner projectRunner )
+	public LoadUiServerProjectWatcher( LoadUiServerProjectRunner projectRunner )
 	{
 		this( projectRunner, new FileSystemHelper() );
 	}
 
-	LoadUiServerProjectWatcher( LoadUiProjectRunner projectRunner, FileSystemHelper fileSystemHelper )
+	LoadUiServerProjectWatcher( LoadUiServerProjectRunner projectRunner, FileSystemHelper fileSystemHelper )
 	{
 		this.projectRunner = projectRunner;
 		this.files = fileSystemHelper;
@@ -73,7 +73,8 @@ public class LoadUiServerProjectWatcher
 							@Override
 							public void onProjectFileCreated( Path projectFile )
 							{
-								projectRunner.runProject( files.makeAbsolute( projectsLocation, projectFile ), attributes );
+								projectRunner.runProjectAsAgent(
+										files.makeAbsolute( projectsLocation, projectFile ), attributes, false );
 							}
 						} ) );
 	}
@@ -106,7 +107,7 @@ public class LoadUiServerProjectWatcher
 	protected static class PathWatcherReactorProvider
 	{
 
-		public Reactor getProjectFileReactor( final ProjectFileListener projectFileListener )
+		public PathWatcher.Reactor getProjectFileReactor( final ProjectFileListener projectFileListener )
 		{
 			return new ProjectFileReactor( projectFileListener )
 			{
@@ -118,9 +119,9 @@ public class LoadUiServerProjectWatcher
 			};
 		}
 
-		public Reactor getProjectsLocationWatchEventHandler( Path projectsLocation,
-																			  FileSystemHelper files,
-																			  final ProjectsLocationCreatedListener listener )
+		public PathWatcher.Reactor getProjectsLocationWatchEventHandler( Path projectsLocation,
+																							  FileSystemHelper files,
+																							  final ProjectsLocationCreatedListener listener )
 		{
 			return new ProjectsLocationReactor( projectsLocation, files )
 			{
@@ -145,7 +146,7 @@ public class LoadUiServerProjectWatcher
 		void onProjectFileCreated( Path projectFile );
 	}
 
-	protected static abstract class ProjectFileReactor extends Reactor
+	public static abstract class ProjectFileReactor extends PathWatcher.Reactor
 	{
 		private final ProjectFileListener listener;
 
@@ -174,7 +175,7 @@ public class LoadUiServerProjectWatcher
 
 	}
 
-	protected static abstract class ProjectsLocationReactor extends Reactor
+	public static abstract class ProjectsLocationReactor extends PathWatcher.Reactor
 	{
 		private final Path projectsLocation;
 		private final FileSystemHelper files;
@@ -203,34 +204,5 @@ public class LoadUiServerProjectWatcher
 
 	}
 
-	protected static class FileSystemHelper
-	{
-
-		public boolean isDirectory( Path path )
-		{
-			return Files.isDirectory( path );
-		}
-
-		public boolean exists( Path path )
-		{
-			return Files.exists( path );
-		}
-
-		public boolean areSameLocation( Path p1, Path p2 )
-		{
-			log.info( "Checking if " + p1 + " and " + p2 + " are the same path" );
-			return p1.equals( p2 );
-		}
-
-		protected PathWatcher providePathWatcher()
-		{
-			return PathWatcher.singleThreadedPathWatcher();
-		}
-
-		public Path makeAbsolute( Path parent, Path path )
-		{
-			return parent.resolve( path );
-		}
-	}
 
 }

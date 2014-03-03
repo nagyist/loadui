@@ -16,24 +16,27 @@
 package com.eviware.loadui.launcher;
 
 import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.launcher.api.OSGiUtils;
+import com.eviware.loadui.api.cli.CommandLineParser;
 import com.eviware.loadui.launcher.util.BndUtils;
 import com.eviware.loadui.launcher.util.ErrorHandler;
-import org.apache.commons.cli.*;
 import org.apache.felix.framework.FrameworkFactory;
 import org.apache.felix.main.AutoProcessor;
 import org.apache.felix.main.Main;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.launch.Framework;
 
 import java.io.*;
+import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Dictionary;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -59,10 +62,8 @@ public abstract class LoadUILauncher
 	private final static Logger log = Logger.getLogger( LoadUILauncher.class.getName() );
 
 	protected Framework framework;
-	protected final Properties configProps;
+	protected final Map<String, String> configProps;
 	protected final String[] argv;
-	private final Options options;
-	private final CommandLine cmd;
 
 	/**
 	 * Initiates and starts the OSGi runtime.
@@ -77,7 +78,6 @@ public abstract class LoadUILauncher
 		String username = System.getProperty( "user.name" );
 		System.setProperty( "user.name.original", username );
 		System.setProperty( "user.name", username.toLowerCase() );
-
 		File buildInfoFile = new File( LoadUI.getWorkingDir(), "res/buildinfo.txt" );
 
 		applyJava6sslIssueWorkaround();
@@ -104,26 +104,6 @@ public abstract class LoadUILauncher
 			System.setProperty( LOADUI_NAME, "loadUI" );
 		}
 
-		options = createOptions();
-		CommandLineParser parser = new PosixParser();
-		try
-		{
-			cmd = parser.parse( options, argv );
-		}
-		catch( ParseException e )
-		{
-			System.err.print( "Error parsing commandline args: " + e.getMessage() + "\n" );
-			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp( "", options );
-
-			exitInError();
-			throw new RuntimeException();
-		}
-
-		if( cmd.hasOption( SYSTEM_PROPERTY_OPTION ) )
-		{
-			parseSystemProperties();
-		}
 
 		initSystemProperties();
 
@@ -201,36 +181,24 @@ public abstract class LoadUILauncher
 		}
 	}
 
-	private void parseSystemProperties()
+	private boolean hasCommandLineOption( String option )
 	{
-		for( String option : cmd.getOptionValues( SYSTEM_PROPERTY_OPTION ) )
+		for( String arg : argv )
 		{
-			int ix = option.indexOf( '=' );
-			if( ix != -1 )
-				System.setProperty( option.substring( 0, ix ), option.substring( ix + 1 ) );
-			else
-				System.setProperty( option, "true" );
+			if( arg.contains( option ) )
+				return true;
 		}
+		return false;
 	}
 
 	public void init()
 	{
-		String extra = configProps.getProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, "" );
-		configProps.put( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA,
-				( extra == null || extra.equals( "" ) ) ? "com.eviware.loadui.launcher.api"
-						: "com.eviware.loadui.launcher.api," + extra );
-
-		if( cmd.hasOption( HELP_OPTION ) )
-			printUsageAndQuit();
-
-		if( !cmd.hasOption( IGNORE_CURRENTLY_RUNNING_OPTION ) )
+		if( !hasCommandLineOption( IGNORE_CURRENTLY_RUNNING_OPTION ) )
 		{
 			ensureNoOtherInstance();
 		}
 
 		processOsgiExtraPackages();
-
-		processCommandLine( cmd );
 
 		framework = new FrameworkFactory().newFramework( configProps );
 
@@ -280,7 +248,7 @@ public abstract class LoadUILauncher
 	{
 		try
 		{
-			File bundleCache = new File( configProps.getProperty( "org.osgi.framework.storage" ) );
+			File bundleCache = new File( configProps.get( "org.osgi.framework.storage" ) );
 			if( !bundleCache.isDirectory() )
 				if( !bundleCache.mkdirs() )
 					throw new RuntimeException( "Unable to create directory: " + bundleCache.getAbsolutePath() );
@@ -292,7 +260,7 @@ public abstract class LoadUILauncher
 
 			try
 			{
-				@SuppressWarnings("resource")
+				@SuppressWarnings( "resource" )
 				RandomAccessFile randomAccessFile = new RandomAccessFile( lockFile, "rw" );
 				FileLock lock = randomAccessFile.getChannel().tryLock();
 				if( lock == null )
@@ -336,26 +304,43 @@ public abstract class LoadUILauncher
 
 	}
 
-	protected void printUsageAndQuit()
-	{
-		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp( "loadUILauncher", options );
-
-		OSGiUtils.shutdown();
-	}
 
 	public void start()
 	{
 		try
 		{
 			framework.start();
-			OSGiUtils.setFramework( framework );
 			System.out.println( "Framework started!" );
+			afterStart();
 		}
 		catch( BundleException e )
 		{
 			e.printStackTrace();
 		}
+	}
+
+	protected abstract String commandLineServiceOsgiFilter();
+
+	protected void afterStart()
+	{
+		String filter = commandLineServiceOsgiFilter();
+		if( filter != null )
+		{
+			try
+			{
+				Object cliService = getService( CommandLineParser.class, filter );
+
+				// cannot cast to CommandLineParser as the this instance was loaded with a different classloader
+				Method parse = cliService.getClass().getMethod( "parse", new String[0].getClass() );
+				parse.invoke( cliService, ( Object )argv ); // casting to Object is necessary so varargs won't split up the array
+			}
+			catch( Exception e )
+			{
+				e.printStackTrace();
+				exitInError();
+			}
+		}
+
 	}
 
 	public void stop() throws Exception
@@ -371,19 +356,39 @@ public abstract class LoadUILauncher
 			framework.getBundleContext().registerService( serviceClass, service, properties );
 	}
 
-	protected Options createOptions()
+	public Object getService( Class<?> serviceClass, String osgiFilter ) throws InvalidSyntaxException
 	{
-		Options newOptions = new Options();
-		newOptions.addOption( SYSTEM_PROPERTY_OPTION, true, "Sets system property with name=value" );
-		newOptions.addOption( NOFX_OPTION, false, "Do not include or require the JavaFX runtime" );
-		newOptions.addOption( "agent", false, "Run in Agent mode" );
-		newOptions.addOption( HELP_OPTION, "help", false, "Prints this message" );
-		newOptions.addOption( IGNORE_CURRENTLY_RUNNING_OPTION, false, "Disable lock file" );
+		int tries = 10;
+		ServiceReference<?>[] references;
+		do
+		{
+			references = framework.getBundleContext().getServiceReferences( serviceClass.getName(), osgiFilter );
+			sleep( 500 );
+		} while( ( references == null || references.length == 0 ) && --tries > 0 );
 
-		return newOptions;
+		if( references.length == 0 )
+		{
+			throw new RuntimeException( "Service with class " + serviceClass.getName()
+					+ " cannot be found. Osgi filter: " + osgiFilter );
+		}
+		else
+		{
+			ServiceReference<?> serviceRef = references[0];
+			return framework.getBundleContext().getService( serviceRef );
+		}
 	}
 
-	protected abstract void processCommandLine( CommandLine cmdLine );
+	private void sleep( long time )
+	{
+		try
+		{
+			Thread.sleep( time );
+		}
+		catch( InterruptedException e )
+		{
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * Allows sub-classes to check the installed bundles before they are started.

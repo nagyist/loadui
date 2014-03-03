@@ -15,9 +15,8 @@
  */
 package com.eviware.loadui.cmd;
 
+import com.eviware.loadui.api.command.GroovyCommand;
 import com.eviware.loadui.api.model.WorkspaceProvider;
-import com.eviware.loadui.launcher.api.GroovyCommand;
-import com.eviware.loadui.launcher.api.OSGiUtils;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
@@ -54,7 +53,7 @@ public class CommandRunner
 		shell = new GroovyShell();
 	}
 
-	public void execute( GroovyCommand command, Map<String, String> properties )
+	public void execute( GroovyCommand command, Map properties )
 	{
 		executor.execute( new CommandRunnable( command ) );
 	}
@@ -104,11 +103,11 @@ public class CommandRunner
 			{
 				workspaceProvider.getWorkspace().release();
 				if( result instanceof Number )
-					OSGiUtils.shutdown( ( ( Number )result ).intValue() );
+					System.exit( ( ( Number )result ).intValue() );
 				else if( result instanceof Boolean )
-					OSGiUtils.shutdown( ( Boolean )result ? 0 : 1 );
+					System.exit( ( Boolean )result ? 0 : 1 );
 				else
-					OSGiUtils.shutdown();
+					System.exit( 0 );
 			}
 		}
 	}

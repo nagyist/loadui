@@ -13,11 +13,12 @@
  * express or implied. See the Licence for the specific language governing permissions and limitations
  * under the Licence.
  */
-package com.eviware.loadui.launcher.impl;
+package com.eviware.loadui.util.command;
 
-import java.io.BufferedReader;
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Map;
 
@@ -34,18 +35,14 @@ public class FileGroovyCommand extends AbstractGroovyCommand
 	@Override
 	public String getScript()
 	{
-		try (BufferedReader br = new BufferedReader( new FileReader( scriptFile ) ))
+		try
 		{
-			StringBuilder s = new StringBuilder();
-			String line = null;
-			while( ( line = br.readLine() ) != null )
-				s.append( line ).append( "\n" );
-
-			return s.toString();
+			return Files.toString( scriptFile, Charsets.UTF_8 );
 		}
 		catch( IOException e )
 		{
 			throw new RuntimeException( e );
 		}
 	}
+
 }
