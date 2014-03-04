@@ -18,7 +18,7 @@ public class ServerStarter extends JavaFxStarter
 		@Override
 		protected HeadlessFxLauncherBase createLauncher( String[] args )
 		{
-			return new LoadUiServerLauncher( args );
+			return new LoadUIServerLauncher( args );
 		}
 	}
 }

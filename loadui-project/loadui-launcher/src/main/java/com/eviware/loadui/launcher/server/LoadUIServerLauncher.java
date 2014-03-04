@@ -2,11 +2,11 @@ package com.eviware.loadui.launcher.server;
 
 import com.eviware.loadui.launcher.HeadlessFxLauncherBase;
 
-public class LoadUiServerLauncher extends HeadlessFxLauncherBase
+public class LoadUIServerLauncher extends HeadlessFxLauncherBase
 {
 
 
-	public LoadUiServerLauncher( String[] args )
+	public LoadUIServerLauncher( String[] args )
 	{
 		super( args );
 	}
