@@ -366,7 +366,7 @@ public abstract class LoadUILauncher
 			sleep( 500 );
 		} while( ( references == null || references.length == 0 ) && --tries > 0 );
 
-		if( references.length == 0 )
+		if( references == null || references.length == 0 )
 		{
 			throw new RuntimeException( "Service with class " + serviceClass.getName()
 					+ " cannot be found. Osgi filter: " + osgiFilter );
@@ -413,7 +413,7 @@ public abstract class LoadUILauncher
 		setDefaultSystemProperty( "loadui.ssl.keyStorePassword", "password" );
 		setDefaultSystemProperty( "loadui.ssl.trustStorePassword", "password" );
 
-		setDefaultSystemProperty( LoadUI.INSTANCE, "controller" );
+		setDefaultSystemProperty( LoadUI.INSTANCE, LoadUI.CONTROLLER );
 
 		File loaduiHome = new File( System.getProperty( LOADUI_HOME ) );
 		System.out.println( "LoadUI Home: " + loaduiHome.getAbsolutePath() );
