@@ -62,8 +62,13 @@ public class ProjectBuilderImpl implements ProjectBuilder
 			project.getProject().save();
 			project.setEnabled( false );
 
-			where = new File( blueprint.getProjectDirectory().getPath() + "/" + project.getProjectFile().getName() );
+			File directory = blueprint.getProjectDirectory();
 
+			if( !directory.exists() ){
+				directory.mkdirs();
+			}
+
+			where = new File( directory.getPath() + File.separator + project.getProjectFile().getName() );
 			Files.move( project.getProjectFile(), where );
 
 			return project;
