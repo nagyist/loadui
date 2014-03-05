@@ -68,10 +68,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 				directory.mkdirs();
 			}
 
-			where = new File( directory.getPath() + "/" + project.getProjectFile().getName() );
-
-
-
+			where = new File( directory.getPath() + File.separator + project.getProjectFile().getName() );
 			Files.move( project.getProjectFile(), where );
 
 			return project;
