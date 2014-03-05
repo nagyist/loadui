@@ -13,7 +13,6 @@ public class AgentLauncher extends LoadUILauncher
 	@Override
 	protected void processOsgiExtraPackages()
 	{
-		//TODO see if we can stop this
 		JavaFxStarter.addJavaFxOsgiExtraPackages( configProps );
 	}
 
@@ -25,7 +24,7 @@ public class AgentLauncher extends LoadUILauncher
 
 	public static void main( String[] args )
 	{
-		setDefaultSystemProperty( LoadUI.INSTANCE, "agent" );
+		setDefaultSystemProperty( LoadUI.INSTANCE, LoadUI.AGENT );
 		AgentLauncher launcher = new AgentLauncher( args );
 		launcher.init();
 		launcher.start();

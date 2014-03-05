@@ -75,7 +75,7 @@ public class LoadUIFXLauncher extends LoadUILauncher
 			final String agent = getParameters().getNamed().get( "agent" );
 
 			if( "true".equals( agent ) )
-				setDefaultSystemProperty( LoadUI.INSTANCE, "agent" );
+				setDefaultSystemProperty( LoadUI.INSTANCE, LoadUI.AGENT );
 
 			if( "false".equals( noFx ) )
 			{
