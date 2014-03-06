@@ -31,6 +31,7 @@ import com.eviware.loadui.ui.fx.util.Properties;
 import com.eviware.loadui.util.BeanInjector;
 import com.eviware.loadui.util.layout.FormattedString;
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import javafx.application.Platform;
@@ -74,6 +75,8 @@ public class ComponentLayoutUtils
 	@SuppressWarnings( "unchecked" )
 	public static Node instantiateLayout( LayoutComponent component )
 	{
+		Preconditions.checkNotNull( component, "LayoutComponent cannot be null" );
+
 		//Legacy rules that we need, that pre-emp anything else
 		if( component.has( "widget" ) )
 		{
