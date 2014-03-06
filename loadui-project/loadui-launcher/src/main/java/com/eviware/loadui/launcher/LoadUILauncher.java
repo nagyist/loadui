@@ -36,7 +36,6 @@ import java.nio.channels.OverlappingFileLockException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Dictionary;
-import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -62,7 +61,7 @@ public abstract class LoadUILauncher
 	private final static Logger log = Logger.getLogger( LoadUILauncher.class.getName() );
 
 	protected Framework framework;
-	protected final Map<String, String> configProps;
+	protected final Properties configProps;
 	protected final String[] argv;
 
 	/**
@@ -248,7 +247,7 @@ public abstract class LoadUILauncher
 	{
 		try
 		{
-			File bundleCache = new File( configProps.get( "org.osgi.framework.storage" ) );
+			File bundleCache = new File( configProps.getProperty( "org.osgi.framework.storage" ) );
 			if( !bundleCache.isDirectory() )
 				if( !bundleCache.mkdirs() )
 					throw new RuntimeException( "Unable to create directory: " + bundleCache.getAbsolutePath() );
@@ -359,7 +358,7 @@ public abstract class LoadUILauncher
 	public Object getService( Class<?> serviceClass, String osgiFilter ) throws InvalidSyntaxException
 	{
 		int tries = 10;
-		ServiceReference<?>[] references;
+		ServiceReference[] references;
 		do
 		{
 			references = framework.getBundleContext().getServiceReferences( serviceClass.getName(), osgiFilter );
@@ -373,7 +372,7 @@ public abstract class LoadUILauncher
 		}
 		else
 		{
-			ServiceReference<?> serviceRef = references[0];
+			ServiceReference serviceRef = references[0];
 			return framework.getBundleContext().getService( serviceRef );
 		}
 	}

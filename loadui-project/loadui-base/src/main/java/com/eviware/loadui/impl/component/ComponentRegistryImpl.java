@@ -15,29 +15,16 @@
  */
 package com.eviware.loadui.impl.component;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
+import com.eviware.loadui.api.component.*;
+import com.google.common.collect.Maps;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.osgi.context.BundleContextAware;
 
-import com.eviware.loadui.api.component.BehaviorProvider;
-import com.eviware.loadui.api.component.ComponentBehavior;
-import com.eviware.loadui.api.component.ComponentContext;
-import com.eviware.loadui.api.component.ComponentCreationException;
-import com.eviware.loadui.api.component.ComponentDescriptor;
-import com.eviware.loadui.api.component.ComponentRegistry;
-import com.google.common.collect.Maps;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class ComponentRegistryImpl implements ComponentRegistry, BundleContextAware
 {
@@ -201,7 +188,7 @@ public class ComponentRegistryImpl implements ComponentRegistry, BundleContextAw
 		public void descriptorAdded( ComponentDescriptor descriptor )
 		{
 			registrations.put( descriptor,
-					context.registerService( ComponentDescriptor.class, descriptor, new Hashtable<String, String>() ) );
+					context.registerService( ComponentDescriptor.class.getName(), descriptor, new Hashtable<String, String>() ) );
 		}
 
 		@Override

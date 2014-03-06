@@ -61,7 +61,7 @@
                                 <artifactItem>
                                     <groupId>org.osgi</groupId>
                                     <artifactId>org.osgi.core</artifactId>
-                                    <version>4.2.0</version>
+                                    <version>${osgiVersion}</version>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.directory}/bundle</outputDirectory>

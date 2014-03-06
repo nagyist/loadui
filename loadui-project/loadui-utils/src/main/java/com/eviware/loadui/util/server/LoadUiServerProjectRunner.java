@@ -44,7 +44,7 @@ public class LoadUiServerProjectRunner
 	{
 		log.info( "Starting project " + projectPath );
 		attributes.put( "projectFile", projectPath.toFile() );
-		context.registerService( GroovyCommand.class, createCommand( script, attributes, exitAfterRun ), null );
+		context.registerService( GroovyCommand.class.getName(), createCommand( script, attributes, exitAfterRun ), null );
 	}
 
 	private GroovyCommand createCommand( String runScript, Map<String, Object> attributes, boolean exitAfterRun )
