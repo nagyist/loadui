@@ -401,9 +401,19 @@ public abstract class LoadUILauncher
 		// no action
 	}
 
+	private void setDefaultHomeToEnvironmentHomeIfAvailable(){
+		String userHome = System.getenv( "USER_HOME" );
+		if(userHome != null){
+			System.setProperty( "user.home", userHome );
+		}
+	}
+
 	protected final void initSystemProperties()
 	{
-		setDefaultSystemProperty( LOADUI_HOME, System.getProperty( "user.home", "." ) + File.separator + ".loadui" );
+		setDefaultHomeToEnvironmentHomeIfAvailable();
+
+		setDefaultSystemProperty( LOADUI_HOME, System.getProperty( "user.home" ) + File.separator + ".loadui" );
+
 		setDefaultSystemProperty( "groovy.root", System.getProperty( LOADUI_HOME ) + File.separator + ".groovy" );
 
 		setDefaultSystemProperty( "loadui.ssl.keyStore", System.getProperty( LOADUI_HOME ) + File.separator
