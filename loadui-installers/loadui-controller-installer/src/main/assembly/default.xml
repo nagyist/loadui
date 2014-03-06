@@ -10,7 +10,7 @@
 	<includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-            <directory>/src/main/resources</directory>
+            <directory>src/main/resources</directory>
             <outputDirectory>/</outputDirectory>
             <lineEnding>unix</lineEnding>
             <includes>
@@ -19,7 +19,7 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>/src/main/resources</directory>
+            <directory>src/main/resources</directory>
             <outputDirectory>/</outputDirectory>
             <lineEnding>dos</lineEnding>
             <includes>
@@ -27,7 +27,7 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>/src/main/resources</directory>
+            <directory>src/main/resources</directory>
             <outputDirectory>/</outputDirectory>
             <lineEnding>keep</lineEnding>
             <excludes>
