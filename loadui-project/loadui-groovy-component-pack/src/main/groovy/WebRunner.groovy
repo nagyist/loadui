@@ -226,6 +226,8 @@ sample = { message, sampleId ->
                 int contentLength = response.entity.contentLength
                 message['Bytes'] = contentLength
 
+                determineLatency(response.entity.content, sampleId)
+
                 if (outputBody.value)
                     message['Response'] = EntityUtils.toString(response.entity)
 
@@ -236,7 +238,6 @@ sample = { message, sampleId ->
                         message['Bytes'] = EntityUtils.toString(response.entity).length()
                 }
 
-                determineLatency(response.entity.content, sampleId)
                 response.entity.consumeContent()
 
                 if (!runningSamples.remove(get)) {
