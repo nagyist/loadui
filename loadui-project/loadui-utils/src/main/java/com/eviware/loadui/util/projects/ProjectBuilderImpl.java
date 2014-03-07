@@ -50,7 +50,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 
 		try
 		{
-			File where = File.createTempFile( "loadui-project-", ".xml" );
+			File where = blueprint.getProjectFile();
 			ProjectRef project = workspaceProvider.getWorkspace().createProject( where, where.getName(), true );
 
 			project.getProject().setLimit( CanvasItem.REQUEST_COUNTER, blueprint.getRequestLimit() );
@@ -62,9 +62,10 @@ public class ProjectBuilderImpl implements ProjectBuilder
 			project.getProject().save();
 			project.setEnabled( false );
 
-			File directory = blueprint.getProjectDirectory();
+			File directory = blueprint.getProjectFile();
 
-			if( !directory.exists() ){
+			if( !directory.exists() )
+			{
 				directory.mkdirs();
 			}
 
@@ -209,20 +210,23 @@ public class ProjectBuilderImpl implements ProjectBuilder
 
 		private LoadUiProjectBlueprint()
 		{
-			setComponentBlueprints( new ArrayList<ComponentBlueprint>() );
-			setRequestLimit( DEFAULT_REQUEST_LIMIT );
-			setAssertionFailureLimit( DEFAULT_ASSERTION_FAILURE_LIMIT );
-			setTimeLimit( DEFAULT_TIME_LIMIT );
+			try
+			{
+				projectFile = File.createTempFile( "loadui-project-", ".xml" );
+				setComponentBlueprints( new ArrayList<ComponentBlueprint>() );
+				setRequestLimit( DEFAULT_REQUEST_LIMIT );
+				setAssertionFailureLimit( DEFAULT_ASSERTION_FAILURE_LIMIT );
+				setTimeLimit( DEFAULT_TIME_LIMIT );
+			}
+			catch( IOException e )
+			{
+				log.error( "Unable to create temporary file, cannot build project." );
+			}
 		}
 
-		private File getProjectDirectory()
+		private File getProjectFile()
 		{
 			return projectFile;
-		}
-
-		private void setProjectDirectory( File where )
-		{
-			this.projectFile = where;
 		}
 
 		private List<ComponentBlueprint> getComponentBlueprints()
@@ -278,7 +282,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		@Override
 		public ProjectBlueprint where( File folder )
 		{
-			projectFile = folder;
+			projectFile = new File( folder.getPath() + File.separator + projectFile.getName() );
 			return this;
 		}
 
@@ -318,9 +322,10 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		}
 
 		@Override
-		public ProjectBlueprint label( String name )
+		public ProjectBlueprint label( String label )
 		{
-			setLabel( name );
+			projectFile = new File( projectFile.getPath() + File.separator + label + projectFile + ".xml");
+			setLabel( label );
 			return this;
 		}
 
