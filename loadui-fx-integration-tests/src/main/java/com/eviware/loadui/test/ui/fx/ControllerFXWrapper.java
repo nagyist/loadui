@@ -112,12 +112,23 @@ public class ControllerFXWrapper
 		{
 			copyDirectory( new File(
 					"../loadui-installers/loadui-controller-installer/target/main" ), baseDir );
+			copyGrapesToGrapeHome();
 			copyDirectory( new File( "target/bundle" ), bundleDir );
 		}
 		catch( IOException e1 )
 		{
 			throw new RuntimeException( e1 );
 		}
+	}
+
+	private void copyGrapesToGrapeHome() throws IOException
+	{
+		File originalGrapesLocation = new File( baseDir, ".groovy" );
+		File groovyHome = new File( homeDir, ".groovy" );
+		copyDirectory( originalGrapesLocation, groovyHome );
+		deleteRecursive( originalGrapesLocation );
+		System.setProperty( "groovy.root", groovyHome.getAbsolutePath() );
+		System.setProperty( "grape.root", groovyHome.getAbsolutePath() );
 	}
 
 	public Stage getStage()
