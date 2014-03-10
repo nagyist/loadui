@@ -33,6 +33,7 @@
         <module>loadui-groovy-utils</module>
         <module>loadui-fx-interface</module>
         <module>loadui-fx-test-utils</module>
+        <module>loadui-rest-runner</module>
     </modules>
     <repositories>
         <repository>
