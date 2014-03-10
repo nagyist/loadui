@@ -15,28 +15,22 @@
  */
 package com.eviware.loadui.util;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import javax.annotation.Nonnull;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
-import org.osgi.framework.ServiceReference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.osgi.context.BundleContextAware;
-
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.AbstractFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import org.osgi.framework.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.osgi.context.BundleContextAware;
+
+import javax.annotation.Nonnull;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public enum BeanInjector
 {
@@ -56,7 +50,7 @@ public enum BeanInjector
 
 	public static <T> T getNonCachedBeanOrNull( @Nonnull Class<T> cls )
 	{
-		ServiceReference ref = INSTANCE.context.getServiceReference( cls );
+		ServiceReference ref = INSTANCE.context.getServiceReference( cls.getName() );
 		if( ref != null )
 		{
 			return ( T )INSTANCE.context.getService( ref );

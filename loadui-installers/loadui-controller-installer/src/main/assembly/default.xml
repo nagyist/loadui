@@ -48,6 +48,7 @@
 			<excludes>
 				<exclude>*:pom</exclude>
 				<exclude>com.google.code.findbugs</exclude>
+                <exclude>org.osgi:org.osgi.core:4.3.0</exclude>
 			</excludes>
 			<useTransitiveDependencies>true</useTransitiveDependencies>
 			<useTransitiveFiltering>true</useTransitiveFiltering>

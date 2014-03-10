@@ -6,7 +6,7 @@ import javafx.scene.text.Font;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import static com.eviware.loadui.launcher.LoadUILauncher.ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA;
@@ -96,7 +96,7 @@ public abstract class JavaFxStarter
 		}
 	}
 
-	public static void addJavaFxOsgiExtraPackages( Map<String, String> configProps )
+	public static void addJavaFxOsgiExtraPackages( Properties configProps )
 	{
 		try(InputStream is = JavaFxStarter.class.getResourceAsStream( "/packages-extra.txt" ))
 		{
@@ -107,7 +107,7 @@ public abstract class JavaFxStarter
 				for( int n; ( n = is.read( b ) ) != -1; )
 					out.append( new String( b, 0, n ) );
 
-				String extra = configProps.put( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, "" );
+				String extra = ( String )configProps.setProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, "" );
 				if( !extra.isEmpty() )
 					out.append( "," ).append( extra );
 

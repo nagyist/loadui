@@ -259,7 +259,7 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>4.3.0</version>
+            <version>${osgiVersion}</version>
         </dependency>
         <dependency>
             <groupId>com.eviware.loadui</groupId>

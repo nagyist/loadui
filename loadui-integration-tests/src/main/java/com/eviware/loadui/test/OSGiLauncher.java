@@ -19,7 +19,7 @@ import com.eviware.loadui.launcher.LoadUILauncher;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
-import java.util.Map;
+import java.util.Properties;
 
 public class OSGiLauncher extends LoadUILauncher
 {
@@ -68,7 +68,7 @@ public class OSGiLauncher extends LoadUILauncher
 		// no action
 	}
 
-	public Map<String, String> getConfig()
+	public Properties getConfig()
 	{
 		return configProps;
 	}

@@ -54,8 +54,8 @@ public class ControllerWrapper
 		System.setProperty( LoadUI.LOADUI_HOME, homeDir.getAbsolutePath() );
 
 		launcher = new OSGiLauncher( new String[] { "-nolock" } );
-		Map<String, String> config = launcher.getConfig();
-		config.put( "felix.cache.rootdir", baseDir.getAbsolutePath() );
+		Properties config = launcher.getConfig();
+		config.setProperty( "felix.cache.rootdir", baseDir.getAbsolutePath() );
 
 		File bundleDir = new File( baseDir, "bundle" );
 		copyRuntimeDirectories( bundleDir, baseDir );

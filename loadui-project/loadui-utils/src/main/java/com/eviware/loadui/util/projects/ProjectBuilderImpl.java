@@ -50,32 +50,45 @@ public class ProjectBuilderImpl implements ProjectBuilder
 
 		try
 		{
-			File where = File.createTempFile( "loadui-project-", ".xml" );
-			ProjectRef project = workspaceProvider.getWorkspace().createProject( where, where.getName(), true );
+			File temporaryProjectLocation = blueprint.getProjectFile();
+			ProjectRef projectRef = workspaceProvider.getWorkspace().createProject( temporaryProjectLocation, temporaryProjectLocation.getName(), true );
 
-			project.getProject().setLimit( CanvasItem.REQUEST_COUNTER, blueprint.getRequestLimit() );
-			project.getProject().setLimit( CanvasItem.TIMER_COUNTER, blueprint.getTimeLimit() );
-			project.getProject().setLimit( CanvasItem.FAILURE_COUNTER, blueprint.getAssertionFailureLimit() );
+			projectRef.getProject().setLimit( CanvasItem.REQUEST_COUNTER, blueprint.getRequestLimit() );
+			projectRef.getProject().setLimit( CanvasItem.TIMER_COUNTER, blueprint.getTimeLimit() );
+			projectRef.getProject().setLimit( CanvasItem.FAILURE_COUNTER, blueprint.getAssertionFailureLimit() );
 
-			assembleComponentsByBlueprint( project, blueprint.getComponentBlueprints() );
+			assembleComponentsByBlueprint( projectRef, blueprint.getComponentBlueprints() );
 
-			project.getProject().save();
-			project.setEnabled( false );
+			projectRef.getProject().save();
+			projectRef.setEnabled( false );
 
-			File directory = blueprint.getProjectDirectory();
+			File toDirectory = blueprint.getTargetDirectory();
 
-			if( !directory.exists() ){
-				directory.mkdirs();
+			if( !toDirectory.exists() )
+			{
+				toDirectory.mkdirs();
 			}
 
-			where = new File( directory.getPath() + File.separator + project.getProjectFile().getName() );
-			Files.move( project.getProjectFile(), where );
-
-			return project;
+			if( !toDirectory.getPath().equals( temporaryProjectLocation.getParent() ) )
+			{
+				File targetProjectLocation = new File( toDirectory + File.separator + temporaryProjectLocation.getName() );
+				Files.move( temporaryProjectLocation, targetProjectLocation );
+				workspaceProvider.getWorkspace().removeProject( projectRef );
+				return workspaceProvider.getWorkspace().importProject( targetProjectLocation, false );
+			}
+			else
+			{
+				return projectRef;
+			}
 		}
 		catch( IOException e )
 		{
 			log.error( "Unable to assemble project from blueprint " + e.getMessage() );
+			e.printStackTrace();
+		}
+		catch( SecurityException e )
+		{
+			log.error( "Unable to assemble project at location " + e.getMessage() );
 			e.printStackTrace();
 		}
 		return null;
@@ -109,6 +122,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		{
 			throw new ComponentCreationException( "Component descriptor " + blueprint.getComponentType() + " does not exist in the component-registry." );
 		}
+
 		String label = CanvasItemNameGenerator.generateComponentName( project.getProject(), descriptor.getLabel() );
 		ComponentItem parentComponent = project.getProject().createComponent( label, descriptor );
 
@@ -201,6 +215,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		private static final long DEFAULT_TIME_LIMIT = 0;
 
 		private File projectFile;
+		private File targetDirectory;
 		private List<ComponentBlueprint> components;
 		private String label;
 		private long requestLimit;
@@ -209,20 +224,24 @@ public class ProjectBuilderImpl implements ProjectBuilder
 
 		private LoadUiProjectBlueprint()
 		{
-			setComponentBlueprints( new ArrayList<ComponentBlueprint>() );
-			setRequestLimit( DEFAULT_REQUEST_LIMIT );
-			setAssertionFailureLimit( DEFAULT_ASSERTION_FAILURE_LIMIT );
-			setTimeLimit( DEFAULT_TIME_LIMIT );
+			try
+			{
+				projectFile = File.createTempFile( "loadui-project-", ".xml" );
+				targetDirectory = projectFile.getParentFile();
+				setComponentBlueprints( new ArrayList<ComponentBlueprint>() );
+				setRequestLimit( DEFAULT_REQUEST_LIMIT );
+				setAssertionFailureLimit( DEFAULT_ASSERTION_FAILURE_LIMIT );
+				setTimeLimit( DEFAULT_TIME_LIMIT );
+			}
+			catch( IOException e )
+			{
+				log.error( "Unable to create temporary file, cannot build project." );
+			}
 		}
 
-		private File getProjectDirectory()
+		private File getProjectFile()
 		{
 			return projectFile;
-		}
-
-		private void setProjectDirectory( File where )
-		{
-			this.projectFile = where;
 		}
 
 		private List<ComponentBlueprint> getComponentBlueprints()
@@ -238,6 +257,11 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		private String getLabel()
 		{
 			return label;
+		}
+
+		private File getTargetDirectory()
+		{
+			return targetDirectory;
 		}
 
 		private void setLabel( String label )
@@ -278,7 +302,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		@Override
 		public ProjectBlueprint where( File folder )
 		{
-			projectFile = folder;
+			targetDirectory = folder;
 			return this;
 		}
 
@@ -313,14 +337,14 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		@Override
 		public ProjectBlueprint scenario( String label )
 		{
-			//TODO Create scenario
 			return this;
 		}
 
 		@Override
-		public ProjectBlueprint label( String name )
+		public ProjectBlueprint label( String label )
 		{
-			setLabel( name );
+			projectFile = new File( projectFile.getPath() + File.separator + label + projectFile + ".xml" );
+			setLabel( label );
 			return this;
 		}
 
