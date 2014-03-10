@@ -194,10 +194,5 @@
 			<artifactId>loadui-soapui-plugin</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
-        <dependency>
-			<groupId>com.eviware.loadui</groupId>
-			<artifactId>loadui-rest-runner</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
 	</dependencies>
 </project>
