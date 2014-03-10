@@ -1,4 +1,5 @@
 package com.eviware.loadui.util
+import com.eviware.loadui.api.events.CollectionEvent
 //
 // Copyright 2011 SmartBear Software
 //
@@ -14,16 +15,13 @@ package com.eviware.loadui.util
 // express or implied. See the Licence for the specific language governing permissions and limitations
 // under the Licence.
 //
-import com.eviware.loadui.api.events.CollectionEvent
 import com.eviware.loadui.api.events.EventHandler
 import com.eviware.loadui.api.execution.TestRunner
 import com.eviware.loadui.api.model.CanvasItem
 import com.eviware.loadui.api.model.WorkspaceItem
 import com.eviware.loadui.api.statistics.store.ExecutionListener
-import com.eviware.loadui.api.statistics.store.TrackDescriptor
 import com.eviware.loadui.api.statistics.store.ExecutionManager
-import com.eviware.loadui.util.BeanInjector
-import com.eviware.loadui.util.FormattingUtils
+import com.eviware.loadui.api.statistics.store.TrackDescriptor
 import com.google.common.io.Files
 
 import java.util.concurrent.atomic.AtomicBoolean
@@ -150,7 +148,7 @@ try {
 
     //wait until execution stops
     while ( !testStopped.get() ) {
-        log.info "Time: ${FormattingUtils.formatTime( time.value )} Requests: ${samples.value} Failures: ${failures.value} Running? ${testStopped}"
+        log.info "Time: ${FormattingUtils.formatTime( time.value )} Requests: ${samples.value} Failures: ${failures.value} Running? ${!testStopped.get()}"
         sleep 1000
     }
 
