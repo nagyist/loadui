@@ -73,7 +73,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 			{
 				File targetProjectLocation = new File( toDirectory + File.separator + temporaryProjectLocation.getName() );
 				Files.move( temporaryProjectLocation, targetProjectLocation );
-				projectRef.delete( true );
+				workspaceProvider.getWorkspace().removeProject( projectRef );
 				return workspaceProvider.getWorkspace().importProject( targetProjectLocation, false );
 			}
 			else
