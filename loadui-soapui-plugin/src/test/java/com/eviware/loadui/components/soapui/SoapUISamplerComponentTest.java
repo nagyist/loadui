@@ -28,7 +28,6 @@ import com.eviware.loadui.api.statistics.StatisticVariable.Mutable;
 import com.eviware.loadui.api.terminal.InputTerminal;
 import com.eviware.loadui.api.terminal.OutputTerminal;
 import com.eviware.loadui.api.terminal.TerminalMessage;
-import com.eviware.loadui.components.soapui.SoapUISamplerComponent;
 import com.eviware.loadui.util.component.ComponentTestUtils;
 import com.eviware.loadui.util.test.TestUtils;
 import com.google.common.collect.ImmutableMap;
