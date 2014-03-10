@@ -18,8 +18,9 @@ package com.eviware.loadui.groovy.components;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import java.io.File;
-
+import com.eviware.loadui.groovy.util.GroovyComponentTestUtils;
+import com.eviware.loadui.test.categories.IntegrationTest;
+import com.eviware.loadui.util.component.ComponentTestUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,19 +29,18 @@ import com.eviware.loadui.api.component.categories.OutputCategory;
 import com.eviware.loadui.api.model.ComponentItem;
 import com.eviware.loadui.api.terminal.InputTerminal;
 import com.eviware.loadui.api.terminal.OutputTerminal;
-import com.eviware.loadui.groovy.util.GroovyComponentTestUtils;
-import com.google.common.base.Joiner;
+import org.junit.experimental.categories.Category;
 
+@Category( IntegrationTest.class )
 public class TableLogTest
 {
 	private ComponentItem component;
 	private GroovyComponentTestUtils ctu;
-	
+
 	@Before
 	public void setup() throws ComponentCreationException
 	{
 		ctu = new GroovyComponentTestUtils();
-		ctu.initialize( Joiner.on( File.separator ).join( "src", "main", "groovy" ) );
 		ctu.getDefaultBeanInjectorMocker();
 		component = ctu.createComponent( "Table Log" );
 	}
