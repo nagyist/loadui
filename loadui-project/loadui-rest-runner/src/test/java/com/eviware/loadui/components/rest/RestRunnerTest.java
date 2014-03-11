@@ -23,9 +23,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import static com.eviware.loadui.api.model.CanvasItem.REQUEST_FAILURE_COUNTER;
-import static com.eviware.loadui.components.rest.RestRunner.BODY;
-import static com.eviware.loadui.components.rest.RestRunner.METHOD;
-import static com.eviware.loadui.components.rest.RestRunner.URL;
+import static com.eviware.loadui.components.rest.RestRunner.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;
@@ -76,6 +74,29 @@ public class RestRunnerTest
 		HttpUriRequest request = httpClient.lastRequest();
 		assertThat( request.getMethod(), is( "GET" ) );
 		assertThat( request.getURI(), is( URI.create( TEST_URL )) );
+		CounterAsserter.forHolder( component.getContext() )
+				.sent( 1 )
+				.completed( 1 )
+				.failures( 0 );
+	}
+
+	@Test
+	public void shouldIncludeheaders() throws Exception
+	{
+		String headers = "Content-Type: text/xml; charset=utf-8" + System.lineSeparator()
+				+	"Multiple-value: a" + System.lineSeparator() + "Multiple-value: b";
+
+		// GIVEN
+		setProperty( HEADERS, headers );
+
+		// WHEN
+		triggerAndWait();
+
+		// THEN
+		HttpUriRequest request = httpClient.lastRequest();
+		assertThat( request.getFirstHeader( "Content-Type" ).getValue(), is( "text/xml; charset=utf-8" ) );
+		assertThat( request.getFirstHeader( "Multiple-value" ).getValue(), is( "a" ) );
+		assertThat( request.getLastHeader( "Multiple-value" ).getValue(), is( "b" ) );
 		CounterAsserter.forHolder( component.getContext() )
 				.sent( 1 )
 				.completed( 1 )
