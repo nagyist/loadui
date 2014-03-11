@@ -3,17 +3,18 @@ package com.eviware.loadui.util.server;
 
 import com.eviware.loadui.util.files.FileSystemHelper;
 import com.eviware.loadui.util.files.PathWatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.util.Map;
-import java.util.logging.Logger;
 
 
 public class LoadUiServerProjectWatcher
 {
-	static final Logger log = Logger.getLogger( LoadUiServerProjectWatcher.class.getName() );
+	static final Logger log = LoggerFactory.getLogger( LoadUiServerProjectWatcher.class );
 	private final LoadUiServerProjectRunner projectRunner;
 	private final FileSystemHelper files;
 	protected PathWatcherReactorProvider reactorProvider = new PathWatcherReactorProvider();
@@ -31,7 +32,7 @@ public class LoadUiServerProjectWatcher
 
 	public void watchForProjectToRun( Path projectsLocation, final Map<String, Object> attributes )
 	{
-		log.info( "Will watch projects in directory: " + projectsLocation );
+		log.info( "Will watch projects in directory: {}", projectsLocation );
 		PathWatcher pathWatcher = files.providePathWatcher();
 
 		if( files.isDirectory( projectsLocation ) )
@@ -161,14 +162,13 @@ public class LoadUiServerProjectWatcher
 			try
 			{
 				Path changedFile = ( Path )event.context();
-				log.info( "Detected creation of potential project file: " + changedFile );
+				log.info( "Detected creation of potential project file: {}", changedFile );
 				if( changedFile.toString().endsWith( ".xml" ) )
 					listener.onProjectFileCreated( changedFile );
 			}
 			catch( Exception e )
 			{
-				log.info( "Tried to start running project but a problem happened: " + e );
-				e.printStackTrace();
+				log.warn( "Tried to start running project but a problem happened", e );
 			}
 			return true;
 		}
@@ -190,7 +190,7 @@ public class LoadUiServerProjectWatcher
 		public final boolean handle( WatchEvent event )
 		{
 			Path changedFile = files.makeAbsolute( projectsLocation.getParent(), ( Path )event.context() );
-			log.info( "Created possibly projects location: " + changedFile );
+			log.info( "Created possibly projects location: {}", changedFile );
 			if( files.isDirectory( changedFile ) && files.areSameLocation( projectsLocation, changedFile ) )
 			{
 				log.info( "Projects location created, will start watching it" );

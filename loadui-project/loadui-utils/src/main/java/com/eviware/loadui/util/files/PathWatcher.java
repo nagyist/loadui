@@ -1,16 +1,19 @@
 package com.eviware.loadui.util.files;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.logging.Logger;
+
 
 public abstract class PathWatcher
 {
-	Logger log = Logger.getLogger( PathWatcher.class.getName() );
+	Logger log = LoggerFactory.getLogger( PathWatcher.class );
 
 	private final ExecutorService executor = provideExecutorService();
 
@@ -20,14 +23,14 @@ public abstract class PathWatcher
 											final Path path,
 											final Reactor reactor )
 	{
-		log.info( "Registering to watch events " + eventKind.name() + " on path " + path );
+		log.info( "Registering to watch events {} on path {}", eventKind.name(), path );
 		try
 		{
 			executor.execute( new WatcherRunner( eventKind, path, reactor ) );
 		}
 		catch( IOException e )
 		{
-			log.warning( "Unable to start watching " + path + ", " + e );
+			log.warn( "Unable to start watching {} due to {}", path, e );
 			e.printStackTrace();
 		}
 	}
@@ -124,7 +127,7 @@ public abstract class PathWatcher
 			}
 			catch( InterruptedException ie )
 			{
-				log.warning( "PathWatcher interrupted, will stop watching " + path );
+				log.warn( "PathWatcher interrupted, will stop watching {}", path );
 			}
 			catch( Exception e )
 			{
@@ -159,7 +162,7 @@ public abstract class PathWatcher
 				boolean isKeyValid = watchKey.reset();
 				if( !isKeyValid )
 				{
-					log.warning( "PathWatcher watchKey became invalid!" );
+					log.warn( "PathWatcher watchKey became invalid!" );
 					reactor.onCannotWatchPath();
 				}
 				return isKeyValid;
