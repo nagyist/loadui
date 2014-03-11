@@ -83,10 +83,10 @@ public class RestRunner extends RunnerBase
 
 	private HttpUriRequest generateRequest()
 	{
-		String method = getContext().getProperty( "method" ).getStringValue();
-		CustomHttpRequest request = new CustomHttpRequest( method, getPropertyValue( "url" ) );
+		String method = getContext().getProperty( METHOD ).getStringValue();
+		CustomHttpRequest request = new CustomHttpRequest( method, getPropertyValue( URL ) );
 		if( request.canHaveBody() )
-			request.setEntity( new StringEntity( getPropertyValue( "body" ), "UTF-8" ) );
+			request.setEntity( new StringEntity( getPropertyValue( BODY ), "UTF-8" ) );
 		return request;
 	}
 

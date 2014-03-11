@@ -55,7 +55,7 @@ public class RestHttpClient
 		}
 		catch( Exception e )
 		{
-			throw new RuntimeException( "Unable to initialize the SSLContext, cannot run DejaClickRunner", e );
+			throw new RuntimeException( "Unable to initialize the SSLContext.", e );
 		}
 	}
 
