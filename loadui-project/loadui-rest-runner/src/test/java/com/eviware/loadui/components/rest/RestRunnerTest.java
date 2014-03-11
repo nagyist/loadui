@@ -8,6 +8,7 @@ import com.eviware.loadui.api.terminal.InputTerminal;
 import com.eviware.loadui.api.terminal.OutputTerminal;
 import com.eviware.loadui.api.terminal.TerminalMessage;
 import com.eviware.loadui.components.rest.statistics.LatencyCalculator;
+import com.eviware.loadui.impl.component.categories.RunnerBase;
 import com.eviware.loadui.util.RealClock;
 import com.eviware.loadui.util.component.ComponentTestUtils;
 import org.apache.http.client.methods.HttpPost;
@@ -25,6 +26,7 @@ import static com.eviware.loadui.api.model.CanvasItem.REQUEST_FAILURE_COUNTER;
 import static com.eviware.loadui.components.rest.RestRunner.BODY;
 import static com.eviware.loadui.components.rest.RestRunner.METHOD;
 import static com.eviware.loadui.components.rest.RestRunner.URL;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -151,6 +153,6 @@ public class RestRunnerTest
 
 	private TerminalMessage getNextOutputMessage() throws InterruptedException
 	{
-		return results.poll( 5, TimeUnit.SECONDS );
+		return results.poll( 1, SECONDS );
 	}
 }
