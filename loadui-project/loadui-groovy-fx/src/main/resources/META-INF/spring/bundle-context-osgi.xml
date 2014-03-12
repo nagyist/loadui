@@ -3,12 +3,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
                       http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi-1.0.xsd">
-	
-	<osgi:reference interface="com.eviware.loadui.api.component.ComponentRegistry" id="componentRegistry" />
-	
-	<osgi:reference interface="java.util.concurrent.ScheduledExecutorService" id="scheduledExecutorService" />
 
-    <osgi:list id="groovyResolvers" cardinality="0..N"
-                interface="com.eviware.loadui.api.component.GroovyResolver.Methods" />
+    <osgi:service ref="javafxResolver" interface="com.eviware.loadui.api.component.GroovyResolver.Methods" />
 
 </beans>

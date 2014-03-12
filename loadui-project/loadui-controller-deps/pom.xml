@@ -64,5 +64,10 @@
 			<artifactId>loadui-cmd-base</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>com.eviware.loadui</groupId>
+            <artifactId>loadui-groovy-fx</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
 	</dependencies>
 </project>

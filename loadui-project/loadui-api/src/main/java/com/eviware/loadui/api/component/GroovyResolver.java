@@ -13,17 +13,14 @@
  * express or implied. See the Licence for the specific language governing permissions and limitations
  * under the Licence.
  */
-package com.eviware.loadui.util.groovy;
-
-import groovy.lang.MissingMethodException;
-import groovy.lang.MissingPropertyException;
+package com.eviware.loadui.api.component;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
  * Provides additional methods or properties to the script environment.
- * 
+ *
  * @author dain.nilsson
  */
 public interface GroovyResolver
@@ -32,7 +29,7 @@ public interface GroovyResolver
 
 	/**
 	 * Resolves methods.
-	 * 
+	 *
 	 * @author dain.nilsson
 	 */
 	public interface Methods extends GroovyResolver
@@ -40,19 +37,18 @@ public interface GroovyResolver
 		/**
 		 * Called when an unresolved method is invoked from the context of the
 		 * script.
-		 * 
+		 *
 		 * @param methodName
 		 * @param args
 		 * @return
-		 * @throws MissingMethodException
 		 */
 		@Nullable
-		public Object invokeMethod( @Nonnull String methodName, Object... args ) throws MissingMethodException;
+		public Object invokeMethod( @Nonnull String methodName, Object... args );
 	}
 
 	/**
 	 * Resolves Properties.
-	 * 
+	 *
 	 * @author dain.nilsson
 	 */
 	public interface Properties extends GroovyResolver
@@ -61,13 +57,12 @@ public interface GroovyResolver
 		/**
 		 * Called when an unresolved property is accessed from the context of the
 		 * script.
-		 * 
+		 *
 		 * @param propertyName
 		 * @return
-		 * @throws MissingPropertyException
 		 */
 		@Nullable
-		public Object getProperty( @Nonnull String propertyName ) throws MissingPropertyException;
+		public Object getProperty( @Nonnull String propertyName );
 	}
 
 	public static final class NullResolver implements GroovyResolver.Methods, GroovyResolver.Properties
@@ -77,15 +72,15 @@ public interface GroovyResolver
 		}
 
 		@Override
-		public Object getProperty( String propertyName ) throws MissingPropertyException
+		public Object getProperty( String propertyName )
 		{
-			throw new MissingPropertyException( propertyName, NullResolver.class );
+			throw new RuntimeException( propertyName );
 		}
 
 		@Override
-		public Object invokeMethod( String methodName, Object... args ) throws MissingMethodException
+		public Object invokeMethod( String methodName, Object... args )
 		{
-			throw new MissingMethodException( methodName, NullResolver.class, args );
+			throw new RuntimeException( methodName );
 		}
 	}
 }

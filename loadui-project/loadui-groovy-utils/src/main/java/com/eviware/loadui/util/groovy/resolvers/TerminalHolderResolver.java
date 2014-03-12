@@ -30,7 +30,7 @@ import com.eviware.loadui.api.terminal.InputTerminal;
 import com.eviware.loadui.api.terminal.MutableTerminalHolder;
 import com.eviware.loadui.api.terminal.OutputTerminal;
 import com.eviware.loadui.api.terminal.Terminal;
-import com.eviware.loadui.util.groovy.GroovyResolver;
+import com.eviware.loadui.api.component.GroovyResolver;
 import com.google.common.base.Preconditions;
 
 /**

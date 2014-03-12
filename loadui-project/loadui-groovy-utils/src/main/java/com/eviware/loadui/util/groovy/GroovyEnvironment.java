@@ -15,6 +15,7 @@
  */
 package com.eviware.loadui.util.groovy;
 
+import com.eviware.loadui.api.component.GroovyResolver;
 import com.eviware.loadui.api.traits.Releasable;
 import com.google.common.collect.Maps;
 import groovy.grape.Grape;
