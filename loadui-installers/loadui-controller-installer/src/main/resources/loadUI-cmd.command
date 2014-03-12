@@ -1,7 +1,7 @@
 #!/bin/sh
 ### ====================================================================== ###
 ##                                                                          ##
-##  loadUI Agent Bootstrap Script                                           ##
+##  LoadUI Command Line Runner for Mac                                      ##
 ##                                                                          ##
 ### ====================================================================== ###
 
@@ -9,37 +9,25 @@
 
 DIRNAME=`dirname $0`
 
-# OS specific support (must be 'true' or 'false').
-cygwin=false;
-case "`uname`" in
-    CYGWIN*)
-        cygwin=true
-        ;;
-esac
-
 # Setup LOADUI_HOME
-if [ "x$LOADUI_AGENT_HOME" = "x" ]
+if [ "x$LOADUI_HOME" = "x" ]
 then
     # get the full path (without any relative bits)
-    LOADUI_AGENT_HOME=`cd $DIRNAME/; pwd`
+    LOADUI_HOME=`cd $DIRNAME/; pwd`
 fi
-export LOADUI_AGENT_HOME
+export LOADUI_HOME
 
-LOADUI_AGENT_CLASSPATH="$LOADUI_AGENT_HOME:$LOADUI_AGENT_HOME/lib/*:$LOADUI_AGENT_HOME/../../PlugIns/jre.bundle/Contents/Home/jre/lib/*"
+LOADUI_CLASSPATH="$LOADUI_HOME:$LOADUI_HOME/lib/*:$LOADUI_HOME/../../PlugIns/jre.bundle/Contents/Home/jre/lib/*"
+JAVA="$LOADUI_HOME/../../PlugIns/jre.bundle/Contents/Home/jre/bin/java"
 
-# For Cygwin, switch paths to Windows format before running java
-if $cygwin
+if [ ! -f "$JAVA" ]; 
 then
-    LOADUI_AGENT_HOME=`cygpath --path -w "$LOADUI_AGENT_HOME"`
-    LOADUI_AGENT_CLASSPATH=`cygpath --path -w "$LOADUI_AGENT_CLASSPATH"`
-fi
-
-JAVA = "../../PlugIns/jre.bundle/Contents/Home/jre/bin/java"
-
-if [ ! -d "$JAVA" ]; then
   JAVA="java"
+  echo "Using system Java"
+else
+  echo "Using bundled Java" 
 fi
 
 JAVA_OPTS="-Xms128m -Xmx768m -XX:MaxPermSize=128m"
 
-$JAVA $JAVA_OPTS -cp "$LOADUI_AGENT_CLASSPATH" com.eviware.loadui.launcher.LoadUICommandLineLauncher "$@"
+"$JAVA" $JAVA_OPTS -cp "$LOADUI_CLASSPATH" com.javafx.main.Main --cmd=true --nofx=true -nofx -Dlog4j.configuration=log4j_headless.xml "$@"
