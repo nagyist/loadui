@@ -15,26 +15,19 @@
  */
 package com.eviware.loadui.util.groovy.resolvers;
 
-import groovy.lang.Closure;
-import groovy.lang.MissingMethodException;
-import groovy.lang.MissingPropertyException;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
-
-import org.slf4j.Logger;
-
+import com.eviware.loadui.api.component.GroovyResolver;
 import com.eviware.loadui.api.events.PropertyEvent;
 import com.eviware.loadui.api.events.WeakEventHandler;
 import com.eviware.loadui.api.model.PropertyHolder;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.api.traits.Releasable;
-import com.eviware.loadui.util.groovy.GroovyResolver;
 import com.google.common.base.Preconditions;
+import groovy.lang.Closure;
+import groovy.lang.MissingMethodException;
+import groovy.lang.MissingPropertyException;
+import org.slf4j.Logger;
+
+import java.util.*;
 
 /**
  * Adds convenient Groovy methods for dealing with Properties for a

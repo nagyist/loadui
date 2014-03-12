@@ -15,17 +15,16 @@
  */
 package com.eviware.loadui.groovy;
 
+import com.eviware.loadui.api.component.GroovyResolver;
+import com.eviware.loadui.api.serialization.Value;
+import com.eviware.loadui.impl.component.categories.BaseCategory;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import groovy.lang.Closure;
 import groovy.lang.MissingMethodException;
 import groovy.lang.MissingPropertyException;
 
 import java.util.Map;
-
-import com.eviware.loadui.api.serialization.Value;
-import com.eviware.loadui.impl.component.categories.BaseCategory;
-import com.eviware.loadui.util.groovy.GroovyResolver;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 
 public class TotalResolver implements GroovyResolver.Methods, GroovyResolver.Properties
 {

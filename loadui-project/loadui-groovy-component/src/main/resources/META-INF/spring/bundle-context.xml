@@ -15,5 +15,6 @@
 		<constructor-arg ref="scheduledExecutorService" />
 		<constructor-arg ref="scriptDir" />
 		<constructor-arg ref="classLoaderRegistry" />
+        <constructor-arg ref="groovyResolvers" />
 	</bean>
 </beans>

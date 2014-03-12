@@ -23,7 +23,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import com.eviware.loadui.api.traits.Releasable;
-import com.eviware.loadui.util.groovy.GroovyResolver;
+import com.eviware.loadui.api.component.GroovyResolver;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
