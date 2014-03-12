@@ -29,6 +29,7 @@ import com.eviware.loadui.util.groovy.GroovyEnvironment;
 import com.eviware.loadui.util.groovy.GroovyEnvironmentClassLoader;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -86,7 +87,7 @@ public class GroovyComponentTestUtils extends ComponentTestUtils
 		} );
 	}
 
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	public ComponentItem createComponent( final String componentName ) throws ComponentCreationException
 	{
 		ComponentItem component = createComponentItem();
@@ -118,6 +119,8 @@ public class GroovyComponentTestUtils extends ComponentTestUtils
 	public ComponentItem createComponent( final String componentName, ComponentItem component )
 			throws ComponentCreationException
 	{
+		Preconditions.checkState( descriptors.keySet().size() != 0, "No component descriptors found. Are you sure you are running with correct root directory?" );
+
 		Optional<ComponentDescriptor> descriptorOptional = null;
 		Predicate<ComponentDescriptor> predicate = new Predicate<ComponentDescriptor>()
 		{
