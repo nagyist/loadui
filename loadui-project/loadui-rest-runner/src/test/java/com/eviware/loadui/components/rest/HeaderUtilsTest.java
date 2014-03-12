@@ -1,14 +1,8 @@
 package com.eviware.loadui.components.rest;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
-import org.apache.http.Header;
-import org.apache.http.client.methods.HttpGet;
 import org.junit.Test;
-
-import java.util.Collection;
-import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
