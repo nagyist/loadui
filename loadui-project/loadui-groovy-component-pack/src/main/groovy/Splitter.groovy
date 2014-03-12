@@ -22,6 +22,10 @@
  * @category flow
  * @nonBlocking true
  */
+
+
+import com.eviware.loadui.LoadUI
+
 //Here to support Splitters created in loadUI 1.0, remove in the future:
 try { renameProperty( 'outputs', 'numOutputs' ) } catch( e ) {}
 
@@ -107,7 +111,7 @@ createProperty( 'type', String, "Round-Robin" ) {
 	if ( controller ) refreshLayout()
 }
 
-if ( controller ) {
+if ( !LoadUI.headless ) {
     slider = slider(min: 2, max: 10, majorTickUnit:1, minorTickCount:0, showTickLabels: true, snapToTicks: true, showTickMarks: true)
     invalidator = invalidationListener { if(!slider.valueChanging) numOutputs.value = slider.value }
     slider.valueChangingProperty().addListener( invalidator )

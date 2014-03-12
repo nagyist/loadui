@@ -27,6 +27,7 @@ import com.eviware.loadui.util.component.ComponentTestUtils;
 import com.eviware.loadui.util.groovy.ClassLoaderRegistry;
 import com.eviware.loadui.util.groovy.GroovyEnvironment;
 import com.eviware.loadui.util.groovy.GroovyEnvironmentClassLoader;
+import com.eviware.loadui.api.component.GroovyResolver;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -38,6 +39,7 @@ import org.mockito.stubbing.Answer;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 
@@ -83,7 +85,7 @@ public class GroovyComponentTestUtils extends ComponentTestUtils
 			{
 				return new GroovyEnvironmentClassLoader( bundleClassLoader, new File( "target", ".groovy" ) );
 			}
-		} );
+		}, Collections.<GroovyResolver.Methods>emptyList() );
 	}
 
 	@SuppressWarnings( "unchecked" )

@@ -13,6 +13,7 @@ public class AgentLauncher extends LoadUILauncher
 	@Override
 	protected void processOsgiExtraPackages()
 	{
+		// as of 2014/03/12 the only module still requiring JavaFX packages in Agents is the soapui-plugin
 		JavaFxStarter.addJavaFxOsgiExtraPackages( configProps );
 	}
 

@@ -1,7 +1,6 @@
 package com.eviware.loadui.launcher.server;
 
 import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.launcher.JavaFxStarter;
 import com.eviware.loadui.launcher.LoadUILauncher;
 
 public class LoadUIServerLauncher extends LoadUILauncher
@@ -16,7 +15,7 @@ public class LoadUIServerLauncher extends LoadUILauncher
 	@Override
 	protected void processOsgiExtraPackages()
 	{
-		JavaFxStarter.addJavaFxOsgiExtraPackages( configProps );
+		// server must not contain any JavaFX package so it can run in a clean Linux environment
 	}
 
 	@Override

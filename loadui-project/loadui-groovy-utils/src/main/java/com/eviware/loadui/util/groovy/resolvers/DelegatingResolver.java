@@ -15,17 +15,16 @@
  */
 package com.eviware.loadui.util.groovy.resolvers;
 
+import com.eviware.loadui.api.component.GroovyResolver;
+import com.eviware.loadui.api.traits.Releasable;
+import com.eviware.loadui.util.ReleasableUtils;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import groovy.lang.MissingMethodException;
 import groovy.lang.MissingPropertyException;
 
 import java.util.List;
 import java.util.Set;
-
-import com.eviware.loadui.api.traits.Releasable;
-import com.eviware.loadui.util.ReleasableUtils;
-import com.eviware.loadui.util.groovy.GroovyResolver;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 /**
  * Combines multiple PropertyAndMethodResolvers into a single one, which tries

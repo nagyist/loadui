@@ -15,17 +15,15 @@
  */
 package com.eviware.loadui.util.groovy.resolvers;
 
-import javax.annotation.Nonnull;
-
-import org.codehaus.groovy.runtime.InvokerHelper;
-
-import groovy.lang.MissingMethodException;
-import groovy.lang.MissingPropertyException;
-
+import com.eviware.loadui.api.component.GroovyResolver;
 import com.eviware.loadui.api.traits.Releasable;
 import com.eviware.loadui.util.ReleasableUtils;
-import com.eviware.loadui.util.groovy.GroovyResolver;
 import com.google.common.base.Preconditions;
+import groovy.lang.MissingMethodException;
+import groovy.lang.MissingPropertyException;
+import org.codehaus.groovy.runtime.InvokerHelper;
+
+import javax.annotation.Nonnull;
 
 /**
  * Resolved methods and properties to a delegate Object using reflection.
