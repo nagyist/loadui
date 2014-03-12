@@ -39,7 +39,7 @@ public class ProjectBuilderTest
 	public void shouldCreateTheSimplestOfProjects()
 	{
 		//When
-		projectRef = projectBuilder.create().build();
+		projectRef = projectBuilder.create().importProject( true ).build();
 
 		ProjectItem project = enableProject( projectRef );
 
@@ -51,7 +51,7 @@ public class ProjectBuilderTest
 	public void shouldCreateProjectsInAnotherFolder()
 	{
 		//When
-		projectRef = projectBuilder.create().where( LoadUI.getWorkingDir() ).build();
+		projectRef = projectBuilder.create().importProject( true ).where( LoadUI.getWorkingDir() ).build();
 
 		assertThat( "Component count", projectRef.getProjectFile().getPath(), containsString( LoadUI.getWorkingDir().getPath() ) );
 	}
@@ -61,6 +61,7 @@ public class ProjectBuilderTest
 	{
 		//When
 		projectRef = projectBuilder.create()
+				.importProject( true )
 				.components(
 						ComponentBuilder.create().type( FIXED_RATE ).property( "rate", Long.class, 10L ).child(
 								ComponentBuilder.create().type( WEB_RUNNER ).property( "url", String.class, "http://05ten.se" ).build()
@@ -83,6 +84,7 @@ public class ProjectBuilderTest
 	public void shouldCreateAConcurrentUsersProject()
 	{
 		projectRef = projectBuilder.create()
+				.importProject( true )
 				.components(
 						ComponentBuilder.create().type( FIXED_LOAD ).concurrent().property( "load", Long.class, 2L ).child(
 								ComponentBuilder.create().type( WEB_RUNNER ).property( "url", String.class, "http://05ten.se" ).build()
