@@ -73,13 +73,20 @@ public class ProjectBuilderImpl implements ProjectBuilder
 			{
 				File targetProjectLocation = new File( toDirectory + File.separator + temporaryProjectLocation.getName() );
 				Files.move( temporaryProjectLocation, targetProjectLocation );
-				workspaceProvider.getWorkspace().removeProject( projectRef );
-				return workspaceProvider.getWorkspace().importProject( targetProjectLocation, false );
+				projectRef.delete( false );
+				if( blueprint.shouldImportProject() )
+				{
+					projectRef = workspaceProvider.getWorkspace().importProject( targetProjectLocation, false );
+				}
 			}
 			else
 			{
-				return projectRef;
+				if( !blueprint.shouldImportProject )
+				{
+					workspaceProvider.getWorkspace().removeProject( projectRef );
+				}
 			}
+			return projectRef;
 		}
 		catch( IOException e )
 		{
@@ -221,6 +228,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		private long requestLimit;
 		private long timeLimit;
 		private long assertionFailureLimit;
+		private boolean shouldImportProject;
 
 		private LoadUiProjectBlueprint()
 		{
@@ -232,6 +240,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 				setRequestLimit( DEFAULT_REQUEST_LIMIT );
 				setAssertionFailureLimit( DEFAULT_ASSERTION_FAILURE_LIMIT );
 				setTimeLimit( DEFAULT_TIME_LIMIT );
+				shouldImportProject = false;
 			}
 			catch( IOException e )
 			{
@@ -252,6 +261,11 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		private void setComponentBlueprints( List<ComponentBlueprint> components )
 		{
 			this.components = components;
+		}
+
+		private boolean shouldImportProject()
+		{
+			return shouldImportProject;
 		}
 
 		private String getLabel()
@@ -303,6 +317,13 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		public ProjectBlueprint where( File folder )
 		{
 			targetDirectory = folder;
+			return this;
+		}
+
+		@Override
+		public ProjectBlueprint importProject( boolean bool )
+		{
+			shouldImportProject = bool;
 			return this;
 		}
 

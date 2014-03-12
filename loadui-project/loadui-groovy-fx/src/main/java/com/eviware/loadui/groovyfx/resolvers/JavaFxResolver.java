@@ -1,6 +1,6 @@
-package com.eviware.loadui.util.groovy.resolvers;
+package com.eviware.loadui.groovyfx.resolvers;
 
-import com.eviware.loadui.util.groovy.GroovyResolver;
+import com.eviware.loadui.api.component.GroovyResolver;
 import com.google.common.base.Preconditions;
 import groovy.lang.Closure;
 import groovy.lang.MissingMethodException;

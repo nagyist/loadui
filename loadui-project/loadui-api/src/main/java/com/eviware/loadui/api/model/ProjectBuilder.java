@@ -27,6 +27,15 @@ public interface ProjectBuilder
 		public ProjectBlueprint components( ComponentBlueprint... components );
 
 		/**
+		 * Should the project be imported into the current instance of LoadUI or not.
+		 * It is not imported by default, and projectRef that is produced by build is if project is not imported.
+		 *
+		 * @param bool
+		 * @return
+		 */
+		public ProjectBlueprint importProject( boolean bool );
+
+		/**
 		 * The requests limit of the project
 		 *
 		 * @param requests
