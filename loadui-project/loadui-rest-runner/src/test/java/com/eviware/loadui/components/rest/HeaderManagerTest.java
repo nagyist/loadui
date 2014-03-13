@@ -1,19 +1,13 @@
 package com.eviware.loadui.components.rest;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
-import org.apache.http.Header;
-import org.apache.http.client.methods.HttpGet;
 import org.junit.Test;
-
-import java.util.Collection;
-import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-public class HeaderUtilsTest
+public class HeaderManagerTest
 {
 	@Test
 	public void shouldExtractHeaders()
@@ -31,7 +25,7 @@ public class HeaderUtilsTest
 		expectedHeaders.put( "Multiple-values2", "a" );
 		expectedHeaders.put( "Multiple-values2", "b" );
 
-		Multimap<String, String> headers = HeaderUtils.extractHeaders( headerBlob );
+		Multimap<String, String> headers = HeaderManager.extractHeaders( headerBlob );
 
 		assertThat( headers, is( expectedHeaders ) );
 	}
