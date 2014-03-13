@@ -23,6 +23,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import static com.eviware.loadui.api.model.CanvasItem.REQUEST_FAILURE_COUNTER;
+import static com.eviware.loadui.components.rest.HeaderManager.HEADERS;
 import static com.eviware.loadui.components.rest.RestRunner.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.core.Is.is;
