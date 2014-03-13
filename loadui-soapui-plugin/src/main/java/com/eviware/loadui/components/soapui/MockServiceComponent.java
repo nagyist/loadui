@@ -264,7 +264,7 @@ public class MockServiceComponent extends OnOffBase implements MiscCategory, Moc
 						{
 							if( mockRunner != null )
 							{
-								Tools.openURL( mockRunner.getMockService().getLocalMockServiceEndpoint() );
+								Tools.openURL( ((WsdlMockService) mockRunner.getMockContext().getMockService()).getLocalMockServiceEndpoint() );
 							}
 						}
 						catch( Exception e )
