@@ -29,6 +29,7 @@ public class RestRunner extends RunnerBase
 	private final Clock clock;
 	private final LatencyCalculator latencyCalculator;
 	private final StatisticVariable.Mutable latencyVariable;
+	private final HeaderManager headerManager;
 
 	public RestRunner( ComponentContext context, HttpClient httpClient, Clock clock )
 	{
@@ -42,6 +43,7 @@ public class RestRunner extends RunnerBase
 
 		latencyCalculator = LatencyCalculator.usingClock( clock );
 		latencyVariable = context.addStatisticVariable( "Latency", "", SampleStatisticsWriter.TYPE );
+		headerManager = new HeaderManager( context );
 
 		context.setLayout( new RestLayout( context ) );
 	}
@@ -82,8 +84,7 @@ public class RestRunner extends RunnerBase
 
 	private void addHeaders( CustomHttpRequest request )
 	{
-		Multimap<String, String> headers = HeaderManager.extractHeaders( getPropertyValue( HEADERS ) );
-		for( Map.Entry<String, String> entry : headers.entries() )
+		for( Map.Entry<String, String> entry : headerManager.getHeaders().entries() )
 		{
 			request.addHeader( entry.getKey(), entry.getValue() );
 		}

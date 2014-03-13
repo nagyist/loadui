@@ -59,7 +59,7 @@ public class RestHttpClient
 		}
 	}
 
-	//SSL support, trust all certificates and hostnames.
+	//SSL support, trust all certificates and host names.
 	private static class NaiveTrustManager implements X509TrustManager
 	{
 
