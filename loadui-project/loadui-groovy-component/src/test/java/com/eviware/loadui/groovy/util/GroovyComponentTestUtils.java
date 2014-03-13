@@ -27,7 +27,6 @@ import com.eviware.loadui.util.component.ComponentTestUtils;
 import com.eviware.loadui.util.groovy.ClassLoaderRegistry;
 import com.eviware.loadui.util.groovy.GroovyEnvironment;
 import com.eviware.loadui.util.groovy.GroovyEnvironmentClassLoader;
-import com.eviware.loadui.api.component.GroovyResolver;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -121,7 +120,7 @@ public class GroovyComponentTestUtils extends ComponentTestUtils
 	public ComponentItem createComponent( final String componentName, ComponentItem component )
 			throws ComponentCreationException
 	{
-		Preconditions.checkState( descriptors.keySet().size() != 0, "No component descriptors found. Are you sure you are running with correct root directory?" );
+
 
 		Optional<ComponentDescriptor> descriptorOptional = null;
 		Predicate<ComponentDescriptor> predicate = new Predicate<ComponentDescriptor>()
@@ -154,6 +153,9 @@ public class GroovyComponentTestUtils extends ComponentTestUtils
 		ComponentDescriptor descriptor = descriptorOptional.get();
 
 		component.setAttribute( ComponentItem.TYPE, descriptor.getLabel() );
+
+		Preconditions.checkState( descriptors.keySet().size() != 0, "No component descriptors found. Are you sure you are running with correct root directory?" );
+
 		setComponentBehavior( component,
 				descriptors.get( descriptor ).createBehavior( descriptor, component.getContext() ) );
 
