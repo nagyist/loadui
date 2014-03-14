@@ -6,9 +6,6 @@ import com.eviware.x.dialogs.XProgressDialog;
 
 import java.awt.*;
 
-/**
- * @author renato
- */
 public class NoOpXDialogs implements XDialogs
 {
 	@Override
@@ -37,6 +34,12 @@ public class NoOpXDialogs implements XDialogs
 
 	@Override
 	public boolean confirm( String s, String s2 )
+	{
+		return true;
+	}
+
+	@Override
+	public boolean confirm( String s, String s2, Component component )
 	{
 		return true;
 	}

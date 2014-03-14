@@ -17,7 +17,7 @@
 
     <properties>
         <loadUIVersion>${project.version}</loadUIVersion>
-        <soapUIVersion>4.5.2</soapUIVersion>
+        <soapUIVersion>5.0.0-beta</soapUIVersion>
     </properties>
     <repositories>
         <repository>
@@ -86,7 +86,7 @@
                         </Bundle-Activator>
                         <Embed-Dependency>*;scope=provided</Embed-Dependency>
                         <Import-Package>
-                            !com.eviware.loadui.api.charting.line,!,!com.eviware.loadui.api.reporting,!org.tbee.javafx.scene.layout,!com.apple.eawt,!sun.awt,!org.apache.commons.httpclient.*,!org.apache.tools.*,!org.fusesource.*,!org.apache.log,!org.apache.ivy.*,!org.apache.bsf.*,!org.apache.batik.*,!javax.xml.rpc.*,!jline,!org.apache.xml.resolver.*,!org.apache.axis.*,!org.apache.crimson.*;!org.mozilla.*,!com.sun.javadoc,!com.sun.tools.javadoc,!com.teamdev.jxbrowser*,!com.teamdev.xpcom.*,!com.teamdev.xulrunner-linux, !com.teamdev.xulrunner-mac,!com.teamdev.xulrunner-windows, !com.teamdev.xulrunner-linux64,!javax.servlet.jsp,!groovyjarjarasm.asm.util,!groovyjarjarasm.asm.tree.analysis,!org.dom4j.*,!org.apache.avalon.framework.logger,!org.apache.oro.text.regex,!com.sun.jdmk.comm,!com.sun.org.apache.xerces.internal.*,!com.sun.net.ssl.*,!com.sun.crypto.provider,!com.sun.java.swing.plaf.windows.*,!sun.io,!sun.misc,!sun.reflect.generics.reflectiveObjects,!org.jgroups*,!com.adbs*,!hermes*,!com.eviware.soapui.coverage*,!com.toedter.calendar*,!net.infonode.docking*,!net.infonode.properties.gui.util*,!net.infonode.tabbedpanel*,!net.infonode.util*,!*net.sf.jasperreports*,!org.jfree.util*,!com.jniwrapper*,!net.sf.cglib.proxy*,!org.codehaus.jettison*,!org.jdom*,!org.xmlpull.mxp1*,!org.xmlpull.v1*,!sun.reflect*,!net.sf.saxon.xpath,!org.apache.http*,!com.jp.protection*,!net.jcip.annotations*,!com.werken.xpath*,!org.apache.log.*,!org.apache.oro*,!org.owasp.*,*
+                            !com.eviware.loadui.api.charting.line,!,!com.eviware.loadui.api.reporting,!org.tbee.javafx.scene.layout,!com.apple.eawt,!sun.awt,!org.apache.commons.httpclient.*,!org.apache.tools.*,!org.fusesource.*,!org.apache.log,!org.apache.ivy.*,!org.apache.bsf.*,!org.apache.batik.*,!javax.xml.rpc.*,!jline,!org.apache.xml.resolver.*,!org.apache.axis.*,!org.apache.crimson.*;!org.mozilla.*,!com.sun.javadoc,!com.sun.tools.javadoc,!com.teamdev.xpcom.*,!com.teamdev.xulrunner-linux, !com.teamdev.xulrunner-mac,!com.teamdev.xulrunner-windows, !com.teamdev.xulrunner-linux64,!javax.servlet.jsp,!groovyjarjarasm.asm.util,!groovyjarjarasm.asm.tree.analysis,!org.dom4j.*,!org.apache.avalon.framework.logger,!org.apache.oro.text.regex,!com.sun.jdmk.comm,!com.sun.org.apache.xerces.internal.*,!com.sun.net.ssl.*,!com.sun.crypto.provider,!com.sun.java.swing.plaf.windows.*,!sun.io,!sun.misc,!sun.reflect.generics.reflectiveObjects,!org.jgroups*,!com.adbs*,!hermes*,!com.eviware.soapui.coverage*,!com.toedter.calendar*,!net.infonode.docking*,!net.infonode.properties.gui.util*,!net.infonode.tabbedpanel*,!net.infonode.util*,!*net.sf.jasperreports*,!org.jfree.util*,!com.jniwrapper*,!net.sf.cglib.proxy*,!org.codehaus.jettison*,!org.jdom*,!org.xmlpull.mxp1*,!org.xmlpull.v1*,!sun.reflect*,!net.sf.saxon.xpath,!org.apache.http*,!com.jp.protection*,!net.jcip.annotations*,!com.werken.xpath*,!org.apache.log.*,!org.apache.oro*,!org.owasp.*,*
                         </Import-Package>
                     </instructions>
                 </configuration>
@@ -764,6 +764,30 @@
             <artifactId>hamcrest-all</artifactId>
             <version>1.3</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.btr</groupId>
+            <artifactId>proxy-vole</artifactId>
+            <version>20131209</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.oltu.oauth2</groupId>
+            <artifactId>org.apache.oltu.oauth2.client</artifactId>
+            <version>0.31</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.oltu.oauth2</groupId>
+            <artifactId>org.apache.oltu.oauth2.httpclient4</artifactId>
+            <version>0.31</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.oltu.oauth2</groupId>
+            <artifactId>org.apache.oltu.oauth2.common</artifactId>
+            <version>0.31</version>
+            <scope>provided</scope>
         </dependency>
         <!--<dependency>-->
             <!--<groupId>org.hamcrest</groupId>-->
