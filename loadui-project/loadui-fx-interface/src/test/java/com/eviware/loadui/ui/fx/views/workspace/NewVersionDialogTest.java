@@ -52,7 +52,7 @@ public class NewVersionDialogTest extends GuiTest
 	public static void createWindow() throws Throwable
 	{
 		FXTestUtils.launchApp( NewVersionDialogTestApp.class );
-		stage = stageFuture.get( 5, TimeUnit.SECONDS );
+		stage = stageFuture.get( 10, TimeUnit.SECONDS );
 		FXTestUtils.bringToFront( stage );
 	}
 

@@ -8,6 +8,7 @@ import com.eviware.loadui.api.terminal.OutputTerminal;
 import com.eviware.loadui.api.terminal.TerminalMessage;
 import com.eviware.loadui.util.RealClock;
 import com.eviware.loadui.util.component.ComponentTestUtils;
+import static com.eviware.loadui.components.rest.HeaderManager.HEADERS;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.util.EntityUtils;
 import org.junit.Before;
@@ -24,7 +25,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.spy;
 
-@Ignore
 public class RestRunnerTest
 {
 	public static final String TEST_URL = "http://www.example.org";
@@ -76,13 +76,13 @@ public class RestRunnerTest
 	}
 
 	@Test
-	public void shouldIncludeheaders() throws Exception
+	public void shouldIncludeHeaders() throws Exception
 	{
 		String headers = "Content-Type: text/xml; charset=utf-8" + System.lineSeparator()
 				+	"Multiple-value: a" + System.lineSeparator() + "Multiple-value: b";
 
 		// GIVEN
-		//setProperty( HEADERS, headers );
+		setProperty( HEADERS, headers );
 
 		// WHEN
 		triggerAndWait();
