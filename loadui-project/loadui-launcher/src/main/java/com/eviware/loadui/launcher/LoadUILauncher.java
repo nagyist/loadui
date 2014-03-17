@@ -400,14 +400,14 @@ public abstract class LoadUILauncher
 		// no action
 	}
 
-	private void setDefaultHomeToEnvironmentHomeIfAvailable(){
+	private static void setDefaultHomeToEnvironmentHomeIfAvailable(){
 		String userHome = System.getenv( "USER_HOME" );
 		if(userHome != null){
 			System.setProperty( "user.home", userHome );
 		}
 	}
 
-	protected final void initSystemProperties()
+	public static void initSystemProperties()
 	{
 		setDefaultHomeToEnvironmentHomeIfAvailable();
 
@@ -469,10 +469,10 @@ public abstract class LoadUILauncher
 		}
 	}
 
-	private void createKeyStore( File keystore )
+	private static void createKeyStore( File keystore )
 	{
 		try(FileOutputStream fos = new FileOutputStream( keystore );
-			 InputStream is = getClass().getResourceAsStream( "/keystore.jks" ))
+			 InputStream is = LoadUILauncher.class.getResourceAsStream( "/keystore.jks" ))
 		{
 			byte buf[] = new byte[1024];
 			int len;
@@ -486,10 +486,10 @@ public abstract class LoadUILauncher
 		}
 	}
 
-	private void createTrustStore( File truststore )
+	private static void createTrustStore( File truststore )
 	{
 		try(FileOutputStream fos = new FileOutputStream( truststore );
-			 InputStream is = getClass().getResourceAsStream( "/certificate.pem" ))
+			 InputStream is = LoadUILauncher.class.getResourceAsStream( "/certificate.pem" ))
 		{
 			byte buf[] = new byte[1024];
 			int len;
