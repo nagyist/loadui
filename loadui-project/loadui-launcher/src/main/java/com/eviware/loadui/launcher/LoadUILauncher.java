@@ -71,6 +71,17 @@ public abstract class LoadUILauncher
 	{
 		argv = args;
 
+		String workingDir = System.getenv( "LOADUI_WORKING" );
+		if(workingDir != null)
+		{
+			setDefaultSystemProperty( LoadUI.LOADUI_WORKING, workingDir );
+
+			System.out.println("set working directory to: " + workingDir);
+		}
+
+		System.out.println("LoadUI working directory= "+ LoadUI.getWorkingDir());
+
+
 		//Fix for Protection!
 		//FIXME this fix is probably not needed after the license-manager was created,
 		// this is also present in the license manager ticket to remove this: LOADUI-1029
@@ -78,6 +89,20 @@ public abstract class LoadUILauncher
 		System.setProperty( "user.name.original", username );
 		System.setProperty( "user.name", username.toLowerCase() );
 		File buildInfoFile = new File( LoadUI.getWorkingDir(), "res/buildinfo.txt" );
+
+
+		System.out.println("BEFORE SET:");
+		System.out.println(Main.CONFIG_PROPERTIES_PROP + ": " + System.getProperty( Main.CONFIG_PROPERTIES_PROP ));
+		System.out.println(Main.SYSTEM_PROPERTIES_PROP + ": " + System.getProperty( Main.SYSTEM_PROPERTIES_PROP ));
+
+		//Paths.get( LoadUI.getWorkingDir(),  Main.CONFIG_DIRECTORY, Main.CONFIG_PROPERTIES_FILE_VALUE ).toUri()
+		System.setProperty( Main.CONFIG_PROPERTIES_PROP, new File(LoadUI.getWorkingDir() + File.separator + Main.CONFIG_DIRECTORY + File.separator + Main.CONFIG_PROPERTIES_FILE_VALUE).toURI().toString() );
+		System.setProperty( Main.SYSTEM_PROPERTIES_PROP, new File(LoadUI.getWorkingDir() + File.separator + Main.CONFIG_DIRECTORY + File.separator + Main.SYSTEM_PROPERTIES_FILE_VALUE).toURI().toString() );
+
+		System.out.println("AFTER SET:");
+		System.out.println(Main.CONFIG_PROPERTIES_PROP + ": " + System.getProperty( Main.CONFIG_PROPERTIES_PROP ));
+		System.out.println( Main.SYSTEM_PROPERTIES_PROP + ": " + System.getProperty( Main.SYSTEM_PROPERTIES_PROP ) );
+
 
 		applyJava6sslIssueWorkaround();
 
@@ -247,10 +272,13 @@ public abstract class LoadUILauncher
 	{
 		try
 		{
+			System.out.println("org.osgi.framework.storage: " + configProps.getProperty( "org.osgi.framework.storage" ));
 			File bundleCache = new File( configProps.getProperty( "org.osgi.framework.storage" ) );
 			if( !bundleCache.isDirectory() )
 				if( !bundleCache.mkdirs() )
 					throw new RuntimeException( "Unable to create directory: " + bundleCache.getAbsolutePath() );
+
+			System.out.println("BundleCacheDir: " + bundleCache.getAbsolutePath());
 
 			File lockFile = new File( bundleCache, "loadui.lock" );
 			if( !lockFile.exists() )
