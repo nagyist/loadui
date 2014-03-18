@@ -10,6 +10,7 @@ public class WebRunner extends RunnerBase
 	public WebRunner( ComponentContext context )
 	{
 		super( context );
+		context.setLayout( new WebRunnerLayout() );
 	}
 
 	@Override

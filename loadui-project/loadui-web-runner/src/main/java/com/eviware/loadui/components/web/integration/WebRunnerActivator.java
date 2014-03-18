@@ -28,7 +28,7 @@ public class WebRunnerActivator
 		URI webRunnerIcon = getClass().getResource( "/images/WebRunner.png" ).toURI();
 
 		log.debug( "Activating the Web Runner Bundle" );
-		ComponentDescriptor restDescriptor = new ComponentDescriptor(
+		ComponentDescriptor webRunnerDescriptor = new ComponentDescriptor(
 				WebRunner.class.getName(),
 				RunnerCategory.CATEGORY,
 				"New Web Runner",
@@ -36,7 +36,7 @@ public class WebRunnerActivator
 				webRunnerIcon
 		);
 
-		registry.registerDescriptor( restDescriptor, behaviorProvider );
+		registry.registerDescriptor( webRunnerDescriptor, behaviorProvider );
 	}
 
 	public void stop()
