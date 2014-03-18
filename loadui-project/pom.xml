@@ -35,6 +35,7 @@
         <module>loadui-fx-test-utils</module>
         <module>loadui-groovy-fx</module>
         <module>loadui-rest-runner</module>
+        <module>loadui-web-runner</module>
     </modules>
     <repositories>
         <repository>
