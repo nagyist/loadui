@@ -35,9 +35,7 @@
                 <version>${mavenBundlePluginVersion}</version>
                 <configuration>
                     <instructions>
-                        <Import-Package>org.apache.commons.logging,org.apache.commons.codec.binary;version=1.1.1,*
-                        </Import-Package>
-                        <Embed-Dependency>*;scope=provided</Embed-Dependency>
+                        <Export-Package></Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
@@ -76,15 +74,13 @@
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
+            <artifactId>httpcore-osgi</artifactId>
             <version>4.3.1</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
+            <artifactId>httpclient-osgi</artifactId>
             <version>4.3.1</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 
