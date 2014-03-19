@@ -16,7 +16,7 @@ public class WebRunner extends RunnerBase
 	@Override
 	protected TerminalMessage sample( TerminalMessage triggerMessage, Object sampleId ) throws SampleCancelledException
 	{
-		return triggerMessage;
+		return null;
 	}
 
 	@Override

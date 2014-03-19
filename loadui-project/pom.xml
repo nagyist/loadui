@@ -16,6 +16,7 @@
         <module>loadui-core-deps</module>
         <module>loadui-api</module>
         <module>loadui-fx-api</module>
+        <module>loadui-web-data</module>
         <module>loadui-model-xmlbeans</module>
         <module>loadui-base</module>
         <module>loadui-controller-base</module>
