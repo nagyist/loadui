@@ -15,6 +15,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.util.Map;
@@ -64,6 +65,7 @@ public class RestRunner extends RunnerBase
 			long currentTime = clock.millis();
 			long latency = latencyCalculator.calculate( response.getEntity().getContent(), ( Long )sampleId );
 			latencyVariable.update( currentTime, latency );
+			EntityUtils.consume( response.getEntity() );
 		}
 		catch( IOException e )
 		{
