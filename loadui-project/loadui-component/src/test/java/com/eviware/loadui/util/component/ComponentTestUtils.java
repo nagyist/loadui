@@ -70,11 +70,11 @@ import com.eviware.loadui.util.test.TestUtils;
 
 public class ComponentTestUtils
 {
-	private static final ComponentItem dummyComponent = mock( ComponentItem.class );
-	private static final OutputTerminal outputDummy = mock( OutputTerminal.class );
-	private static final Set<ConnectionImpl> connections = Collections.synchronizedSet( new HashSet<ConnectionImpl>() );
+	private final ComponentItem dummyComponent = mock( ComponentItem.class );
+	private final OutputTerminal outputDummy = mock( OutputTerminal.class );
+	private final Set<ConnectionImpl> connections = Collections.synchronizedSet( new HashSet<ConnectionImpl>() );
 
-	static
+	public ComponentTestUtils()
 	{
 		System.setProperty( LoadUI.INSTANCE, LoadUI.CONTROLLER );
 
@@ -148,17 +148,10 @@ public class ComponentTestUtils
 		{
 			TestUtils.awaitEvents( component );
 		}
-		catch( InterruptedException e )
+		catch( InterruptedException | ExecutionException | TimeoutException e )
 		{
 			e.printStackTrace();
-		}
-		catch( ExecutionException e )
-		{
-			e.printStackTrace();
-		}
-		catch( TimeoutException e )
-		{
-			e.printStackTrace();
+			throw new RuntimeException( e );
 		}
 	}
 
@@ -251,15 +244,7 @@ public class ComponentTestUtils
 				{
 					TestUtils.awaitEvents( getOutputTerminal() );
 				}
-				catch( InterruptedException e )
-				{
-					e.printStackTrace();
-				}
-				catch( ExecutionException e )
-				{
-					e.printStackTrace();
-				}
-				catch( TimeoutException e )
+				catch( InterruptedException | ExecutionException | TimeoutException e )
 				{
 					e.printStackTrace();
 				}
