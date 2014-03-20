@@ -1,30 +1,54 @@
 package com.eviware.loadui.webdata;
 
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 
-import static com.google.common.io.ByteStreams.toByteArray;
-
-public class HttpWebResponse extends WebResponse
+public class HttpWebResponse implements WebResponse
 {
 
 	private final int responseCode;
-	private final long contentLength;
 	private final Header contentType;
 	private final Header contentEncoding;
-	private final long responseTime;
+	private HttpEntity entity;
+	private boolean responseConsumed = false;
 
-	public HttpWebResponse( int responseCode, long contentLength, Header contentType,
-									Header contentEncoding, byte[] content, long responseTime )
+	@Nullable
+	private byte[] responseContents;
+
+	private StreamConsumer consumer = new StreamConsumer();
+
+	public HttpWebResponse( int responseCode, Header contentType, Header contentEncoding, HttpEntity entity )
 	{
-		super( content );
 		this.responseCode = responseCode;
-		this.contentLength = contentLength;
 		this.contentType = contentType;
 		this.contentEncoding = contentEncoding;
-		this.responseTime = responseTime;
+		this.entity = entity;
+	}
+
+	public void setConsumer( StreamConsumer consumer )
+	{
+		this.consumer = consumer;
+	}
+
+	private void ensureResponseConsumed()
+	{
+		if( responseConsumed ) return;
+
+		try
+		{
+			responseContents = consumer.consume( entity.getContent() );
+		}
+		catch( IOException e )
+		{
+			throw new RuntimeException( "Could not download response body", e );
+		} finally
+		{
+			responseConsumed = true;
+		}
 	}
 
 	public int getResponseCode()
@@ -34,7 +58,8 @@ public class HttpWebResponse extends WebResponse
 
 	public long getContentLength()
 	{
-		return contentLength;
+		ensureResponseConsumed();
+		return responseContents == null ? 0 : responseContents.length;
 	}
 
 	public Header getContentType()
@@ -47,38 +72,21 @@ public class HttpWebResponse extends WebResponse
 		return contentEncoding;
 	}
 
-	public long getResponseTime()
-	{
-		return responseTime;
-	}
-
 	@Override
 	public byte[] getResponseData()
 	{
-		return new byte[0];
+		ensureResponseConsumed();
+		return responseContents == null ? new byte[0] : responseContents;
 	}
 
-	public static HttpWebResponse of( CloseableHttpResponse response, long startTime )
+	public static HttpWebResponse of( CloseableHttpResponse response )
 	{
 		int responseCode = response.getStatusLine().getStatusCode();
 		Header contentType = response.getEntity().getContentType();
 		Header contentEncoding = response.getEntity().getContentEncoding();
 
-		byte[] content;
-		try
-		{
-			content = toByteArray( response.getEntity().getContent() );
-		}
-		catch( IOException e )
-		{
-			throw new RuntimeException( "Could not download response body", e );
-		}
-
-		long contentLength = content.length;
-		long responseTime = System.currentTimeMillis() - startTime;
-
 		return new HttpWebResponse(
-				responseCode, contentLength, contentType, contentEncoding, content, responseTime );
+				responseCode, contentType, contentEncoding, response.getEntity() );
 	}
 
 	@Override
@@ -92,11 +100,10 @@ public class HttpWebResponse extends WebResponse
 
 		return "ProcessedHttpResponse{" +
 				"responseCode=" + responseCode +
-				", contentLength=" + contentLength +
 				", contentType=" + contentType +
 				", contentEncoding=" + contentEncoding +
 				", content=" + contentText +
-				", responseTime=" + responseTime +
+				", responseConsumed=" + responseConsumed +
 				'}';
 	}
 
