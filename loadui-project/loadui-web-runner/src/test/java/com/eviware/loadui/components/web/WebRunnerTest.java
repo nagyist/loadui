@@ -1,11 +1,13 @@
 package com.eviware.loadui.components.web;
 
+import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.terminal.TerminalMessage;
 import com.eviware.loadui.impl.component.categories.RunnerBase;
 import com.eviware.loadui.util.component.RunnerTestBase;
 import com.eviware.loadui.util.html.HtmlAssetScraper;
 import org.junit.Test;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -24,7 +26,7 @@ public class WebRunnerTest extends RunnerTestBase
 		mockReqRunner = mock( RequestRunner.class );
 		mockReqRunnerProvider = mock( RequestRunnerProvider.class );
 
-		when( mockReqRunnerProvider.provideRequestRunner( contextSpy, anyCollection() ) )
+		when( mockReqRunnerProvider.provideRequestRunner( any( ComponentContext.class ), anyCollection() ) )
 				.thenReturn( mockReqRunner );
 
 		runner = new WebRunner( contextSpy, mockScraper, mockReqRunnerProvider );
