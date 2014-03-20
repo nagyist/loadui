@@ -35,7 +35,6 @@ public class HeaderManager
 
 	private void updateHeaders( ComponentContext context )
 	{
-		System.out.println("HEDEAR: " + context.getProperty( HEADERS ).getStringValue());
 		headers = HeaderManager.extractHeaders( context.getProperty( HEADERS ).getStringValue() );
 	}
 
