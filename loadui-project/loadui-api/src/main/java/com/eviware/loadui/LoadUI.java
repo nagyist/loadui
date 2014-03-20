@@ -122,7 +122,7 @@ public class LoadUI
 	 */
 	public static File getWorkingDir()
 	{
-		return new File( System.getProperty( LOADUI_WORKING, "." ) ).getAbsoluteFile();
+		return new File( System.getProperty( LOADUI_WORKING, "" ) ).getAbsoluteFile();
 	}
 
 	public static File relativeFile( String path )

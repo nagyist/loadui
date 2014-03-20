@@ -33,6 +33,7 @@ import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Dictionary;
@@ -70,6 +71,8 @@ public abstract class LoadUILauncher
 	public LoadUILauncher( String[] args )
 	{
 		argv = args;
+
+		setLoadUiWorkingDirectory();
 
 		//Fix for Protection!
 		//FIXME this fix is probably not needed after the license-manager was created,
@@ -156,6 +159,21 @@ public abstract class LoadUILauncher
 			exitInError();
 		}
 		Main.copySystemProperties( configProps );
+	}
+
+	private void setLoadUiWorkingDirectory()
+	{
+		String workingDir = System.getenv( "LOADUI_WORKING" );
+		if( workingDir != null )
+		{
+			setDefaultSystemProperty( LoadUI.LOADUI_WORKING, workingDir );
+		}
+		else
+		{
+			setDefaultSystemProperty( LoadUI.LOADUI_WORKING, new File( "" ).getAbsolutePath() );
+		}
+
+		System.out.println( "LoadUI working directory: " + LoadUI.getWorkingDir() );
 	}
 
 	private void applyJava6sslIssueWorkaround()
@@ -357,7 +375,7 @@ public abstract class LoadUILauncher
 
 	public Object getService( Class<?> serviceClass, String osgiFilter ) throws InvalidSyntaxException
 	{
-		int tries = 10;
+		int tries = 20;
 		ServiceReference[] references;
 		do
 		{
@@ -400,16 +418,32 @@ public abstract class LoadUILauncher
 		// no action
 	}
 
-	private void setDefaultHomeToEnvironmentHomeIfAvailable(){
+	private static void setDefaultHomeToEnvironmentHomeIfAvailable()
+	{
 		String userHome = System.getenv( "USER_HOME" );
-		if(userHome != null){
+		if( userHome != null )
+		{
 			System.setProperty( "user.home", userHome );
 		}
 	}
 
-	protected final void initSystemProperties()
+	private static void setOsgiConfigurationProperties()
+	{
+		setDefaultSystemProperty( Main.CONFIG_PROPERTIES_PROP, Paths
+				.get( LoadUI.getWorkingDir().getAbsolutePath(), Main.CONFIG_DIRECTORY, Main.CONFIG_PROPERTIES_FILE_VALUE )
+				.toUri()
+				.toString() );
+		setDefaultSystemProperty( Main.SYSTEM_PROPERTIES_PROP, Paths
+				.get( LoadUI.getWorkingDir().getAbsolutePath(), Main.CONFIG_DIRECTORY, Main.SYSTEM_PROPERTIES_FILE_VALUE )
+				.toUri()
+				.toString() );
+	}
+
+	public static void initSystemProperties()
 	{
 		setDefaultHomeToEnvironmentHomeIfAvailable();
+
+		setOsgiConfigurationProperties();
 
 		setDefaultSystemProperty( LOADUI_HOME, System.getProperty( "user.home" ) + File.separator + ".loadui" );
 
@@ -469,10 +503,10 @@ public abstract class LoadUILauncher
 		}
 	}
 
-	private void createKeyStore( File keystore )
+	private static void createKeyStore( File keystore )
 	{
 		try(FileOutputStream fos = new FileOutputStream( keystore );
-			 InputStream is = getClass().getResourceAsStream( "/keystore.jks" ))
+			 InputStream is = LoadUILauncher.class.getResourceAsStream( "/keystore.jks" ))
 		{
 			byte buf[] = new byte[1024];
 			int len;
@@ -486,10 +520,10 @@ public abstract class LoadUILauncher
 		}
 	}
 
-	private void createTrustStore( File truststore )
+	private static void createTrustStore( File truststore )
 	{
 		try(FileOutputStream fos = new FileOutputStream( truststore );
-			 InputStream is = getClass().getResourceAsStream( "/certificate.pem" ))
+			 InputStream is = LoadUILauncher.class.getResourceAsStream( "/certificate.pem" ))
 		{
 			byte buf[] = new byte[1024];
 			int len;
