@@ -14,7 +14,7 @@ import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
 
-import static com.eviware.loadui.util.projects.ComponentBuilder.LoadUiComponent.*;
+import static com.eviware.loadui.util.projects.ComponentBuilder.LoadUIComponents.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -64,7 +64,7 @@ public class ProjectBuilderTest
 				.importProject( true )
 				.components(
 						ComponentBuilder.create().type( FIXED_RATE ).property( "rate", Long.class, 10L ).child(
-								ComponentBuilder.create().type( WEB_RUNNER ).property( "url", String.class, "http://05ten.se" ).build()
+								ComponentBuilder.create().type( "Web Page Runner" ).property( "url", String.class, "http://05ten.se" ).build()
 						).build()
 				)
 				.build();
@@ -87,7 +87,7 @@ public class ProjectBuilderTest
 				.importProject( true )
 				.components(
 						ComponentBuilder.create().type( FIXED_LOAD ).concurrent().property( "load", Long.class, 2L ).child(
-								ComponentBuilder.create().type( WEB_RUNNER ).property( "url", String.class, "http://05ten.se" ).build()
+								ComponentBuilder.create().type( "Web Page Runner" ).property( "url", String.class, "http://05ten.se" ).build()
 						).build()
 				)
 				.build();
