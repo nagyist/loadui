@@ -18,6 +18,7 @@ public class WebRunnerStatsSender
 	private final Map<String, StatisticVariable.Mutable> latencyVariableMap = new HashMap<>();
 	private final Map<String, StatisticVariable.Mutable> timeTakenVariableMap = new HashMap<>();
 	private final Map<String, StatisticVariable.Mutable> responseSizeVariableMap = new HashMap<>();
+	private final Map<String, StatisticVariable.Mutable> FailureVariableMap = new HashMap<>();
 
 	private final Clock clock;
 	private final ComponentContext context;
@@ -36,6 +37,7 @@ public class WebRunnerStatsSender
 
 	public void updateRequestSent( String resource )
 	{
+		long currentTime = clock.millis();
 
 	}
 
@@ -47,6 +49,12 @@ public class WebRunnerStatsSender
 	public void updateResponse( String resource, long timeTaken, long responseSize )
 	{
 		long currentTime = clock.millis();
+	}
+
+	public void updateRequestFailed( String resource )
+	{
+		long currentTime = clock.millis();
+
 	}
 
 }
