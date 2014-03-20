@@ -10,7 +10,7 @@ import static com.eviware.loadui.api.component.ComponentContext.Scope.COMPONENT;
 import static com.eviware.loadui.api.component.categories.RunnerCategory.SAMPLE_ACTION;
 import static com.eviware.loadui.components.rest.RestRunner.BODY;
 import static com.eviware.loadui.components.rest.RestRunner.METHOD;
-import static com.eviware.loadui.components.rest.RestRunner.URL;
+import static com.eviware.loadui.components.rest.UrlProperty.URL;
 import static com.eviware.loadui.impl.layout.ActionLayoutComponentImpl.ACTION;
 import static com.eviware.loadui.impl.layout.PropertyLayoutComponentImpl.LABEL;
 import static com.eviware.loadui.impl.layout.PropertyLayoutComponentImpl.PROPERTY;
