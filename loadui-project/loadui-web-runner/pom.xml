@@ -50,6 +50,11 @@
         </dependency>
         <dependency>
             <groupId>com.eviware.loadui</groupId>
+            <artifactId>loadui-web-data</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.eviware.loadui</groupId>
             <artifactId>loadui-component</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -79,12 +84,12 @@
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore-osgi</artifactId>
+            <artifactId>httpcore</artifactId>
             <version>4.3.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient-osgi</artifactId>
+            <artifactId>httpclient</artifactId>
             <version>4.3.1</version>
         </dependency>
     </dependencies>
