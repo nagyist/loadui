@@ -24,7 +24,7 @@ public class WebRunnerTest extends RunnerTestBase
 		mockReqRunner = mock( RequestRunner.class );
 		mockReqRunnerProvider = mock( RequestRunnerProvider.class );
 
-		when( mockReqRunnerProvider.provideRequestRunner( anyCollection() ) )
+		when( mockReqRunnerProvider.provideRequestRunner( contextSpy, anyCollection() ) )
 				.thenReturn( mockReqRunner );
 
 		runner = new WebRunner( contextSpy, mockScraper, mockReqRunnerProvider );

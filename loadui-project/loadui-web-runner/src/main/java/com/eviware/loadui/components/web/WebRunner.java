@@ -47,18 +47,16 @@ public class WebRunner extends RunnerBase
 	{
 		try
 		{
-			System.out.println("Validating url " + url );
 			validateUrl( url );
-			requestRunner = requestRunnerProvider.provideRequestRunner( scraper.scrapeUrl( url ) );
+			requestRunner = requestRunnerProvider.provideRequestRunner( getContext(), scraper.scrapeUrl( url ) );
 		}
 		catch( IllegalArgumentException e )
 		{
-			System.out.println("Bad URL");
 			//TODO invalid URL, do something
+
 		}
 		catch( IOException e )
 		{
-			System.out.println("Could not scrap shit!");
 			//TODO could not scrap!
 		}
 	}
