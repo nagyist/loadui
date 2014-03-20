@@ -178,7 +178,7 @@ public class RestRunnerTest
 		}
 		catch( Exception e )
 		{
-			e.printStackTrace();
+			throw new RuntimeException( e );
 		}
 	}
 
