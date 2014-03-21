@@ -17,6 +17,7 @@ public class ComponentBuilder
 	{
 		FIXED_RATE( "Fixed Rate" ),
 		WEB_RUNNER( "Web Page Runner" ),
+		NEW_WEB_RUNNER( "New Web Runner" ),
 		REST_RUNNER( "REST Runner" ),
 		FIXED_LOAD( "Fixed Load" ),
 		RAMP_LOAD( "Ramp Load" ),

@@ -24,6 +24,12 @@ public class CounterAsserter
 		return new CounterAsserter( counterHolder );
 	}
 
+	public static void oneSuccessfulRequest( CounterHolder counterHolder )
+	{
+		CounterAsserter counterAsserter = new CounterAsserter( counterHolder );
+		counterAsserter.sent( 1 ).completed( 1 ).failures( 0 );
+	}
+
 	public CounterAsserter failures( long expected )
 	{
 		assertThat( counterHolder.getCounter( CanvasItem.REQUEST_FAILURE_COUNTER ).get(), is( expected ) );
