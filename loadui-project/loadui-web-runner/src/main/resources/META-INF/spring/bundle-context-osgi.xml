@@ -5,6 +5,10 @@
                       http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi-1.0.xsd"
     osgi:default-timeout="5000" >
 
-	<osgi:reference interface="com.eviware.loadui.api.component.ComponentRegistry" id="registry" />
-		
+	<osgi:reference id="registry" interface="com.eviware.loadui.api.component.ComponentRegistry" />
+
+    <osgi:reference id="testEventManager" interface="com.eviware.loadui.api.testevents.TestEventManager" cardinality="0..1">
+        <osgi:listener ref="behaviorProvider" bind-method="bindEventManager" unbind-method="removeEventManager" />
+    </osgi:reference>
+
 </beans>
