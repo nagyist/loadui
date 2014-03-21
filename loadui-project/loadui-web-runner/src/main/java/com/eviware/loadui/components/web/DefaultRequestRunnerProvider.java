@@ -2,14 +2,14 @@ package com.eviware.loadui.components.web;
 
 import com.eviware.loadui.api.base.Clock;
 import com.eviware.loadui.api.component.ComponentContext;
+import com.eviware.loadui.components.web.api.RequestRunnerProvider;
 import com.eviware.loadui.util.RealClock;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.net.URI;
 
-public class RequestRunnerProvider
+public class DefaultRequestRunnerProvider implements RequestRunnerProvider
 {
-
 	public RequestRunner provideRequestRunner( ComponentContext context, Iterable<URI> pageUris )
 	{
 		Clock clock = new RealClock();
@@ -18,5 +18,4 @@ public class RequestRunnerProvider
 				pageUris,
 				new WebRunnerStatsSender( context, clock ) );
 	}
-
 }

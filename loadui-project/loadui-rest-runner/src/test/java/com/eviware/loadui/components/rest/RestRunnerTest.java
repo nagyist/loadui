@@ -11,11 +11,12 @@ import com.eviware.loadui.util.RealClock;
 import com.eviware.loadui.util.component.ComponentTestUtils;
 import static com.eviware.loadui.components.rest.HeaderManager.HEADERS;
 
+import com.eviware.loadui.util.test.CounterAsserter;
+import com.eviware.loadui.util.test.FakeHttpClient;
 import com.eviware.loadui.util.test.TestUtils;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.util.EntityUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.net.URI;

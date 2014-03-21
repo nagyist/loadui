@@ -1,4 +1,4 @@
-package com.eviware.loadui.components.rest;
+package com.eviware.loadui.util.test;
 
 import com.eviware.loadui.api.counter.CounterHolder;
 import com.eviware.loadui.api.model.CanvasItem;

@@ -5,6 +5,7 @@ import com.eviware.loadui.api.events.EventHandler;
 import com.eviware.loadui.api.events.PropertyEvent;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.api.terminal.TerminalMessage;
+import com.eviware.loadui.components.web.api.RequestRunnerProvider;
 import com.eviware.loadui.impl.component.categories.RunnerBase;
 import com.eviware.loadui.util.html.HtmlAssetScraper;
 
