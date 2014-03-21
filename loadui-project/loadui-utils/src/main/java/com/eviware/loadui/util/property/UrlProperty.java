@@ -1,4 +1,4 @@
-package com.eviware.loadui.components.rest;
+package com.eviware.loadui.util.property;
 
 import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.events.EventHandler;

@@ -6,7 +6,7 @@ import com.eviware.loadui.api.model.ComponentItem;
 import com.eviware.loadui.api.terminal.InputTerminal;
 import com.eviware.loadui.api.terminal.OutputTerminal;
 import com.eviware.loadui.api.terminal.TerminalMessage;
-import static com.eviware.loadui.components.rest.UrlProperty.URL;
+import static com.eviware.loadui.util.property.UrlProperty.URL;
 import com.eviware.loadui.util.RealClock;
 import com.eviware.loadui.util.component.ComponentTestUtils;
 import static com.eviware.loadui.components.rest.HeaderManager.HEADERS;
