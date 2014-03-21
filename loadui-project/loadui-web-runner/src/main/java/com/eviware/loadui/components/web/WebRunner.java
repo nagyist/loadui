@@ -5,6 +5,8 @@ import com.eviware.loadui.api.events.EventHandler;
 import com.eviware.loadui.api.events.PropertyEvent;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.api.terminal.TerminalMessage;
+import com.eviware.loadui.api.testevents.MessageLevel;
+import com.eviware.loadui.api.testevents.TestEventManager;
 import com.eviware.loadui.impl.component.categories.RunnerBase;
 import com.eviware.loadui.util.html.HtmlAssetScraper;
 
@@ -18,7 +20,11 @@ public class WebRunner extends RunnerBase
 	private final HtmlAssetScraper scraper;
 	private final RequestRunnerProvider requestRunnerProvider;
 	private RequestRunner requestRunner;
+	private TestEventManager testEventManager;
+	private Runnable toRunOnRelease;
+
 	public static final String WEB_PAGE_URL_PROP = "webPageUrl";
+
 
 	public WebRunner( ComponentContext context, HtmlAssetScraper scraper, RequestRunnerProvider requestRunnerProvider )
 	{
@@ -40,7 +46,7 @@ public class WebRunner extends RunnerBase
 			}
 		} );
 
-		context.setLayout( new WebRunnerLayout() );
+		context.setLayout( new WebRunnerLayout( webPageUrlProperty ) );
 	}
 
 	private void updateWebPageUrl( String url )
@@ -52,12 +58,19 @@ public class WebRunner extends RunnerBase
 		}
 		catch( IllegalArgumentException e )
 		{
-			//TODO invalid URL, do something
-
+			log.debug( "WebRunner cannot accept the invalid URL: {}", url );
 		}
 		catch( IOException e )
 		{
-			//TODO could not scrap!
+			log.debug( "An error occurred while scraping the provided URL: {}", url );
+		}
+	}
+
+	private void notifyUser( String message )
+	{
+		if( testEventManager != null )
+		{
+			testEventManager.logMessage( MessageLevel.WARNING, message );
 		}
 	}
 
@@ -74,7 +87,7 @@ public class WebRunner extends RunnerBase
 	protected TerminalMessage sample( TerminalMessage triggerMessage, Object sampleId ) throws SampleCancelledException
 	{
 		if( requestRunner == null )
-			throw new SampleCancelledException();
+			throw new RuntimeException( "Cannot run, no URL set or URL is invalid" );
 		requestRunner.run();
 		return triggerMessage;
 	}
@@ -86,5 +99,25 @@ public class WebRunner extends RunnerBase
 		return 0;
 	}
 
+	@Override
+	public void onRelease()
+	{
+		super.onRelease();
+		if( toRunOnRelease != null )
+		{
+			toRunOnRelease.run();
+		}
+	}
+
+	public void setTestEventManager( TestEventManager testEventManager )
+	{
+		this.testEventManager = testEventManager;
+	}
+
+
+	public void setOnRelease( Runnable onRelease )
+	{
+		this.toRunOnRelease = onRelease;
+	}
 
 }

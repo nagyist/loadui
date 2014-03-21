@@ -33,13 +33,13 @@ public class WebRunnerTest extends RunnerTestBase
 		return runner;
 	}
 
-	@Test( expected = RunnerBase.SampleCancelledException.class )
+	@Test( expected = RuntimeException.class )
 	public void throwsWhenNoUrlGiven() throws RunnerBase.SampleCancelledException
 	{
 		runner.sample( mock( TerminalMessage.class ), 0L );
 	}
 
-	@Test( expected = RunnerBase.SampleCancelledException.class )
+	@Test( expected = RuntimeException.class )
 	public void throwsWhenBadUrlGiven() throws RunnerBase.SampleCancelledException, InterruptedException
 	{
 		setProperty( WebRunner.WEB_PAGE_URL_PROP, "x://bad url" );
