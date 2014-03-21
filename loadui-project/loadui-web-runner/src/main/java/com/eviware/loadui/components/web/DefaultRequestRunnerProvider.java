@@ -14,13 +14,27 @@ import static java.util.Arrays.asList;
 public class DefaultRequestRunnerProvider implements RequestRunnerProvider
 {
 	private final Clock clock = new RealClock();
+	private WebRunnerStatsSender statisticsSender;
 
 	public RequestRunner provideRequestRunner( ComponentContext context, URI pageUri, Iterable<URI> assetUris )
 	{
 		return new RequestRunner( clock,
 				HttpClientBuilder.create().build(),
 				Iterables.concat( asList( pageUri ), assetUris ),
-				new WebRunnerStatsSender( context, clock ) );
+				createStatsSenderIfNecessary( context ) );
+	}
+
+	private WebRunnerStatsSender createStatsSenderIfNecessary( ComponentContext context )
+	{
+		if( statisticsSender == null )
+		{
+			statisticsSender = new WebRunnerStatsSender( context, clock );
+		}
+		else
+		{
+			statisticsSender.clearStatisticVariables();
+		}
+		return statisticsSender;
 	}
 
 }

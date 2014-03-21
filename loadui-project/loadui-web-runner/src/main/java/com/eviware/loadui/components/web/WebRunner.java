@@ -3,13 +3,13 @@ package com.eviware.loadui.components.web;
 import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.events.EventHandler;
 import com.eviware.loadui.api.events.PropertyEvent;
-import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.api.terminal.TerminalMessage;
-import com.eviware.loadui.components.web.api.RequestRunnerProvider;
 import com.eviware.loadui.api.testevents.MessageLevel;
 import com.eviware.loadui.api.testevents.TestEventManager;
+import com.eviware.loadui.components.web.api.RequestRunnerProvider;
 import com.eviware.loadui.impl.component.categories.RunnerBase;
 import com.eviware.loadui.util.html.HtmlAssetScraper;
+import com.eviware.loadui.util.property.UrlProperty;
 
 import java.io.IOException;
 import java.net.URI;
@@ -17,22 +17,22 @@ import java.net.URI;
 public class WebRunner extends RunnerBase
 {
 
-	private final Property<String> webPageUrlProperty;
+	private final UrlProperty webPageUrlProperty;
 	private final HtmlAssetScraper scraper;
 	private final RequestRunnerProvider requestRunnerProvider;
 	private RequestRunner requestRunner;
 	private TestEventManager testEventManager;
 	private Runnable toRunOnRelease;
 
-	public static final String WEB_PAGE_URL_PROP = "webPageUrl";
-
+	// TODO remove this
+	public static final String WEB_PAGE_URL_PROP = UrlProperty.URL;
 
 	public WebRunner( ComponentContext context, HtmlAssetScraper scraper, RequestRunnerProvider requestRunnerProvider )
 	{
 		super( context );
 		this.scraper = scraper;
 		this.requestRunnerProvider = requestRunnerProvider;
-		this.webPageUrlProperty = context.createProperty( WEB_PAGE_URL_PROP, String.class );
+		this.webPageUrlProperty = new UrlProperty( context );
 
 		context.addEventListener( PropertyEvent.class, new EventHandler<PropertyEvent>()
 		{
@@ -42,7 +42,7 @@ public class WebRunner extends RunnerBase
 				if( event.getEvent() == PropertyEvent.Event.VALUE &&
 						event.getProperty() == webPageUrlProperty )
 				{
-					updateWebPageUrl( webPageUrlProperty.getValue() );
+					updateWebPageUrl( webPageUrlProperty.getUrl() );
 				}
 			}
 		} );
