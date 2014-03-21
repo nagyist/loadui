@@ -54,8 +54,8 @@ public class WebRunner extends RunnerBase
 	{
 		try
 		{
-			validateUrl( url );
-			requestRunner = requestRunnerProvider.provideRequestRunner( getContext(), scraper.scrapeUrl( url ) );
+			URI pageUri = validateUrl( url );
+			requestRunner = requestRunnerProvider.provideRequestRunner( getContext(), pageUri, scraper.scrapeUrl( url ) );
 		}
 		catch( IllegalArgumentException e )
 		{
@@ -75,13 +75,13 @@ public class WebRunner extends RunnerBase
 		}
 	}
 
-	private void validateUrl( String url ) throws IllegalArgumentException
+	private URI validateUrl( String url ) throws IllegalArgumentException
 	{
 		if( url == null )
 		{
 			throw new IllegalArgumentException( "URL cannot be null" );
 		}
-		URI.create( url );
+		return URI.create( url );
 	}
 
 	@Override

@@ -7,5 +7,5 @@ import java.net.URI;
 
 public interface RequestRunnerProvider
 {
-	RequestRunner provideRequestRunner( ComponentContext context, Iterable<URI> pageUris );
+	RequestRunner provideRequestRunner( ComponentContext context, URI pageUri, Iterable<URI> assertUris );
 }
