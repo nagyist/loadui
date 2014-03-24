@@ -85,6 +85,11 @@ public class RequestRunner implements Runnable
 		}
 	}
 
+	public void resetCounters()
+	{
+		statsSender.reset();
+	}
+
 	private class Request implements Callable<Void>
 	{
 		private final URI uri;

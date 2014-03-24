@@ -1,8 +1,7 @@
 package com.eviware.loadui.components.web;
 
 import com.eviware.loadui.api.component.ComponentContext;
-import com.eviware.loadui.api.events.EventHandler;
-import com.eviware.loadui.api.events.PropertyEvent;
+import com.eviware.loadui.api.serialization.ListenableValue;
 import com.eviware.loadui.api.terminal.TerminalMessage;
 import com.eviware.loadui.api.testevents.MessageLevel;
 import com.eviware.loadui.api.testevents.TestEventManager;
@@ -13,8 +12,9 @@ import com.eviware.loadui.util.property.UrlProperty;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-public class WebRunner extends RunnerBase
+public class WebRunner extends RunnerBase implements ListenableValue.ValueListener<String>
 {
 
 	private final UrlProperty webPageUrlProperty;
@@ -23,6 +23,7 @@ public class WebRunner extends RunnerBase
 	private RequestRunner requestRunner;
 	private TestEventManager testEventManager;
 	private Runnable toRunOnRelease;
+	private AtomicBoolean isLoadTestRunning = new AtomicBoolean( false );
 
 	// TODO remove this
 	public static final String WEB_PAGE_URL_PROP = UrlProperty.URL;
@@ -33,25 +34,35 @@ public class WebRunner extends RunnerBase
 		this.scraper = scraper;
 		this.requestRunnerProvider = requestRunnerProvider;
 		this.webPageUrlProperty = new UrlProperty( context );
+		context.setLayout( new WebRunnerLayout( webPageUrlProperty, context ) );
+		webPageUrlProperty.addUrlChangeListener( this );
+	}
 
-		context.addEventListener( PropertyEvent.class, new EventHandler<PropertyEvent>()
+	public void setLoadTestRunning( boolean running )
+	{
+		isLoadTestRunning.set( running );
+		if( running )
 		{
-			@Override
-			public void handleEvent( PropertyEvent event )
+			if( requestRunner != null )
 			{
-				if( event.getEvent() == PropertyEvent.Event.VALUE &&
-						event.getProperty() == webPageUrlProperty )
-				{
-					updateWebPageUrl( webPageUrlProperty.getUrl() );
-				}
+				requestRunner.resetCounters();
 			}
-		} );
+			updateWebPageUrl( webPageUrlProperty.getUrl() );
+		}
+	}
 
-		context.setLayout( new WebRunnerLayout( webPageUrlProperty ) );
+	@Override
+	public void update( String url )
+	{
+		if( isLoadTestRunning.get() )
+		{
+			updateWebPageUrl( url );
+		}
 	}
 
 	private void updateWebPageUrl( String url )
 	{
+		log.debug( "Updating url to {}", url );
 		try
 		{
 			URI pageUri = validateUrl( url );

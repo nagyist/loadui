@@ -7,6 +7,8 @@
 
 	<osgi:reference id="registry" interface="com.eviware.loadui.api.component.ComponentRegistry" />
 
+    <osgi:reference id="testRunner" interface="com.eviware.loadui.api.execution.TestRunner" />
+
     <osgi:reference id="testEventManager" interface="com.eviware.loadui.api.testevents.TestEventManager" cardinality="0..1">
         <osgi:listener ref="behaviorProvider" bind-method="bindEventManager" unbind-method="removeEventManager" />
     </osgi:reference>
