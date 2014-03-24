@@ -6,11 +6,8 @@ import com.eviware.loadui.api.model.ComponentItem;
 import com.eviware.loadui.api.terminal.InputTerminal;
 import com.eviware.loadui.api.terminal.OutputTerminal;
 import com.eviware.loadui.api.terminal.TerminalMessage;
-import static com.eviware.loadui.util.property.UrlProperty.URL;
 import com.eviware.loadui.util.RealClock;
 import com.eviware.loadui.util.component.ComponentTestUtils;
-import static com.eviware.loadui.components.rest.HeaderManager.HEADERS;
-
 import com.eviware.loadui.util.test.CounterAsserter;
 import com.eviware.loadui.util.test.FakeHttpClient;
 import com.eviware.loadui.util.test.TestUtils;
@@ -22,7 +19,10 @@ import org.junit.Test;
 import java.net.URI;
 import java.util.concurrent.BlockingQueue;
 
-import static com.eviware.loadui.components.rest.RestRunner.*;
+import static com.eviware.loadui.components.rest.HeaderManager.HEADERS;
+import static com.eviware.loadui.components.rest.RestRunner.BODY;
+import static com.eviware.loadui.components.rest.RestRunner.METHOD;
+import static com.eviware.loadui.util.property.UrlProperty.URL;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;
