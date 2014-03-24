@@ -71,10 +71,12 @@ public class WebRunner extends RunnerBase implements ListenableValue.ValueListen
 		catch( IllegalArgumentException e )
 		{
 			log.debug( "WebRunner cannot accept the invalid URL: {}", url );
+			notifyUser( getContext().getLabel() + " will not run. Invalid URL: " + url );
 		}
 		catch( IOException e )
 		{
 			log.debug( "An error occurred while scraping the provided URL: {}", url );
+			notifyUser( getContext().getLabel() + " could not scrape the given URL. Please start the test again." );
 		}
 	}
 
@@ -82,7 +84,12 @@ public class WebRunner extends RunnerBase implements ListenableValue.ValueListen
 	{
 		if( testEventManager != null )
 		{
+			log.debug( "Notifying user: " + message );
 			testEventManager.logMessage( MessageLevel.WARNING, message );
+		}
+		else
+		{
+			log.warn( "Cannot notify users as testEventManager is null" );
 		}
 	}
 
@@ -107,8 +114,7 @@ public class WebRunner extends RunnerBase implements ListenableValue.ValueListen
 	@Override
 	protected int onCancel()
 	{
-		//TODO implement
-		return 0;
+		return requestRunner.cancelAllRequests();
 	}
 
 	@Override

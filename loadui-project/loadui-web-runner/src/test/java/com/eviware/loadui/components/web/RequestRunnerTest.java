@@ -10,21 +10,28 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Arrays.asList;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public class RequestRunnerTest
 {
 
-	RequestRunner runner;
 	Clock clock;
 	CloseableHttpClient httpClient;
 	List<URI> uris = new ArrayList<>();
@@ -64,7 +71,7 @@ public class RequestRunnerTest
 	public void allResourcesAreAdded()
 	{
 		uris.addAll( asList( URI.create( "url1" ), URI.create( "url2" ) ) );
-		createRunner();
+		RequestRunner runner = createRunner();
 
 		runner.run();
 
@@ -76,7 +83,7 @@ public class RequestRunnerTest
 	public void allRequestsArePerformed() throws IOException
 	{
 		uris.addAll( asList( URI.create( "url1" ), URI.create( "url2" ) ) );
-		createRunner();
+		RequestRunner runner = createRunner();
 
 		runner.run();
 
@@ -88,7 +95,7 @@ public class RequestRunnerTest
 	{
 		uris.addAll( asList( URI.create( "url1" ) ) );
 
-		createRunner();
+		RequestRunner runner = createRunner();
 
 		runner.run();
 
@@ -97,10 +104,55 @@ public class RequestRunnerTest
 		verify( mockStatsSender ).updateResponse( "url1", 25L, RESPONSE_CONTENT.length() );
 	}
 
-	private void createRunner()
+	@Test
+	public void runningRequestsCanBeCancelled() throws Exception
 	{
-		runner = new RequestRunner( clock, httpClient, uris, mockStatsSender );
+		final long EACH_REQUEST_TIME = 250L;
+		final AtomicInteger interruptedThreads = new AtomicInteger();
+		final CountDownLatch latch = new CountDownLatch( 2 );
+
+		RequestRunner runner = createRunner();
+		runner.requestConverter = mock( RequestRunner.RequestConverter.class );
+
+		RequestRunner.Request mockReq = mock( RequestRunner.Request.class );
+		when( mockReq.call() ).thenAnswer( new Answer<Void>()
+		{
+			@Override
+			public Void answer( InvocationOnMock invocation ) throws Throwable
+			{
+				try
+				{
+					latch.countDown();
+					Thread.sleep( EACH_REQUEST_TIME );
+				}
+				catch( InterruptedException e )
+				{
+					interruptedThreads.incrementAndGet();
+					throw e;
+				}
+				return null;
+			}
+		} );
+
+		when( runner.requestConverter.convert( uris ) ).thenReturn( Arrays.asList( mockReq, mockReq ) );
+
+		new Thread( runner ).start();
+
+		latch.await( 1, TimeUnit.SECONDS );
+
+		int cancelledRequests = runner.cancelAllRequests();
+
+		assertThat( cancelledRequests, is( 2 ) );
+
+		Thread.sleep( EACH_REQUEST_TIME );
+		assertThat( interruptedThreads.get(), is( 2 ) );
+	}
+
+	private RequestRunner createRunner()
+	{
+		RequestRunner runner = new RequestRunner( clock, httpClient, uris, mockStatsSender );
 		runner.setConsumer( mockConsumer );
+		return runner;
 	}
 
 }
