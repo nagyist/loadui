@@ -70,7 +70,7 @@ public class RestRunnerTest
 		triggerAndWait();
 
 		// THEN
-		HttpUriRequest request = httpClient.lastRequest();
+		HttpUriRequest request = httpClient.popRequest();
 		assertThat( request.getMethod(), is( "GET" ) );
 		assertThat( request.getURI(), is( URI.create( TEST_URL )) );
 		CounterAsserter.oneSuccessfulRequest( component.getContext() );
@@ -86,7 +86,7 @@ public class RestRunnerTest
 		triggerAndWait();
 
 		// THEN
-		HttpUriRequest request = httpClient.lastRequest();
+		HttpUriRequest request = httpClient.popRequest();
 		assertThat( request.getMethod(), is( "GET" ) );
 		assertThat( request.getURI(), is( URI.create( TEST_URL )) );
 		CounterAsserter.oneSuccessfulRequest( component.getContext() );
@@ -105,7 +105,7 @@ public class RestRunnerTest
 		triggerAndWait();
 
 		// THEN
-		HttpUriRequest request = httpClient.lastRequest();
+		HttpUriRequest request = httpClient.popRequest();
 		assertThat( request.getFirstHeader( "Content-Type" ).getValue(), is( "text/xml; charset=utf-8" ) );
 		assertThat( request.getFirstHeader( "Multiple-value" ).getValue(), is( "a" ) );
 		assertThat( request.getLastHeader( "Multiple-value" ).getValue(), is( "b" ) );
@@ -123,7 +123,7 @@ public class RestRunnerTest
 		triggerAndWait();
 
 		// THEN
-		CustomHttpRequest request = ( CustomHttpRequest )httpClient.lastRequest();
+		CustomHttpRequest request = ( CustomHttpRequest )httpClient.popRequest();
 		assertThat( request.getMethod(), is( "POST" ) );
 		assertThat( request.getURI(), is( URI.create( TEST_URL )) );
 		assertThat( EntityUtils.toString( request.getEntity() ), is( "Foo" ) );
@@ -141,7 +141,7 @@ public class RestRunnerTest
 		triggerAndWait();
 
 		// THEN
-		CustomHttpRequest request = ( CustomHttpRequest )httpClient.lastRequest();
+		CustomHttpRequest request = ( CustomHttpRequest )httpClient.popRequest();
 		assertThat( request.getURI(), is( URI.create( TEST_URL )) );
 		assertThat( EntityUtils.toString( request.getEntity() ), is( "Foo" ) );
 		CounterAsserter.oneSuccessfulRequest( component.getContext() );
