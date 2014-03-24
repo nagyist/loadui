@@ -13,20 +13,29 @@ import com.eviware.loadui.util.html.HtmlAssetScraper;
 import com.eviware.loadui.util.test.CounterAsserter;
 import com.eviware.loadui.util.test.FakeHttpClient;
 import com.eviware.loadui.util.test.TestUtils;
+import com.google.common.collect.ImmutableMultiset;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multiset;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.util.EntityUtils;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.net.URI;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
+import static com.eviware.loadui.impl.component.categories.BaseCategory.log;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 public class WebRunnerTest
 {
@@ -40,7 +49,7 @@ public class WebRunnerTest
 	private BlockingQueue<TerminalMessage> results;
 
 	@Before
-	public void setup() throws ComponentCreationException
+	public void setup() throws ComponentCreationException, IOException
 	{
 		ctu = new ComponentTestUtils();
 		ctu.getDefaultBeanInjectorMocker();
@@ -49,8 +58,15 @@ public class WebRunnerTest
 		ComponentContext contextSpy = spy( component.getContext() );
 		ctu.mockStatisticsFor( component, contextSpy );
 
+		HtmlAssetScraper assetScraper = mock(HtmlAssetScraper.class);
+		Set<URI> assets = ImmutableSet.of(
+				URI.create( "http://www.example.org/image1.png" ),
+				URI.create( "http://www.example.org/style.css" )
+		);
+		when(assetScraper.scrapeUrl( anyString() )).thenReturn( assets );
+
 		httpClient = new FakeHttpClient();
-		runner = new WebRunner( contextSpy, HtmlAssetScraper.create(), new FakeRequestRunnerProvider() );
+		runner = new WebRunner( contextSpy, assetScraper, FakeRequestRunnerProvider.usingHttpClient( httpClient ) );
 		ctu.setComponentBehavior( component, runner );
 
 		triggerTerminal = runner.getTriggerTerminal();
@@ -63,52 +79,20 @@ public class WebRunnerTest
 	}
 
 	@Test
-	@Ignore
-	public void shouldSendRequests() throws Exception
+	public void shouldRequestAssets() throws Exception
 	{
+		Multiset<String> expectedRequests = ImmutableMultiset.of(
+				"GET http://www.example.org/image1.png",
+				"GET http://www.example.org/style.css"
+		);
+
 		// WHEN
 		triggerAndWait();
 
 		// THEN
-		HttpUriRequest request = httpClient.lastRequest();
-		assertThat( request.getMethod(), is( "GET" ) );
-		assertThat( request.getURI(), is( URI.create( TEST_URL )) );
+		Multiset<String> actualRequests = httpClient.popAllRequests();
+		assertEquals( expectedRequests, actualRequests );
 		CounterAsserter.oneSuccessfulRequest( component.getContext() );
-	}
-
-	@Test
-	@Ignore
-	public void shouldNotRequireHttpPrefix() throws Exception
-	{
-		// GIVEN
-		setProperty( WEB_PAGE_URL_PROP, TEST_URL.replace( "http://", "" ) );
-
-		// WHEN
-		triggerAndWait();
-
-		// THEN
-		HttpUriRequest request = httpClient.lastRequest();
-		assertThat( request.getMethod(), is( "GET" ) );
-		assertThat( request.getURI(), is( URI.create( TEST_URL )) );
-		CounterAsserter.oneSuccessfulRequest( component.getContext() );
-	}
-
-	@Test
-	@Ignore
-	public void shouldFailOnBadUrl() throws Exception
-	{
-		// GIVEN
-		setProperty( WEB_PAGE_URL_PROP, "hxxp:/mal formed.url" );
-
-		// WHEN
-		triggerAndWait();
-
-		// THEN
-		assertFalse( httpClient.hasReceivedRequests() );
-		CounterAsserter.forHolder( component.getContext() )
-				.sent( 1 )
-				.completed( 1 )
-				.failures( 1 );
 	}
 
 	private void triggerAndWait() throws InterruptedException
