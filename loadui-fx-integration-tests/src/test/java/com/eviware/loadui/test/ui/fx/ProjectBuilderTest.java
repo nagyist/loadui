@@ -21,7 +21,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.core.Is.is;
 
-@Category( IntegrationTest.class )
+@Category(IntegrationTest.class)
 public class ProjectBuilderTest
 {
 	private ProjectRef projectRef;
@@ -64,7 +64,7 @@ public class ProjectBuilderTest
 				.importProject( true )
 				.components(
 						ComponentBuilder.create().type( FIXED_RATE ).property( "rate", Long.class, 10L ).child(
-								ComponentBuilder.create().type( "Web Page Runner" ).property( "url", String.class, "http://05ten.se" ).build()
+								ComponentBuilder.create().type( WEB_RUNNER ).property( "url", String.class, "win-srvmontest" ).build()
 						).build()
 				)
 				.build();
@@ -76,7 +76,7 @@ public class ProjectBuilderTest
 		assertThat( "Components exist", canvas.getComponents(), is( not( empty() ) ) );
 		assertThat( "Connections count", canvas.getCanvas().getConnections().size(), equalTo( 1 ) );
 		assertThat( "Fixed Rate created", canvas.getComponentByLabel( "Fixed Rate 1" ).getProperty( "rate" ).getStringValue(), equalTo( "10" ) );
-		assertThat( "Web Page Runner created", project.getCanvas().getComponentByLabel( "Web Page Runner 1" ).getProperty( "url" ).getStringValue(), equalTo( "http://05ten.se" ) );
+		assertThat( "Web Page Runner created", project.getCanvas().getComponentByLabel( "Web Page Runner 1" ).getProperty( "url" ).getStringValue(), equalTo( "win-srvmontest" ) );
 
 	}
 
@@ -87,7 +87,7 @@ public class ProjectBuilderTest
 				.importProject( true )
 				.components(
 						ComponentBuilder.create().type( FIXED_LOAD ).concurrent().property( "load", Long.class, 2L ).child(
-								ComponentBuilder.create().type( "Web Page Runner" ).property( "url", String.class, "http://05ten.se" ).build()
+								ComponentBuilder.create().type( WEB_RUNNER ).property( "url", String.class, "win-srvmontest" ).build()
 						).build()
 				)
 				.build();
