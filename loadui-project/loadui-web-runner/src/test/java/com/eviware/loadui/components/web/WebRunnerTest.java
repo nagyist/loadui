@@ -8,6 +8,7 @@ import com.eviware.loadui.api.terminal.OutputTerminal;
 import com.eviware.loadui.api.terminal.TerminalMessage;
 import com.eviware.loadui.util.component.ComponentTestUtils;
 import com.eviware.loadui.util.html.HtmlAssetScraper;
+import com.eviware.loadui.util.property.UrlProperty;
 import com.eviware.loadui.util.test.CounterAsserter;
 import com.eviware.loadui.util.test.FakeHttpClient;
 import com.eviware.loadui.util.test.TestUtils;
@@ -66,13 +67,15 @@ public class WebRunnerTest
 		results = ctu.getMessagesFrom( resultsTerminal );
 
 		// GIVEN
-		setProperty( WEB_PAGE_URL_PROP, TEST_URL );
+		setProperty( UrlProperty.URL, TEST_URL );
+		runner.setLoadTestRunning( true );
 	}
 
 	@Test
 	public void shouldRequestAssets() throws Exception
 	{
 		Multiset<String> expectedRequests = ImmutableMultiset.of(
+				"GET http://www.example.org",
 				"GET http://www.example.org/image1.png",
 				"GET http://www.example.org/style.css"
 		);
