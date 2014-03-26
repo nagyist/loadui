@@ -70,6 +70,8 @@ public class RestRunner extends RunnerBase
 		{
 			throw new RuntimeException( e );
 		}
+		if( response.getStatusLine().getStatusCode() >= 400 )
+			getFailedRequestCounter().increment();
 		return triggerMessage;
 	}
 

@@ -11,7 +11,7 @@ import static org.junit.Assert.assertThat;
 
 public class CounterAsserter
 {
-	private Map<String, Long> expectedValues = new LinkedHashMap<>();
+	public static final String UNEXPECTED_NUMBER_OF = "Unexpected number of ";
 	private final CounterHolder counterHolder;
 
 	private CounterAsserter( CounterHolder counterHolder )
@@ -30,21 +30,27 @@ public class CounterAsserter
 		counterAsserter.sent( 1 ).completed( 1 ).failures( 0 );
 	}
 
+	public static void oneFailedRequest( CounterHolder counterHolder )
+	{
+		CounterAsserter counterAsserter = new CounterAsserter( counterHolder );
+		counterAsserter.sent( 1 ).completed( 1 ).failures( 1 );
+	}
+
 	public CounterAsserter failures( long expected )
 	{
-		assertThat( counterHolder.getCounter( CanvasItem.REQUEST_FAILURE_COUNTER ).get(), is( expected ) );
+		assertThat( UNEXPECTED_NUMBER_OF + "Failures", counterHolder.getCounter( CanvasItem.REQUEST_FAILURE_COUNTER ).get(), is( expected ) );
 		return this;
 	}
 
 	public CounterAsserter completed( long expected )
 	{
-		assertThat( counterHolder.getCounter( CanvasItem.SAMPLE_COUNTER ).get(), is( expected ) );
+		assertThat( UNEXPECTED_NUMBER_OF + "Completed", counterHolder.getCounter( CanvasItem.SAMPLE_COUNTER ).get(), is( expected ) );
 		return this;
 	}
 
 	public CounterAsserter sent( long expected )
 	{
-		assertThat( counterHolder.getCounter( CanvasItem.REQUEST_COUNTER ).get(), is( expected ) );
+		assertThat( UNEXPECTED_NUMBER_OF + "Sent", counterHolder.getCounter( CanvasItem.REQUEST_COUNTER ).get(), is( expected ) );
 		return this;
 	}
 }
