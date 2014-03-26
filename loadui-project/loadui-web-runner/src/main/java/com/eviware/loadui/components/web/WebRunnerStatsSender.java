@@ -12,17 +12,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static com.eviware.loadui.webdata.StatisticConstants.*;
 
 public class WebRunnerStatsSender
 {
-	private final Map<String, VariableGroup> resourceToVariableGroup = new HashMap<>();
-
 	private static final Logger log = LoggerFactory.getLogger( WebRunnerStatsSender.class );
+
+
+	private final Map<String, VariableGroup> resourceToVariableGroup = new HashMap<>();
 
 	private final Clock clock;
 	private final ComponentContext context;
 
-	public WebRunnerStatsSender( ComponentContext context, Clock clock)
+	public WebRunnerStatsSender( ComponentContext context, Clock clock )
 	{
 		this.clock = clock;
 		this.context = context;
@@ -30,7 +32,7 @@ public class WebRunnerStatsSender
 
 	public void addResource( String resource )
 	{
-		resourceToVariableGroup.put( resource, new VariableGroup( resource ) );
+		resourceToVariableGroup.put( getIdentifierForResource( resource ), new VariableGroup( resource ) );
 	}
 
 	public void clearStatisticVariables()
@@ -43,6 +45,11 @@ public class WebRunnerStatsSender
 		resourceToVariableGroup.clear();
 	}
 
+	private String getIdentifierForResource( String resource )
+	{
+		return STAT_LABEL_PREFIX + resource;
+	}
+
 	public void reset()
 	{
 		for( VariableGroup variables : resourceToVariableGroup.values() )
@@ -52,13 +59,18 @@ public class WebRunnerStatsSender
 
 	}
 
+	private VariableGroup getVariablesFor( String resource )
+	{
+		return resourceToVariableGroup.get( getIdentifierForResource( resource ) );
+	}
+
 	public void updateRequestSent( String resource )
 	{
 		long timeStamp = clock.millis();
 
-		VariableGroup resorceVariables = resourceToVariableGroup.get( resource );
+		VariableGroup resorceVariables = getVariablesFor( resource );
 
-		if(resorceVariables != null)
+		if( resorceVariables != null )
 		{
 			resorceVariables.sentVariable.update( timeStamp, resorceVariables.sentCount.incrementAndGet() );
 		}
@@ -72,9 +84,9 @@ public class WebRunnerStatsSender
 	{
 		long timeStamp = clock.millis();
 
-		VariableGroup resorceVariables = resourceToVariableGroup.get( resource );
+		VariableGroup resorceVariables = getVariablesFor( resource );
 
-		if(resorceVariables != null)
+		if( resorceVariables != null )
 		{
 			resorceVariables.latencyVariable.update( timeStamp, latency );
 		}
@@ -86,17 +98,17 @@ public class WebRunnerStatsSender
 
 	public void updateResponse( String resource, long timeTaken, long responseSize )
 	{
-		long TimeTaken = clock.millis();
+		long timeStamp = clock.millis();
 
-		VariableGroup resorceVariables = resourceToVariableGroup.get( resource );
-		if(resorceVariables != null)
+		VariableGroup resorceVariables = getVariablesFor( resource );
+		if( resorceVariables != null )
 		{
-			resorceVariables.timeTakenVariable.update( TimeTaken, timeTaken );
-			resorceVariables.responseSizeVariable.update( TimeTaken, responseSize );
+			resorceVariables.timeTakenVariable.update( timeStamp, timeTaken );
+			resorceVariables.responseSizeVariable.update( timeStamp, responseSize );
 		}
 		else
 		{
-			logResourceNotFoundError(resource);
+			logResourceNotFoundError( resource );
 		}
 	}
 
@@ -104,9 +116,9 @@ public class WebRunnerStatsSender
 	{
 		long timeStamp = clock.millis();
 
-		VariableGroup resorceVariables = resourceToVariableGroup.get( resource );
+		VariableGroup resorceVariables = getVariablesFor( resource );
 
-		if(resorceVariables != null)
+		if( resorceVariables != null )
 		{
 			resorceVariables.failureVariable.update( timeStamp, resorceVariables.failureCount.incrementAndGet() );
 		}
@@ -117,39 +129,39 @@ public class WebRunnerStatsSender
 
 	}
 
-	private void logResourceNotFoundError(String resource)
+	private void logResourceNotFoundError( String resource )
 	{
 		log.error( "Could not find statistic variables for resource {} please add it using addResource", resource );
 	}
 
 	public class VariableGroup
 	{
-		private final  StatisticVariable.Mutable timeTakenVariable;
-		private final  StatisticVariable.Mutable latencyVariable;
-		private final  StatisticVariable.Mutable responseSizeVariable;
+		private final StatisticVariable.Mutable timeTakenVariable;
+		private final StatisticVariable.Mutable latencyVariable;
+		private final StatisticVariable.Mutable responseSizeVariable;
 
-		private final  StatisticVariable.Mutable failureVariable;
-		private final  StatisticVariable.Mutable sentVariable;
+		private final StatisticVariable.Mutable failureVariable;
+		private final StatisticVariable.Mutable sentVariable;
 
 		private final AtomicLong failureCount = new AtomicLong( 0l );
 		private final AtomicLong sentCount = new AtomicLong( 0l );
 
-		public VariableGroup(String resource)
+		public VariableGroup( String identifier )
 		{
 			timeTakenVariable = context.addStatisticVariable(
-					resource + ": TimeTaken", "elapsed time for the resource to complete", SampleStatisticsWriter.TYPE );
+					identifier + ":" + TIMETAKEN_IDENTIFIER, "elapsed time for the resource to complete", SampleStatisticsWriter.TYPE );
 
 			latencyVariable = context.addStatisticVariable(
-					resource + ": Latency", "Time to first byte", SampleStatisticsWriter.TYPE );
+					identifier + ":" + LATENCY_IDENTIFIER, "Time to first byte", SampleStatisticsWriter.TYPE );
 
 			responseSizeVariable = context.addStatisticVariable(
-					resource + ": ResponseSize", "Response Size of Response", SampleStatisticsWriter.TYPE );
+					identifier + ":" + RESPONSESIZE_IDENTIFIER, "Response Size of Response", SampleStatisticsWriter.TYPE );
 
 			failureVariable = context.addStatisticVariable(
-					resource + ": Failure", "Failed requests", CounterStatisticsWriter.TYPE );
+					identifier + ":" + FAILURE_IDENTIFIER, "Failed requests", CounterStatisticsWriter.TYPE );
 
 			sentVariable = context.addStatisticVariable(
-					resource + ": Sent", "Sent for the resource", CounterStatisticsWriter.TYPE );
+					identifier + ":" + SENT_IDENTIFIER, "Sent for the resource", CounterStatisticsWriter.TYPE );
 		}
 
 		public void removeAllVariablesFromContext()
