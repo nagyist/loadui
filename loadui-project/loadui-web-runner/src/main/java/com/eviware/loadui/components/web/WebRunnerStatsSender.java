@@ -32,7 +32,7 @@ public class WebRunnerStatsSender
 
 	public void addResource( String resource )
 	{
-		resourceToVariableGroup.put( getIdentifierForResource( resource ), new VariableGroup( resource ) );
+		resourceToVariableGroup.put( resource, new VariableGroup( resource ) );
 	}
 
 	public void clearStatisticVariables()
@@ -43,11 +43,6 @@ public class WebRunnerStatsSender
 		}
 
 		resourceToVariableGroup.clear();
-	}
-
-	private String getIdentifierForResource( String resource )
-	{
-		return STAT_LABEL_PREFIX + resource;
 	}
 
 	public void reset()
@@ -61,7 +56,7 @@ public class WebRunnerStatsSender
 
 	private VariableGroup getVariablesFor( String resource )
 	{
-		return resourceToVariableGroup.get( getIdentifierForResource( resource ) );
+		return resourceToVariableGroup.get( resource );
 	}
 
 	public void updateRequestSent( String resource )
