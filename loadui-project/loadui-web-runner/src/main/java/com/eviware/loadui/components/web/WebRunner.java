@@ -60,7 +60,7 @@ public class WebRunner extends RunnerBase implements ListenableValue.ValueListen
 		}
 	}
 
-	private void updateWebPageUrl( String url )
+	public void updateWebPageUrl( String url )
 	{
 		log.debug( "Updating url to {}", url );
 		try
