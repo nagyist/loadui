@@ -5,12 +5,9 @@ import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.components.web.api.RequestRunnerProvider;
 import com.eviware.loadui.components.web.internal.SocketFactoryProvider;
 import com.eviware.loadui.util.RealClock;
-import com.google.common.collect.Iterables;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.net.URI;
-
-import static java.util.Arrays.asList;
 
 public class DefaultRequestRunnerProvider implements RequestRunnerProvider
 {
@@ -22,7 +19,7 @@ public class DefaultRequestRunnerProvider implements RequestRunnerProvider
 	{
 		return new RequestRunner( clock,
 				HttpClientBuilder.create().setSSLSocketFactory( socketFactoryProvider.newSocketFactory() ) . build(),
-				Iterables.concat( asList( pageUri ), assetUris ),
+				pageUri, assetUris,
 				createStatsSenderIfNecessary( context ) );
 	}
 
