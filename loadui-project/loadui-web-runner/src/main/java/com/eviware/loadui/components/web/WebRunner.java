@@ -10,6 +10,7 @@ import com.eviware.loadui.impl.component.categories.RunnerBase;
 import com.eviware.loadui.util.html.HtmlAssetScraper;
 import com.eviware.loadui.util.property.UrlProperty;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -17,10 +18,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class WebRunner extends RunnerBase implements ListenableValue.ValueListener<String>
 {
 
+	@Nullable
+	private RequestRunner requestRunner;
+
 	private final UrlProperty webPageUrlProperty;
 	private final HtmlAssetScraper scraper;
 	private final RequestRunnerProvider requestRunnerProvider;
-	private RequestRunner requestRunner;
 	private TestEventManager testEventManager;
 	private Runnable toRunOnRelease;
 	private AtomicBoolean isLoadTestRunning = new AtomicBoolean( false );
@@ -70,11 +73,13 @@ public class WebRunner extends RunnerBase implements ListenableValue.ValueListen
 		}
 		catch( IllegalArgumentException e )
 		{
+			requestRunner = null;
 			log.debug( "WebRunner cannot accept the invalid URL: {}", url );
 			notifyUser( getContext().getLabel() + " will not run. Invalid URL: " + url );
 		}
 		catch( IOException e )
 		{
+			requestRunner = null;
 			log.debug( "An error occurred while scraping the provided URL: {}", url );
 			notifyUser( getContext().getLabel() + " could not scrape the given URL. Please start the test again." );
 		}
@@ -105,16 +110,19 @@ public class WebRunner extends RunnerBase implements ListenableValue.ValueListen
 	@Override
 	protected TerminalMessage sample( TerminalMessage triggerMessage, Object sampleId ) throws SampleCancelledException
 	{
-		if( requestRunner == null )
+		final RequestRunner runner = requestRunner;
+		if( runner == null )
 			throw new RuntimeException( "Cannot run, no URL set or URL is invalid" );
-		requestRunner.run();
+		runner.run();
 		return triggerMessage;
 	}
 
 	@Override
 	protected int onCancel()
 	{
-		return requestRunner.cancelAllRequests();
+		final RequestRunner runner = requestRunner;
+		if( runner == null ) return 0;
+		return runner.cancelAllRequests();
 	}
 
 	@Override
