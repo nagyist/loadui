@@ -18,7 +18,7 @@ public class RequestRunnerExecutor
 	public static final long REQUEST_TIMEOUT_IN_MINUTES = 2; // minutes
 
 	private final List<ExecutorService> executors = Collections.synchronizedList( new ArrayList<ExecutorService>() );
-	private final List<Future<Void>> currentlyRunningRequests = Collections.synchronizedList( new ArrayList<Future<Void>>() );
+	private final List<Future<Boolean>> currentlyRunningRequests = Collections.synchronizedList( new ArrayList<Future<Boolean>>() );
 
 	private final ThreadLocal<ExecutorService> localRequestsExecutor =
 			new ThreadLocal<ExecutorService>()
@@ -38,12 +38,14 @@ public class RequestRunnerExecutor
 
 	private final ExecutorService overalExecutor = Executors.newCachedThreadPool();
 
-	public Future<List<Future<Void>>> runAll( Collection<RequestRunner.Request> requests ) throws Exception
+	public Future<Boolean> runPageRequest( RequestRunner.PageUriRequest pageUriRequest )
 	{
-		synchronized( overalExecutor )
-		{
-			return overalExecutor.submit( new RequestExecutor( requests ) );
-		}
+		return overalExecutor.submit( pageUriRequest );
+	}
+
+	public Future<List<Future<Boolean>>> runAll( Collection<RequestRunner.Request> requests ) throws Exception
+	{
+		return overalExecutor.submit( new RequestExecutor( requests ) );
 	}
 
 	public int cancelAll()
@@ -51,7 +53,7 @@ public class RequestRunnerExecutor
 		int cancelledTasks = 0;
 		synchronized( currentlyRunningRequests )
 		{
-			for( Future<Void> future : currentlyRunningRequests )
+			for( Future<Boolean> future : currentlyRunningRequests )
 			{
 				boolean cancelled = future.cancel( true );
 				if( cancelled ) cancelledTasks++;
@@ -82,7 +84,7 @@ public class RequestRunnerExecutor
 		}
 	}
 
-	private class RequestExecutor implements Callable<List<Future<Void>>>
+	private class RequestExecutor implements Callable<List<Future<Boolean>>>
 	{
 
 		private final Collection<RequestRunner.Request> requests;
@@ -93,32 +95,35 @@ public class RequestRunnerExecutor
 		}
 
 		@Override
-		public List<Future<Void>> call() throws Exception
+		public List<Future<Boolean>> call() throws Exception
 		{
 			ExecutorService executor = localRequestsExecutor.get();
-			List<Future<Void>> futures = new ArrayList<>( requests.size() );
+			List<Future<Boolean>> futures = new ArrayList<>( requests.size() );
 			for( RequestRunner.Request request : requests )
 			{
 				futures.add( executor.submit( request ) );
 			}
 			currentlyRunningRequests.addAll( futures );
-			for( Future<Void> futureRequest : futures )
+			for( Future<Boolean> futureRequest : futures )
 			{
-				waitForCompletion( futureRequest );
+				boolean shouldContinue = waitForCompletion( futureRequest );
+				if( !shouldContinue )
+					break;
 			}
 			currentlyRunningRequests.removeAll( futures );
 			return futures;
 		}
 
-		private void waitForCompletion( Future<Void> future )
+		private boolean waitForCompletion( Future<Boolean> future )
 		{
 			try
 			{
-				future.get( REQUEST_TIMEOUT_IN_MINUTES, TimeUnit.MINUTES );
+				return future.get( REQUEST_TIMEOUT_IN_MINUTES, TimeUnit.MINUTES );
 			}
 			catch( Exception e )
 			{
 				log.debug( "Problem while waiting for request to complete", e );
+				return false;
 			}
 		}
 

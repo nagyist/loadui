@@ -2,6 +2,7 @@ package com.eviware.loadui.components.web;
 
 import com.eviware.loadui.api.base.Clock;
 import com.eviware.loadui.webdata.StreamConsumer;
+import com.google.common.collect.Iterables;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
@@ -18,14 +19,18 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -73,7 +78,7 @@ public class RequestRunnerTest
 		uris.addAll( asList( URI.create( "url1" ), URI.create( "url2" ) ) );
 		RequestRunner runner = createRunner();
 
-		runner.run();
+		runner.call();
 
 		verify( mockStatsSender ).addResource( "url1" );
 		verify( mockStatsSender ).addResource( "url2" );
@@ -85,7 +90,7 @@ public class RequestRunnerTest
 		uris.addAll( asList( URI.create( "url1" ), URI.create( "url2" ) ) );
 		RequestRunner runner = createRunner();
 
-		runner.run();
+		runner.call();
 
 		verify( httpClient, times( 2 ) ).execute( any( HttpGet.class ) );
 	}
@@ -97,7 +102,7 @@ public class RequestRunnerTest
 
 		RequestRunner runner = createRunner();
 
-		runner.run();
+		runner.call();
 
 		verify( mockStatsSender ).updateRequestSent( "url1" );
 		verify( mockStatsSender ).updateLatency( "url1", 10L );
@@ -111,14 +116,19 @@ public class RequestRunnerTest
 		final AtomicInteger interruptedThreads = new AtomicInteger();
 		final CountDownLatch latch = new CountDownLatch( 2 );
 
-		RequestRunner runner = createRunner();
+		uris.addAll( asList( URI.create( "url1" ) ) );
+
+		final RequestRunner runner = createRunner();
 		runner.requestConverter = mock( RequestRunner.RequestConverter.class );
 
+		RequestRunner.PageUriRequest mockPageReq = mock( RequestRunner.PageUriRequest.class );
+		when( mockPageReq.call() ).thenReturn( true );
+
 		RequestRunner.Request mockReq = mock( RequestRunner.Request.class );
-		when( mockReq.call() ).thenAnswer( new Answer<Void>()
+		when( mockReq.call() ).thenAnswer( new Answer<Boolean>()
 		{
 			@Override
-			public Void answer( InvocationOnMock invocation ) throws Throwable
+			public Boolean answer( InvocationOnMock invocation ) throws Throwable
 			{
 				try
 				{
@@ -130,15 +140,25 @@ public class RequestRunnerTest
 					interruptedThreads.incrementAndGet();
 					throw e;
 				}
-				return null;
+				return true;
 			}
 		} );
 
-		when( runner.requestConverter.convert( uris ) ).thenReturn( Arrays.asList( mockReq, mockReq ) );
+		when( runner.requestConverter.convertPageUri( any( URI.class ) ) ).thenReturn( mockPageReq );
+		when( runner.requestConverter.convertAssets( anyCollection() ) ).thenReturn( Arrays.asList( mockReq, mockReq ) );
 
-		new Thread( runner ).start();
+		new Thread( new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				runner.call();
+			}
+		} ).start();
 
-		latch.await( 1, TimeUnit.SECONDS );
+		boolean ok = latch.await( 1, TimeUnit.SECONDS );
+
+		assertTrue( ok );
 
 		int cancelledRequests = runner.cancelAllRequests();
 
@@ -148,9 +168,46 @@ public class RequestRunnerTest
 		assertThat( interruptedThreads.get(), is( 2 ) );
 	}
 
+	@Test
+	public void wontRequestAssetsIfPageFails() throws Exception
+	{
+		uris.addAll( asList( URI.create( "url1" ) ) );
+
+		final RequestRunner runner = createRunner();
+		runner.requestConverter = mock( RequestRunner.RequestConverter.class );
+
+		RequestRunner.PageUriRequest mockPageReq = mock( RequestRunner.PageUriRequest.class );
+		when( mockPageReq.call() ).thenReturn( false );
+
+		RequestRunner.Request mockReq = mock( RequestRunner.Request.class );
+		when( mockReq.call() ).thenReturn( true );
+
+		when( runner.requestConverter.convertPageUri( any( URI.class ) ) ).thenReturn( mockPageReq );
+		when( runner.requestConverter.convertAssets( anyCollection() ) ).thenReturn( Arrays.asList( mockReq, mockReq ) );
+
+		final AtomicBoolean result = new AtomicBoolean( true );
+
+		Thread t = new Thread( new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				result.set( runner.call() );
+			}
+		} );
+		t.start();
+		t.join();
+
+		assertFalse( result.get() );
+
+	}
+
 	private RequestRunner createRunner()
 	{
-		RequestRunner runner = new RequestRunner( clock, httpClient, uris, mockStatsSender );
+		Iterator<URI> iter = uris.iterator();
+		URI pageUri = iter.next();
+		Iterable<URI> assets = Iterables.skip( uris, 1 );
+		RequestRunner runner = new RequestRunner( clock, httpClient, pageUri, assets, mockStatsSender );
 		runner.setConsumer( mockConsumer );
 		return runner;
 	}

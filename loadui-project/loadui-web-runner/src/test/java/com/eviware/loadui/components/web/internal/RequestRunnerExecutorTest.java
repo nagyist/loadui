@@ -55,7 +55,7 @@ public class RequestRunnerExecutorTest
 		} );
 
 		long startTime = System.currentTimeMillis();
-		Future<List<Future<Void>>> results = executor.runAll( Arrays.asList( mockReq, mockReq ) );
+		Future<List<Future<Boolean>>> results = executor.runAll( Arrays.asList( mockReq, mockReq ) );
 		long endTime = System.currentTimeMillis();
 
 		boolean ok = latch.await( 1, TimeUnit.SECONDS );
@@ -88,9 +88,9 @@ public class RequestRunnerExecutorTest
 		} );
 
 		long startTime = System.currentTimeMillis();
-		Future<List<Future<Void>>> results1 = executor.runAll( Arrays.asList( mockReq, mockReq ) );
+		Future<List<Future<Boolean>>> results1 = executor.runAll( Arrays.asList( mockReq, mockReq ) );
 		long endTime1 = System.currentTimeMillis();
-		Future<List<Future<Void>>> results2 = executor.runAll( Arrays.asList( mockReq, mockReq ) );
+		Future<List<Future<Boolean>>> results2 = executor.runAll( Arrays.asList( mockReq, mockReq ) );
 		long endTime2 = System.currentTimeMillis();
 
 		boolean ok = latch.await( 1, TimeUnit.SECONDS );
@@ -129,13 +129,13 @@ public class RequestRunnerExecutorTest
 			}
 		} );
 
-		Future<List<Future<Void>>> results1 = executor.runAll( Arrays.asList( mockReq ) );
+		Future<List<Future<Boolean>>> results1 = executor.runAll( Arrays.asList( mockReq ) );
 		boolean ok1 = latch1.await( 1, TimeUnit.SECONDS );
 
 		assertThat( ok1, is( true ) );
 		Thread.sleep( EACH_REQUEST_TIME );
 
-		Future<List<Future<Void>>> results2 = executor.runAll( Arrays.asList( mockReq ) );
+		Future<List<Future<Boolean>>> results2 = executor.runAll( Arrays.asList( mockReq ) );
 		boolean ok2 = latch2.await( 1, TimeUnit.SECONDS );
 
 		assertThat( ok2, is( true ) );

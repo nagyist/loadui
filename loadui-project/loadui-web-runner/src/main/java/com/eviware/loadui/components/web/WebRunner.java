@@ -113,7 +113,9 @@ public class WebRunner extends RunnerBase implements ListenableValue.ValueListen
 		final RequestRunner runner = requestRunner;
 		if( runner == null )
 			throw new RuntimeException( "Cannot run, no URL set or URL is invalid" );
-		runner.run();
+		boolean goodSample = runner.call();
+		if( !goodSample )
+			getFailedRequestCounter().increment();
 		return triggerMessage;
 	}
 
