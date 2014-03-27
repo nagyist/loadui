@@ -86,7 +86,18 @@ public class FakeHttpClient extends CloseableHttpClient
 		when(response.getEntity()).thenReturn( entity );
 
 		StatusLine statusLine = mock(StatusLine.class);
-		when(statusLine.getStatusCode()).thenReturn( 200 );
+
+		int statusCode = 200;
+		try
+		{
+			statusCode = Integer.parseInt( httpUriRequest.getURI().getHost() );
+		}
+		catch( NumberFormatException e )
+		{
+			// ignore
+		}
+
+		when( statusLine.getStatusCode() ).thenReturn( statusCode );
 		when( response.getStatusLine() ).thenReturn( statusLine );
 
 		return response;
