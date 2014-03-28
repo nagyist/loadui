@@ -27,7 +27,7 @@ public class RestRunnerActivator
 	{
 		URI restIcon = getClass().getResource( "/images/restRunner.png" ).toURI();
 
-		log.debug( "Activating the DejaClick Bundle" );
+		log.debug( "Activating the REST Bundle" );
 		ComponentDescriptor restDescriptor = new ComponentDescriptor(
 				RestRunner.class.getName(),
 				RunnerCategory.CATEGORY,

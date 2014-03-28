@@ -6,26 +6,29 @@ import com.eviware.loadui.api.model.ComponentItem;
 import com.eviware.loadui.api.terminal.InputTerminal;
 import com.eviware.loadui.api.terminal.OutputTerminal;
 import com.eviware.loadui.api.terminal.TerminalMessage;
-import static com.eviware.loadui.components.rest.UrlProperty.URL;
 import com.eviware.loadui.util.RealClock;
 import com.eviware.loadui.util.component.ComponentTestUtils;
-import static com.eviware.loadui.components.rest.HeaderManager.HEADERS;
-
+import com.eviware.loadui.util.property.UrlProperty;
+import com.eviware.loadui.util.test.CounterAsserter;
+import com.eviware.loadui.util.test.FakeHttpClient;
 import com.eviware.loadui.util.test.TestUtils;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.util.EntityUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.net.URI;
 import java.util.concurrent.BlockingQueue;
 
-import static com.eviware.loadui.components.rest.RestRunner.*;
+import static com.eviware.loadui.components.rest.HeaderManager.HEADERS;
+import static com.eviware.loadui.components.rest.RestRunner.BODY;
+import static com.eviware.loadui.components.rest.RestRunner.METHOD;
+import static com.eviware.loadui.util.property.UrlProperty.URL;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 
 public class RestRunnerTest
@@ -69,7 +72,7 @@ public class RestRunnerTest
 		triggerAndWait();
 
 		// THEN
-		HttpUriRequest request = httpClient.lastRequest();
+		HttpUriRequest request = httpClient.popRequest();
 		assertThat( request.getMethod(), is( "GET" ) );
 		assertThat( request.getURI(), is( URI.create( TEST_URL )) );
 		CounterAsserter.oneSuccessfulRequest( component.getContext() );
@@ -85,7 +88,7 @@ public class RestRunnerTest
 		triggerAndWait();
 
 		// THEN
-		HttpUriRequest request = httpClient.lastRequest();
+		HttpUriRequest request = httpClient.popRequest();
 		assertThat( request.getMethod(), is( "GET" ) );
 		assertThat( request.getURI(), is( URI.create( TEST_URL )) );
 		CounterAsserter.oneSuccessfulRequest( component.getContext() );
@@ -104,7 +107,7 @@ public class RestRunnerTest
 		triggerAndWait();
 
 		// THEN
-		HttpUriRequest request = httpClient.lastRequest();
+		HttpUriRequest request = httpClient.popRequest();
 		assertThat( request.getFirstHeader( "Content-Type" ).getValue(), is( "text/xml; charset=utf-8" ) );
 		assertThat( request.getFirstHeader( "Multiple-value" ).getValue(), is( "a" ) );
 		assertThat( request.getLastHeader( "Multiple-value" ).getValue(), is( "b" ) );
@@ -122,7 +125,7 @@ public class RestRunnerTest
 		triggerAndWait();
 
 		// THEN
-		CustomHttpRequest request = ( CustomHttpRequest )httpClient.lastRequest();
+		CustomHttpRequest request = ( CustomHttpRequest )httpClient.popRequest();
 		assertThat( request.getMethod(), is( "POST" ) );
 		assertThat( request.getURI(), is( URI.create( TEST_URL )) );
 		assertThat( EntityUtils.toString( request.getEntity() ), is( "Foo" ) );
@@ -140,7 +143,7 @@ public class RestRunnerTest
 		triggerAndWait();
 
 		// THEN
-		CustomHttpRequest request = ( CustomHttpRequest )httpClient.lastRequest();
+		CustomHttpRequest request = ( CustomHttpRequest )httpClient.popRequest();
 		assertThat( request.getURI(), is( URI.create( TEST_URL )) );
 		assertThat( EntityUtils.toString( request.getEntity() ), is( "Foo" ) );
 		CounterAsserter.oneSuccessfulRequest( component.getContext() );
@@ -157,10 +160,21 @@ public class RestRunnerTest
 
 		// THEN
 		assertFalse( httpClient.hasReceivedRequests() );
-		CounterAsserter.forHolder( component.getContext() )
-				.sent( 1 )
-				.completed( 1 )
-				.failures( 1 );
+		CounterAsserter.oneFailedRequest( component.getContext() );
+	}
+
+	@Test
+	public void shouldFailOn404() throws Exception
+	{
+		// GIVEN
+		setProperty( URL, "http://404" );
+
+		// WHEN
+		triggerAndWait();
+
+		// THEN
+		assertTrue( httpClient.hasReceivedRequests() );
+		CounterAsserter.oneFailedRequest( component.getContext() );
 	}
 
 	private void triggerAndWait() throws InterruptedException

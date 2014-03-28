@@ -16,6 +16,7 @@
         <module>loadui-core-deps</module>
         <module>loadui-api</module>
         <module>loadui-fx-api</module>
+        <module>loadui-web-data</module>
         <module>loadui-model-xmlbeans</module>
         <module>loadui-base</module>
         <module>loadui-controller-base</module>
@@ -35,6 +36,7 @@
         <module>loadui-fx-test-utils</module>
         <module>loadui-groovy-fx</module>
         <module>loadui-rest-runner</module>
+        <module>loadui-web-runner</module>
     </modules>
     <repositories>
         <repository>

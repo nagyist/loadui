@@ -148,4 +148,26 @@ public class ComponentDescriptor implements Labeled, Describable
 	{
 		return deprecated;
 	}
+
+	@Override
+	public boolean equals( Object o )
+	{
+		if( this == o ) return true;
+		if( o == null || getClass() != o.getClass() ) return false;
+
+		ComponentDescriptor that = ( ComponentDescriptor )o;
+
+		if( !label.equals( that.label ) ) return false;
+		if( !type.equals( that.type ) ) return false;
+
+		return true;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		int result = type.hashCode();
+		result = 31 * result + label.hashCode();
+		return result;
+	}
 }

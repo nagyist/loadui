@@ -8,6 +8,7 @@ import com.eviware.loadui.components.rest.statistics.LatencyCalculator;
 import com.eviware.loadui.impl.component.categories.RunnerBase;
 import com.eviware.loadui.impl.statistics.SampleStatisticsWriter;
 import com.eviware.loadui.util.RealClock;
+import com.eviware.loadui.util.property.UrlProperty;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.*;
@@ -69,6 +70,8 @@ public class RestRunner extends RunnerBase
 		{
 			throw new RuntimeException( e );
 		}
+		if( response.getStatusLine().getStatusCode() >= 400 )
+			getFailedRequestCounter().increment();
 		return triggerMessage;
 	}
 

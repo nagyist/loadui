@@ -8,7 +8,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>loadui-core-deps</artifactId>
     <packaging>pom</packaging>
-    <name>loadUI Core Dependencies</name>
+    <name>LoadUI Core Dependencies</name>
 
     <dependencies>
         <dependency>
@@ -63,8 +63,28 @@
         </dependency>
         <dependency>
             <groupId>com.eviware.loadui</groupId>
+            <artifactId>loadui-web-data</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.eviware.loadui</groupId>
             <artifactId>loadui-rest-runner</artifactId>
             <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.eviware.loadui</groupId>
+            <artifactId>loadui-web-runner</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore-osgi</artifactId>
+            <version>4.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient-osgi</artifactId>
+            <version>4.3.1</version>
         </dependency>
     </dependencies>
 </project>
