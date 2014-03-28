@@ -15,13 +15,12 @@
  */
 package com.eviware.loadui.impl.summary.sections.tablemodels;
 
-import java.util.Collections;
-import java.util.List;
-
-import javax.swing.table.AbstractTableModel;
-
 import com.eviware.loadui.api.assertion.AssertionItem;
 import com.google.common.collect.Lists;
+
+import javax.swing.table.AbstractTableModel;
+import java.util.Collections;
+import java.util.List;
 
 public class AssertionMetricsTableModel extends AbstractTableModel
 {
@@ -37,14 +36,12 @@ public class AssertionMetricsTableModel extends AbstractTableModel
 	@Override
 	public String getColumnName( int column )
 	{
-		System.out.println( "    getColumnName(" + column + ") = " + columnNames[column] );
 		return columnNames[column];
 	}
 
 	@Override
 	public int getColumnCount()
 	{
-		System.out.println( "    getColumnCount = " + columnNames.length );
 		return columnNames.length;
 	}
 
