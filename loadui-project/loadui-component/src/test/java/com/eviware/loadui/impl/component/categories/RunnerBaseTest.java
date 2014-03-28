@@ -15,21 +15,6 @@
  */
 package com.eviware.loadui.impl.component.categories;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Matchers;
-
 import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.component.categories.GeneratorCategory;
 import com.eviware.loadui.api.model.ComponentItem;
@@ -41,6 +26,17 @@ import com.eviware.loadui.api.terminal.OutputTerminal;
 import com.eviware.loadui.api.terminal.TerminalMessage;
 import com.eviware.loadui.util.component.ComponentTestUtils;
 import com.google.common.collect.ImmutableMap;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Matchers;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 public class RunnerBaseTest
 {
@@ -49,6 +45,18 @@ public class RunnerBaseTest
 	private InputTerminal triggerTerminal;
 	private OutputTerminal resultsTerminal;
 	private ComponentTestUtils ctu;
+
+	/**
+	 * Set this to something else to do something every time the runnerBase runs a sample
+	 */
+	private Runnable runOnSample = new Runnable()
+	{
+		@Override
+		public void run()
+		{
+			// does nothing by default.
+		}
+	};
 
 	@Before
 	@SuppressWarnings( "unchecked" )
@@ -80,6 +88,7 @@ public class RunnerBaseTest
 			protected TerminalMessage sample( TerminalMessage triggerMessage, Object sampleId )
 					throws SampleCancelledException
 			{
+				runOnSample.run();
 				return triggerMessage;
 			}
 
@@ -112,4 +121,28 @@ public class RunnerBaseTest
 		assertThat( runnerBase.getSampleCounter().getValue(), is( 1L ) );
 		assertThat( runnerBase.getFailureCounter().getValue(), is( 0L ) );
 	}
+
+	@Test
+	public void shouldSampleEvenOnExceptionThrown() throws InterruptedException
+	{
+		runOnSample = new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				throw new RuntimeException( "Break the sample method" );
+			}
+		};
+
+		BlockingQueue<TerminalMessage> results = ctu.getMessagesFrom( resultsTerminal );
+		ctu.sendMessage( triggerTerminal,
+				ImmutableMap.<String, Object> of( GeneratorCategory.TRIGGER_TIMESTAMP_MESSAGE_PARAM, 0 ) );
+
+		TerminalMessage message = results.poll( 5, TimeUnit.SECONDS );
+		assertThat( message.get( GeneratorCategory.TRIGGER_TIMESTAMP_MESSAGE_PARAM ), is( ( Object )0 ) );
+		assertThat( runnerBase.getRequestCounter().getValue(), is( 1L ) );
+		assertThat( runnerBase.getSampleCounter().getValue(), is( 1L ) );
+		assertThat( runnerBase.getFailureCounter().getValue(), is( 1L ) );
+	}
+
 }
