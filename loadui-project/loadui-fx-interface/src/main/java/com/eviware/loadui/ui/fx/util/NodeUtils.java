@@ -15,14 +15,10 @@
  */
 package com.eviware.loadui.ui.fx.util;
 
-import java.awt.MouseInfo;
-import java.awt.Point;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.List;
-
+import com.eviware.loadui.api.traits.Releasable;
+import com.sun.glass.ui.Application;
+import com.sun.glass.ui.Robot;
+import com.sun.javafx.PlatformUtil;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.value.ObservableValue;
@@ -34,16 +30,16 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import org.apache.commons.codec.binary.Base64;
 
 import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
-
-import org.apache.commons.codec.binary.Base64;
-
-import com.eviware.loadui.api.traits.Releasable;
-import com.sun.glass.ui.Application;
-import com.sun.glass.ui.Robot;
-import com.sun.javafx.PlatformUtil;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.List;
 
 public final class NodeUtils
 {
@@ -162,7 +158,6 @@ public final class NodeUtils
 	{
 		if( node instanceof Releasable )
 		{
-			System.out.println( "!!!!! RELEASING " + node );
 			( ( Releasable )node ).release();
 		}
 	}

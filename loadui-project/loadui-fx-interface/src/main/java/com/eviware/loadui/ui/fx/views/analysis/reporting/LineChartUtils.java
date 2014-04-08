@@ -45,8 +45,6 @@ public class LineChartUtils
 	public static Map<ChartView, Image> createImages( Collection<StatisticPage> pages,
 																	  ObservableValue<Execution> executionProperty, Execution comparedExecution )
 	{
-		System.out.println( "11111" );
-		log.debug( "1111111111111111111111" );
 		HashMap<ChartView, Image> images = Maps.newHashMap();
 		for( StatisticPage page : pages )
 			for( ChartGroup chartGroup : page.getChildren() )

@@ -255,7 +255,6 @@ public class InspectorView extends AnchorPane
 				return INSPECTOR_ORDERING.compare( o1.getText(), o2.getText() );
 			}
 		} );
-		System.out.println( "Ordering: " + shownTabs );
 		tabPane.getTabs().setAll( shownTabs );
 
 		if( !tabPane.getTabs().contains( selected ) )
