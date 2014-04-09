@@ -31,7 +31,7 @@ public class WebRunnerActivator
 		ComponentDescriptor webRunnerDescriptor = new ComponentDescriptor(
 				WebRunner.class.getName(),
 				RunnerCategory.CATEGORY,
-				"New Web Runner",
+				"Web Runner",
 				"A runner for Web requests",
 				webRunnerIcon
 		);
