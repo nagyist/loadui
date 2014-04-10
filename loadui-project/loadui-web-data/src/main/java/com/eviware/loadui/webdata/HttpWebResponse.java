@@ -2,7 +2,7 @@ package com.eviware.loadui.webdata;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.HttpResponse;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -79,7 +79,7 @@ public class HttpWebResponse implements WebResponse
 		return responseContents == null ? new byte[0] : responseContents;
 	}
 
-	public static HttpWebResponse of( CloseableHttpResponse response )
+	public static HttpWebResponse of( HttpResponse response )
 	{
 		int responseCode = response.getStatusLine().getStatusCode();
 		Header contentType = response.getEntity().getContentType();

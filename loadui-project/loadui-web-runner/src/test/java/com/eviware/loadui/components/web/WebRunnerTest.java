@@ -67,17 +67,17 @@ public class WebRunnerTest
 
 		httpClient = new FakeHttpClient();
 
-		runner = new WebRunner( contextSpy, assetScraper, FakeRequestRunnerProvider.usingHttpClient( httpClient ) );
-		ctu.setComponentBehavior( component, runner );
-
-		triggerTerminal = runner.getTriggerTerminal();
-		resultsTerminal = runner.getResultTerminal();
-
-		results = ctu.getMessagesFrom( resultsTerminal );
-
-		// GIVEN
-		setProperty( UrlProperty.URL, TEST_URL );
-		runner.setLoadTestRunning( true );
+//		runner = new WebRunner( contextSpy, assetScraper, FakeRequestRunnerProvider.usingHttpClient( httpClient ) );
+//		ctu.setComponentBehavior( component, runner );
+//
+//		triggerTerminal = runner.getTriggerTerminal();
+//		resultsTerminal = runner.getResultTerminal();
+//
+//		results = ctu.getMessagesFrom( resultsTerminal );
+//
+//		// GIVEN
+//		setProperty( UrlProperty.URL, TEST_URL );
+//		runner.setLoadTestRunning( true );
 
 		return component;
 	}

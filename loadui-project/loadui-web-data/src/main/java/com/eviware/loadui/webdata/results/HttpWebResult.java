@@ -1,7 +1,7 @@
 package com.eviware.loadui.webdata.results;
 
 import com.eviware.loadui.webdata.HttpWebResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.HttpResponse;
 
 public class HttpWebResult extends WebResult<HttpWebResponse>
 {
@@ -16,7 +16,7 @@ public class HttpWebResult extends WebResult<HttpWebResponse>
 		super( e );
 	}
 
-	public static HttpWebResult of( CloseableHttpResponse response )
+	public static HttpWebResult of( HttpResponse response )
 	{
 		try
 		{

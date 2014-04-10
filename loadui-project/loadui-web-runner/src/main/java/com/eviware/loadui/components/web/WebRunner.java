@@ -111,6 +111,10 @@ public class WebRunner extends RunnerBase implements ListenableValue.ValueListen
 	@Override
 	protected TerminalMessage sample( TerminalMessage triggerMessage, Object sampleId ) throws SampleCancelledException
 	{
+		if( !isLoadTestRunning.get() )
+		{
+			updateWebPageUrl( webPageUrlProperty.getUrl() );
+		}
 		final RequestRunner runner = requestRunner;
 		if( runner == null )
 			throw new RuntimeException( "Cannot run, no URL set or URL is invalid" );
