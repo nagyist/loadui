@@ -73,6 +73,8 @@ public class StatisticTree extends TreeView<Labeled> implements ValidatableNode
 		super( root );
 		setShowRoot( false );
 
+		setMinWidth( 650 );
+
 		getSelectionModel().setSelectionMode( SelectionMode.MULTIPLE );
 		getStyleClass().add( "assertable-tree" );
 

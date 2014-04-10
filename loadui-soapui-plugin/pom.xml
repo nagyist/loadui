@@ -17,7 +17,7 @@
 
     <properties>
         <loadUIVersion>${project.version}</loadUIVersion>
-        <soapUIVersion>5.0.0-beta</soapUIVersion>
+        <soapUIVersion>5.0.0</soapUIVersion>
     </properties>
     <repositories>
         <repository>

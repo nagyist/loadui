@@ -19,7 +19,7 @@
  *
  * @id com.eviware.WebRunner
  * @help http://www.loadui.org/Runners/web-page-runner-component.html
- * @name Web Page Runner
+ * @name HTTP Runner
  * @category runners
  */
 

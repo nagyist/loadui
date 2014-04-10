@@ -23,6 +23,7 @@ import com.eviware.loadui.ui.fx.util.UIUtils;
 import com.eviware.loadui.util.statistics.StatisticNameFormatter;
 
 import javafx.event.EventHandler;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.TreeCell;
 import javafx.scene.input.MouseEvent;
 
@@ -36,6 +37,7 @@ public class LabeledTreeCell extends TreeCell<Labeled> {
                     cell.fireEvent(IntentEvent.create(IntentEvent.INTENT_SAVE, ConfirmationDialog.class));
             }
         });
+		  cell.setTextOverrun( OverrunStyle.LEADING_ELLIPSIS );
         return cell;
     }
 
@@ -56,7 +58,7 @@ public class LabeledTreeCell extends TreeCell<Labeled> {
 		  {
 			  if( item instanceof Statistic<?> || item instanceof StatisticWrapper )
 			  {
-				  setText( StatisticNameFormatter.format( item.getLabel() ) );
+			     setText( StatisticNameFormatter.format( item.getLabel() ) );
 				  setId( UIUtils.toCssId( StatisticNameFormatter.format( item.getLabel() ) ) );
 
 			  }
