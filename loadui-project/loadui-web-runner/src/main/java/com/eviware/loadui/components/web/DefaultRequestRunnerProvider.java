@@ -18,7 +18,12 @@ public class DefaultRequestRunnerProvider implements RequestRunnerProvider
 	public RequestRunner provideRequestRunner( ComponentContext context, URI pageUri, Iterable<URI> assetUris )
 	{
 		return new RequestRunner( clock,
-				HttpClientBuilder.create().setSSLSocketFactory( socketFactoryProvider.newSocketFactory() ) . build(),
+				HttpClientBuilder
+						.create()
+						.setSSLSocketFactory( socketFactoryProvider.newSocketFactory() )
+						.setMaxConnTotal( 10000 )
+						.setMaxConnPerRoute( 10000 )
+						.build(),
 				pageUri, assetUris,
 				createStatsSenderIfNecessary( context ) );
 	}
