@@ -38,6 +38,7 @@ public class WebRunner extends RunnerBase implements ListenableValue.ValueListen
 		this.requestRunnerProvider = requestRunnerProvider;
 		this.webPageUrlProperty = new UrlProperty( context );
 		context.setLayout( new WebRunnerLayout( webPageUrlProperty, context ) );
+		context.setCompactLayout( new WebRunnerCompactLayout( context ) );
 		webPageUrlProperty.addUrlChangeListener( this );
 	}
 
