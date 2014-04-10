@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import static com.eviware.loadui.util.projects.ComponentBuilder.LoadUIComponents.REST_RUNNER;
+
 public class RestRunnerActivator
 {
 	private Logger log = LoggerFactory.getLogger( RestRunnerActivator.class );
@@ -31,7 +33,7 @@ public class RestRunnerActivator
 		ComponentDescriptor restDescriptor = new ComponentDescriptor(
 				RestRunner.class.getName(),
 				RunnerCategory.CATEGORY,
-				"REST Runner",
+				REST_RUNNER.getName(),
 				"A runner for REST requests",
 				restIcon
 		);

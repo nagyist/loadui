@@ -16,14 +16,15 @@ public class ComponentBuilder
 	public enum LoadUIComponents
 	{
 		FIXED_RATE( "Fixed Rate" ),
-		WEB_RUNNER( "Web Page Runner" ),
-		NEW_WEB_RUNNER( "New Web Runner" ),
+		HTTP_RUNNER( "Http Runner" ),
+		WEB_RUNNER( "Web Runner" ),
 		REST_RUNNER( "REST Runner" ),
+		DEJA_RUNNER( "DejaClick Runner" ),
+		SOAPUI_RUNNER( "SoapUI Runner" ),
 		FIXED_LOAD( "Fixed Load" ),
 		RAMP_LOAD( "Ramp Load" ),
 		RAMP( "Ramp" ),
 		RAMP_SEQUENCE( "Ramp Sequence" ),
-		DEJA_RUNNER( "DejaClick Runner" ),
 		TABLE_LOG( "Table Log" );
 
 		private final String name;

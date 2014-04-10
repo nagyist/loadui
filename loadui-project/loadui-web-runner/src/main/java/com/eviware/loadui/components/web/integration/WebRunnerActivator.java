@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import static com.eviware.loadui.util.projects.ComponentBuilder.LoadUIComponents.WEB_RUNNER;
+
 public class WebRunnerActivator
 {
 	static final Logger log = LoggerFactory.getLogger( WebRunnerActivator.class );
@@ -31,7 +33,7 @@ public class WebRunnerActivator
 		ComponentDescriptor webRunnerDescriptor = new ComponentDescriptor(
 				WebRunner.class.getName(),
 				RunnerCategory.CATEGORY,
-				"Web Runner",
+				WEB_RUNNER.getName(),
 				"A runner for Web requests",
 				webRunnerIcon
 		);

@@ -64,7 +64,7 @@ public class ProjectBuilderTest
 				.importProject( true )
 				.components(
 						ComponentBuilder.create().type( FIXED_RATE ).property( "rate", Long.class, 10L ).child(
-								ComponentBuilder.create().type( WEB_RUNNER ).property( "url", String.class, "win-srvmontest" ).build()
+								ComponentBuilder.create().type( HTTP_RUNNER ).property( "url", String.class, "win-srvmontest" ).build()
 						).build()
 				)
 				.build();
@@ -87,7 +87,7 @@ public class ProjectBuilderTest
 				.importProject( true )
 				.components(
 						ComponentBuilder.create().type( FIXED_LOAD ).concurrent().property( "load", Long.class, 2L ).child(
-								ComponentBuilder.create().type( WEB_RUNNER ).property( "url", String.class, "win-srvmontest" ).build()
+								ComponentBuilder.create().type( HTTP_RUNNER ).property( "url", String.class, "win-srvmontest" ).build()
 						).build()
 				)
 				.build();
