@@ -897,6 +897,7 @@ public class SoapUISamplerComponent extends RunnerBase
 			{
 				state.restore();
 			}
+			soapuiLoadTest.setProject( project );
 		}
 
 		public void setTestSuite( final String testSuiteName )
