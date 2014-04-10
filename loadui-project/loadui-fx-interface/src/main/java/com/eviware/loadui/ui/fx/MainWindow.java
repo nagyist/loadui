@@ -27,7 +27,7 @@ import com.eviware.loadui.ui.fx.views.analysis.FxExecutionsInfo;
 import com.eviware.loadui.ui.fx.views.window.MainWindowView;
 import com.eviware.loadui.ui.fx.views.workspace.GettingStartedDialog;
 import com.eviware.loadui.ui.fx.views.workspace.NewVersionDialog;
-import com.eviware.loadui.util.NewVersionChecker;
+import com.eviware.loadui.util.ShutdownWatchdog;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -41,6 +41,7 @@ import javafx.stage.WindowEvent;
 import static com.eviware.loadui.ui.fx.views.workspace.GettingStartedDialog.SHOW_GETTING_STARTED;
 import static com.eviware.loadui.util.NewVersionChecker.VersionInfo;
 import static com.eviware.loadui.util.NewVersionChecker.checkForNewVersion;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class MainWindow
 {
@@ -69,6 +70,7 @@ public class MainWindow
 			public void handle( WindowEvent event )
 			{
 				saveDimensions();
+				ShutdownWatchdog.killJvmIn( 6, SECONDS );
 			}
 		} );
 
