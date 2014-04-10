@@ -15,30 +15,11 @@
  */
 package com.eviware.loadui.integration;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
-
-import javax.annotation.Nonnull;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.component.ComponentCreationException;
 import com.eviware.loadui.api.component.ComponentDescriptor;
 import com.eviware.loadui.api.component.ComponentRegistry;
-import com.eviware.loadui.api.model.CanvasItem;
-import com.eviware.loadui.api.model.ComponentItem;
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.api.model.ProjectRef;
-import com.eviware.loadui.api.model.SceneItem;
-import com.eviware.loadui.api.model.WorkspaceProvider;
+import com.eviware.loadui.api.model.*;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.api.terminal.Terminal;
 import com.eviware.loadui.components.soapui.MockServiceComponent;
@@ -47,6 +28,15 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
+import static com.eviware.loadui.util.projects.ComponentBuilder.LoadUIComponents.SOAPUI_RUNNER;
 
 public class LoadUIUtils
 {
@@ -145,7 +135,7 @@ public class LoadUIUtils
 				{
 					for( ComponentItem componentItem : components )
 					{
-						if( ( baseComponentName.equals( LoadUIIntegrator.SOAPUI_RUNNER_BASE_NAME ) && componentItem
+						if( ( baseComponentName.equals( SOAPUI_RUNNER.getName() ) && componentItem
 								.getBehavior() instanceof SoapUISamplerComponent )
 								|| ( baseComponentName.equals( LoadUIIntegrator.MOCK_RUNNER_BASE_NAME ) && componentItem
 										.getBehavior() instanceof MockServiceComponent ) )
@@ -173,7 +163,7 @@ public class LoadUIUtils
 				Collection<? extends ComponentItem> components = theScene.getComponents();
 				for( ComponentItem componentItem : components )
 				{
-					if( ( baseComponentName.equals( LoadUIIntegrator.SOAPUI_RUNNER_BASE_NAME ) && componentItem
+					if( ( baseComponentName.equals( SOAPUI_RUNNER.getName() ) && componentItem
 							.getBehavior() instanceof SoapUISamplerComponent )
 							|| ( baseComponentName.equals( LoadUIIntegrator.MOCK_RUNNER_BASE_NAME ) && componentItem
 									.getBehavior() instanceof MockServiceComponent ) )
@@ -201,7 +191,7 @@ public class LoadUIUtils
 		Set<ComponentItem> components = Sets.newHashSet();
 		for( ComponentItem componentItem : canvasComponents )
 		{
-			if( baseComponentName.equals( LoadUIIntegrator.SOAPUI_RUNNER_BASE_NAME )
+			if( baseComponentName.equals( SOAPUI_RUNNER.getName() )
 					&& componentItem.getBehavior() instanceof SoapUISamplerComponent )
 			{
 				components.add( componentItem );
