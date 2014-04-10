@@ -1,7 +1,6 @@
 package com.eviware.loadui.components.web;
 
 import com.eviware.loadui.api.base.Clock;
-import com.eviware.loadui.webdata.StreamConsumer;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.SettableFuture;
 import org.apache.http.Header;
@@ -16,7 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -35,7 +33,6 @@ public class RequestRunnerTest
 	CloseableHttpAsyncClient httpClient;
 	List<URI> uris = new ArrayList<>();
 	WebRunnerStatsSender mockStatsSender;
-	StreamConsumer mockConsumer;
 	static final String RESPONSE_CONTENT = "hello";
 
 	FutureCallback<HttpResponse> anyFutureResponse = ( FutureCallback<HttpResponse> )any( FutureCallback.class );
@@ -64,9 +61,6 @@ public class RequestRunnerTest
 		mockResponseFuture.set( mockResponse );
 
 		when( httpClient.execute( any( HttpGet.class ), anyFutureResponse ) ).thenReturn( mockResponseFuture );
-
-		mockConsumer = mock( StreamConsumer.class );
-		when( mockConsumer.consume( any( InputStream.class ) ) ).thenReturn( RESPONSE_CONTENT.getBytes() );
 
 		mockStatsSender = mock( WebRunnerStatsSender.class );
 	}
@@ -207,7 +201,6 @@ public class RequestRunnerTest
 		URI pageUri = iter.next();
 		Iterable<URI> assets = Iterables.skip( uris, 1 );
 		RequestRunner runner = new RequestRunner( clock, httpClient, pageUri, assets, mockStatsSender );
-		runner.setConsumer( mockConsumer );
 		return runner;
 	}
 

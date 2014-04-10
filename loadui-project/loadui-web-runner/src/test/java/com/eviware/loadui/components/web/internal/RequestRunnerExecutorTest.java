@@ -25,7 +25,7 @@ public class RequestRunnerExecutorTest
 	}
 
 	@Test
-	public void a()
+	public void noTests()
 	{
 
 	}

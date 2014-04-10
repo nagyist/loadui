@@ -138,8 +138,8 @@ public class WebRunnerStatsSender
 		private final StatisticVariable.Mutable failureVariable;
 		private final StatisticVariable.Mutable sentVariable;
 
-		private final AtomicLong failureCount = new AtomicLong( 0l );
-		private final AtomicLong sentCount = new AtomicLong( 0l );
+		private final AtomicLong failureCount = new AtomicLong( 0L );
+		private final AtomicLong sentCount = new AtomicLong( 0L );
 
 		public VariableGroup( String identifier )
 		{
@@ -170,8 +170,8 @@ public class WebRunnerStatsSender
 
 		public void resetCounters()
 		{
-			failureCount.set( 0l );
-			sentCount.set( 0l );
+			failureCount.set( 0L );
+			sentCount.set( 0L );
 		}
 	}
 

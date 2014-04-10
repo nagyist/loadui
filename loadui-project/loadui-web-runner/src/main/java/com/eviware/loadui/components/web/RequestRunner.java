@@ -3,7 +3,6 @@ package com.eviware.loadui.components.web;
 import com.eviware.loadui.api.base.Clock;
 import com.eviware.loadui.components.web.internal.RequestRunnerExecutor;
 import com.eviware.loadui.webdata.HttpWebResponse;
-import com.eviware.loadui.webdata.StreamConsumer;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +19,6 @@ public class RequestRunner implements Callable<Boolean>
 	static final Logger log = LoggerFactory.getLogger( RequestRunner.class );
 
 	private final RequestRunnerExecutor requestRunnerExecutor;
-	private final CloseableHttpAsyncClient httpClient;
-	private final Clock clock;
 	private final WebRunnerStatsSender statsSender;
 	private final URI pageUri;
 	private final Iterable<URI> assets;
@@ -35,17 +32,10 @@ public class RequestRunner implements Callable<Boolean>
 								 Iterable<URI> assets,
 								 WebRunnerStatsSender statsSender )
 	{
-		this.clock = clock;
-		this.httpClient = httpClient;
 		this.statsSender = statsSender;
 		this.pageUri = pageUri;
 		this.assets = assets;
 		requestRunnerExecutor = new RequestRunnerExecutor( httpClient, statsSender, clock );
-	}
-
-	public void setConsumer( StreamConsumer consumer )
-	{
-		requestRunnerExecutor.setConsumer( consumer );
 	}
 
 	@Override

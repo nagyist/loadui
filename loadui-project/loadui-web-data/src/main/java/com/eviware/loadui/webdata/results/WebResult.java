@@ -1,10 +1,8 @@
 package com.eviware.loadui.webdata.results;
 
-import com.eviware.loadui.webdata.WebResponse;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class WebResult<T extends WebResponse>
+public class WebResult<T>
 {
 
 	private final Exception exception;

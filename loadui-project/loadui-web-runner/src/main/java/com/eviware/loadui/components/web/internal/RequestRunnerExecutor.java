@@ -4,25 +4,29 @@ import com.eviware.loadui.api.base.Clock;
 import com.eviware.loadui.components.web.RequestRunner;
 import com.eviware.loadui.components.web.WebRunnerStatsSender;
 import com.eviware.loadui.webdata.HttpWebResponse;
-import com.eviware.loadui.webdata.StreamConsumer;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
+import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.nio.IOControl;
+import org.apache.http.nio.client.methods.AsyncByteConsumer;
+import org.apache.http.nio.client.methods.HttpAsyncMethods;
+import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class RequestRunnerExecutor
 {
@@ -32,10 +36,7 @@ public class RequestRunnerExecutor
 	private final CloseableHttpAsyncClient httpClient;
 	private final Clock clock;
 
-	private StreamConsumer consumer = new StreamConsumer();
 	private List<Future<?>> runningRequests = new ArrayList<>();
-
-	private ExecutorService downloadService = Executors.newCachedThreadPool();
 
 	public RequestRunnerExecutor( CloseableHttpAsyncClient httpClient,
 											WebRunnerStatsSender statsSender,
@@ -69,48 +70,86 @@ public class RequestRunnerExecutor
 		final String resource = request.getResource();
 
 		log.debug( "Running request: {}", resource );
-		HttpGet get = new HttpGet( uri );
 		statsSender.updateRequestSent( request.getResource() );
 
 		final long startTime = clock.millis();
 
-		Future<HttpResponse> futureResponse = httpClient.execute( get, new FutureCallback<HttpResponse>()
-		{
-			@Override
-			public void completed( HttpResponse httpResponse )
-			{
-				long st = System.currentTimeMillis();
-				HttpWebResponse webResponse = HttpWebResponse.of( httpResponse );
-				boolean failed = request.isFailure( webResponse );
-				log.debug( "It took {}ms to just know if it failed or not", System.currentTimeMillis() - st );
-				if( failed )
+		Future<HttpWebResponse> futureResponse = httpClient.execute(
+				HttpAsyncMethods.createGet( uri ),
+				new AsyncByteConsumer<HttpWebResponse>()
 				{
-					failed( new RuntimeException( "Request reported webResponse constitutes a failure" ) );
-				}
-				else
+					private volatile HttpWebResponse response;
+					private boolean hasFirstByte = false;
+					private AtomicLong length = new AtomicLong( 0 );
+
+					@Override
+					protected void onByteReceived( ByteBuffer buf, IOControl ioctrl )
+							throws IOException
+					{
+						if( !hasFirstByte )
+						{
+							long latency = clock.millis() - startTime;
+							statsSender.updateLatency( resource, latency );
+							log.debug( "It took {}ms to to get the first byte for {}", latency, resource );
+						}
+						hasFirstByte = true;
+
+						while( buf.position() < buf.limit() )
+						{
+							buf.get();
+							length.incrementAndGet();
+						}
+					}
+
+					@Override
+					protected void onResponseReceived( HttpResponse response )
+							throws HttpException, IOException
+					{
+						log.debug( "Called onResponseReceived for {}", resource );
+						this.response = HttpWebResponse.of( response, length );
+					}
+
+					@Override
+					protected HttpWebResponse buildResult( HttpContext context )
+							throws Exception
+					{
+						return response;
+					}
+				},
+				new FutureCallback<HttpWebResponse>()
 				{
-					webResponse.setConsumer( consumer );
-					statsSender.updateLatency( resource, clock.millis() - startTime );
-					consumeResponseAsync( webResponse, resource, startTime );
-					result.set( true );
-					log.debug( "It took {}ms to finish reacting", System.currentTimeMillis() - st );
+					@Override
+					public void completed( HttpWebResponse webResponse )
+					{
+						log.debug( "Completed request for {}", resource );
+						boolean failed = request.isFailure( webResponse );
+						if( failed )
+						{
+							failed( new RuntimeException( "Request reported webResponse constitutes a failure" ) );
+						}
+						else
+						{
+							long contentLength = webResponse.getContentLength();
+							statsSender.updateResponse( resource, clock.millis() - startTime, contentLength );
+							result.set( true );
+						}
+					}
+
+					@Override
+					public void failed( Exception error )
+					{
+						request.handleError( new RuntimeException( "Request to " + resource + " failed" ) );
+						result.set( false );
+					}
+
+					@Override
+					public void cancelled()
+					{
+						result.set( false );
+					}
+
 				}
-			}
-
-			@Override
-			public void failed( Exception error )
-			{
-				request.handleError( new RuntimeException( "Request to " + resource + " failed" ) );
-				result.set( false );
-			}
-
-			@Override
-			public void cancelled()
-			{
-				result.set( false );
-			}
-
-		} );
+		);
 
 		result.addListener( new Runnable()
 		{
@@ -125,20 +164,6 @@ public class RequestRunnerExecutor
 		return result;
 	}
 
-	private void consumeResponseAsync( final HttpWebResponse webResponse, final String resource, final long startTime )
-	{
-		downloadService.execute( new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				log.debug( "Completed request {} on thread {}", resource, Thread.currentThread().getName() );
-				long contentLength = webResponse.getContentLength();
-				statsSender.updateResponse( resource, clock.millis() - startTime, contentLength );
-			}
-		} );
-	}
-
 	public int cancelAll()
 	{
 		int runningCount = runningRequests.size();
@@ -149,8 +174,4 @@ public class RequestRunnerExecutor
 		return runningCount;
 	}
 
-	public void setConsumer( StreamConsumer consumer )
-	{
-		this.consumer = consumer;
-	}
 }
