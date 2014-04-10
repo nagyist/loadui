@@ -46,10 +46,15 @@ public class DefaultRequestRunnerProvider implements RequestRunnerProvider
 							socketFactoryProvider.getHostnameVerifier() ) )
 					.build();
 
+			PoolingNHttpClientConnectionManager connectionManager =
+					new PoolingNHttpClientConnectionManager( ioReactor, sessionStrategyRegistry );
+			connectionManager.setDefaultMaxPerRoute( 1_000 );
+			connectionManager.setMaxTotal( 5_000 );
+
 			CloseableHttpAsyncClient client = HttpAsyncClients.custom()
 					.setMaxConnTotal( 5_000 )
 					.setMaxConnPerRoute( 1_000 )
-					.setConnectionManager( new PoolingNHttpClientConnectionManager( ioReactor, sessionStrategyRegistry ) )
+					.setConnectionManager( connectionManager )
 					.build();
 
 			return new RequestRunner( clock, client, pageUri, assetUris, createStatsSenderIfNecessary( context ) );
