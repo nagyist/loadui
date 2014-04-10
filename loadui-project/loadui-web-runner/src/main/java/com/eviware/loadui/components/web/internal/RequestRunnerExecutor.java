@@ -1,6 +1,9 @@
 package com.eviware.loadui.components.web.internal;
 
 import com.eviware.loadui.components.web.RequestRunner;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,29 +17,32 @@ public class RequestRunnerExecutor
 {
 	static final Logger log = LoggerFactory.getLogger( RequestRunnerExecutor.class );
 
-	public static final int MAX_REQUEST_THREADS = 5;
+	public static final int MAX_REQUEST_THREADS = 6;
 	public static final long REQUEST_TIMEOUT_IN_MINUTES = 2; // minutes
 
 	private final List<ExecutorService> executors = Collections.synchronizedList( new ArrayList<ExecutorService>() );
 	private final List<Future<Boolean>> currentlyRunningRequests = Collections.synchronizedList( new ArrayList<Future<Boolean>>() );
 
-	private final ThreadLocal<ExecutorService> localRequestsExecutor =
-			new ThreadLocal<ExecutorService>()
+	private final LoadingCache<Thread, ExecutorService> threadCache;
+
+
+	private final ExecutorService overalExecutor = Executors.newFixedThreadPool( 50 );
+
+	public RequestRunnerExecutor()
+	{
+		this.threadCache = CacheBuilder.newBuilder().build( new CacheLoader<Thread, ExecutorService>()
+		{
+			@Override
+			public ExecutorService load( Thread _thread ) throws Exception
 			{
-
-				@Override
-				protected ExecutorService initialValue()
-				{
-					ExecutorService service = Executors.newFixedThreadPool( MAX_REQUEST_THREADS );
-					executors.add( service );
-					log.debug( "Created new Executor for running requests, now there are {} executors",
-							executors.size() );
-					return service;
-				}
-
-			};
-
-	private final ExecutorService overalExecutor = Executors.newCachedThreadPool();
+				ExecutorService service = Executors.newFixedThreadPool( MAX_REQUEST_THREADS );
+				executors.add( service );
+				log.debug( "Created new Executor for running requests, now there are {} executors. Thread name: {}",
+						executors.size(), _thread.getName() );
+				return service;
+			}
+		} );
+	}
 
 	public Future<Boolean> runPageRequest( RequestRunner.PageUriRequest pageUriRequest )
 	{
@@ -97,7 +103,7 @@ public class RequestRunnerExecutor
 		@Override
 		public List<Future<Boolean>> call() throws Exception
 		{
-			ExecutorService executor = localRequestsExecutor.get();
+			ExecutorService executor = threadCache.get( Thread.currentThread() );
 			List<Future<Boolean>> futures = new ArrayList<>( requests.size() );
 			for( RequestRunner.Request request : requests )
 			{
