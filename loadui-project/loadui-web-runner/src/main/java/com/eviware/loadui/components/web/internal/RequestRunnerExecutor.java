@@ -94,11 +94,13 @@ public class RequestRunnerExecutor
 						}
 						hasFirstByte = true;
 
+						long bytesRead = 0;
 						while( buf.position() < buf.limit() )
 						{
 							buf.get();
-							length.incrementAndGet();
+							bytesRead++;
 						}
+						length.addAndGet( bytesRead );
 					}
 
 					@Override
