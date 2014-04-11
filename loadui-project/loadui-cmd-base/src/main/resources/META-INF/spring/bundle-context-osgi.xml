@@ -9,7 +9,7 @@
 
     <osgi:service id="cmdFilePickerDialogFactory" ranking="0" interface="com.eviware.loadui.api.ui.dialog.FilePickerDialogFactory"/>
 
-
+    <osgi:reference interface="com.eviware.loadui.api.statistics.store.ExecutionManager" id="executionManager" cardinality="0..1" />
 
     <osgi:list interface="com.eviware.loadui.api.command.GroovyCommand"
 		id="commands" cardinality="0..N">

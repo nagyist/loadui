@@ -17,6 +17,7 @@ package com.eviware.loadui.cmd;
 
 import com.eviware.loadui.api.command.GroovyCommand;
 import com.eviware.loadui.api.model.WorkspaceProvider;
+import com.eviware.loadui.api.statistics.store.ExecutionManager;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
@@ -37,8 +38,9 @@ public class CommandRunner
 	private final ExecutorService executor;
 	private final WorkspaceProvider workspaceProvider;
 	private final GroovyShell shell;
+	private final ExecutionManager executionManager;
 
-	public CommandRunner( WorkspaceProvider workspaceProvider )
+	public CommandRunner( WorkspaceProvider workspaceProvider, ExecutionManager executionManager )
 	{
 		this.executor = Executors.newSingleThreadScheduledExecutor( new ThreadFactory()
 		{
@@ -49,6 +51,7 @@ public class CommandRunner
 			}
 		} );
 		this.workspaceProvider = workspaceProvider;
+		this.executionManager = executionManager;
 
 		shell = new GroovyShell();
 	}
@@ -96,6 +99,10 @@ public class CommandRunner
 			catch( RuntimeException e )
 			{
 				log.error( "An error occured when executing the script", e );
+			} finally
+			{
+				if( executionManager.getState() != ExecutionManager.State.STOPPED )
+					executionManager.stopExecution();
 			}
 			shell.resetLoadedClasses();
 
