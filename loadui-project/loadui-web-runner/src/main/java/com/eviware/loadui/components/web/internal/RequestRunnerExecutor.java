@@ -69,7 +69,6 @@ public class RequestRunnerExecutor
 		final URI uri = request.getUri();
 		final String resource = request.getResource();
 
-		log.debug( "Running request: {}", resource );
 		statsSender.updateRequestSent( request.getResource() );
 
 		final long startTime = clock.millis();
@@ -86,6 +85,7 @@ public class RequestRunnerExecutor
 					protected void onByteReceived( ByteBuffer buf, IOControl ioctrl )
 							throws IOException
 					{
+						log.debug( "onByteReceived!!!" );
 						if( !hasFirstByte )
 						{
 							long latency = clock.millis() - startTime;

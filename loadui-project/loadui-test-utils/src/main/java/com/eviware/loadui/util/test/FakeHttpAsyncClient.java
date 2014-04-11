@@ -12,6 +12,7 @@ import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.nio.ContentDecoder;
 import org.apache.http.nio.protocol.HttpAsyncRequestProducer;
 import org.apache.http.nio.protocol.HttpAsyncResponseConsumer;
 import org.apache.http.params.HttpParams;
@@ -23,6 +24,7 @@ import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Timer;
@@ -37,6 +39,7 @@ import static org.mockito.Mockito.when;
 public class FakeHttpAsyncClient extends CloseableHttpAsyncClient
 {
 	protected static final Logger log = LoggerFactory.getLogger( FakeHttpAsyncClient.class );
+	public static final String DEFAULT_RESPONSE = "Ok!";
 
 	private final BlockingQueue<HttpRequest> handledRequests = new LinkedBlockingQueue<>();
 
@@ -108,7 +111,29 @@ public class FakeHttpAsyncClient extends CloseableHttpAsyncClient
 			public T call() throws Exception
 			{
 				Thread.sleep( 200 );
+
+				ContentDecoder decoder = new ContentDecoder()
+				{
+					boolean isCompleted;
+
+					@Override
+					public int read( ByteBuffer dst ) throws IOException
+					{
+						byte[] bytes = DEFAULT_RESPONSE.getBytes();
+						dst.put( bytes );
+						isCompleted = true;
+						return bytes.length;
+					}
+
+					@Override
+					public boolean isCompleted()
+					{
+						return isCompleted;
+					}
+				};
+
 				tHttpAsyncResponseConsumer.responseReceived( response );
+				tHttpAsyncResponseConsumer.consumeContent( decoder, null );
 				tHttpAsyncResponseConsumer.responseCompleted( httpContext );
 				T result = tHttpAsyncResponseConsumer.getResult();
 				tFutureCallback.completed( result );
@@ -126,7 +151,7 @@ public class FakeHttpAsyncClient extends CloseableHttpAsyncClient
 		handledRequests.add( request );
 
 		HttpEntity entity = mock( HttpEntity.class );
-		when( entity.getContent() ).thenReturn( new ByteArrayInputStream( "Ok!".getBytes() ) );
+		when( entity.getContent() ).thenReturn( new ByteArrayInputStream( DEFAULT_RESPONSE.getBytes() ) );
 
 		CloseableHttpResponse response = mock(CloseableHttpResponse.class);
 		when( response.getEntity() ).thenReturn( entity );
