@@ -63,7 +63,7 @@ public class RequestRunnerExecutor
 		return Futures.allAsList( futures );
 	}
 
-	private ListenableFuture<Boolean> runRequest( final RequestRunner.Request request )
+	private ListenableFuture<Boolean> runRequest( final RequestRunner.Request request ) //TODO: Refactor!
 	{
 		final SettableFuture<Boolean> result = SettableFuture.create();
 		final URI uri = request.getUri();
@@ -138,7 +138,7 @@ public class RequestRunnerExecutor
 					}
 
 					@Override
-					public void failed( Exception error )
+					public void failed( Exception error ) //TODO: Arguments not used
 					{
 						request.handleError( new RuntimeException( "Request to " + resource + " failed" ) );
 						result.set( false );
