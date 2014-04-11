@@ -85,7 +85,6 @@ public class RequestRunnerExecutor
 					protected void onByteReceived( ByteBuffer buf, IOControl ioctrl )
 							throws IOException
 					{
-						log.debug( "onByteReceived!!!" );
 						if( !hasFirstByte )
 						{
 							long latency = clock.millis() - startTime;
