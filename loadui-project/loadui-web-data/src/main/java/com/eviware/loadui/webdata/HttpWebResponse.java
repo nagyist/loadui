@@ -3,17 +3,18 @@ package com.eviware.loadui.webdata;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 
+import javax.annotation.concurrent.Immutable;
 import java.util.concurrent.atomic.AtomicLong;
 
+@Immutable
 public class HttpWebResponse
 {
-
 	private final int responseCode;
 	private final Header contentType;
 	private final Header contentEncoding;
-	private AtomicLong length;
+	private final long length;
 
-	public HttpWebResponse( int responseCode, Header contentType, Header contentEncoding, AtomicLong length )
+	private HttpWebResponse( int responseCode, Header contentType, Header contentEncoding, long length )
 	{
 		this.responseCode = responseCode;
 		this.contentType = contentType;
@@ -28,20 +29,10 @@ public class HttpWebResponse
 
 	public long getContentLength()
 	{
-		return length.get();
+		return length;
 	}
 
-	public Header getContentType()
-	{
-		return contentType;
-	}
-
-	public Header getContentEncoding()
-	{
-		return contentEncoding;
-	}
-
-	public static HttpWebResponse of( HttpResponse response, AtomicLong length )
+	public static HttpWebResponse of( HttpResponse response, long length )
 	{
 		int responseCode = response.getStatusLine().getStatusCode();
 		Header contentType = response.getEntity().getContentType();
@@ -58,7 +49,7 @@ public class HttpWebResponse
 				"responseCode=" + responseCode +
 				", contentType=" + contentType +
 				", contentEncoding=" + contentEncoding +
-				", length=" + length.get() +
+				", length=" + length +
 				'}';
 	}
 

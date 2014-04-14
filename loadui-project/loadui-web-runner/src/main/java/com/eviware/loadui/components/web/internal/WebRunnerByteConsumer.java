@@ -17,7 +17,7 @@ class WebRunnerByteConsumer extends AsyncByteConsumer<HttpWebResponse>
 {
 	private final long startTime;
 	private final String resource;
-	private volatile HttpWebResponse response;
+	private volatile HttpResponse response;
 	private boolean hasFirstByte;
 	private final AtomicLong length;
 	private final WebRunnerStatsSender statsSender;
@@ -59,13 +59,13 @@ class WebRunnerByteConsumer extends AsyncByteConsumer<HttpWebResponse>
 			throws HttpException, IOException
 	{
 		RequestRunnerExecutor.log.debug( "Called onResponseReceived for {}", resource );
-		this.response = HttpWebResponse.of( response, length );
+		this.response = response;
 	}
 
 	@Override
 	protected HttpWebResponse buildResult( HttpContext context )
 			throws Exception
 	{
-		return response;
+		return HttpWebResponse.of( response, length.get() );
 	}
 }
