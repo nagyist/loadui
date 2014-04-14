@@ -4,12 +4,11 @@ import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.FxIntegrationTestBase;
 import com.eviware.loadui.test.ui.fx.states.ProjectLoadedWithoutAgentsState;
-import javafx.scene.input.KeyCode;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
-import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.WEB_PAGE_RUNNER;
+import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.HTTP_RUNNER;
 import static org.loadui.testfx.Assertions.assertNodeExists;
 import static org.loadui.testfx.Matchers.hasLabel;
 
@@ -32,9 +31,9 @@ public class FirstLoadTest extends FxIntegrationTestBase
 	}
 
 	@Test
-	public void canCreate_WebPageRunner()
+	public void canCreate_HttpRunner()
 	{
-		connect( FIXED_RATE_GENERATOR ).to( WEB_PAGE_RUNNER );
+		connect( FIXED_RATE_GENERATOR ).to( HTTP_RUNNER );
 
 		assertNodeExists( ".connection-view" );
 

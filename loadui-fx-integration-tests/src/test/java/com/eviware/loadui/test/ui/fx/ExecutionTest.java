@@ -23,25 +23,21 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.loadui.testfx.GuiTest;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.WEB_PAGE_RUNNER;
 import static com.google.code.tempusfugit.temporal.Duration.seconds;
 import static com.google.code.tempusfugit.temporal.Timeout.timeout;
 import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 import static com.google.common.collect.Collections2.filter;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.loadui.testfx.Assertions.verifyThat;
-import static org.mockito.AdditionalMatchers.find;
 import static org.mockito.AdditionalMatchers.not;
 
 /**
