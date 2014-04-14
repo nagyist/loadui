@@ -18,7 +18,6 @@ public class WebRunnerStatsSender
 {
 	private static final Logger log = LoggerFactory.getLogger( WebRunnerStatsSender.class );
 
-
 	private final Map<String, VariableGroup> resourceToVariableGroup = new HashMap<>();
 
 	private final Clock clock;
@@ -63,11 +62,11 @@ public class WebRunnerStatsSender
 	{
 		long timeStamp = clock.millis();
 
-		VariableGroup resorceVariables = getVariablesFor( resource );
+		VariableGroup resourceVariables = getVariablesFor( resource );
 
-		if( resorceVariables != null )
+		if( resourceVariables != null )
 		{
-			resorceVariables.sentVariable.update( timeStamp, resorceVariables.sentCount.incrementAndGet() );
+			resourceVariables.sentVariable.update( timeStamp, resourceVariables.sentCount.incrementAndGet() );
 		}
 		else
 		{
@@ -79,11 +78,11 @@ public class WebRunnerStatsSender
 	{
 		long timeStamp = clock.millis();
 
-		VariableGroup resorceVariables = getVariablesFor( resource );
+		VariableGroup resourceVariables = getVariablesFor( resource );
 
-		if( resorceVariables != null )
+		if( resourceVariables != null )
 		{
-			resorceVariables.latencyVariable.update( timeStamp, latency );
+			resourceVariables.latencyVariable.update( timeStamp, latency );
 		}
 		else
 		{
@@ -95,11 +94,11 @@ public class WebRunnerStatsSender
 	{
 		long timeStamp = clock.millis();
 
-		VariableGroup resorceVariables = getVariablesFor( resource );
-		if( resorceVariables != null )
+		VariableGroup resourceVariables = getVariablesFor( resource );
+		if( resourceVariables != null )
 		{
-			resorceVariables.timeTakenVariable.update( timeStamp, timeTaken );
-			resorceVariables.responseSizeVariable.update( timeStamp, responseSize );
+			resourceVariables.timeTakenVariable.update( timeStamp, timeTaken );
+			resourceVariables.responseSizeVariable.update( timeStamp, responseSize );
 		}
 		else
 		{

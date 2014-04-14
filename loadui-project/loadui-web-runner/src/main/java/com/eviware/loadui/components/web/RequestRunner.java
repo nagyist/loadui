@@ -3,6 +3,7 @@ package com.eviware.loadui.components.web;
 import com.eviware.loadui.api.base.Clock;
 import com.eviware.loadui.components.web.internal.RequestRunnerExecutor;
 import com.eviware.loadui.webdata.HttpWebResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,7 +148,7 @@ public class RequestRunner implements Callable<Boolean>
 		@Override
 		public boolean isFailure( HttpWebResponse response )
 		{
-			return response.getResponseCode() != 200;
+			return response.getResponseCode() >= 300;
 		}
 
 	}
