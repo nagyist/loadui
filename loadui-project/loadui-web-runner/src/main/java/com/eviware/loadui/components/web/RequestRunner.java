@@ -3,6 +3,7 @@ package com.eviware.loadui.components.web;
 import com.eviware.loadui.api.base.Clock;
 import com.eviware.loadui.components.web.internal.RequestRunnerExecutor;
 import com.eviware.loadui.webdata.HttpWebResponse;
+import com.google.common.collect.ImmutableList;
 import org.apache.http.HttpStatus;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.slf4j.Logger;
@@ -23,8 +24,8 @@ public class RequestRunner implements Callable<Boolean>
 	private final WebRunnerStatsSender statsSender;
 	private final URI pageUri;
 	private final Iterable<URI> assets;
-	private PageUriRequest pageRequest;
-	private Collection<Request> assetRequests;
+	private volatile PageUriRequest pageRequest;
+	private volatile Collection<Request> assetRequests;
 	RequestConverter requestConverter = new RequestConverter();
 
 	public RequestRunner( Clock clock,
@@ -75,10 +76,9 @@ public class RequestRunner implements Callable<Boolean>
 
 	class RequestConverter
 	{
-
 		public PageUriRequest convertPageUri( URI uri )
 		{
-			addResource( uri );
+			statsSender.setResources( ImmutableList.of( uri ) );
 			return new PageUriRequest( uri );
 		}
 
@@ -87,18 +87,11 @@ public class RequestRunner implements Callable<Boolean>
 			List<Request> reqs = new ArrayList<>();
 			for( URI uri : uris )
 			{
-				addResource( uri );
 				reqs.add( new Request( uri ) );
 			}
+			statsSender.setResources( uris );
 			return reqs;
 		}
-
-		private void addResource( URI uri )
-		{
-			log.debug( "Creating request for URI {}", uri.toASCIIString() );
-			statsSender.addResource( uri.toASCIIString() );
-		}
-
 	}
 
 	@Immutable
