@@ -105,7 +105,7 @@ http = new DefaultHttpClient(cm)
 inlineUrlAuthUsername = null
 inlineUrlAuthPassword = null
 
-def runningSamples = ([] as Set).asSynchronized()
+def runningSamples = [].asSynchronized()
 runAction = null
 
 def dummyUrl = "http://GoSpamYourself.com"
