@@ -28,7 +28,7 @@ public class LoopTest extends FxIntegrationTestBase
 	@Test
 	public void TestLoop()
 	{
-		connect( FIXED_RATE_GENERATOR ).to( LOOP ).to( WEB_PAGE_RUNNER );
+		connect( FIXED_RATE_GENERATOR ).to( LOOP ).to( HTTP_RUNNER );
 
 
 

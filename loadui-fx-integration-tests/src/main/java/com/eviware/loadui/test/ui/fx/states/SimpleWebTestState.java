@@ -19,7 +19,7 @@ import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.ui.fx.FxTestState;
 
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
-import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.WEB_PAGE_RUNNER;
+import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.HTTP_RUNNER;
 
 public class SimpleWebTestState extends FxTestState
 {
@@ -44,7 +44,7 @@ public class SimpleWebTestState extends FxTestState
 	@Override
 	protected void enterFromParent() throws Exception
 	{
-		connect( FIXED_RATE_GENERATOR ).to( WEB_PAGE_RUNNER );
+		connect( FIXED_RATE_GENERATOR ).to( HTTP_RUNNER );
 
 		controller.click( ".component-view .text-field" ).type( "win-srvmontest" );
 	}

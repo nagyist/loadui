@@ -1,5 +1,6 @@
 package com.eviware.loadui.ui.fx.util.test;
 
+import com.eviware.loadui.util.projects.ComponentBuilder;
 import com.eviware.loadui.util.test.TestUtils;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -34,14 +35,25 @@ public class LoadUiRobot
 {
 	public enum Component
 	{
-		FIXED_RATE_GENERATOR( "generators", "Fixed Rate" ), TABLE_LOG( "output", "Table Log" ), WEB_PAGE_RUNNER(
-			"runners", "Web Page Runner" ), VARIANCE( "generators", "Variance" ), RANDOM( "generators", "Random" ),
-		RAMP_SEQUENCE( "generators", "Ramp Sequence" ), RAMP( "generators", "Ramp" ), USAGE( "generators", "Usage" ),
-		FIXED_LOAD( "generators", "Fixed Load" ), SCRIPT_RUNNER( "runners", "Script Runner" ),
-		PROCESS_RUNNER( "runners", "Process Runner" ), GEB_RUNNER( "runners", "Geb Runner" ), LOOP( "flow", "Loop" ),
-		SPLITTER( "flow", "Splitter" ), DELAY( "flow", "Delay" ), CONDITION( "flow", "Condition" ),
-		INTERVAL( "scheduler", "Interval" ), SCHEDULER( "scheduler", "Scheduler" ),
-		SOUPUI_MOCKSERVICE( "misc", "soupUI MockService" ), SCENARIO( "vu-scenario", "VU Scenario" );
+		FIXED_RATE_GENERATOR( "generators", ComponentBuilder.LoadUIComponents.FIXED_RATE.getName() ),
+		TABLE_LOG( "output", ComponentBuilder.LoadUIComponents.TABLE_LOG.getName() ),
+		HTTP_RUNNER( "runners", ComponentBuilder.LoadUIComponents.HTTP_RUNNER.getName() ),
+		VARIANCE( "generators", "Variance" ),
+		RANDOM( "generators", "Random" ),
+		RAMP_SEQUENCE( "generators", "Ramp Sequence" ),
+		RAMP( "generators", "Ramp" ),
+		USAGE( "generators", "Usage" ),
+		FIXED_LOAD( "generators", "Fixed Load" ),
+		SCRIPT_RUNNER( "runners", "Script Runner" ),
+		PROCESS_RUNNER( "runners", "Process Runner" ),
+		GEB_RUNNER( "runners", "Geb Runner" ), LOOP( "flow", "Loop" ),
+		SPLITTER( "flow", "Splitter" ),
+		DELAY( "flow", "Delay" ),
+		CONDITION( "flow", "Condition" ),
+		INTERVAL( "scheduler", "Interval" ),
+		SCHEDULER( "scheduler", "Scheduler" ),
+		SOUPUI_MOCKSERVICE( "misc", "soupUI MockService" ),
+		SCENARIO( "vu-scenario", "VU Scenario" );
 
 		public final String category;
 		public final String name;
