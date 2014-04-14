@@ -8,25 +8,17 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
-import org.apache.http.HttpException;
-import org.apache.http.HttpResponse;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
-import org.apache.http.nio.IOControl;
-import org.apache.http.nio.client.methods.AsyncByteConsumer;
 import org.apache.http.nio.client.methods.HttpAsyncMethods;
-import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class RequestRunnerExecutor
 {
@@ -75,48 +67,7 @@ public class RequestRunnerExecutor
 
 		Future<HttpWebResponse> futureResponse = httpClient.execute(
 				HttpAsyncMethods.createGet( uri ),
-				new AsyncByteConsumer<HttpWebResponse>()
-				{
-					private volatile HttpWebResponse response;
-					private boolean hasFirstByte = false;
-					private AtomicLong length = new AtomicLong( 0 );
-
-					@Override
-					protected void onByteReceived( ByteBuffer buf, IOControl ioctrl )
-							throws IOException
-					{
-						if( !hasFirstByte )
-						{
-							long latency = clock.millis() - startTime;
-							statsSender.updateLatency( resource, latency );
-							log.debug( "It took {}ms to to get the first byte for {}", latency, resource );
-						}
-						hasFirstByte = true;
-
-						long bytesRead = 0;
-						while( buf.position() < buf.limit() )
-						{
-							buf.get();
-							bytesRead++;
-						}
-						length.addAndGet( bytesRead );
-					}
-
-					@Override
-					protected void onResponseReceived( HttpResponse response )
-							throws HttpException, IOException
-					{
-						log.debug( "Called onResponseReceived for {}", resource );
-						this.response = HttpWebResponse.of( response, length );
-					}
-
-					@Override
-					protected HttpWebResponse buildResult( HttpContext context )
-							throws Exception
-					{
-						return response;
-					}
-				},
+				new WebRunnerByteConsumer( startTime, resource, statsSender, clock ),
 				new FutureCallback<HttpWebResponse>()
 				{
 					@Override
@@ -137,9 +88,9 @@ public class RequestRunnerExecutor
 					}
 
 					@Override
-					public void failed( Exception error ) //TODO: Arguments not used
+					public void failed( Exception error )
 					{
-						request.handleError( new RuntimeException( "Request to " + resource + " failed" ) );
+						request.handleError( new RuntimeException( "Request to " + resource + " failed", error ) );
 						result.set( false );
 					}
 
