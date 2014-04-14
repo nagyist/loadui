@@ -2,6 +2,8 @@ package com.eviware.loadui.components.web;
 
 import com.eviware.loadui.api.base.Clock;
 import com.eviware.loadui.util.test.FakeHttpAsyncClient;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.SettableFuture;
 import org.apache.http.Header;
@@ -11,6 +13,7 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -18,6 +21,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
 public class RequestRunnerTest
@@ -28,7 +33,7 @@ public class RequestRunnerTest
 	FakeHttpAsyncClient httpClient;
 	List<URI> uris = new ArrayList<>();
 	WebRunnerStatsSender mockStatsSender;
-	static final String RESPONSE_CONTENT = "hello";
+	ArgumentCaptor<List> resourcesCaptor;
 
 	@Before
 	public void setup() throws Exception
@@ -54,18 +59,27 @@ public class RequestRunnerTest
 		mockResponseFuture.set( mockResponse );
 
 		mockStatsSender = mock( WebRunnerStatsSender.class );
+		resourcesCaptor = ArgumentCaptor.forClass(List.class);
 	}
 
 	@Test
 	public void allResourcesAreAdded()
 	{
-		uris.addAll( asList( URI.create( URL_1 ), URI.create( URL_2 ) ) );
+		List<URI> urisToTest = asList( URI.create( URL_1 ), URI.create( URL_2 ) );
+		uris.addAll( urisToTest );
 		RequestRunner runner = createRunner();
 
 		runner.call();
 
-		verify( mockStatsSender ).addResource( URL_1 );
-		verify( mockStatsSender ).addResource( URL_2 );
+		verify( mockStatsSender, times( 2 ) ).setResources( resourcesCaptor.capture() );
+
+		List<URI> addedUris = new ArrayList<>();
+		for( Iterable<URI> uris : resourcesCaptor.getAllValues() )
+		{
+			Iterables.addAll( addedUris, uris );
+		}
+
+		assertThat( addedUris, is( urisToTest ) );
 	}
 
 	@Test
