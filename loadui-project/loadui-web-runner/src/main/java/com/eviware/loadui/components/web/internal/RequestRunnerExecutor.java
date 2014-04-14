@@ -28,7 +28,7 @@ public class RequestRunnerExecutor
 	private final CloseableHttpAsyncClient httpClient;
 	private final Clock clock;
 
-	private List<Future<?>> runningRequests = new ArrayList<>();
+	private List<Future<HttpWebResponse>> runningRequests = new ArrayList<>();
 
 	public RequestRunnerExecutor( CloseableHttpAsyncClient httpClient,
 											WebRunnerStatsSender statsSender,
@@ -65,7 +65,7 @@ public class RequestRunnerExecutor
 
 		final long startTime = clock.millis();
 
-		Future<HttpWebResponse> futureResponse = httpClient.execute(
+		final Future<HttpWebResponse> futureResponse = httpClient.execute(
 				HttpAsyncMethods.createGet( uri ),
 				new WebRunnerByteConsumer( startTime, resource, statsSender, clock ),
 				new FutureCallback<HttpWebResponse>()
@@ -108,7 +108,8 @@ public class RequestRunnerExecutor
 			@Override
 			public void run()
 			{
-				runningRequests.remove( result );
+				boolean removedOk = runningRequests.remove( futureResponse );
+				if( !removedOk ) log.warn( "Failed to remove running request" );
 			}
 		}, MoreExecutors.sameThreadExecutor() );
 
