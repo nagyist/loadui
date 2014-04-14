@@ -6,6 +6,7 @@
 	<bean id="commandRunner" class="com.eviware.loadui.cmd.CommandRunner"
 		destroy-method="destroy">
 		<constructor-arg ref="workspaceProvider" />
+        <constructor-arg ref="executionManager" />
 	</bean>
 
     <bean id="cmdFilePickerDialogFactory" class="com.eviware.loadui.cmd.interaction.CmdFilePickerDialogFactory"/>

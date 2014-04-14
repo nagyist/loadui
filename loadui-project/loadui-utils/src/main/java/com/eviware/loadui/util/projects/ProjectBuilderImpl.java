@@ -50,8 +50,8 @@ public class ProjectBuilderImpl implements ProjectBuilder
 
 		try
 		{
-			File temporaryProjectLocation = blueprint.getProjectFile();
-			ProjectRef projectRef = workspaceProvider.getWorkspace().createProject( temporaryProjectLocation, temporaryProjectLocation.getName(), true );
+			File temporaryProjectFile = blueprint.getProjectFile();
+			ProjectRef projectRef = workspaceProvider.getWorkspace().createProject( temporaryProjectFile, temporaryProjectFile.getName(), true );
 
 			projectRef.getProject().setLimit( CanvasItem.REQUEST_COUNTER, blueprint.getRequestLimit() );
 			projectRef.getProject().setLimit( CanvasItem.TIMER_COUNTER, blueprint.getTimeLimit() );
@@ -69,36 +69,31 @@ public class ProjectBuilderImpl implements ProjectBuilder
 				toDirectory.mkdirs();
 			}
 
-			if( !toDirectory.getPath().equals( temporaryProjectLocation.getParent() ) )
+			if( !toDirectory.getPath().equals( temporaryProjectFile.getParent() ) )
 			{
-				File targetProjectLocation = new File( toDirectory + File.separator + temporaryProjectLocation.getName() );
-				Files.move( temporaryProjectLocation, targetProjectLocation );
+				File targetProjectLocation = new File( toDirectory, temporaryProjectFile.getName() );
+				Files.move( temporaryProjectFile, targetProjectLocation );
 				projectRef.delete( false );
 				if( blueprint.shouldImportProject() )
 				{
 					projectRef = workspaceProvider.getWorkspace().importProject( targetProjectLocation, false );
 				}
 			}
-			else
+			else if( !blueprint.shouldImportProject() )
 			{
-				if( !blueprint.shouldImportProject )
-				{
 					workspaceProvider.getWorkspace().removeProject( projectRef );
-				}
 			}
 			return projectRef;
 		}
 		catch( IOException e )
 		{
-			log.error( "Unable to assemble project from blueprint " + e.getMessage() );
-			e.printStackTrace();
+			log.error( "Unable to assemble project from blueprint ", e );
 		}
 		catch( SecurityException e )
 		{
-			log.error( "Unable to assemble project at location " + e.getMessage() );
-			e.printStackTrace();
+			log.error( "Unable to assemble project at location ", e );
 		}
-		return null;
+		throw new RuntimeException( "Failed to create project" );
 	}
 
 	private void assembleComponentsByBlueprint( ProjectRef project, List<ComponentBlueprint> componentBlueprints )
@@ -364,7 +359,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		@Override
 		public ProjectBlueprint label( String label )
 		{
-			projectFile = new File( projectFile.getPath() + File.separator + label + projectFile + ".xml" );
+			projectFile = new File( projectFile.getParentFile(), label + projectFile.getName() );
 			setLabel( label );
 			return this;
 		}

@@ -15,7 +15,7 @@ public interface ProjectBuilder
 		 * Where should the project file be put.
 		 * If not used then the project file will end up in the systems tmp-folder.
 		 *
-		 * @param where
+		 * @param where the directory where project files will be saved
 		 * @return
 		 */
 		public ProjectBlueprint where( File where );

@@ -42,6 +42,16 @@ public class LoadUiServerProjectRunner
 
 	private void runProject( Path projectPath, Map<String, Object> attributes, boolean exitAfterRun, String script )
 	{
+		try
+		{
+			log.info( "Will start project as soon as the project file has been written" );
+			Thread.sleep( 1_000 );
+		}
+		catch( InterruptedException e )
+		{
+			log.warn( "Interrupted while waiting for project file to be written" );
+		}
+
 		log.info( "Starting project " + projectPath );
 		attributes.put( "projectFile", projectPath.toFile() );
 		context.registerService( GroovyCommand.class.getName(), createCommand( script, attributes, exitAfterRun ), null );
