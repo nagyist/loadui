@@ -6,7 +6,7 @@ package com.eviware.loadui.util;
 public enum LoadUIComponents
 {
 	FIXED_RATE( "Fixed Rate" ),
-	HTTP_RUNNER( "Http Runner" ),
+	HTTP_RUNNER( "HTTP Runner" ),
 	WEB_RUNNER( "Web Runner" ),
 	REST_RUNNER( "REST Runner" ),
 	DEJA_RUNNER( "DejaClick Runner" ),
