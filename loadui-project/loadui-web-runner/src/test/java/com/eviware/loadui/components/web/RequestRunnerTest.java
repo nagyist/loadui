@@ -2,8 +2,6 @@ package com.eviware.loadui.components.web;
 
 import com.eviware.loadui.api.base.Clock;
 import com.eviware.loadui.util.test.FakeHttpAsyncClient;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.SettableFuture;
 import org.apache.http.Header;
@@ -71,7 +69,7 @@ public class RequestRunnerTest
 
 		runner.call();
 
-		verify( mockStatsSender, times( 2 ) ).setResources( resourcesCaptor.capture() );
+		verify( mockStatsSender, times( 2 ) ).addResources( resourcesCaptor.capture() );
 
 		List<URI> addedUris = new ArrayList<>();
 		for( Iterable<URI> uris : resourcesCaptor.getAllValues() )

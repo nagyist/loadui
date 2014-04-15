@@ -4,7 +4,6 @@ import com.eviware.loadui.api.base.Clock;
 import com.eviware.loadui.components.web.internal.RequestRunnerExecutor;
 import com.eviware.loadui.webdata.HttpWebResponse;
 import com.google.common.collect.ImmutableList;
-import org.apache.http.HttpStatus;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +77,7 @@ public class RequestRunner implements Callable<Boolean>
 	{
 		public PageUriRequest convertPageUri( URI uri )
 		{
-			statsSender.setResources( ImmutableList.of( uri ) );
+			statsSender.addResources( ImmutableList.of( uri ) );
 			return new PageUriRequest( uri );
 		}
 
@@ -89,7 +88,7 @@ public class RequestRunner implements Callable<Boolean>
 			{
 				reqs.add( new Request( uri ) );
 			}
-			statsSender.setResources( uris );
+			statsSender.addResources( uris );
 			return reqs;
 		}
 	}

@@ -33,9 +33,10 @@ public class WebRunnerStatsSender
 		this.context = context;
 	}
 
-	public void setResources( Iterable<URI> uris )
+	public void addResources( Iterable<URI> uris )
 	{
 		ImmutableMap.Builder<String, VariableGroup> mapBuilder = ImmutableMap.builder();
+		mapBuilder.putAll( resourceToVariableGroup );
 		for( URI uri : uris )
 		{
 			String resource = uri.toASCIIString();
@@ -119,7 +120,6 @@ public class WebRunnerStatsSender
 		{
 			logResourceNotFoundError( resource );
 		}
-
 	}
 
 	private void logResourceNotFoundError( String resource )
