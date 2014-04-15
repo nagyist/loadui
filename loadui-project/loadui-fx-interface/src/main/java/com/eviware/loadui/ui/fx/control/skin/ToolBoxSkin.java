@@ -20,6 +20,7 @@ import com.eviware.loadui.ui.fx.control.ScrollableList;
 import com.eviware.loadui.ui.fx.control.ToolBox;
 import com.eviware.loadui.ui.fx.control.behavior.ToolBoxBehavior;
 import com.eviware.loadui.ui.fx.util.UIUtils;
+import com.eviware.loadui.util.StringUtils;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.sun.javafx.scene.control.behavior.BehaviorBase;
@@ -234,7 +235,7 @@ public class ToolBoxSkin<E extends Node> extends SkinBase<ToolBox<E>, BehaviorBa
 		public ToolBoxCategory( String category )
 		{
 			getStyleClass().setAll( "category" );
-			setId( UIUtils.toCssId( category ) );
+			setId( StringUtils.toCssName( category ) );
 			this.category = category;
 
 			itemHolder = new ItemHolder( category );

@@ -25,8 +25,8 @@ import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import com.eviware.loadui.ui.fx.util.FXMLUtils;
 import com.eviware.loadui.ui.fx.util.NodeUtils;
 import com.eviware.loadui.ui.fx.util.Properties;
-import com.eviware.loadui.ui.fx.util.UIUtils;
 import com.eviware.loadui.ui.fx.views.workspace.WorkspaceView;
+import com.eviware.loadui.util.StringUtils;
 import com.google.common.base.Preconditions;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyStringProperty;
@@ -77,7 +77,7 @@ public class ProjectRefView extends StackPane implements Labeled
 	{
 		setPrefWidth( 130 );
 		setMaxHeight( 95 );
-		setId( UIUtils.toCssId( projectRef.getLabel() ) );
+		setId( StringUtils.toCssName( projectRef.getLabel() ) );
 
 		menuButton.textProperty().bind( labelProperty );
 

@@ -27,7 +27,7 @@ import com.eviware.loadui.components.soapui.utils.NoOpXDialogs;
 import com.eviware.loadui.components.soapui.utils.NoOpXFileDialogs;
 import com.eviware.loadui.integration.CajoServer;
 import com.eviware.loadui.integration.LoadUIIntegrator;
-import com.eviware.loadui.util.projects.ComponentBuilder;
+import com.eviware.loadui.util.LoadUIComponents;
 import com.eviware.loadui.util.soapui.CajoClient;
 import com.eviware.soapui.SoapUI;
 import com.eviware.soapui.SoapUICore;
@@ -72,7 +72,7 @@ public final class SoapUIComponentActivator implements BundleActivator
 		bundleContext = context;
 		loadUIIntegrator = LoadUIIntegrator.getInstance();
 		final ComponentDescriptor componentDescriptor = new ComponentDescriptor( SoapUISamplerComponent.TYPE,
-				RunnerCategory.CATEGORY, ComponentBuilder.LoadUIComponents.SOAPUI_RUNNER.getName(), "Runs a soapUI TestCase.",
+				RunnerCategory.CATEGORY, LoadUIComponents.SOAPUI_RUNNER.getName(), "Runs a soapUI TestCase.",
 				soapuiRunnerIcon );
 
 		final ComponentDescriptor mockServiceDescriptor = new ComponentDescriptor( MockServiceComponent.TYPE,

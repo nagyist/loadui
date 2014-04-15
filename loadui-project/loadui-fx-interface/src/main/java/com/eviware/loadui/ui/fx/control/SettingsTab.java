@@ -15,15 +15,16 @@
  */
 package com.eviware.loadui.ui.fx.control;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
+import com.eviware.loadui.api.layout.ActionLayoutComponent;
+import com.eviware.loadui.api.property.Property;
+import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import com.eviware.loadui.ui.fx.control.fields.*;
+import com.eviware.loadui.util.StringUtils;
+import com.google.common.base.Objects;
+import com.google.common.base.Predicates;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Iterables;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -38,17 +39,13 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextBuilder;
 
 import javax.annotation.Nonnull;
-
-import com.eviware.loadui.api.layout.ActionLayoutComponent;
-import com.eviware.loadui.api.property.Property;
-import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
-import com.eviware.loadui.ui.fx.control.fields.ValidatableNode;
-import com.eviware.loadui.ui.fx.util.UIUtils;
-import com.google.common.base.Objects;
-import com.google.common.base.Predicates;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Iterables;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.Callable;
 
 public class SettingsTab extends Tab
 {
@@ -81,7 +78,7 @@ public class SettingsTab extends Tab
 		{
 			ValidatableCheckBox checkBox = new ValidatableCheckBox( label );
 			checkBox.setSelected( ( Boolean )property.getValue() );
-			checkBox.setId( UIUtils.toCssId( label ) );
+			checkBox.setId( StringUtils.toCssName( label ) );
 			vBox.getChildren().add( checkBox );
 			fieldToLoaduiProperty.put( checkBox, property );
 		}
@@ -101,7 +98,7 @@ public class SettingsTab extends Tab
 			ValidatableComboBoxField combo = new ValidatableComboBoxField();
 			combo.setItems( FXCollections.observableArrayList( enumValues ) );
 			combo.getSelectionModel().select( property.getValue() );
-			combo.setId( UIUtils.toCssId( label ) );
+			combo.setId( StringUtils.toCssName( label ) );
 			vBox.getChildren().add( combo );
 
 			fieldToLoaduiProperty.put( combo, property );
@@ -124,7 +121,7 @@ public class SettingsTab extends Tab
 				textField = new ValidatableStringField();
 				textField.setText( Objects.firstNonNull( property.getValue(), "" ).toString() );
 			}
-			textField.setId( UIUtils.toCssId( label ) );
+			textField.setId( StringUtils.toCssName( label ) );
 			vBox.getChildren().addAll( new Label( label + ":" ), textField );
 			fieldToLoaduiProperty.put( textField, property );
 		}
@@ -136,7 +133,7 @@ public class SettingsTab extends Tab
 		{
 			ValidatableTextField<?> textField = new ValidatableStringField();
 			textField.setText( Objects.firstNonNull( property.getValue(), "" ).toString() );
-			textField.setId( UIUtils.toCssId( label ) );
+			textField.setId( StringUtils.toCssName( label ) );
 			vBox.getChildren().addAll( new Label( label + ":" ), textField );
 			fieldToJavafxProperty.put( textField, property );
 		}
@@ -153,7 +150,7 @@ public class SettingsTab extends Tab
 		{
 			ValidatableTextField<?> textField = new ValidatableStringField();
 			textField.setText( ( String )initialValue );
-			textField.setId( UIUtils.toCssId( label ) );
+			textField.setId( StringUtils.toCssName( label ) );
 			vBox.getChildren().addAll( new Label( label + ":" ), textField );
 			fieldToFieldSaveHandler.put( textField, fieldSaveHandler );
 		}
@@ -161,7 +158,7 @@ public class SettingsTab extends Tab
 		{
 			ValidatableCheckBox checkBox = new ValidatableCheckBox( label );
 			checkBox.setSelected( ( Boolean )initialValue );
-			checkBox.setId( UIUtils.toCssId( label ) );
+			checkBox.setId( StringUtils.toCssName( label ) );
 			vBox.getChildren().add( checkBox );
 			fieldToFieldSaveHandler.put( checkBox, fieldSaveHandler );
 		}
@@ -186,11 +183,11 @@ public class SettingsTab extends Tab
 					throw new IllegalArgumentException( "The status closure is currently not represented by a callable" );
 				}
 
-				final Text statusLabel = TextBuilder.create().text( "Untested..." ).id( UIUtils.toCssId( "status" ) )
+				final Text statusLabel = TextBuilder.create().text( "Untested..." ).id( StringUtils.toCssName( "status" ) )
 						.build();
 
 				final Button button = ButtonBuilder.create().text( action.getLabel() ).disable( !action.isEnabled() )
-						.id( UIUtils.toCssId( action.getLabel() ) ).build();
+						.id( StringUtils.toCssName( action.getLabel() ) ).build();
 
 				final Runnable statusCallback = new Runnable()
 				{

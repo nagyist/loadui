@@ -20,6 +20,8 @@ import static com.eviware.loadui.ui.fx.util.ObservableLists.ofCollection;
 import static com.eviware.loadui.ui.fx.util.ObservableLists.transform;
 import static com.eviware.loadui.ui.fx.util.Properties.forLabel;
 import static com.google.common.base.Strings.isNullOrEmpty;
+
+import com.eviware.loadui.util.StringUtils;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -57,7 +59,6 @@ import com.eviware.loadui.ui.fx.util.DefaultNonSingletonFactory;
 import com.eviware.loadui.ui.fx.util.FXMLUtils;
 import com.eviware.loadui.ui.fx.util.NodeUtils;
 import com.eviware.loadui.ui.fx.util.ObservableLists;
-import com.eviware.loadui.ui.fx.util.UIUtils;
 import com.eviware.loadui.util.BeanInjector;
 import com.google.common.base.Function;
 
@@ -145,7 +146,7 @@ public class StatisticTab extends Tab implements Releasable
 	{
 		tabTitle = forLabel( page );
 		textProperty().bindBidirectional( tabTitle );
-		setId( UIUtils.toCssId( page.getLabel() ) );
+		setId( StringUtils.toCssName( page.getLabel() ) );
 
 		MenuItem renameItem = new MenuItem( "Rename\u2026" );
 		renameItem.setId( "tab-rename" );
