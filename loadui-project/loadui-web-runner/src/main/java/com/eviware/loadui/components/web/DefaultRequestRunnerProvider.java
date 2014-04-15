@@ -57,7 +57,7 @@ public class DefaultRequestRunnerProvider implements RequestRunnerProvider
 					.setConnectionManager( connectionManager )
 					.build();
 
-			return new RequestRunner( clock, client, pageUri, assetUris, createStatsSenderIfNecessary( context ) );
+			return new RequestRunner( clock, client, pageUri, assetUris, new WebRunnerStatsSender( context, clock ) );
 		}
 		catch( Exception e )
 		{
@@ -65,18 +65,4 @@ public class DefaultRequestRunnerProvider implements RequestRunnerProvider
 		}
 
 	}
-
-	private WebRunnerStatsSender createStatsSenderIfNecessary( ComponentContext context )
-	{
-		if( statisticsSender == null )
-		{
-			statisticsSender = new WebRunnerStatsSender( context, clock );
-		}
-		else
-		{
-			statisticsSender.clearStatisticVariables();
-		}
-		return statisticsSender;
-	}
-
 }

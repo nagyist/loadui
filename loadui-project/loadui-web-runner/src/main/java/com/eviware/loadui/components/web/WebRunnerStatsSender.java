@@ -5,10 +5,14 @@ import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.statistics.StatisticVariable;
 import com.eviware.loadui.impl.statistics.CounterStatisticsWriter;
 import com.eviware.loadui.impl.statistics.SampleStatisticsWriter;
+import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -18,8 +22,7 @@ public class WebRunnerStatsSender
 {
 	private static final Logger log = LoggerFactory.getLogger( WebRunnerStatsSender.class );
 
-
-	private final Map<String, VariableGroup> resourceToVariableGroup = new HashMap<>();
+	private volatile ImmutableMap<String, VariableGroup> resourceToVariableGroup = ImmutableMap.of();
 
 	private final Clock clock;
 	private final ComponentContext context;
@@ -30,19 +33,16 @@ public class WebRunnerStatsSender
 		this.context = context;
 	}
 
-	public void addResource( String resource )
+	public void addResources( Iterable<URI> uris )
 	{
-		resourceToVariableGroup.put( resource, new VariableGroup( resource ) );
-	}
-
-	public void clearStatisticVariables()
-	{
-		for( VariableGroup variables : resourceToVariableGroup.values() )
+		ImmutableMap.Builder<String, VariableGroup> mapBuilder = ImmutableMap.builder();
+		mapBuilder.putAll( resourceToVariableGroup );
+		for( URI uri : uris )
 		{
-			variables.removeAllVariablesFromContext();
+			String resource = uri.toASCIIString();
+			mapBuilder.put( resource, new VariableGroup( resource ) );
 		}
-
-		resourceToVariableGroup.clear();
+		resourceToVariableGroup = mapBuilder.build();
 	}
 
 	public void reset()
@@ -51,7 +51,6 @@ public class WebRunnerStatsSender
 		{
 			variables.resetCounters();
 		}
-
 	}
 
 	private VariableGroup getVariablesFor( String resource )
@@ -63,11 +62,11 @@ public class WebRunnerStatsSender
 	{
 		long timeStamp = clock.millis();
 
-		VariableGroup resorceVariables = getVariablesFor( resource );
+		VariableGroup resourceVariables = getVariablesFor( resource );
 
-		if( resorceVariables != null )
+		if( resourceVariables != null )
 		{
-			resorceVariables.sentVariable.update( timeStamp, resorceVariables.sentCount.incrementAndGet() );
+			resourceVariables.sentVariable.update( timeStamp, resourceVariables.sentCount.incrementAndGet() );
 		}
 		else
 		{
@@ -79,11 +78,11 @@ public class WebRunnerStatsSender
 	{
 		long timeStamp = clock.millis();
 
-		VariableGroup resorceVariables = getVariablesFor( resource );
+		VariableGroup resourceVariables = getVariablesFor( resource );
 
-		if( resorceVariables != null )
+		if( resourceVariables != null )
 		{
-			resorceVariables.latencyVariable.update( timeStamp, latency );
+			resourceVariables.latencyVariable.update( timeStamp, latency );
 		}
 		else
 		{
@@ -95,11 +94,11 @@ public class WebRunnerStatsSender
 	{
 		long timeStamp = clock.millis();
 
-		VariableGroup resorceVariables = getVariablesFor( resource );
-		if( resorceVariables != null )
+		VariableGroup resourceVariables = getVariablesFor( resource );
+		if( resourceVariables != null )
 		{
-			resorceVariables.timeTakenVariable.update( timeStamp, timeTaken );
-			resorceVariables.responseSizeVariable.update( timeStamp, responseSize );
+			resourceVariables.timeTakenVariable.update( timeStamp, timeTaken );
+			resourceVariables.responseSizeVariable.update( timeStamp, responseSize );
 		}
 		else
 		{
@@ -121,7 +120,6 @@ public class WebRunnerStatsSender
 		{
 			logResourceNotFoundError( resource );
 		}
-
 	}
 
 	private void logResourceNotFoundError( String resource )

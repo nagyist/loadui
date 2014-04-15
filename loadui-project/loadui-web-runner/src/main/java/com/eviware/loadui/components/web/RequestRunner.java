@@ -3,6 +3,7 @@ package com.eviware.loadui.components.web;
 import com.eviware.loadui.api.base.Clock;
 import com.eviware.loadui.components.web.internal.RequestRunnerExecutor;
 import com.eviware.loadui.webdata.HttpWebResponse;
+import com.google.common.collect.ImmutableList;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +23,8 @@ public class RequestRunner implements Callable<Boolean>
 	private final WebRunnerStatsSender statsSender;
 	private final URI pageUri;
 	private final Iterable<URI> assets;
-	private PageUriRequest pageRequest;
-	private Collection<Request> assetRequests;
+	private volatile PageUriRequest pageRequest;
+	private volatile Collection<Request> assetRequests;
 	RequestConverter requestConverter = new RequestConverter();
 
 	public RequestRunner( Clock clock,
@@ -74,10 +75,9 @@ public class RequestRunner implements Callable<Boolean>
 
 	class RequestConverter
 	{
-
 		public PageUriRequest convertPageUri( URI uri )
 		{
-			addResource( uri );
+			statsSender.addResources( ImmutableList.of( uri ) );
 			return new PageUriRequest( uri );
 		}
 
@@ -86,18 +86,11 @@ public class RequestRunner implements Callable<Boolean>
 			List<Request> reqs = new ArrayList<>();
 			for( URI uri : uris )
 			{
-				addResource( uri );
 				reqs.add( new Request( uri ) );
 			}
+			statsSender.addResources( uris );
 			return reqs;
 		}
-
-		private void addResource( URI uri )
-		{
-			log.debug( "Creating request for URI {}", uri.toASCIIString() );
-			statsSender.addResource( uri.toASCIIString() );
-		}
-
 	}
 
 	@Immutable
@@ -147,7 +140,7 @@ public class RequestRunner implements Callable<Boolean>
 		@Override
 		public boolean isFailure( HttpWebResponse response )
 		{
-			return response.getResponseCode() != 200;
+			return response.getResponseCode() >= 300;
 		}
 
 	}
