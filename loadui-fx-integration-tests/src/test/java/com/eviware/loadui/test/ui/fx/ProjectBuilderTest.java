@@ -75,8 +75,8 @@ public class ProjectBuilderTest
 		CanvasItem canvas = project.getCanvas();
 		assertThat( "Components exist", canvas.getComponents(), is( not( empty() ) ) );
 		assertThat( "Connections count", canvas.getCanvas().getConnections().size(), equalTo( 1 ) );
-		assertThat( "Fixed Rate created", canvas.getComponentByLabel( "Fixed Rate 1" ).getProperty( "rate" ).getStringValue(), equalTo( "10" ) );
-		assertThat( "Web Page Runner created", project.getCanvas().getComponentByLabel( "Web Page Runner 1" ).getProperty( "url" ).getStringValue(), equalTo( "win-srvmontest" ) );
+		assertThat( "Fixed Rate created", canvas.getComponentByLabel(FIXED_RATE.defaultComponentLabel() ).getProperty( "rate" ).getStringValue(), equalTo( "10" ) );
+		assertThat( "Web Page Runner created", project.getCanvas().getComponentByLabel( HTTP_RUNNER.defaultComponentLabel() ).getProperty( "url" ).getStringValue(), equalTo( "win-srvmontest" ) );
 
 	}
 
@@ -95,8 +95,8 @@ public class ProjectBuilderTest
 		ProjectItem project = enableProject( projectRef );
 
 		//Then
-		assertThat( "Project should contain Fixed Load", project.getCanvas().getComponentByLabel( "Fixed Load 1" ), notNullValue() );
-		Terminal sampleCount = project.getCanvas().getComponentByLabel( "Fixed Load 1" ).getTerminalByName( "Sample Count" );
+		assertThat( "Project should contain Fixed Load", project.getCanvas().getComponentByLabel( FIXED_LOAD.defaultComponentLabel() ), notNullValue() );
+		Terminal sampleCount = project.getCanvas().getComponentByLabel( FIXED_LOAD.defaultComponentLabel() ).getTerminalByName( "Sample Count" );
 		assertThat( "Connected as a concurrent-users scenario", sampleCount.getConnections().size(), equalTo( 1 ) );
 	}
 

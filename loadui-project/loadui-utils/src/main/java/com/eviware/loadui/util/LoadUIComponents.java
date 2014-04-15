@@ -39,5 +39,14 @@ public enum LoadUIComponents
 		return "." + this.cssName();
 	}
 
+	public String defaultComponentLabel()
+	{
+		return defaultComponentLabel( 1 );
+	}
+	public String defaultComponentLabel(int number)
+	{
+		return name + " " + number;
+	}
+
 
 }
