@@ -1,6 +1,6 @@
 package com.eviware.loadui.ui.fx.util.test;
 
-import com.eviware.loadui.util.projects.ComponentBuilder;
+import com.eviware.loadui.util.LoadUIComponents;
 import com.eviware.loadui.util.test.TestUtils;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -27,17 +27,17 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 import static org.loadui.testfx.GuiTest.*;
-import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 import static org.loadui.testfx.matchers.ContainsNodesMatcher.contains;
 import static org.loadui.testfx.matchers.EnabledMatcher.enabled;
+import static org.loadui.testfx.matchers.VisibleNodesMatcher.visible;
 
 public class LoadUiRobot
 {
 	public enum Component
 	{
-		FIXED_RATE_GENERATOR( "generators", ComponentBuilder.LoadUIComponents.FIXED_RATE.getName() ),
-		TABLE_LOG( "output", ComponentBuilder.LoadUIComponents.TABLE_LOG.getName() ),
-		HTTP_RUNNER( "runners", ComponentBuilder.LoadUIComponents.HTTP_RUNNER.getName() ),
+		FIXED_RATE_GENERATOR( "generators", LoadUIComponents.FIXED_RATE.getName() ),
+		TABLE_LOG( "output", LoadUIComponents.TABLE_LOG.getName() ),
+		HTTP_RUNNER( "runners", LoadUIComponents.HTTP_RUNNER.getName() ),
 		VARIANCE( "generators", "Variance" ),
 		RANDOM( "generators", "Random" ),
 		RAMP_SEQUENCE( "generators", "Ramp Sequence" ),
