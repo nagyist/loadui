@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static com.eviware.loadui.util.projects.ComponentBuilder.LoadUIComponents.REST_RUNNER;
+import static com.eviware.loadui.util.LoadUIComponents.REST_RUNNER;
 
 public class RestRunnerActivator
 {

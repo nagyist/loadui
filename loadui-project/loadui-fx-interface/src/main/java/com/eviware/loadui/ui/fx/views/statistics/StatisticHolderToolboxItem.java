@@ -28,7 +28,7 @@ import javafx.scene.layout.VBoxBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.eviware.loadui.ui.fx.util.UIUtils.toCssId;
+import static com.eviware.loadui.util.StringUtils.toCssName;
 
 public class StatisticHolderToolboxItem extends Label
 {
@@ -41,7 +41,7 @@ public class StatisticHolderToolboxItem extends Label
 	{
 		this.holder = holder;
 
-		setId( toCssId( holder.getLabel() ) );
+		setId( toCssName( holder.getLabel() ) );
 
 		vbox = VBoxBuilder.create().spacing( 6 ).maxHeight( 68 ).minHeight( 68 ).build();
 		getStyleClass().add( "icon" );

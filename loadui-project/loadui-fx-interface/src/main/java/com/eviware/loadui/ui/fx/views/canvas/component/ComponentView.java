@@ -36,7 +36,7 @@ import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.RegionBuilder;
 
-import static com.eviware.loadui.ui.fx.util.UIUtils.toCssId;
+import static com.eviware.loadui.util.StringUtils.toCssName;
 
 public class ComponentView extends CanvasObjectView implements Releasable
 {
@@ -47,7 +47,7 @@ public class ComponentView extends CanvasObjectView implements Releasable
 	protected ComponentView( final ComponentItem component )
 	{
 		super( component );
-		getStyleClass().add( toCssId( component.getType() ) );
+		getStyleClass().add( toCssName( component.getType() ) );
 
 		layoutReloaded = Properties.observeEvent( component, ComponentItem.LAYOUT_RELOADED );
 

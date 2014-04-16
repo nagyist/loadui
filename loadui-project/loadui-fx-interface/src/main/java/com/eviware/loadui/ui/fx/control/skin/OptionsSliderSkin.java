@@ -15,8 +15,11 @@
  */
 package com.eviware.loadui.ui.fx.control.skin;
 
-import java.util.Iterator;
-
+import com.eviware.loadui.ui.fx.control.OptionsSlider;
+import com.eviware.loadui.util.StringUtils;
+import com.google.common.collect.ImmutableList;
+import com.sun.javafx.scene.control.behavior.BehaviorBase;
+import com.sun.javafx.scene.control.skin.SkinBase;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -30,20 +33,11 @@ import javafx.scene.control.RadioButtonBuilder;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.RegionBuilder;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.VBoxBuilder;
-
+import javafx.scene.layout.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eviware.loadui.ui.fx.control.OptionsSlider;
-import com.eviware.loadui.ui.fx.util.UIUtils;
-import com.google.common.collect.ImmutableList;
-import com.sun.javafx.scene.control.behavior.BehaviorBase;
-import com.sun.javafx.scene.control.skin.SkinBase;
+import java.util.Iterator;
 
 public class OptionsSliderSkin extends SkinBase<OptionsSlider, BehaviorBase<OptionsSlider>>
 {
@@ -113,7 +107,7 @@ public class OptionsSliderSkin extends SkinBase<OptionsSlider, BehaviorBase<Opti
 			{
 				radio.setGraphic( it.next() );
 			}
-			radio.setId( UIUtils.toCssId( option ) );
+			radio.setId( StringUtils.toCssName( option ) );
 
 			newRadioButtons.add( radio );
 		}

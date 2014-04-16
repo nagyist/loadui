@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import static com.eviware.loadui.util.LoadUIComponents.HTTP_RUNNER;
 import static com.google.code.tempusfugit.temporal.Duration.seconds;
 import static com.google.code.tempusfugit.temporal.Timeout.timeout;
 import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
@@ -38,7 +39,6 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.loadui.testfx.Assertions.verifyThat;
-import static org.mockito.AdditionalMatchers.not;
 
 /**
  * @author renato
@@ -79,7 +79,7 @@ public class ExecutionTest extends SimpleWebTestBase
 
 	private int numberOfAbortedRequests()
 	{
-		Set<Node> allVBoxes = find( ".web-page-runner" ).lookupAll( "VBox" );
+		Set<Node> allVBoxes = find( HTTP_RUNNER.cssClass()).lookupAll( "VBox" );
 		System.out.println(" size: "+allVBoxes.size());
 		Collection<Node> discardedBoxes = filter( allVBoxes, new Predicate<Node>()
 		{

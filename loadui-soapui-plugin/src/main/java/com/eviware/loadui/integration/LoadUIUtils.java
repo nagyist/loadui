@@ -36,7 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import static com.eviware.loadui.util.projects.ComponentBuilder.LoadUIComponents.SOAPUI_RUNNER;
+import static com.eviware.loadui.util.LoadUIComponents.SOAPUI_RUNNER;
 
 public class LoadUIUtils
 {

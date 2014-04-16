@@ -19,13 +19,15 @@ import com.eviware.loadui.api.statistics.Statistic;
 import com.eviware.loadui.api.traits.Labeled;
 import com.eviware.loadui.ui.fx.api.intent.IntentEvent;
 import com.eviware.loadui.ui.fx.control.ConfirmationDialog;
-import com.eviware.loadui.ui.fx.util.UIUtils;
+import com.eviware.loadui.util.StringUtils;
 import com.eviware.loadui.util.statistics.StatisticNameFormatter;
 
 import javafx.event.EventHandler;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.TreeCell;
 import javafx.scene.input.MouseEvent;
+
+import static com.eviware.loadui.util.StringUtils.*;
 
 public class LabeledTreeCell extends TreeCell<Labeled> {
     public static LabeledTreeCell newInstance() {
@@ -59,13 +61,13 @@ public class LabeledTreeCell extends TreeCell<Labeled> {
 			  if( item instanceof Statistic<?> || item instanceof StatisticWrapper )
 			  {
 			     setText( StatisticNameFormatter.format( item.getLabel() ) );
-				  setId( UIUtils.toCssId( StatisticNameFormatter.format( item.getLabel() ) ) );
+				  setId( toCssName( StatisticNameFormatter.format( item.getLabel() ) ) );
 
 			  }
 			  else
 			  {
 				  setText( item.getLabel() );
-				  setId( UIUtils.toCssId ( item.getLabel() ) );
+				  setId( toCssName( item.getLabel() ) );
 			  }
 		  }
     }

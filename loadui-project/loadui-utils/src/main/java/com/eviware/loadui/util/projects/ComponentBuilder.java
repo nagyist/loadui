@@ -1,6 +1,7 @@
 package com.eviware.loadui.util.projects;
 
 import com.eviware.loadui.api.model.ComponentBlueprint;
+import com.eviware.loadui.util.LoadUIComponents;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,38 +10,6 @@ import java.util.List;
 
 public class ComponentBuilder
 {
-
-	/**
-	 * LoadUI known components
-	 */
-	public enum LoadUIComponents
-	{
-		FIXED_RATE( "Fixed Rate" ),
-		HTTP_RUNNER( "HTTP Runner" ),
-		WEB_RUNNER( "Web Runner" ),
-		REST_RUNNER( "REST Runner" ),
-		DEJA_RUNNER( "DejaClick Runner" ),
-		SOAPUI_RUNNER( "SoapUI Runner" ),
-		FIXED_LOAD( "Fixed Load" ),
-		RAMP_LOAD( "Ramp Load" ),
-		RAMP( "Ramp" ),
-		RAMP_SEQUENCE( "Ramp Sequence" ),
-		TABLE_LOG( "Table Log" );
-
-		private final String name;
-
-		private LoadUIComponents( String name )
-		{
-			this.name = name;
-		}
-
-		public String getName()
-		{
-			return name;
-		}
-
-
-	}
 
 	private String component;
 	private List<ComponentBlueprint> child;
