@@ -3,6 +3,7 @@ package com.eviware.loadui.components.web;
 import com.eviware.loadui.api.base.Clock;
 import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.statistics.StatisticVariable;
+import com.eviware.loadui.api.traits.Releasable;
 import com.eviware.loadui.impl.statistics.CounterStatisticsWriter;
 import com.eviware.loadui.impl.statistics.SampleStatisticsWriter;
 import com.google.common.collect.ImmutableMap;
@@ -10,15 +11,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.eviware.loadui.webdata.StatisticConstants.*;
 
-public class WebRunnerStatsSender
+public class WebRunnerStatsSender implements Releasable
 {
 	private static final Logger log = LoggerFactory.getLogger( WebRunnerStatsSender.class );
 
@@ -27,7 +26,7 @@ public class WebRunnerStatsSender
 	private final Clock clock;
 	private final ComponentContext context;
 
-	public WebRunnerStatsSender( ComponentContext context, Clock clock )
+	WebRunnerStatsSender( ComponentContext context, Clock clock )
 	{
 		this.clock = clock;
 		this.context = context;
@@ -127,7 +126,15 @@ public class WebRunnerStatsSender
 		log.error( "Could not find statistic variables for resource {} please add it using addResource", resource );
 	}
 
-	public class VariableGroup
+	public void release()
+	{
+		for( VariableGroup variables : resourceToVariableGroup.values() )
+		{
+			variables.release();
+		}
+	}
+
+	public class VariableGroup implements Releasable
 	{
 		private final StatisticVariable.Mutable timeTakenVariable;
 		private final StatisticVariable.Mutable latencyVariable;
@@ -157,7 +164,7 @@ public class WebRunnerStatsSender
 					identifier + ":" + SENT_IDENTIFIER, "Sent for the resource", CounterStatisticsWriter.TYPE );
 		}
 
-		public void removeAllVariablesFromContext()
+		public void release()
 		{
 			context.removeStatisticVariable( timeTakenVariable.getLabel() );
 			context.removeStatisticVariable( sentVariable.getLabel() );

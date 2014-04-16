@@ -57,7 +57,7 @@ public class DefaultRequestRunnerProvider implements RequestRunnerProvider
 					.setConnectionManager( connectionManager )
 					.build();
 
-			return new RequestRunner( clock, client, pageUri, assetUris, new WebRunnerStatsSender( context, clock ) );
+			return new RequestRunner( clock, client, pageUri, assetUris, WebRunnerStatsSenderFactory.newInstance( context, clock ) );
 		}
 		catch( Exception e )
 		{
