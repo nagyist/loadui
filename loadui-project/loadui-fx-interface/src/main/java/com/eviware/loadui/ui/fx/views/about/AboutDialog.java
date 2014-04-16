@@ -15,8 +15,10 @@
  */
 package com.eviware.loadui.ui.fx.views.about;
 
-import java.io.IOException;
-
+import com.eviware.loadui.LoadUI;
+import com.eviware.loadui.ui.fx.util.FXMLUtils;
+import com.eviware.loadui.ui.fx.util.UIUtils;
+import com.google.common.collect.ImmutableMap;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -31,11 +33,11 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.ui.fx.util.FXMLUtils;
-import com.eviware.loadui.ui.fx.util.UIUtils;
-import com.google.common.collect.ImmutableMap;
+import java.io.IOException;
+import java.net.MalformedURLException;
 
 public class AboutDialog extends PopupControl
 {
@@ -52,6 +54,8 @@ public class AboutDialog extends PopupControl
 	private Label buildDate;
 
 	private final Node owner;
+
+	private static final Logger log = LoggerFactory.getLogger( AboutDialog.class );
 
 	public AboutDialog( Node owner )
 	{
@@ -98,7 +102,15 @@ public class AboutDialog extends PopupControl
 			}
 		} );
 
-		logo.setImage( new Image( "res/about-logo.png" ) );
+		try
+		{
+			logo.setImage( new Image( LoadUI.relativeFile( "res/about-logo.png" ).toURI().toURL()
+					.toExternalForm() ) );
+		}
+		catch( MalformedURLException e )
+		{
+			log.error( "Failed to load about-logo", e );
+		}
 
 		title.setText( String.format( "%s Version %s", System.getProperty( LoadUI.NAME, "LoadUI" ), LoadUI.version() ) );
 		buildVersion
