@@ -35,14 +35,14 @@ public class WebRunnerStatsSender
 
 	public void addResources( Iterable<URI> uris )
 	{
-		ImmutableMap.Builder<String, VariableGroup> mapBuilder = ImmutableMap.builder();
+		Map<String, VariableGroup> mapBuilder = new HashMap<>();
 		mapBuilder.putAll( resourceToVariableGroup );
 		for( URI uri : uris )
 		{
 			String resource = uri.toASCIIString();
 			mapBuilder.put( resource, new VariableGroup( resource ) );
 		}
-		resourceToVariableGroup = mapBuilder.build();
+		resourceToVariableGroup = ImmutableMap.copyOf( mapBuilder );
 	}
 
 	public void reset()
