@@ -4,6 +4,7 @@ import com.eviware.loadui.api.base.Clock;
 import com.eviware.loadui.components.web.RequestRunner;
 import com.eviware.loadui.components.web.WebRunnerStatsSender;
 import com.eviware.loadui.webdata.HttpWebResponse;
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 public class RequestRunnerExecutor
@@ -25,8 +27,7 @@ public class RequestRunnerExecutor
 	private final WebRunnerStatsSender statsSender;
 	private final CloseableHttpAsyncClient httpClient;
 	private final Clock clock;
-
-	private final List<Future<HttpWebResponse>> runningRequests = new ArrayList<>();
+	private final Set<Future<HttpWebResponse>> runningRequests = Sets.newConcurrentHashSet();
 
 	public RequestRunnerExecutor( CloseableHttpAsyncClient httpClient,
 											WebRunnerStatsSender statsSender,
@@ -85,6 +86,7 @@ public class RequestRunnerExecutor
 	public int cancelAll()
 	{
 		int runningCount = runningRequests.size();
+
 		for( Future<?> future : runningRequests )
 		{
 			future.cancel( true );
