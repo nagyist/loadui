@@ -1,54 +1,25 @@
 package com.eviware.loadui.webdata;
 
 import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.HttpResponse;
 
-import javax.annotation.Nullable;
-import java.io.IOException;
+import javax.annotation.concurrent.Immutable;
+import java.util.concurrent.atomic.AtomicLong;
 
-public class HttpWebResponse implements WebResponse
+@Immutable
+public class HttpWebResponse
 {
-
 	private final int responseCode;
 	private final Header contentType;
 	private final Header contentEncoding;
-	private HttpEntity entity;
-	private boolean responseConsumed = false;
+	private final long length;
 
-	@Nullable
-	private byte[] responseContents;
-
-	private StreamConsumer consumer = new StreamConsumer();
-
-	public HttpWebResponse( int responseCode, Header contentType, Header contentEncoding, HttpEntity entity )
+	private HttpWebResponse( int responseCode, Header contentType, Header contentEncoding, long length )
 	{
 		this.responseCode = responseCode;
 		this.contentType = contentType;
 		this.contentEncoding = contentEncoding;
-		this.entity = entity;
-	}
-
-	public void setConsumer( StreamConsumer consumer )
-	{
-		this.consumer = consumer;
-	}
-
-	private void ensureResponseConsumed()
-	{
-		if( responseConsumed ) return;
-
-		try
-		{
-			responseContents = consumer.consume( entity.getContent() );
-		}
-		catch( IOException e )
-		{
-			throw new RuntimeException( "Could not download response body", e );
-		} finally
-		{
-			responseConsumed = true;
-		}
+		this.length = length;
 	}
 
 	public int getResponseCode()
@@ -58,52 +29,27 @@ public class HttpWebResponse implements WebResponse
 
 	public long getContentLength()
 	{
-		ensureResponseConsumed();
-		return responseContents == null ? 0 : responseContents.length;
+		return length;
 	}
 
-	public Header getContentType()
-	{
-		return contentType;
-	}
-
-	public Header getContentEncoding()
-	{
-		return contentEncoding;
-	}
-
-	@Override
-	public byte[] getResponseData()
-	{
-		ensureResponseConsumed();
-		return responseContents == null ? new byte[0] : responseContents;
-	}
-
-	public static HttpWebResponse of( CloseableHttpResponse response )
+	public static HttpWebResponse of( HttpResponse response, long length )
 	{
 		int responseCode = response.getStatusLine().getStatusCode();
 		Header contentType = response.getEntity().getContentType();
 		Header contentEncoding = response.getEntity().getContentEncoding();
 
 		return new HttpWebResponse(
-				responseCode, contentType, contentEncoding, response.getEntity() );
+				responseCode, contentType, contentEncoding, length );
 	}
 
 	@Override
 	public String toString()
 	{
-		String contentText;
-		if( contentType != null && contentType.getValue().toLowerCase().contains( "text" ) )
-			contentText = new String( getResponseData() );
-		else
-			contentText = "%BINARY_DATA%";
-
 		return "ProcessedHttpResponse{" +
 				"responseCode=" + responseCode +
 				", contentType=" + contentType +
 				", contentEncoding=" + contentEncoding +
-				", content=" + contentText +
-				", responseConsumed=" + responseConsumed +
+				", length=" + length +
 				'}';
 	}
 

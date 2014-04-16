@@ -4,20 +4,20 @@ import com.eviware.loadui.api.base.Clock;
 import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.components.web.api.RequestRunnerProvider;
 import com.eviware.loadui.util.test.FakeClock;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 
 import java.net.URI;
 
 public class FakeRequestRunnerProvider implements RequestRunnerProvider
 {
-	private final CloseableHttpClient httpClient;
+	private final CloseableHttpAsyncClient httpClient;
 
-	private FakeRequestRunnerProvider( CloseableHttpClient httpClient )
+	private FakeRequestRunnerProvider( CloseableHttpAsyncClient httpClient )
 	{
 		this.httpClient = httpClient;
 	}
 
-	public static RequestRunnerProvider usingHttpClient( CloseableHttpClient httpClient )
+	public static RequestRunnerProvider usingHttpClient( CloseableHttpAsyncClient httpClient )
 	{
 		return new FakeRequestRunnerProvider( httpClient );
 	}

@@ -38,6 +38,7 @@ public class WebRunner extends RunnerBase implements ListenableValue.ValueListen
 		this.requestRunnerProvider = requestRunnerProvider;
 		this.webPageUrlProperty = new UrlProperty( context );
 		context.setLayout( new WebRunnerLayout( webPageUrlProperty, context ) );
+		context.setCompactLayout( new WebRunnerCompactLayout( context ) );
 		webPageUrlProperty.addUrlChangeListener( this );
 	}
 
@@ -110,6 +111,10 @@ public class WebRunner extends RunnerBase implements ListenableValue.ValueListen
 	@Override
 	protected TerminalMessage sample( TerminalMessage triggerMessage, Object sampleId ) throws SampleCancelledException
 	{
+		if( !isLoadTestRunning.get() )
+		{
+			updateWebPageUrl( webPageUrlProperty.getUrl() );
+		}
 		final RequestRunner runner = requestRunner;
 		if( runner == null )
 			throw new RuntimeException( "Cannot run, no URL set or URL is invalid" );

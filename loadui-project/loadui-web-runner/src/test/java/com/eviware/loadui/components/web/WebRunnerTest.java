@@ -10,7 +10,7 @@ import com.eviware.loadui.util.component.ComponentTestUtils;
 import com.eviware.loadui.util.html.HtmlAssetScraper;
 import com.eviware.loadui.util.property.UrlProperty;
 import com.eviware.loadui.util.test.CounterAsserter;
-import com.eviware.loadui.util.test.FakeHttpClient;
+import com.eviware.loadui.util.test.FakeHttpAsyncClient;
 import com.eviware.loadui.util.test.TestUtils;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.Multiset;
@@ -37,7 +37,7 @@ public class WebRunnerTest
 	private ComponentTestUtils ctu;
 	private InputTerminal triggerTerminal;
 	private OutputTerminal resultsTerminal;
-	private FakeHttpClient httpClient;
+	private FakeHttpAsyncClient httpClient;
 	private BlockingQueue<TerminalMessage> results;
 
 	@Before
@@ -65,7 +65,7 @@ public class WebRunnerTest
 		ComponentContext contextSpy = spy( component.getContext() );
 		ctu.mockStatisticsFor( component, contextSpy );
 
-		httpClient = new FakeHttpClient();
+		httpClient = new FakeHttpAsyncClient();
 
 		runner = new WebRunner( contextSpy, assetScraper, FakeRequestRunnerProvider.usingHttpClient( httpClient ) );
 		ctu.setComponentBehavior( component, runner );
@@ -95,7 +95,7 @@ public class WebRunnerTest
 		triggerAndWait();
 
 		// THEN
-		Multiset<String> actualRequests = httpClient.popAllRequests();
+		Multiset<String> actualRequests = httpClient.awaitRequests( 3 );
 		assertEquals( expectedRequests, actualRequests );
 		CounterAsserter.oneSuccessfulRequest( component.getContext() );
 	}
@@ -119,7 +119,7 @@ public class WebRunnerTest
 		getNextOutputMessage();
 
 		// THEN
-		Multiset<String> actualRequests = httpClient.popAllRequests();
+		Multiset<String> actualRequests = httpClient.awaitRequests( 9 );
 		assertEquals( expectedRequests, actualRequests );
 		CounterAsserter.forHolder( component.getContext() )
 				.sent( 3 )
@@ -139,7 +139,7 @@ public class WebRunnerTest
 		triggerAndWait();
 
 		// THEN
-		Multiset<String> actualRequests = httpClient.popAllRequests();
+		Multiset<String> actualRequests = httpClient.awaitRequests( 1 );
 		assertEquals( expectedRequests, actualRequests );
 		CounterAsserter.oneSuccessfulRequest( component.getContext() );
 	}

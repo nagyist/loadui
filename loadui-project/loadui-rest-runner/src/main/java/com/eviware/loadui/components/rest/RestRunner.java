@@ -46,6 +46,7 @@ public class RestRunner extends RunnerBase
 		urlProperty = new UrlProperty( context );
 
 		context.setLayout( new RestLayout( context ) );
+		context.setCompactLayout( new RestCompactLayout( context) );
 	}
 
 	public RestRunner( ComponentContext context )

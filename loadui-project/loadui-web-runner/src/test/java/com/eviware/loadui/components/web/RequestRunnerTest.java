@@ -1,56 +1,45 @@
 package com.eviware.loadui.components.web;
 
 import com.eviware.loadui.api.base.Clock;
-import com.eviware.loadui.webdata.StreamConsumer;
+import com.eviware.loadui.util.test.FakeHttpAsyncClient;
 import com.google.common.collect.Iterables;
+import com.google.common.util.concurrent.SettableFuture;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.mockito.ArgumentCaptor;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertFalse;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public class RequestRunnerTest
 {
-
+	public static final String URL_1 = "http://example.org/url1";
+	public static final String URL_2 = "http://example.org/url2";
 	Clock clock;
-	CloseableHttpClient httpClient;
+	FakeHttpAsyncClient httpClient;
 	List<URI> uris = new ArrayList<>();
 	WebRunnerStatsSender mockStatsSender;
-	StreamConsumer mockConsumer;
-	static final String RESPONSE_CONTENT = "hello";
+	ArgumentCaptor<List> resourcesCaptor;
 
 	@Before
 	public void setup() throws Exception
 	{
 		clock = mock( Clock.class );
-		when( clock.millis() ).thenReturn( 0L, 10L, 25L );
+		when( clock.millis() ).thenReturn( 0L, 10L, 20L, 30L, 40L, 50L );
 
-		httpClient = mock( CloseableHttpClient.class );
+		httpClient = new FakeHttpAsyncClient();
 
 		CloseableHttpResponse mockResponse = mock( CloseableHttpResponse.class );
 		StatusLine mockStatusLine = mock( StatusLine.class );
@@ -64,142 +53,58 @@ public class RequestRunnerTest
 		when( mockEntity.getContentType() ).thenReturn( mockContentType );
 		when( mockEntity.getContentEncoding() ).thenReturn( mockContentEncoding );
 
-		when( httpClient.execute( any( HttpGet.class ) ) ).thenReturn( mockResponse );
-
-		mockConsumer = mock( StreamConsumer.class );
-		when( mockConsumer.consume( any( InputStream.class ) ) ).thenReturn( RESPONSE_CONTENT.getBytes() );
+		final SettableFuture<HttpResponse> mockResponseFuture = SettableFuture.create();
+		mockResponseFuture.set( mockResponse );
 
 		mockStatsSender = mock( WebRunnerStatsSender.class );
+		resourcesCaptor = ArgumentCaptor.forClass(List.class);
 	}
 
 	@Test
 	public void allResourcesAreAdded()
 	{
-		uris.addAll( asList( URI.create( "url1" ), URI.create( "url2" ) ) );
+		List<URI> urisToTest = asList( URI.create( URL_1 ), URI.create( URL_2 ) );
+		uris.addAll( urisToTest );
 		RequestRunner runner = createRunner();
 
 		runner.call();
 
-		verify( mockStatsSender ).addResource( "url1" );
-		verify( mockStatsSender ).addResource( "url2" );
+		verify( mockStatsSender, times( 2 ) ).addResources( resourcesCaptor.capture() );
+
+		List<URI> addedUris = new ArrayList<>();
+		for( Iterable<URI> uris : resourcesCaptor.getAllValues() )
+		{
+			Iterables.addAll( addedUris, uris );
+		}
+
+		assertThat( addedUris, is( urisToTest ) );
 	}
 
 	@Test
-	public void allRequestsArePerformed() throws IOException
+	public void allRequestsArePerformed() throws Exception
 	{
-		uris.addAll( asList( URI.create( "url1" ), URI.create( "url2" ) ) );
+		uris.addAll( asList( URI.create( URL_1 ), URI.create( URL_2 ) ) );
 		RequestRunner runner = createRunner();
 
 		runner.call();
 
-		verify( httpClient, times( 2 ) ).execute( any( HttpGet.class ) );
+		httpClient.awaitRequests( 2 );
 	}
 
 	@Test
-	public void resultsAreUpdatedOnRequest()
+	public void resultsAreUpdatedOnRequest() throws Exception
 	{
-		uris.addAll( asList( URI.create( "url1" ) ) );
+		uris.addAll( asList( URI.create( URL_1 ) ) );
 
 		RequestRunner runner = createRunner();
 
 		runner.call();
 
-		verify( mockStatsSender ).updateRequestSent( "url1" );
-		verify( mockStatsSender ).updateLatency( "url1", 10L );
-		verify( mockStatsSender ).updateResponse( "url1", 25L, RESPONSE_CONTENT.length() );
-	}
+		httpClient.awaitRequests( 1 );
 
-	@Test
-	public void runningRequestsCanBeCancelled() throws Exception
-	{
-		final long EACH_REQUEST_TIME = 250L;
-		final AtomicInteger interruptedThreads = new AtomicInteger();
-		final CountDownLatch latch = new CountDownLatch( 2 );
-
-		uris.addAll( asList( URI.create( "url1" ) ) );
-
-		final RequestRunner runner = createRunner();
-		runner.requestConverter = mock( RequestRunner.RequestConverter.class );
-
-		RequestRunner.PageUriRequest mockPageReq = mock( RequestRunner.PageUriRequest.class );
-		when( mockPageReq.call() ).thenReturn( true );
-
-		RequestRunner.Request mockReq = mock( RequestRunner.Request.class );
-		when( mockReq.call() ).thenAnswer( new Answer<Boolean>()
-		{
-			@Override
-			public Boolean answer( InvocationOnMock invocation ) throws Throwable
-			{
-				try
-				{
-					latch.countDown();
-					Thread.sleep( EACH_REQUEST_TIME );
-				}
-				catch( InterruptedException e )
-				{
-					interruptedThreads.incrementAndGet();
-					throw e;
-				}
-				return true;
-			}
-		} );
-
-		when( runner.requestConverter.convertPageUri( any( URI.class ) ) ).thenReturn( mockPageReq );
-		when( runner.requestConverter.convertAssets( anyCollection() ) ).thenReturn( Arrays.asList( mockReq, mockReq ) );
-
-		new Thread( new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				runner.call();
-			}
-		} ).start();
-
-		boolean ok = latch.await( 1, TimeUnit.SECONDS );
-
-		assertTrue( ok );
-
-		int cancelledRequests = runner.cancelAllRequests();
-
-		assertThat( cancelledRequests, is( 2 ) );
-
-		Thread.sleep( EACH_REQUEST_TIME );
-		assertThat( interruptedThreads.get(), is( 2 ) );
-	}
-
-	@Test
-	public void wontRequestAssetsIfPageFails() throws Exception
-	{
-		uris.addAll( asList( URI.create( "url1" ) ) );
-
-		final RequestRunner runner = createRunner();
-		runner.requestConverter = mock( RequestRunner.RequestConverter.class );
-
-		RequestRunner.PageUriRequest mockPageReq = mock( RequestRunner.PageUriRequest.class );
-		when( mockPageReq.call() ).thenReturn( false );
-
-		RequestRunner.Request mockReq = mock( RequestRunner.Request.class );
-		when( mockReq.call() ).thenReturn( true );
-
-		when( runner.requestConverter.convertPageUri( any( URI.class ) ) ).thenReturn( mockPageReq );
-		when( runner.requestConverter.convertAssets( anyCollection() ) ).thenReturn( Arrays.asList( mockReq, mockReq ) );
-
-		final AtomicBoolean result = new AtomicBoolean( true );
-
-		Thread t = new Thread( new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				result.set( runner.call() );
-			}
-		} );
-		t.start();
-		t.join();
-
-		assertFalse( result.get() );
-
+		verify( mockStatsSender ).updateRequestSent( URL_1 );
+		verify( mockStatsSender ).updateLatency( URL_1, 10L );
+		verify( mockStatsSender ).updateResponse( URL_1, 20, FakeHttpAsyncClient.DEFAULT_RESPONSE.length() );
 	}
 
 	private RequestRunner createRunner()
@@ -208,7 +113,6 @@ public class RequestRunnerTest
 		URI pageUri = iter.next();
 		Iterable<URI> assets = Iterables.skip( uris, 1 );
 		RequestRunner runner = new RequestRunner( clock, httpClient, pageUri, assets, mockStatsSender );
-		runner.setConsumer( mockConsumer );
 		return runner;
 	}
 
