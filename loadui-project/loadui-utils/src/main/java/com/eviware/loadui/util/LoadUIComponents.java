@@ -7,7 +7,7 @@ public enum LoadUIComponents
 {
 	FIXED_RATE( "Fixed Rate" ),
 	HTTP_RUNNER( "HTTP Runner" ),
-	WEB_RUNNER( "Web Runner" ),
+	WEB_RUNNER( "Web Runner PREVIEW" ),
 	REST_RUNNER( "REST Runner" ),
 	DEJA_RUNNER( "DejaClick Runner" ),
 	SOAPUI_RUNNER( "SoapUI Runner" ),
