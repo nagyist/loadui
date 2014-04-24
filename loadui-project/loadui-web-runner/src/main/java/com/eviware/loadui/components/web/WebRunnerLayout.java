@@ -41,7 +41,7 @@ public class WebRunnerLayout extends LayoutContainerImpl
 
 
 		//TODO: remove this when component is done
-		add( new LabelLayoutComponentImpl( "NOTICE: This component is a preview.", "spanx" ) );
+		add( new LabelLayoutComponentImpl( "NOTICE: This component is a preview of a new feature.", "spanx" ) );
 		//TODO: also this
 		add( new SeparatorLayoutComponentImpl( false, "newline, growx, spanx" ) );
 
