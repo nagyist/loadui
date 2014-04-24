@@ -3,10 +3,7 @@ package com.eviware.loadui.components.web;
 import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.layout.LayoutContainer;
 import com.eviware.loadui.impl.component.RunnerCountersDisplay;
-import com.eviware.loadui.impl.layout.ActionLayoutComponentImpl;
-import com.eviware.loadui.impl.layout.LayoutContainerImpl;
-import com.eviware.loadui.impl.layout.PropertyLayoutComponentImpl;
-import com.eviware.loadui.impl.layout.SeparatorLayoutComponentImpl;
+import com.eviware.loadui.impl.layout.*;
 import com.eviware.loadui.util.property.UrlProperty;
 import com.google.common.collect.ImmutableMap;
 
@@ -21,6 +18,8 @@ public class WebRunnerLayout extends LayoutContainerImpl
 	{
 		super( "gap 10 5", "", "align top", "" );
 		LayoutContainer box = new LayoutContainerImpl( "wrap 2, ins 0", "", "align top", "" );
+
+
 
 		box.add( new PropertyLayoutComponentImpl<String>( ImmutableMap.<String, Object>builder()
 				.put( PropertyLayoutComponentImpl.PROPERTY, webPageUrlProperty.getUrlProperty() )
@@ -39,6 +38,13 @@ public class WebRunnerLayout extends LayoutContainerImpl
 						context.triggerAction( SAMPLE_ACTION, COMPONENT );
 					}
 				} ).build() ) );
+
+
+		//TODO: remove this when component is done
+		add( new LabelLayoutComponentImpl( "NOTICE: This component is a preview.", "spanx" ) );
+		//TODO: also this
+		add( new SeparatorLayoutComponentImpl( false, "newline, growx, spanx" ) );
+
 
 		add( box );
 		add( new SeparatorLayoutComponentImpl( true, "grow y" ) );
