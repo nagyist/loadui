@@ -19,13 +19,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 import static com.eviware.loadui.components.rest.HeaderManager.HEADERS;
 import static com.eviware.loadui.components.rest.RestRunner.BODY;
 import static com.eviware.loadui.components.rest.RestRunner.METHOD;
-import static com.eviware.loadui.util.component.StatisticUpdateRecorder.*;
+import static com.eviware.loadui.util.component.StatisticUpdateRecorder.newInstance;
 import static com.eviware.loadui.util.property.UrlProperty.URL;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.core.Is.is;
@@ -86,8 +85,8 @@ public class RestRunnerTest
 		shouldSendRequests();
 		assertThat( statisticRecorder.getUpdatesToVariable( "Latency" ).size(), is( 1 ) );
 		assertThat( statisticRecorder.getUpdatesToVariable( "Time Taken" ).size(), is( 1 ) );
-		assertEquals( statisticRecorder.getUpdatesToVariable( "Response Size" ),
-				ImmutableList.of( ( Number )Integer.valueOf( 5 ) ) );
+		assertEquals( ImmutableList.of( ( Number ) Long.valueOf( FakeHttpClient.RESPONSE_BYTES.length ) ),
+				statisticRecorder.getUpdatesToVariable( "Response Size" ) );
 	}
 
 	@Test
