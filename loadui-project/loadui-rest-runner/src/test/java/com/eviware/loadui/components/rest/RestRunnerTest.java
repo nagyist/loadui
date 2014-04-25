@@ -8,27 +8,28 @@ import com.eviware.loadui.api.terminal.OutputTerminal;
 import com.eviware.loadui.api.terminal.TerminalMessage;
 import com.eviware.loadui.util.RealClock;
 import com.eviware.loadui.util.component.ComponentTestUtils;
-import com.eviware.loadui.util.property.UrlProperty;
+import com.eviware.loadui.util.component.StatisticUpdateRecorder;
 import com.eviware.loadui.util.test.CounterAsserter;
 import com.eviware.loadui.util.test.FakeHttpClient;
 import com.eviware.loadui.util.test.TestUtils;
+import com.google.common.collect.ImmutableList;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.util.EntityUtils;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 import static com.eviware.loadui.components.rest.HeaderManager.HEADERS;
 import static com.eviware.loadui.components.rest.RestRunner.BODY;
 import static com.eviware.loadui.components.rest.RestRunner.METHOD;
+import static com.eviware.loadui.util.component.StatisticUpdateRecorder.*;
 import static com.eviware.loadui.util.property.UrlProperty.URL;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.spy;
 
 public class RestRunnerTest
@@ -41,6 +42,7 @@ public class RestRunnerTest
 	private OutputTerminal resultsTerminal;
 	private FakeHttpClient httpClient;
 	private BlockingQueue<TerminalMessage> results;
+	private StatisticUpdateRecorder statisticRecorder;
 
 	@Before
 	public void setup() throws ComponentCreationException
@@ -50,7 +52,7 @@ public class RestRunnerTest
 
 		component = ctu.createComponentItem();
 		ComponentContext contextSpy = spy( component.getContext() );
-		ctu.mockStatisticsFor( component, contextSpy );
+		statisticRecorder = newInstance( component, contextSpy );
 
 		httpClient = new FakeHttpClient();
 		runner = new RestRunner( contextSpy, httpClient, new RealClock() );
@@ -76,6 +78,16 @@ public class RestRunnerTest
 		assertThat( request.getMethod(), is( "GET" ) );
 		assertThat( request.getURI(), is( URI.create( TEST_URL )) );
 		CounterAsserter.oneSuccessfulRequest( component.getContext() );
+	}
+
+	@Test
+	public void shouldUpdateStatistics() throws Exception
+	{
+		shouldSendRequests();
+		assertThat( statisticRecorder.getUpdatesToVariable( "Latency" ).size(), is( 1 ) );
+		assertThat( statisticRecorder.getUpdatesToVariable( "Time Taken" ).size(), is( 1 ) );
+		assertEquals( statisticRecorder.getUpdatesToVariable( "Response Size" ),
+				ImmutableList.of( ( Number )Integer.valueOf( 5 ) ) );
 	}
 
 	@Test
