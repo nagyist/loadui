@@ -11,6 +11,8 @@ public interface ComponentBlueprint{
 
 	public List<PropertyDescriptor> getProperties();
 
+	public PropertyDescriptor getProperty( String id );
+
 	public boolean isConcurrentUsers();
 
 	public interface PropertyDescriptor<Type extends Class>{

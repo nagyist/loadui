@@ -15,6 +15,7 @@
  */
 package com.eviware.loadui.util;
 
+import javax.annotation.Nonnull;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -218,5 +219,10 @@ public class StringUtils
 	{
 		if( length <= 0 ) length = 1;
 		return String.format( "%1$-" + length + "s", str );
+	}
+
+	public static String toCssName( @Nonnull String label )
+	{
+		return label.toLowerCase().replace( " ", "-" );
 	}
 }

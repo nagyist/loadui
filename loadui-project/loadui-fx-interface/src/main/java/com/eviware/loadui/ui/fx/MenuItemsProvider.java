@@ -255,7 +255,6 @@ public class MenuItemsProvider
 		@Override
 		public void handle( MouseEvent _ )
 		{
-			System.out.println( "Clicked on the wholeWindow Rectangle!!!!!" );
 			mainWindowView.getChildren().remove( wholeWindowRec );
 			currentMenu.hide();
 			currentMenu.removeEventHandler( MouseEvent.MOUSE_CLICKED, this );

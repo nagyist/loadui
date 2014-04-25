@@ -1,10 +1,8 @@
 package com.eviware.loadui.util.projects;
 
 import com.eviware.loadui.api.component.ComponentRegistry;
-import com.eviware.loadui.api.model.*;
-import com.eviware.loadui.util.projects.ProjectBuilderImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.eviware.loadui.api.model.ProjectBuilderFactory;
+import com.eviware.loadui.api.model.WorkspaceProvider;
 
 public class ProjectBuilderFactoryImpl implements ProjectBuilderFactory
 {

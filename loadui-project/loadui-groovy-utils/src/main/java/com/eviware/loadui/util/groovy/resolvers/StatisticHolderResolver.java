@@ -19,7 +19,7 @@ import groovy.lang.MissingMethodException;
 
 import com.eviware.loadui.api.statistics.StatisticHolder;
 import com.eviware.loadui.api.statistics.StatisticVariable;
-import com.eviware.loadui.util.groovy.GroovyResolver;
+import com.eviware.loadui.api.component.GroovyResolver;
 import com.eviware.loadui.util.statistics.StatisticDescriptorImpl;
 
 public class StatisticHolderResolver implements GroovyResolver.Methods

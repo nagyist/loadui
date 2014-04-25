@@ -71,6 +71,8 @@ public class ShortName
 		{
 		case "Time Taken" :
 			return name.build( "Resp Tm" );
+		case "Latency" :
+				return name.build( "Latency" );
 		case "Response Size" :
 			return name.build( "Resp Sz" );
 		}

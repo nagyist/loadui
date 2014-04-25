@@ -19,14 +19,11 @@ import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.categories.IntegrationTest;
 import com.eviware.loadui.test.ui.fx.FxIntegrationTestBase;
 import com.eviware.loadui.test.ui.fx.states.SimpleWebTestState;
-import javafx.geometry.Bounds;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import org.hamcrest.Description;
+import com.eviware.loadui.util.LoadUIComponents;
+import com.eviware.loadui.util.StringUtils;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.junit.internal.matchers.TypeSafeMatcher;
 
 import static com.eviware.loadui.test.ui.fx.chart.ChartTestSupport.allChartLines;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -46,10 +43,15 @@ public class ChartsTest extends FxIntegrationTestBase
 		runTestFor( 5, SECONDS );
 
 		click( "#statsTab" );
-		drag( ".analysis-view #web-page-runner-1" ).by( 150, 150 ).drop().sleep( 1000 );
+		drag( ".analysis-view " + getCssID() ).by( 150, 150 ).drop().sleep( 1000 );
 		click( "#default" );
 
 		assertThat( allChartLines().size(), is( 2 ) );
+	}
+
+	private String getCssID()
+	{
+		return "#" + StringUtils.toCssName( LoadUIComponents.HTTP_RUNNER.defaultComponentLabel() );
 	}
 
 	@Test
@@ -58,7 +60,7 @@ public class ChartsTest extends FxIntegrationTestBase
 		runTestFor( 5, SECONDS );
 
 		click( "#statsTab" );
-		drag( ".analysis-view #web-page-runner-1" ).by( 150, 150 ).drop().sleep( 1000 );
+		drag( ".analysis-view " + getCssID() ).by( 150, 150 ).drop().sleep( 1000 );
 		doubleClick( "Max" );
 
 		assertThat( allChartLines().size(), is( 1 ) );

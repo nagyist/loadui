@@ -15,28 +15,19 @@
  */
 package com.eviware.loadui.util.groovy;
 
+import com.eviware.loadui.api.component.GroovyResolver;
+import com.eviware.loadui.api.traits.Releasable;
+import com.google.common.collect.Maps;
 import groovy.grape.Grape;
-import groovy.lang.Binding;
-import groovy.lang.Closure;
-import groovy.lang.DelegatingMetaClass;
-import groovy.lang.GroovyShell;
-import groovy.lang.MetaClass;
-import groovy.lang.MissingMethodException;
-import groovy.lang.MissingPropertyException;
-import groovy.lang.Script;
-
-import java.net.URL;
-import java.util.Map;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import groovy.lang.*;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eviware.loadui.api.traits.Releasable;
-import com.google.common.collect.Maps;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.net.URL;
+import java.util.Map;
 
 /**
  * A runtime environment for a ParsedGroovyScript. The script is compiled and
@@ -125,6 +116,7 @@ public class GroovyEnvironment implements Releasable
 		catch( CompilationFailedException e )
 		{
 			log.error( "Compilation of Groovy script failed: ", e );
+			throw new RuntimeException( "Compilation of Groovy script failed", e );
 		}
 		finally
 		{

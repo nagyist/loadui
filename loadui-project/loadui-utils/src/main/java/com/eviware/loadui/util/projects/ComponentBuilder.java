@@ -1,61 +1,37 @@
 package com.eviware.loadui.util.projects;
 
 import com.eviware.loadui.api.model.ComponentBlueprint;
+import com.eviware.loadui.util.LoadUIComponents;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
 public class ComponentBuilder
 {
 
-	/**
-	 * LoadUI known components
-	 */
-	public enum LoadUiComponent
-	{
-		FIXED_RATE( "Fixed Rate" ),
-		WEB_RUNNER( "Web Page Runner" ),
-		FIXED_LOAD( "Fixed Load" ),
-		RAMP_LOAD( "Ramp Load" ),
-		DEJA_RUNNER( "DejaClick Runner" ),
-		TABLE_LOG( "Table Log" );
-		//TODO add more components as required
-
-		private final String name;
-
-		private LoadUiComponent( String name )
-		{
-			this.name = name;
-		}
-
-		public String getName()
-		{
-			return name;
-		}
-
-
-	}
-
-	private LoadUiComponent component;
+	private String component;
 	private List<ComponentBlueprint> child;
 	private List<ComponentBlueprint.PropertyDescriptor> properties;
 	private boolean concurrentUsers;
 
-	private ComponentBuilder( LoadUiComponent component )
+	private ComponentBuilder( LoadUIComponents component )
 	{
-		this.child = new ArrayList<>();
+		this( component.getName() );
+	}
+
+	private ComponentBuilder( String component )
+	{
 		this.component = component;
+		this.child = new ArrayList<>();
 		this.properties = new ArrayList<>();
 		this.concurrentUsers = false;
 	}
 
 	public ComponentBuilder child( ComponentBlueprint... componentBlueprints )
 	{
-		for( ComponentBlueprint component : componentBlueprints )
-		{
-			this.child.add( component );
-		}
+		Collections.addAll( this.child, componentBlueprints );
 		return this;
 	}
 
@@ -79,7 +55,7 @@ public class ComponentBuilder
 
 	public ComponentBlueprintImpl build()
 	{
-		return new ComponentBlueprintImpl( component.getName(), child, properties, concurrentUsers );
+		return new ComponentBlueprintImpl( component, child, properties, concurrentUsers );
 	}
 
 	public static WithType create()
@@ -89,7 +65,12 @@ public class ComponentBuilder
 
 	public static class WithType
 	{
-		public ComponentBuilder type( LoadUiComponent component )
+		public ComponentBuilder type( LoadUIComponents component )
+		{
+			return new ComponentBuilder( component );
+		}
+
+		public ComponentBuilder type( String component )
 		{
 			return new ComponentBuilder( component );
 		}
@@ -124,6 +105,20 @@ public class ComponentBuilder
 		public List<PropertyDescriptor> getProperties()
 		{
 			return properties;
+		}
+
+		@Override
+		public PropertyDescriptor getProperty( String id )
+		{
+			for( PropertyDescriptor property : properties )
+			{
+				if( property.getKey().equals( id ) )
+				{
+					return property;
+				}
+			}
+
+			return null;
 		}
 
 		public boolean isConcurrentUsers()

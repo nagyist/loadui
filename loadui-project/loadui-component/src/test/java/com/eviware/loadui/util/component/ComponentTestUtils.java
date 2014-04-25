@@ -17,9 +17,7 @@ package com.eviware.loadui.util.component;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -33,6 +31,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeoutException;
 
+import com.eviware.loadui.api.component.ComponentContext;
+import com.eviware.loadui.api.component.categories.GeneratorCategory;
+import com.eviware.loadui.api.statistics.Statistic;
+import com.eviware.loadui.api.statistics.StatisticHolder;
+import com.eviware.loadui.api.statistics.StatisticVariable;
+import com.google.common.collect.ImmutableMap;
+import org.mockito.Matchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.core.convert.ConversionService;
@@ -65,11 +70,11 @@ import com.eviware.loadui.util.test.TestUtils;
 
 public class ComponentTestUtils
 {
-	private static final ComponentItem dummyComponent = mock( ComponentItem.class );
-	private static final OutputTerminal outputDummy = mock( OutputTerminal.class );
-	private static final Set<ConnectionImpl> connections = Collections.synchronizedSet( new HashSet<ConnectionImpl>() );
+	private final ComponentItem dummyComponent = mock( ComponentItem.class );
+	private final OutputTerminal outputDummy = mock( OutputTerminal.class );
+	private final Set<ConnectionImpl> connections = Collections.synchronizedSet( new HashSet<ConnectionImpl>() );
 
-	static
+	public ComponentTestUtils()
 	{
 		System.setProperty( LoadUI.INSTANCE, LoadUI.CONTROLLER );
 
@@ -143,17 +148,10 @@ public class ComponentTestUtils
 		{
 			TestUtils.awaitEvents( component );
 		}
-		catch( InterruptedException e )
+		catch( InterruptedException | ExecutionException | TimeoutException e )
 		{
 			e.printStackTrace();
-		}
-		catch( ExecutionException e )
-		{
-			e.printStackTrace();
-		}
-		catch( TimeoutException e )
-		{
-			e.printStackTrace();
+			throw new RuntimeException( e );
 		}
 	}
 
@@ -187,6 +185,27 @@ public class ComponentTestUtils
 		}
 
 		return connection;
+	}
+
+	public void sendSimpleTrigger(InputTerminal triggerTerminal)
+	{
+		sendMessage( triggerTerminal,
+				ImmutableMap.<String, Object>of( GeneratorCategory.TRIGGER_TIMESTAMP_MESSAGE_PARAM, 0 ) );
+	}
+
+	public void mockStatisticsFor( StatisticHolder componentSpy, ComponentContext contextSpy )
+	{
+		final StatisticVariable.Mutable mockVariable = mock( StatisticVariable.Mutable.class );
+		when( mockVariable.getStatisticHolder() ).thenReturn( componentSpy );
+		@SuppressWarnings( "rawtypes" )
+		final Statistic statisticMock = mock( Statistic.class );
+		when( statisticMock.getStatisticVariable() ).thenReturn( mockVariable );
+		when( mockVariable.getStatistic( anyString(), anyString() ) ).thenReturn( statisticMock );
+		doReturn( mockVariable ).when( contextSpy ).addStatisticVariable( anyString(), anyString(),
+				Matchers.<String>anyVararg() );
+		doNothing().when( contextSpy ).removeStatisticVariable( anyString() );
+		doReturn( mockVariable ).when( contextSpy ).addListenableStatisticVariable( anyString(), anyString(),
+				Matchers.<String>anyVararg() );
 	}
 
 	private class MessageListener implements EventHandler<TerminalMessageEvent>
@@ -225,15 +244,7 @@ public class ComponentTestUtils
 				{
 					TestUtils.awaitEvents( getOutputTerminal() );
 				}
-				catch( InterruptedException e )
-				{
-					e.printStackTrace();
-				}
-				catch( ExecutionException e )
-				{
-					e.printStackTrace();
-				}
-				catch( TimeoutException e )
+				catch( InterruptedException | ExecutionException | TimeoutException e )
 				{
 					e.printStackTrace();
 				}

@@ -15,6 +15,7 @@
  */
 package com.eviware.loadui.util.groovy;
 
+import com.eviware.loadui.impl.layout.*;
 import groovy.lang.Closure;
 
 import java.util.HashMap;
@@ -25,14 +26,6 @@ import com.eviware.loadui.api.layout.ActionLayoutComponent;
 import com.eviware.loadui.api.layout.LayoutContainer;
 import com.eviware.loadui.api.property.Property;
 import com.eviware.loadui.api.serialization.Value;
-import com.eviware.loadui.api.traits.Releasable;
-import com.eviware.loadui.impl.layout.ActionLayoutComponentImpl;
-import com.eviware.loadui.impl.layout.LabelLayoutComponentImpl;
-import com.eviware.loadui.impl.layout.LayoutComponentImpl;
-import com.eviware.loadui.impl.layout.LayoutContainerImpl;
-import com.eviware.loadui.impl.layout.PropertyLayoutComponentImpl;
-import com.eviware.loadui.impl.layout.SeparatorLayoutComponentImpl;
-import com.eviware.loadui.util.ReleasableUtils;
 import com.eviware.loadui.util.layout.DelayedFormattedString;
 import com.eviware.loadui.util.layout.FormattedString;
 import com.google.common.collect.ImmutableMap;
@@ -219,17 +212,4 @@ public class LayoutBuilder
 		}
 	}
 
-	private static class FormattedStringLayoutComponent extends LayoutComponentImpl implements Releasable
-	{
-		public FormattedStringLayoutComponent( Map<String, ?> args )
-		{
-			super( args );
-		}
-
-		@Override
-		public void release()
-		{
-			ReleasableUtils.releaseAll( get( "fString" ) );
-		}
-	}
 }

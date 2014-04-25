@@ -15,24 +15,23 @@
  */
 package com.eviware.loadui.ui.fx.views.analysis.linechart;
 
-import static com.eviware.loadui.ui.fx.util.ObservableLists.fx;
-import static com.eviware.loadui.ui.fx.util.ObservableLists.ofCollection;
-import static com.eviware.loadui.ui.fx.util.ObservableLists.transform;
-import static javafx.beans.binding.Bindings.bindContent;
-import static javafx.beans.binding.Bindings.createLongBinding;
-import static javafx.beans.binding.Bindings.createStringBinding;
-
-import java.util.concurrent.Callable;
-
+import com.eviware.loadui.api.statistics.model.chart.line.LineChartView;
+import com.eviware.loadui.api.statistics.model.chart.line.LineSegment;
+import com.eviware.loadui.api.statistics.model.chart.line.Segment;
+import com.eviware.loadui.api.statistics.model.chart.line.TestEventSegment;
+import com.eviware.loadui.api.statistics.store.Execution;
+import com.eviware.loadui.api.traits.Releasable;
+import com.eviware.loadui.ui.fx.api.analysis.ExecutionChart;
+import com.eviware.loadui.ui.fx.util.FXMLUtils;
+import com.eviware.loadui.ui.fx.util.ManualObservable;
+import com.eviware.loadui.ui.fx.util.ObservableLists;
+import com.eviware.loadui.ui.fx.util.Observables;
+import com.eviware.loadui.util.execution.TestExecutionUtils;
+import com.eviware.loadui.util.statistics.ZoomLevel;
+import com.google.common.base.Function;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.LongProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleLongProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -49,28 +48,16 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-
-import javax.annotation.OverridingMethodsMustInvokeSuper;
-
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eviware.loadui.api.charting.line.ZoomLevel;
-import com.eviware.loadui.api.statistics.model.chart.line.LineChartView;
-import com.eviware.loadui.api.statistics.model.chart.line.LineSegment;
-import com.eviware.loadui.api.statistics.model.chart.line.Segment;
-import com.eviware.loadui.api.statistics.model.chart.line.TestEventSegment;
-import com.eviware.loadui.api.statistics.store.Execution;
-import com.eviware.loadui.api.traits.Releasable;
-import com.eviware.loadui.ui.fx.api.analysis.ExecutionChart;
-import com.eviware.loadui.ui.fx.util.FXMLUtils;
-import com.eviware.loadui.ui.fx.util.ManualObservable;
-import com.eviware.loadui.ui.fx.util.ObservableLists;
-import com.eviware.loadui.ui.fx.util.Observables;
-import com.eviware.loadui.util.execution.TestExecutionUtils;
-import com.google.common.base.Function;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
+import java.util.concurrent.Callable;
+
+import static com.eviware.loadui.ui.fx.util.ObservableLists.*;
+import static javafx.beans.binding.Bindings.*;
 
 public class ScrollableLineChart extends HBox implements ExecutionChart, Releasable
 {
@@ -305,7 +292,6 @@ public class ScrollableLineChart extends HBox implements ExecutionChart, Releasa
 					{
 						for( Segment s : ObservableLists.getActuallyRemoved( change ) )
 						{
-							log.debug( "!!!!!! " + s );
 							( ( Segment.Removable )s ).remove();
 						}
 					}
@@ -351,7 +337,6 @@ public class ScrollableLineChart extends HBox implements ExecutionChart, Releasa
 	{
 		for( Series<Long, Number> s : series )
 		{
-			log.debug( "!!!!! CLEANING SERIES " + series );
 			s.setData( FXCollections.<Data<Long, Number>> observableArrayList() );
 		}
 	}

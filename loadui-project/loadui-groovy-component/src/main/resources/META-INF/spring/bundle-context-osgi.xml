@@ -7,4 +7,8 @@
 	<osgi:reference interface="com.eviware.loadui.api.component.ComponentRegistry" id="componentRegistry" />
 	
 	<osgi:reference interface="java.util.concurrent.ScheduledExecutorService" id="scheduledExecutorService" />
+
+    <osgi:list id="groovyResolvers" cardinality="0..N"
+                interface="com.eviware.loadui.api.component.GroovyResolver.Methods" />
+
 </beans>

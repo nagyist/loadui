@@ -15,9 +15,12 @@
  */
 package com.eviware.loadui.ui.fx;
 
+import com.eviware.loadui.util.ShutdownWatchdog;
 import javafx.application.Platform;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class JavaFXActivator implements BundleActivator
 {
@@ -49,25 +52,6 @@ public class JavaFXActivator implements BundleActivator
 	@Override
 	public void stop( BundleContext context ) throws Exception
 	{
-		System.out.println("JavaFX2 bundle stopped!");
-		Thread thread = new Thread(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				try
-				{
-					Thread.sleep(6000);
-				} catch( InterruptedException e )
-				{
-					e.printStackTrace();
-				}
-
-				System.out.println("Shutdown timed out, forcing close...");
-				System.exit(0);
-			}
-		});
-		thread.setDaemon(true);
-		thread.start();
+		ShutdownWatchdog.killJvmIn( 6, SECONDS );
 	}
 }

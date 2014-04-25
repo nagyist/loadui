@@ -24,7 +24,6 @@ import com.eviware.loadui.api.events.ActionEvent;
 import com.eviware.loadui.api.events.BaseEvent;
 import com.eviware.loadui.api.events.EventHandler;
 import com.eviware.loadui.api.events.PropertyEvent;
-import com.eviware.loadui.api.model.AgentItem;
 import com.eviware.loadui.api.model.CanvasItem;
 import com.eviware.loadui.api.model.ModelItem;
 import com.eviware.loadui.api.property.Property;
@@ -233,7 +232,7 @@ public abstract class RunnerBase extends BaseCategory implements RunnerCategory,
 	 * @param sampleId An ID which is used to identify the sample, and should be used
 	 * if the runner is executed asynchronously.
 	 * @return The result of the sample as a TerminalMessage, or null if the
-	 *         sample is executed asynchronously.
+	 * sample is executed asynchronously.
 	 */
 	protected abstract TerminalMessage sample( TerminalMessage triggerMessage, Object sampleId )
 			throws SampleCancelledException;
@@ -499,12 +498,18 @@ public abstract class RunnerBase extends BaseCategory implements RunnerCategory,
 			}
 			catch( RuntimeException e )
 			{
-				updateCurrentlyRunning( currentlyRunning.decrementAndGet() );
+				int cRunning = currentlyRunning.decrementAndGet();
+				updateCurrentlyRunning( cRunning );
 				log.error( "Exception when calling 'sample'", e );
+
+				if( cRunning == 0 )
+					getContext().setBusy( false );
 
 				sampleCounter.increment();
 				failedRequestCounter.increment();
 				failureCounter.increment();
+				message.put( "FAIL", failureCounter.getValue() );
+				getContext().send( resultTerminal, message );
 				return;
 			}
 			if( result != null )
@@ -599,49 +604,6 @@ public abstract class RunnerBase extends BaseCategory implements RunnerCategory,
 			queue.clear();
 			getContext().getComponent().removeEventListener( BaseEvent.class, this );
 		}
-	}
-
-	@Override
-	public Object collectStatisticsData()
-	{
-		Map<String, Object> data = new HashMap<>();
-		data.put( "min", minTime );
-		data.put( "max", maxTime );
-		data.put( "avg", avgTime );
-		data.put( "sumTotalSquares", sumTotalSquares );
-
-		Set<SampleStats> stats = new HashSet<>();
-		stats.addAll( getTopSamples() );
-		stats.addAll( getBottomSamples() );
-		if( !stats.isEmpty() )
-		{
-			StringBuilder s = new StringBuilder();
-			for( SampleStats stat : stats )
-				s.append( stat.getTime() + ":" + stat.getTimeTaken() + ":" + stat.getSize() + ";" );
-			data.put( "samples", s.toString() );
-		}
-		return data;
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public void handleStatisticsData( Map<AgentItem, Object> statisticsData )
-	{
-		Preconditions.checkArgument( statisticsData.size() > 0, "Cannot process empty statistics data" );
-		long avgSum = 0;
-		for( Object data : statisticsData.values() )
-		{
-			try
-			{
-				avgSum = processStatistic( avgSum, data );
-			}
-			catch( Exception e )
-			{
-				log.error( "Could not handle stat {}", data );
-				log.error( "Reason:", e );
-			}
-		}
-		avgTime = avgSum / statisticsData.size();
 	}
 
 	private long processStatistic( long avgSum, Object data )

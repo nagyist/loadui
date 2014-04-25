@@ -15,27 +15,29 @@
  */
 package com.eviware.loadui.groovy.components;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
-import java.io.File;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import com.eviware.loadui.api.component.ComponentCreationException;
 import com.eviware.loadui.api.component.categories.OutputCategory;
 import com.eviware.loadui.api.model.ComponentItem;
 import com.eviware.loadui.api.terminal.InputTerminal;
 import com.eviware.loadui.api.terminal.OutputTerminal;
 import com.eviware.loadui.groovy.util.GroovyComponentTestUtils;
+import com.eviware.loadui.test.categories.IntegrationTest;
 import com.google.common.base.Joiner;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+import java.io.File;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
+@Category( IntegrationTest.class )
 public class TableLogTest
 {
 	private ComponentItem component;
 	private GroovyComponentTestUtils ctu;
-	
+
 	@Before
 	public void setup() throws ComponentCreationException
 	{

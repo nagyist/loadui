@@ -3,19 +3,20 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>loadui-project</artifactId>
     <packaging>pom</packaging>
-    <version>2.6.8</version>
+    <version>2.7.0</version>
     <name>loadUI Project</name>
     <url>http://www.loadui.org</url>
     <parent>
         <groupId>com.eviware.loadui</groupId>
         <artifactId>loadui-parent</artifactId>
-        <version>2.6.8</version>
+        <version>2.7.0</version>
     </parent>
 
     <modules>
         <module>loadui-core-deps</module>
         <module>loadui-api</module>
         <module>loadui-fx-api</module>
+        <module>loadui-web-data</module>
         <module>loadui-model-xmlbeans</module>
         <module>loadui-base</module>
         <module>loadui-controller-base</module>
@@ -33,6 +34,9 @@
         <module>loadui-groovy-utils</module>
         <module>loadui-fx-interface</module>
         <module>loadui-fx-test-utils</module>
+        <module>loadui-groovy-fx</module>
+        <module>loadui-rest-runner</module>
+        <module>loadui-web-runner</module>
     </modules>
     <repositories>
         <repository>

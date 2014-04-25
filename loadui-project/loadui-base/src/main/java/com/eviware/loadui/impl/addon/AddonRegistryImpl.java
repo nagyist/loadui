@@ -15,18 +15,6 @@
  */
 package com.eviware.loadui.impl.addon;
 
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.osgi.context.BundleContextAware;
-
 import com.eviware.loadui.api.addon.Addon;
 import com.eviware.loadui.api.addon.AddonHolder;
 import com.eviware.loadui.api.addon.AddonRegistry;
@@ -35,6 +23,13 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.osgi.context.BundleContextAware;
+
+import java.util.*;
 
 public class AddonRegistryImpl implements AddonRegistry, BundleContextAware
 {
@@ -66,7 +61,7 @@ public class AddonRegistryImpl implements AddonRegistry, BundleContextAware
 		Hashtable<String, String> properties = new Hashtable<>();
 		properties.put( "type", type.getName() );
 
-		registrations.put( type.getName(), bundleContext.registerService( Addon.Factory.class, factory, properties ) );
+		registrations.put( type.getName(), bundleContext.registerService( Addon.Factory.class.getName(), factory, properties ) );
 	}
 
 	@Override

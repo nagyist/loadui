@@ -16,7 +16,6 @@
 package com.eviware.loadui.test;
 
 import com.eviware.loadui.launcher.LoadUILauncher;
-import org.apache.commons.cli.CommandLine;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
@@ -27,11 +26,6 @@ public class OSGiLauncher extends LoadUILauncher
 	public OSGiLauncher( String[] args )
 	{
 		super( args );
-	}
-
-	public Properties getConfig()
-	{
-		return configProps;
 	}
 
 	@Override
@@ -52,6 +46,12 @@ public class OSGiLauncher extends LoadUILauncher
 		super.start();
 	}
 
+	@Override
+	protected String commandLineServiceOsgiFilter()
+	{
+		return null;
+	}
+
 	public BundleContext getBundleContext()
 	{
 		return framework.getBundleContext();
@@ -63,8 +63,13 @@ public class OSGiLauncher extends LoadUILauncher
 	}
 
 	@Override
-	protected void processCommandLine( CommandLine cmdLine )
+	protected void afterStart()
 	{
 		// no action
+	}
+
+	public Properties getConfig()
+	{
+		return configProps;
 	}
 }

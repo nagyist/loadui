@@ -15,9 +15,6 @@
  */
 package com.eviware.loadui.ui.fx.views.analysis.reporting;
 
-import java.awt.image.BufferedImage;
-import java.util.concurrent.CountDownLatch;
-
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Node;
@@ -26,6 +23,8 @@ import javafx.scene.Scene;
 import javafx.scene.image.WritableImage;
 
 import javax.annotation.Nonnull;
+import java.awt.image.BufferedImage;
+import java.util.concurrent.CountDownLatch;
 
 public class Snapshotter
 {
@@ -65,7 +64,6 @@ public class Snapshotter
 			doSnapshot();
 		}
 
-		System.out.println( "awaiting latch" );
 		try
 		{
 			latch.await();
@@ -80,12 +78,8 @@ public class Snapshotter
 
 	private void doSnapshot()
 	{
-		System.out.println( "creating scene" );
 		new Scene( rootNode );
-		System.out.println( "creating scene DONE" );
-		System.out.println( "Creating snapshot STARTED" );
 		setWritableImage( node.snapshot( null, null ) );
-		System.out.println( "Creating snapshot DONE" );
 		latch.countDown();
 	}
 }

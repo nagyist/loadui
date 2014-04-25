@@ -15,20 +15,18 @@
  */
 package com.eviware.loadui.util.test;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.HashMap;
-import java.util.Map;
-
+import com.eviware.loadui.util.BeanInjector;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
-import com.eviware.loadui.util.BeanInjector;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Creating an instance of BeanInjectorMocker causes calls to
@@ -91,19 +89,6 @@ public class BeanInjectorMocker
 		BeanInjector.INSTANCE.clearCache();
 
 		//TODO: We can't use generics here until the OSGi jars stop using compilation flags that are not compatible with Java7.
-		when( contextMock.getServiceReference( any( Class.class ) ) ).thenAnswer( new Answer<ServiceReference>()
-		{
-			@Override
-			public ServiceReference/* <Object> */answer( InvocationOnMock invocation ) throws Throwable
-			{
-				ServiceReference/* <Object> */referenceMock = mock( ServiceReference.class );
-				Object value = getBean( ( Class<?> )invocation.getArguments()[0] );
-				when( contextMock.getService( referenceMock ) ).thenReturn( value );
-
-				return referenceMock;
-			}
-		} );
-
 		when( contextMock.getServiceReference( anyString() ) ).thenAnswer( new Answer<ServiceReference>()
 		{
 			@Override

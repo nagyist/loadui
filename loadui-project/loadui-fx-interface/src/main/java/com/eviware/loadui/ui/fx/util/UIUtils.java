@@ -146,11 +146,6 @@ public class UIUtils
 		return UIUtils.class.getResource( TOOLBOX_IMAGES_PATH + fileName ).toExternalForm();
 	}
 
-	public static String toCssId( @Nonnull String label )
-	{
-		return label.toLowerCase().replace( " ", "-" );
-	}
-
 	public static BufferedImage scaleImage( BufferedImage image, int maxWidth, int maxHeight )
 	{
 		double imageWidth = image.getWidth();

@@ -15,17 +15,13 @@
  */
 package com.eviware.loadui.impl.statistics;
 
+import com.eviware.loadui.api.statistics.*;
+import com.eviware.loadui.api.statistics.store.Entry;
+import com.google.common.collect.Iterables;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
-import com.eviware.loadui.api.statistics.EntryAggregator;
-import com.eviware.loadui.api.statistics.StatisticVariable;
-import com.eviware.loadui.api.statistics.StatisticsManager;
-import com.eviware.loadui.api.statistics.StatisticsWriter;
-import com.eviware.loadui.api.statistics.StatisticsWriterFactory;
-import com.eviware.loadui.api.statistics.store.Entry;
-import com.google.common.collect.Iterables;
 
 public class CounterStatisticsWriter extends AbstractStatisticsWriter
 {
@@ -35,27 +31,9 @@ public class CounterStatisticsWriter extends AbstractStatisticsWriter
 	private long change = 0;
 
 	public CounterStatisticsWriter( StatisticsManager manager, StatisticVariable variable,
-			Map<String, Class<? extends Number>> values, Map<String, Object> config )
+											  Map<String, Class<? extends Number>> values, Map<String, Object> config )
 	{
 		super( manager, variable, values, config, new Aggregator() );
-	}
-
-	public enum Stats
-	{
-		TOTAL( "The number of %v in total since the last time the project was started or resetted." ), PER_SECOND(
-				"The number of %v per second." );
-
-		private final String description;
-
-		Stats()
-		{
-			this.description = this.name() + " of %v.";
-		}
-
-		Stats( String description )
-		{
-			this.description = description;
-		}
 	}
 
 	@Override
@@ -88,7 +66,7 @@ public class CounterStatisticsWriter extends AbstractStatisticsWriter
 		// log.debug( " counterStatWriter:output()   lastTimeFlushed={} delay={}",
 		// lastTimeFlushed, delay );
 		lastTimeFlushed = Math.min( lastTimeFlushed + delay, currentTime );
-		return at( lastTimeFlushed ).put( Stats.TOTAL.name(), total ).put( Stats.PER_SECOND.name(), perSecond ).build();
+		return at( lastTimeFlushed ).put( CounterStats.TOTAL.name(), total ).put( CounterStats.PER_SECOND.name(), perSecond ).build();
 		// log.debug( " ...resulted in Entry {}",e );
 	}
 
@@ -123,14 +101,14 @@ public class CounterStatisticsWriter extends AbstractStatisticsWriter
 			long maxTime = -1;
 			for( Entry entry : entries )
 			{
-				total = Math.max( total, entry.getValue( Stats.TOTAL.name() ).longValue() );
-				perSecond += entry.getValue( Stats.PER_SECOND.name() ).longValue();
+				total = Math.max( total, entry.getValue( CounterStats.TOTAL.name() ).longValue() );
+				perSecond += entry.getValue( CounterStats.PER_SECOND.name() ).longValue();
 				maxTime = Math.max( maxTime, entry.getTimestamp() );
 			}
 
 			perSecond /= entries.size();
 
-			return at( maxTime ).put( Stats.TOTAL.name(), total ).put( Stats.PER_SECOND.name(), perSecond ).build();
+			return at( maxTime ).put( CounterStats.TOTAL.name(), total ).put( CounterStats.PER_SECOND.name(), perSecond ).build();
 		}
 	}
 
@@ -140,8 +118,8 @@ public class CounterStatisticsWriter extends AbstractStatisticsWriter
 
 		public Factory()
 		{
-			trackStructure.put( Stats.TOTAL.name(), Long.class );
-			trackStructure.put( Stats.PER_SECOND.name(), Double.class );
+			trackStructure.put( CounterStats.TOTAL.name(), Long.class );
+			trackStructure.put( CounterStats.PER_SECOND.name(), Double.class );
 		}
 
 		@Override
@@ -152,7 +130,7 @@ public class CounterStatisticsWriter extends AbstractStatisticsWriter
 
 		@Override
 		public StatisticsWriter createStatisticsWriter( StatisticsManager statisticsManager, StatisticVariable variable,
-				Map<String, Object> config )
+																		Map<String, Object> config )
 		{
 			return new CounterStatisticsWriter( statisticsManager, variable, trackStructure, config );
 		}
@@ -161,7 +139,7 @@ public class CounterStatisticsWriter extends AbstractStatisticsWriter
 	@Override
 	public String getDescriptionForMetric( String metricName )
 	{
-		for( Stats s : Stats.values() )
+		for( CounterStats s : CounterStats.values() )
 		{
 			if( s.name().equals( metricName ) )
 				return s.description;

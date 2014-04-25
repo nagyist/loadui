@@ -28,7 +28,7 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 
 import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.FIXED_RATE_GENERATOR;
-import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.WEB_PAGE_RUNNER;
+import static com.eviware.loadui.ui.fx.util.test.LoadUiRobot.Component.HTTP_RUNNER;
 import static com.google.code.tempusfugit.temporal.Duration.seconds;
 import static com.google.code.tempusfugit.temporal.Timeout.timeout;
 import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
@@ -121,13 +121,13 @@ public class ScenarioLinkedPlaybackTest extends SimpleWebTestBase
 		setTestTimeLimitTo( 2 );
 		hasScenarios.ensureScenarioIsLinkedIs( true );
 
-		connect( FIXED_RATE_GENERATOR ).to( WEB_PAGE_RUNNER );
+		connect( FIXED_RATE_GENERATOR ).to( HTTP_RUNNER );
 		setWebPageRunnerUrlTo( VALID_URL_TO_HIT_ON_TESTS );
 
 		hasScenarios.enterScenario();
 
 		robot.resetPredefinedPoints();
-		connect( FIXED_RATE_GENERATOR ).to( WEB_PAGE_RUNNER );
+		connect( FIXED_RATE_GENERATOR ).to( HTTP_RUNNER );
 		setWebPageRunnerUrlTo( VALID_URL_TO_HIT_ON_TESTS );
 
 		robot.clickPlayStopButton();

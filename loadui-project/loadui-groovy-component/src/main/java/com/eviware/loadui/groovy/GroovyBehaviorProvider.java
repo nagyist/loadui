@@ -25,6 +25,7 @@ import com.eviware.loadui.groovy.categories.*;
 import com.eviware.loadui.util.ReleasableUtils;
 import com.eviware.loadui.util.events.EventSupport;
 import com.eviware.loadui.util.groovy.ClassLoaderRegistry;
+import com.eviware.loadui.api.component.GroovyResolver;
 import com.eviware.loadui.util.groovy.ParsedGroovyScript;
 import com.google.common.io.Files;
 import com.google.common.io.InputSupplier;
@@ -51,12 +52,13 @@ public class GroovyBehaviorProvider implements BehaviorProvider, EventFirer, Rel
 	private final ScheduledFuture<?> future;
 	private final EventSupport eventSupport = new EventSupport( this );
 	private final ClassLoaderRegistry clr;
+	private final List<GroovyResolver.Methods> groovyResolvers;
 
 	private final ComponentDescriptor emptyDescriptor = new ComponentDescriptor( TYPE, "misc", "EmptyScriptComponent",
 			"", null );
 
 	public GroovyBehaviorProvider( ComponentRegistry registry, ScheduledExecutorService scheduler, File scriptDir,
-											 ClassLoaderRegistry clr )
+											 ClassLoaderRegistry clr, List<GroovyResolver.Methods> groovyResolvers )
 	{
 		if( !scriptDir.isAbsolute() )
 		{
@@ -65,6 +67,7 @@ public class GroovyBehaviorProvider implements BehaviorProvider, EventFirer, Rel
 		this.scriptDir = scriptDir;
 		this.registry = registry;
 		this.clr = clr;
+		this.groovyResolvers = groovyResolvers;
 
 		File groovyRoot = new File( System.getProperty( "groovy.root" ) );
 		if( !groovyRoot.isDirectory() )
@@ -166,6 +169,11 @@ public class GroovyBehaviorProvider implements BehaviorProvider, EventFirer, Rel
 		return null;
 	}
 
+	public List<? extends GroovyResolver> getGroovyResolvers()
+	{
+		return groovyResolvers;
+	}
+
 	private ComponentBehavior instantiateBehavior( ComponentContext context, String category )
 			throws ComponentCreationException
 	{
@@ -182,10 +190,6 @@ public class GroovyBehaviorProvider implements BehaviorProvider, EventFirer, Rel
 			else if( FlowCategory.CATEGORY.equalsIgnoreCase( category ) )
 			{
 				return new GroovyFlow( this, context );
-			}
-			else if( AnalysisCategory.CATEGORY.equalsIgnoreCase( category ) )
-			{
-				return new GroovyAnalysis( this, context );
 			}
 			else if( OutputCategory.CATEGORY.equalsIgnoreCase( category ) )
 			{
@@ -261,7 +265,7 @@ public class GroovyBehaviorProvider implements BehaviorProvider, EventFirer, Rel
 
 			File icon = new File( script.getParentFile(), headers.getHeader( "icon", baseName + ".png" ) );
 			String digest = null;
-			try( FileInputStream fis = new FileInputStream( script ) )
+			try(FileInputStream fis = new FileInputStream( script ))
 			{
 				digest = DigestUtils.md5Hex( fis );
 			}
@@ -278,7 +282,7 @@ public class GroovyBehaviorProvider implements BehaviorProvider, EventFirer, Rel
 
 		private static String getFileContent( File file )
 		{
-			try( Reader in = new FileReader( file ) )
+			try(Reader in = new FileReader( file ))
 			{
 				StringBuilder sb = new StringBuilder();
 				char[] chars = new char[1 << 16];

@@ -110,6 +110,11 @@ public class LoadUI
 		return Paths.get( System.getProperty( LOADUI_HOME ), "projects" );
 	}
 
+	public static Path serverResourcesLocation()
+	{
+		return Paths.get( System.getProperty( LOADUI_HOME ), "server-resources" );
+	}
+
 	/**
 	 * Gets the directory from where all relative paths should be resolved.
 	 *
@@ -117,7 +122,7 @@ public class LoadUI
 	 */
 	public static File getWorkingDir()
 	{
-		return new File( System.getProperty( LOADUI_WORKING, "." ) ).getAbsoluteFile();
+		return new File( System.getProperty( LOADUI_WORKING, "" ) ).getAbsoluteFile();
 	}
 
 	public static File relativeFile( String path )

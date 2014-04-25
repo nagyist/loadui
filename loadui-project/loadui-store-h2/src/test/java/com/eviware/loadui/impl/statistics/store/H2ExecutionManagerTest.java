@@ -15,22 +15,8 @@
  */
 package com.eviware.loadui.impl.statistics.store;
 
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import com.eviware.loadui.LoadUI;
+import com.eviware.loadui.api.statistics.StatisticVariableIdentifier;
 import com.eviware.loadui.api.statistics.store.Execution;
 import com.eviware.loadui.api.statistics.store.Track;
 import com.eviware.loadui.api.testevents.TestEvent;
@@ -44,6 +30,18 @@ import com.eviware.loadui.util.test.BeanInjectorMocker;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class H2ExecutionManagerTest
 {
@@ -121,7 +119,9 @@ public class H2ExecutionManagerTest
 		types.put( COLUMN_2, Long.class );
 		types.put( COLUMN_3, Integer.class );
 		types.put( COLUMN_4, Double.class );
-		TrackDescriptorImpl td = new TrackDescriptorImpl( "t1", types, null );
+		StatisticVariableIdentifier identifier = mock( StatisticVariableIdentifier.class );
+		when( identifier.getHash() ).thenReturn( "t1" );
+		TrackDescriptorImpl td = new TrackDescriptorImpl( identifier, types, null );
 		h2.registerTrackDescriptor( td );
 
 		// release to invoke execution loading
@@ -158,7 +158,9 @@ public class H2ExecutionManagerTest
 		values.put( COLUMN_3, 3 );
 		values.put( COLUMN_4, 4 );
 
-		TrackDescriptorImpl td = new TrackDescriptorImpl( "t1", types, null );
+		StatisticVariableIdentifier identifier = mock( StatisticVariableIdentifier.class );
+		when( identifier.getHash() ).thenReturn( "t1" );
+		TrackDescriptorImpl td = new TrackDescriptorImpl( identifier, types, null );
 		h2.registerTrackDescriptor( td );
 		Track t = h2.getTrack( "t1" );
 
@@ -281,7 +283,9 @@ public class H2ExecutionManagerTest
 		values.put( COLUMN_3, 3 );
 		values.put( COLUMN_4, 4 );
 
-		TrackDescriptorImpl td = new TrackDescriptorImpl( "t1", types, null );
+		StatisticVariableIdentifier identifier = mock( StatisticVariableIdentifier.class );
+		when( identifier.getHash() ).thenReturn( "t1" );
+		TrackDescriptorImpl td = new TrackDescriptorImpl( identifier, types, null );
 		h2.registerTrackDescriptor( td );
 		Track t = h2.getTrack( "t1" );
 

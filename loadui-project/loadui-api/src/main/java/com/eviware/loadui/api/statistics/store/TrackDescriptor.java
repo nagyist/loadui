@@ -15,9 +15,10 @@
  */
 package com.eviware.loadui.api.statistics.store;
 
-import java.util.Map;
-
 import com.eviware.loadui.api.statistics.EntryAggregator;
+import com.eviware.loadui.api.statistics.StatisticVariableIdentifier;
+
+import java.util.Map;
 
 /**
  * Defines the structure of a Track, and once registered, allows the creation of
@@ -50,4 +51,10 @@ public interface TrackDescriptor
 	 * @return
 	 */
 	public EntryAggregator getEntryAggregator();
+
+	/**
+	 * @return statistic identifier which can be used to retrieve details about a track's statistic.
+	 */
+	StatisticVariableIdentifier getStatisticIdentifier();
+
 }

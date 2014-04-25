@@ -131,9 +131,9 @@ public class ComponentsSmoketest extends FxIntegrationTestBase
 	}
 
 	@Test
-	public void canCreate_WebPageRunner()
+	public void canCreate_HttpRunner()
 	{
-		create( WEB_PAGE_RUNNER );
+		create( HTTP_RUNNER );
 
 		assertNodeExists( "#compact" );
 		assertNodeExists( "#inputTerminalPane" );

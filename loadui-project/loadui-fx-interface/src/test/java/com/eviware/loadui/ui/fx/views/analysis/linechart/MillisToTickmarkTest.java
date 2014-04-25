@@ -21,7 +21,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.eviware.loadui.api.charting.line.ZoomLevel;
+import com.eviware.loadui.util.statistics.ZoomLevel;
 
 public class MillisToTickmarkTest
 {

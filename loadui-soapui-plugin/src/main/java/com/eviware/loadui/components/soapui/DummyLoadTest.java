@@ -22,12 +22,16 @@ import java.util.Set;
 
 import javax.swing.ImageIcon;
 
+import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.model.ModelItem;
+import com.eviware.soapui.model.project.Project;
 import com.eviware.soapui.model.settings.Settings;
 import com.eviware.soapui.model.testsuite.LoadTest;
 import com.eviware.soapui.model.testsuite.LoadTestRunListener;
 import com.eviware.soapui.model.testsuite.LoadTestRunner;
 import com.eviware.soapui.model.testsuite.TestCase;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 class DummyLoadTest implements LoadTest
 {
@@ -35,6 +39,7 @@ class DummyLoadTest implements LoadTest
 	 * 
 	 */
 	private final SoapUISamplerComponent soapUISamplerComponent;
+	private WsdlProject project;
 
 	/**
 	 * @param soapUISamplerComponent
@@ -119,6 +124,12 @@ class DummyLoadTest implements LoadTest
 	}
 
 	@Override
+	public Project getProject()
+	{
+		return checkNotNull( project );
+	}
+
+	@Override
 	public Settings getSettings()
 	{
 		return this.soapUISamplerComponent.soapuiTestCase.getSettings();
@@ -142,5 +153,10 @@ class DummyLoadTest implements LoadTest
 	@Override
 	public void removePropertyChangeListener( String propertyName, PropertyChangeListener listener )
 	{
+	}
+
+	public void setProject( WsdlProject project )
+	{
+		this.project = project;
 	}
 }

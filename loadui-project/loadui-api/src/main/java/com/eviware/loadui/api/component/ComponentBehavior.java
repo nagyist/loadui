@@ -99,22 +99,6 @@ public interface ComponentBehavior
 	public String getCategory();
 
 	/**
-	 * Collects data to be used for statistics calculations. Invoked at the end
-	 * of a test run on each assigned Agent.
-	 * 
-	 * @return Statistics data to be sent to the Controller.
-	 */
-	@Deprecated
-	public Object collectStatisticsData();
-
-	/**
-	 * Handle remotely collected statistics data gathered for Agents on the
-	 * controller.
-	 */
-	@Deprecated
-	public void handleStatisticsData( Map<AgentItem, Object> statisticsData );
-
-	/**
 	 * Called on a ComponentItem to generate a summary of its run.
 	 * 
 	 * @param summary

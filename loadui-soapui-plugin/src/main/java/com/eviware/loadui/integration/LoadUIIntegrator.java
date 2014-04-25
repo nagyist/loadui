@@ -15,17 +15,6 @@
  */
 package com.eviware.loadui.integration;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.eviware.loadui.LoadUI;
 import com.eviware.loadui.api.component.ComponentContext;
 import com.eviware.loadui.api.component.ComponentCreationException;
@@ -34,12 +23,7 @@ import com.eviware.loadui.api.component.ComponentRegistry;
 import com.eviware.loadui.api.component.categories.AnalysisCategory;
 import com.eviware.loadui.api.component.categories.GeneratorCategory;
 import com.eviware.loadui.api.component.categories.RunnerCategory;
-import com.eviware.loadui.api.model.CanvasItem;
-import com.eviware.loadui.api.model.ComponentItem;
-import com.eviware.loadui.api.model.ProjectItem;
-import com.eviware.loadui.api.model.ProjectRef;
-import com.eviware.loadui.api.model.SceneItem;
-import com.eviware.loadui.api.model.WorkspaceProvider;
+import com.eviware.loadui.api.model.*;
 import com.eviware.loadui.api.terminal.InputTerminal;
 import com.eviware.loadui.api.terminal.OutputTerminal;
 import com.eviware.loadui.api.ui.ApplicationState;
@@ -48,6 +32,14 @@ import com.eviware.loadui.components.soapui.MockServiceComponent;
 import com.eviware.loadui.components.soapui.SoapUISamplerComponent;
 import com.eviware.loadui.components.soapui.layout.SoapUiProjectSelector;
 import com.eviware.loadui.util.soapui.CajoClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
+import static com.eviware.loadui.util.LoadUIComponents.SOAPUI_RUNNER;
 
 public class LoadUIIntegrator
 {
@@ -69,7 +61,6 @@ public class LoadUIIntegrator
 	private static final String LOADUI_TEST_CASE_NAME = "loaduiTestCaseName";
 	private static final String LOADUI_PROJECT_NAME = "loaduiProjectName";
 	private static final String MOCKSERVICE_RUNNER_LABEL = "mockRunnerLabel";
-	public static final String SOAPUI_RUNNER_BASE_NAME = "SoapUI Runner";
 	public static final String MOCK_RUNNER_BASE_NAME = "soapUI MockService";
 
 	private static final String TRIGGER_LABEL = "triggerLabel";
@@ -132,7 +123,7 @@ public class LoadUIIntegrator
 
 	public HashMap<String, String> createSoapUIRunner( HashMap<String, Object> context ) throws IOException
 	{
-		ComponentContext compContext = createRunner( context, SOAPUI_RUNNER_BASE_NAME );
+		ComponentContext compContext = createRunner( context, SOAPUI_RUNNER.getName() );
 		createAndConnectComponents( context, compContext );
 
 		HashMap<String, String> soapuiRunnerProperties = new HashMap<>();
@@ -190,7 +181,7 @@ public class LoadUIIntegrator
 		String componentLabel = "";
 		String loadUIProjectName = ( String )context.get( LOADUI_PROJECT_NAME );
 		String loadUITestCaseName = ( String )context.get( LOADUI_TEST_CASE_NAME );
-		if( baseComponentName.equals( SOAPUI_RUNNER_BASE_NAME ) )
+		if( baseComponentName.equals( SOAPUI_RUNNER.getName() ) )
 		{
 			soapuiRunnerProperties = ( HashMap<String, String> )context.get( SoapUISamplerComponent.PROPERTIES );
 			componentLabel = ( String )context.get( SOAPUI_RUNNER_LABEL );
@@ -236,7 +227,7 @@ public class LoadUIIntegrator
 				// name it as soapUI TestCase in case of soapUI Runner ar as a
 				// MockService in case of soapUI MockService
 				String soapUIItemName = "";
-				if( baseComponentName.equals( SOAPUI_RUNNER_BASE_NAME ) )
+				if( baseComponentName.equals( SOAPUI_RUNNER.getName() ) )
 				{
 					soapUIItemName = soapuiRunnerProperties.get( SoapUiProjectSelector.TEST_CASE );
 				}
@@ -274,7 +265,7 @@ public class LoadUIIntegrator
 		if( componentItem == null )
 		{
 			componentLabel = createNewComponentName( canvasItem, context, baseComponentName );
-			if( SOAPUI_RUNNER_BASE_NAME.equals( baseComponentName ) )
+			if( SOAPUI_RUNNER.getName().equals( baseComponentName ) )
 			{
 				componentItem = LoadUIUtils.createComponent( componentLabel, getComponentDescriptor(), canvasItem );
 			}
@@ -310,7 +301,7 @@ public class LoadUIIntegrator
 
 	public HashMap<String, Object> exportSoapUILoadTestToLoadUI( HashMap<String, Object> context ) throws IOException
 	{
-		ComponentContext soapuiRunnerContext = createRunner( context, SOAPUI_RUNNER_BASE_NAME );
+		ComponentContext soapuiRunnerContext = createRunner( context, SOAPUI_RUNNER.getName() );
 
 		createAndConnectComponents( context, soapuiRunnerContext );
 
@@ -502,11 +493,11 @@ public class LoadUIIntegrator
 	{
 		String runnerLabel = "";
 		int i = LoadUIUtils.getRunners( canvasItem, baseComponentName ).size();
-		if( baseComponentName.equals( SOAPUI_RUNNER_BASE_NAME ) )
+		if( baseComponentName.equals( SOAPUI_RUNNER.getName() ) )
 		{
 			do
 			{
-				runnerLabel = SOAPUI_RUNNER_BASE_NAME + " (" + ( ++i ) + ")";
+				runnerLabel = SOAPUI_RUNNER.getName() + " (" + ( ++i ) + ")";
 			}
 			while( LoadUIUtils.findComponent( runnerLabel, canvasItem ) != null );
 			context.put( SOAPUI_RUNNER_LABEL, runnerLabel );
@@ -600,7 +591,7 @@ public class LoadUIIntegrator
 
 	public List<String> getSoapUIRunners( String projectName, String sceneName )
 	{
-		return LoadUIUtils.getRunnersLabelsList( workspaceProvider, projectName, sceneName, SOAPUI_RUNNER_BASE_NAME );
+		return LoadUIUtils.getRunnersLabelsList( workspaceProvider, projectName, sceneName, SOAPUI_RUNNER.getName() );
 	}
 
 	public List<String> getMockServiceRunners( String projectName, String sceneName )

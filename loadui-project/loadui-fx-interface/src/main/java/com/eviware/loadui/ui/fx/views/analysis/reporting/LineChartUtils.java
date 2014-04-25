@@ -36,7 +36,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.eviware.loadui.api.charting.line.ZoomLevel.ALL;
+import static com.eviware.loadui.util.statistics.ZoomLevel.ALL;
 
 public class LineChartUtils
 {
@@ -45,8 +45,6 @@ public class LineChartUtils
 	public static Map<ChartView, Image> createImages( Collection<StatisticPage> pages,
 																	  ObservableValue<Execution> executionProperty, Execution comparedExecution )
 	{
-		System.out.println( "11111" );
-		log.debug( "1111111111111111111111" );
 		HashMap<ChartView, Image> images = Maps.newHashMap();
 		for( StatisticPage page : pages )
 			for( ChartGroup chartGroup : page.getChildren() )

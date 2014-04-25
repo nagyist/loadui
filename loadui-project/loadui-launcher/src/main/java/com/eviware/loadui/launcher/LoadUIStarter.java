@@ -1,7 +1,6 @@
 package com.eviware.loadui.launcher;
 
 import com.eviware.loadui.LoadUI;
-import com.eviware.loadui.launcher.server.ServerStarter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,19 +21,9 @@ public class LoadUIStarter
 				launchCmdRunner( args, arg );
 				return;
 			}
-			if( arg.equals( "--server=true" ) )
-			{
-				launchServer( args, arg );
-				return;
-			}
 		}
 
 		launchFxApp( args );
-	}
-
-	private static void launchServer( String[] args, String arg )
-	{
-		new ServerStarter().launch( removeItem( args, arg ) );
 	}
 
 	private static void launchCmdRunner( String[] args, String arg )

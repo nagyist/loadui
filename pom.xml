@@ -4,7 +4,7 @@
     <groupId>com.eviware.loadui</groupId>
     <artifactId>loadui-parent</artifactId>
     <packaging>pom</packaging>
-    <version>2.6.8</version>
+    <version>2.7.0</version>
     <name>LoadUI Parent</name>
     <description>LoadUI Parent is the top-level project which triggers the build of LoadUI OS, including integration
         tests
@@ -20,7 +20,7 @@
         <jettyVersion>7.5.4.v20111024</jettyVersion>
         <groovyVersion>1.8.5</groovyVersion>
         <changelog.start.date>2011-06-13</changelog.start.date>
-        <osgiVersion>4.3.0</osgiVersion>
+        <osgiVersion>4.2.0</osgiVersion>
         <osgiCompendiumVersion>4.2.0</osgiCompendiumVersion>
         <springVersion>3.1.1.RELEASE</springVersion>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -32,6 +32,7 @@
         <objenesisVersion>1.0</objenesisVersion>
         <testFxVersion>2.7.5</testFxVersion>
         <guavaVersion>16.0</guavaVersion>
+        <felixVersion>4.0.2</felixVersion>
     </properties>
 
     <modules>

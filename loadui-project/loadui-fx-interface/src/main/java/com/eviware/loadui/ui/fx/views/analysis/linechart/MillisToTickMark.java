@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
 
-import com.eviware.loadui.api.charting.line.ZoomLevel;
+import com.eviware.loadui.util.statistics.ZoomLevel;
 
 final class MillisToTickMark extends StringConverter<Number>
 {

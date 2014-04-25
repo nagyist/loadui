@@ -16,15 +16,14 @@
 package com.eviware.loadui.test;
 
 import com.eviware.loadui.LoadUI;
+import com.eviware.loadui.launcher.JavaFxStarter;
+import com.eviware.loadui.launcher.LoadUILauncher;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -99,7 +98,8 @@ public class ControllerWrapper
 					for( String pkg : packages )
 						apiPackages.append( ", " ).append( pkg ).append( "; version=\"" ).append( version ).append( '"' );
 
-					config.put( "org.osgi.framework.system.packages.extra", apiPackages.toString() );
+					config.put( LoadUILauncher.ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, apiPackages.toString() );
+					JavaFxStarter.addJavaFxOsgiExtraPackages( config );
 				}
 
 				if( !bundle.delete() )
@@ -107,7 +107,7 @@ public class ControllerWrapper
 			}
 		}
 
-		config.setProperty( "felix.auto.deploy.dir", bundleDir.getAbsolutePath() );
+		config.put( "felix.auto.deploy.dir", bundleDir.getAbsolutePath() );
 
 		launcher.init();
 		launcher.start();

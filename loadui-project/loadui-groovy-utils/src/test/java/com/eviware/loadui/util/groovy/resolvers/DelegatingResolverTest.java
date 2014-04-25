@@ -22,7 +22,7 @@ import org.junit.*;
 import org.mockito.InOrder;
 
 import com.eviware.loadui.api.traits.Releasable;
-import com.eviware.loadui.util.groovy.GroovyResolver;
+import com.eviware.loadui.api.component.GroovyResolver;
 
 import static org.mockito.Mockito.*;
 

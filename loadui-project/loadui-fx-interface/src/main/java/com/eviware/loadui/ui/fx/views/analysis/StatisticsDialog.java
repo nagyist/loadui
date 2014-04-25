@@ -51,6 +51,7 @@ public class StatisticsDialog extends ConfirmationDialog
 	{
 		super( parent, "Add Statistic", "Add", false, true );
 		tree = StatisticTree.forHolder( holder );
+		setMinWidth( 700 );
 
 		final Collection<Chart> charts = chartView.getChartGroup().getChildren();
 

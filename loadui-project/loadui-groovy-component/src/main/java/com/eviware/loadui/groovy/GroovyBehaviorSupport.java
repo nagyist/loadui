@@ -16,6 +16,7 @@
 package com.eviware.loadui.groovy;
 
 import com.eviware.loadui.api.component.ComponentContext;
+import com.eviware.loadui.api.component.GroovyResolver;
 import com.eviware.loadui.api.events.ActionEvent;
 import com.eviware.loadui.api.events.BaseEvent;
 import com.eviware.loadui.api.events.PropertyEvent;
@@ -28,13 +29,12 @@ import com.eviware.loadui.api.traits.Releasable;
 import com.eviware.loadui.groovy.GroovyBehaviorProvider.ScriptDescriptor;
 import com.eviware.loadui.impl.component.categories.BaseCategory;
 import com.eviware.loadui.util.ReleasableUtils;
-import com.eviware.loadui.util.groovy.ClassLoaderRegistry;
 import com.eviware.loadui.util.groovy.GroovyEnvironment;
-import com.eviware.loadui.util.groovy.GroovyResolver;
 import com.eviware.loadui.util.groovy.ParsedGroovyScript;
 import com.eviware.loadui.util.groovy.resolvers.*;
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import groovy.lang.Binding;
 import groovy.lang.GroovyRuntimeException;
 import groovy.lang.MissingPropertyException;
@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.beans.PropertyChangeEvent;
+import java.util.List;
 import java.util.Set;
 
 import static com.eviware.loadui.util.groovy.resolvers.DelegatingResolver.noRelease;
@@ -60,7 +61,7 @@ public class GroovyBehaviorSupport implements Releasable
 	private final BaseCategory behavior;
 	private final ComponentContext context;
 	private final GroovyComponentContext groovyContext;
-	private final ClassLoaderRegistry clr;
+	private final GroovyBehaviorProvider behaviorProvider;
 	private final String filePath;
 	private final ScriptChangeListener scriptChangeListener;
 	private final PropertyEventListener propertyEventListener;
@@ -77,8 +78,8 @@ public class GroovyBehaviorSupport implements Releasable
 		log = LoggerFactory.getLogger( "com.eviware.loadui.groovy.component." + id );
 		this.behavior = behavior;
 		this.context = context;
+		this.behaviorProvider = behaviorProvider;
 		groovyContext = new GroovyComponentContext( context, log );
-		clr = behaviorProvider.getClassLoaderRegistry();
 
 		classLoaderId = context.getAttribute( GroovyBehaviorSupport.CLASS_LOADER_ATTRIBUTE, id );
 		filePath = context.getAttribute( GroovyBehaviorSupport.SCRIPT_FILE_ATTRIBUTE, null );
@@ -107,7 +108,7 @@ public class GroovyBehaviorSupport implements Releasable
 	protected GroovyResolver[] provideGroovyResolvers()
 	{
 		propertyHolderResolver = new PropertyHolderResolver( context, log );
-		return new GroovyResolver[] {
+		List<GroovyResolver> resolvers = Lists.newArrayList(
 				noRelease( new JavaBeanGroovyResolver( groovyContext ) ),
 				noRelease( new JavaBeanGroovyResolver( behavior ) ),
 				new TotalResolver( behavior ),
@@ -116,9 +117,13 @@ public class GroovyBehaviorSupport implements Releasable
 				new TerminalHolderResolver( context, log ),
 				new StatisticHolderResolver( context.getComponent() ),
 				new ScheduledExecutionResolver(),
-				noRelease( new JavaBeanGroovyResolver( context ) ),
-				new JavaFxResolver()
-		};
+				noRelease( new JavaBeanGroovyResolver( context ) ) );
+
+		List<? extends GroovyResolver> externalResolvers = behaviorProvider.getGroovyResolvers();
+		log.debug( "Got the following external Groovy resolvers: {}", externalResolvers );
+		resolvers.addAll( externalResolvers );
+
+		return resolvers.toArray( new GroovyResolver[resolvers.size()] );
 	}
 
 	private void updateScript( String scriptText )
@@ -134,7 +139,8 @@ public class GroovyBehaviorSupport implements Releasable
 		resolver = new DelegatingResolver( provideGroovyResolvers() );
 
 		Binding binding = new Binding();
-		groovyEnv = GroovyEnvironment.newInstance( headers, id, "com.eviware.loadui.groovy.component", clr,
+		groovyEnv = GroovyEnvironment.newInstance( headers, id, "com.eviware.loadui.groovy.component",
+				behaviorProvider.getClassLoaderRegistry(),
 				classLoaderId, resolver, binding );
 
 		propertyHolderResolver.invokeReplaceHandlers();

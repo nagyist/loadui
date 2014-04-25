@@ -26,7 +26,6 @@ import javafx.scene.control.LabelBuilder;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.stage.*;
-import org.apache.commons.cli.CommandLine;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,9 +53,9 @@ public class LoadUIFXLauncher extends LoadUILauncher
 	}
 
 	@Override
-	protected void processCommandLine( CommandLine cmdLine )
+	protected String commandLineServiceOsgiFilter()
 	{
-
+		return null; // GUI does not use commandLine service
 	}
 
 	public static class FXApplication extends Application
@@ -76,7 +75,7 @@ public class LoadUIFXLauncher extends LoadUILauncher
 			final String agent = getParameters().getNamed().get( "agent" );
 
 			if( "true".equals( agent ) )
-				setDefaultSystemProperty( LoadUI.INSTANCE, "agent" );
+				setDefaultSystemProperty( LoadUI.INSTANCE, LoadUI.AGENT );
 
 			if( "false".equals( noFx ) )
 			{

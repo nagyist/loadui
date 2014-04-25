@@ -1,15 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
                       http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi-1.0.xsd">
 
-    <osgi:reference interface="com.eviware.loadui.api.model.WorkspaceProvider" id="workspaceProvider" />
+    <osgi:reference interface="com.eviware.loadui.api.model.WorkspaceProvider" id="workspaceProvider"/>
 
     <osgi:reference interface="com.eviware.loadui.api.component.ComponentRegistry" id="componentRegistry"/>
 
-    <osgi:service ref="messageTestEventFactory" interface="com.eviware.loadui.api.testevents.TestEvent$Factory" />
+    <osgi:service ref="messageTestEventFactory" interface="com.eviware.loadui.api.testevents.TestEvent$Factory"/>
 
     <osgi:service ref="projectBuilder" interface="com.eviware.loadui.api.model.ProjectBuilderFactory"/>
+
+    <osgi:service ref="serverCli" interface="com.eviware.loadui.api.cli.CommandLineParser">
+        <osgi:service-properties>
+            <entry key="cliType" value="serverCli" />
+        </osgi:service-properties>
+    </osgi:service>
+
+    <osgi:service ref="loadUiCommandLineCli" interface="com.eviware.loadui.api.cli.CommandLineParser">
+        <osgi:service-properties>
+            <entry key="cliType" value="loadUiCommandLineCli" />
+        </osgi:service-properties>
+    </osgi:service>
 
 </beans>

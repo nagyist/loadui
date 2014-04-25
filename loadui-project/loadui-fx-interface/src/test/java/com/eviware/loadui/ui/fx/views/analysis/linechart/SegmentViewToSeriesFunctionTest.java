@@ -35,7 +35,7 @@ import javafx.scene.shape.Circle;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.eviware.loadui.api.charting.line.ZoomLevel;
+import com.eviware.loadui.util.statistics.ZoomLevel;
 import com.eviware.loadui.api.statistics.DataPoint;
 import com.eviware.loadui.api.statistics.Statistic;
 import com.eviware.loadui.api.statistics.model.chart.line.LineSegment;

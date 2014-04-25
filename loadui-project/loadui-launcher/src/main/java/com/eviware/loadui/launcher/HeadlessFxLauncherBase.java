@@ -1,6 +1,5 @@
 package com.eviware.loadui.launcher;
 
-import com.eviware.loadui.launcher.api.GroovyCommand;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import org.osgi.framework.Bundle;
@@ -13,8 +12,6 @@ import java.util.Set;
 public abstract class HeadlessFxLauncherBase extends LoadUILauncher
 {
 
-	private GroovyCommand command;
-
 	public HeadlessFxLauncherBase( String[] args )
 	{
 		super( args );
@@ -24,16 +21,6 @@ public abstract class HeadlessFxLauncherBase extends LoadUILauncher
 	protected final void processOsgiExtraPackages()
 	{
 		JavaFxStarter.addJavaFxOsgiExtraPackages( configProps );
-	}
-
-	protected void setCommand( GroovyCommand command )
-	{
-		this.command = command;
-	}
-
-	protected GroovyCommand getCommand()
-	{
-		return command;
 	}
 
 	@Override

@@ -107,11 +107,11 @@ public abstract class JavaFxStarter
 				for( int n; ( n = is.read( b ) ) != -1; )
 					out.append( new String( b, 0, n ) );
 
-				String extra = configProps.getProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, "" );
+				String extra = ( String )configProps.setProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, "" );
 				if( !extra.isEmpty() )
 					out.append( "," ).append( extra );
 
-				configProps.setProperty( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, out.toString() );
+				configProps.put( ORG_OSGI_FRAMEWORK_SYSTEM_PACKAGES_EXTRA, out.toString() );
 			}
 		}
 		catch( IOException e )

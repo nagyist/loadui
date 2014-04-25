@@ -4,6 +4,8 @@ import com.eviware.loadui.test.TestState;
 import com.eviware.loadui.test.ui.fx.states.SimpleWebTestState;
 import org.junit.After;
 
+import static com.eviware.loadui.util.LoadUIComponents.HTTP_RUNNER;
+
 /**
  * @author renato
  */
@@ -20,7 +22,7 @@ public abstract class SimpleWebTestBase extends FxIntegrationTestBase
 
 	public void setMaxConcurrentRequestsTo( int requests )
 	{
-		click( ".web-page-runner .menu-button" ).click( "Settings" ).click( "#max-concurrent-requests" )
+		click( HTTP_RUNNER.cssClass() + " .menu-button" ).click( "Settings" ).click( "#max-concurrent-requests" )
 				.doubleClick().type( Integer.toString( requests ) ).click( "#default" );
 	}
 

@@ -29,6 +29,7 @@ import com.eviware.loadui.util.groovy.GroovyEnvironment;
 import com.eviware.loadui.util.groovy.GroovyEnvironmentClassLoader;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -38,6 +39,7 @@ import org.mockito.stubbing.Answer;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 
@@ -83,10 +85,10 @@ public class GroovyComponentTestUtils extends ComponentTestUtils
 			{
 				return new GroovyEnvironmentClassLoader( bundleClassLoader, new File( "target", ".groovy" ) );
 			}
-		} );
+		}, Collections.<GroovyResolver.Methods>emptyList() );
 	}
 
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	public ComponentItem createComponent( final String componentName ) throws ComponentCreationException
 	{
 		ComponentItem component = createComponentItem();
@@ -118,6 +120,8 @@ public class GroovyComponentTestUtils extends ComponentTestUtils
 	public ComponentItem createComponent( final String componentName, ComponentItem component )
 			throws ComponentCreationException
 	{
+
+
 		Optional<ComponentDescriptor> descriptorOptional = null;
 		Predicate<ComponentDescriptor> predicate = new Predicate<ComponentDescriptor>()
 		{
@@ -149,6 +153,9 @@ public class GroovyComponentTestUtils extends ComponentTestUtils
 		ComponentDescriptor descriptor = descriptorOptional.get();
 
 		component.setAttribute( ComponentItem.TYPE, descriptor.getLabel() );
+
+		Preconditions.checkState( descriptors.keySet().size() != 0, "No component descriptors found. Are you sure you are running with correct root directory?" );
+
 		setComponentBehavior( component,
 				descriptors.get( descriptor ).createBehavior( descriptor, component.getContext() ) );
 

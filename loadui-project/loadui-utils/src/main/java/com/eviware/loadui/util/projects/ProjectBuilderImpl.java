@@ -11,12 +11,14 @@ import com.eviware.loadui.api.terminal.OutputTerminal;
 import com.eviware.loadui.api.terminal.Terminal;
 import com.eviware.loadui.util.CanvasItemNameGenerator;
 import com.google.common.base.Preconditions;
+import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -34,39 +36,64 @@ public class ProjectBuilderImpl implements ProjectBuilder
 	}
 
 	@Override
-	public ProjectBlueprint create()
+	public LoadUiProjectBlueprint create()
 	{
-		return new ProjectBlueprint();
+		return new LoadUiProjectBlueprint();
 	}
 
-	private boolean save( File file )
+	private ProjectRef assembleProjectByBlueprint( LoadUiProjectBlueprint blueprint )
 	{
+		if( !workspaceProvider.isWorkspaceLoaded() )
+		{
+			workspaceProvider.loadDefaultWorkspace();
+		}
+
 		try
 		{
-			workspaceProvider.getWorkspace().importProject( file, true );
-			return true;
+			File temporaryProjectFile = blueprint.getProjectFile();
+			ProjectRef projectRef = workspaceProvider.getWorkspace().createProject( temporaryProjectFile, temporaryProjectFile.getName(), true );
+
+			projectRef.getProject().setLimit( CanvasItem.REQUEST_COUNTER, blueprint.getRequestLimit() );
+			projectRef.getProject().setLimit( CanvasItem.TIMER_COUNTER, blueprint.getTimeLimit() );
+			projectRef.getProject().setLimit( CanvasItem.FAILURE_COUNTER, blueprint.getAssertionFailureLimit() );
+
+			assembleComponentsByBlueprint( projectRef, blueprint.getComponentBlueprints() );
+
+			projectRef.getProject().save();
+			projectRef.setEnabled( false );
+
+			File toDirectory = blueprint.getTargetDirectory();
+
+			if( !toDirectory.exists() )
+			{
+				toDirectory.mkdirs();
+			}
+
+			if( !toDirectory.getPath().equals( temporaryProjectFile.getParent() ) )
+			{
+				File targetProjectLocation = new File( toDirectory, temporaryProjectFile.getName() );
+				Files.move( temporaryProjectFile, targetProjectLocation );
+				projectRef.delete( false );
+				if( blueprint.shouldImportProject() )
+				{
+					projectRef = workspaceProvider.getWorkspace().importProject( targetProjectLocation, false );
+				}
+			}
+			else if( !blueprint.shouldImportProject() )
+			{
+					workspaceProvider.getWorkspace().removeProject( projectRef );
+			}
+			return projectRef;
 		}
 		catch( IOException e )
 		{
-			return false;
+			log.error( "Unable to assemble project from blueprint ", e );
 		}
-	}
-
-	private ProjectRef assembleProjectByBlueprint( ProjectBlueprint blueprint )
-	{
-
-		ProjectRef project = workspaceProvider.getWorkspace().createProject( blueprint.getProjectFile(), blueprint.getLabel(), true );
-		project.setLabel( blueprint.getLabel() );
-
-		project.getProject().setLimit( CanvasItem.REQUEST_COUNTER, blueprint.getRequestLimit() );
-		project.getProject().setLimit( CanvasItem.TIMER_COUNTER, blueprint.getTimeLimit() );
-		project.getProject().setLimit( CanvasItem.FAILURE_COUNTER, blueprint.getAssertionFailureLimit() );
-
-		assembleComponentsByBlueprint( project, blueprint.getComponentBlueprints() );
-
-		save( project.getProjectFile() );
-
-		return project;
+		catch( SecurityException e )
+		{
+			log.error( "Unable to assemble project at location ", e );
+		}
+		throw new RuntimeException( "Failed to create project" );
 	}
 
 	private void assembleComponentsByBlueprint( ProjectRef project, List<ComponentBlueprint> componentBlueprints )
@@ -103,7 +130,8 @@ public class ProjectBuilderImpl implements ProjectBuilder
 
 		if( !blueprint.getChildren().isEmpty() )
 		{
-			for( ComponentBlueprint child : blueprint.getChildren()){
+			for( ComponentBlueprint child : blueprint.getChildren() )
+			{
 
 				ComponentItem childComponent = assembleComponent( project, child );
 
@@ -117,7 +145,7 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		}
 		modifyProperties( parentComponent, blueprint.getProperties() );
 
-     	return parentComponent;
+		return parentComponent;
 	}
 
 	private void applyConcurrentUsersConnection( ProjectRef project, ComponentItem parentComponent, ComponentItem childComponent )
@@ -136,8 +164,10 @@ public class ProjectBuilderImpl implements ProjectBuilder
 				Terminal runningInputTerminal = parentComponent.getTerminalByName( sampleCountTerminal );
 				canvas.connect( ( OutputTerminal )currentlyRunning, ( InputTerminal )runningInputTerminal );
 			}
-		}else{
-			log.error("Cannot apply additional connection for concurrent users. Can't find the runningTerminal on child component or Sample Count on parent.");
+		}
+		else
+		{
+			log.error( "Cannot apply additional connection for concurrent users. Can't find the runningTerminal on child component or Sample Count on parent." );
 		}
 	}
 
@@ -180,44 +210,42 @@ public class ProjectBuilderImpl implements ProjectBuilder
 	}
 
 
-	public class ProjectBlueprint implements ProjectBuilder.ProjectBlueprint
+	public class LoadUiProjectBlueprint implements ProjectBuilder.ProjectBlueprint
 	{
 		private static final long DEFAULT_REQUEST_LIMIT = 0;
 		private static final long DEFAULT_ASSERTION_FAILURE_LIMIT = 0;
 		private static final long DEFAULT_TIME_LIMIT = 0;
 
 		private File projectFile;
+		private File targetDirectory;
 		private List<ComponentBlueprint> components;
 		private String label;
 		private long requestLimit;
 		private long timeLimit;
 		private long assertionFailureLimit;
+		private boolean shouldImportProject;
 
-		private ProjectBlueprint()
+		private LoadUiProjectBlueprint()
 		{
 			try
 			{
-				setProjectFile( File.createTempFile( "loadui-project", ".xml" ) );
+				projectFile = File.createTempFile( "loadui-project-", ".xml" );
+				targetDirectory = projectFile.getParentFile();
+				setComponentBlueprints( new ArrayList<ComponentBlueprint>() );
+				setRequestLimit( DEFAULT_REQUEST_LIMIT );
+				setAssertionFailureLimit( DEFAULT_ASSERTION_FAILURE_LIMIT );
+				setTimeLimit( DEFAULT_TIME_LIMIT );
+				shouldImportProject = false;
 			}
 			catch( IOException e )
 			{
-				log.error( "cannot create a temporary project" );
+				log.error( "Unable to create temporary file, cannot build project." );
 			}
-			setLabel( projectFile.getName() );
-			setComponentBlueprints( new ArrayList<ComponentBlueprint>() );
-			setRequestLimit( DEFAULT_REQUEST_LIMIT );
-			setAssertionFailureLimit( DEFAULT_ASSERTION_FAILURE_LIMIT );
-			setTimeLimit( DEFAULT_TIME_LIMIT );
 		}
 
 		private File getProjectFile()
 		{
 			return projectFile;
-		}
-
-		private void setProjectFile( File where )
-		{
-			this.projectFile = where;
 		}
 
 		private List<ComponentBlueprint> getComponentBlueprints()
@@ -230,9 +258,19 @@ public class ProjectBuilderImpl implements ProjectBuilder
 			this.components = components;
 		}
 
+		private boolean shouldImportProject()
+		{
+			return shouldImportProject;
+		}
+
 		private String getLabel()
 		{
 			return label;
+		}
+
+		private File getTargetDirectory()
+		{
+			return targetDirectory;
 		}
 
 		private void setLabel( String label )
@@ -271,19 +309,23 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		}
 
 		@Override
-		public ProjectBlueprint where( File where )
+		public ProjectBlueprint where( File folder )
 		{
-			projectFile = where;
+			targetDirectory = folder;
 			return this;
 		}
 
 		@Override
-		public ProjectBuilder.ProjectBlueprint components( ComponentBlueprint... components )
+		public ProjectBlueprint importProject( boolean bool )
 		{
-        	for( ComponentBlueprint blueprint : components )
-			{
-				this.components.add( blueprint );
-			}
+			shouldImportProject = bool;
+			return this;
+		}
+
+		@Override
+		public ProjectBlueprint components( ComponentBlueprint... components )
+		{
+			Collections.addAll( this.components, components );
 			return this;
 		}
 
@@ -309,16 +351,16 @@ public class ProjectBuilderImpl implements ProjectBuilder
 		}
 
 		@Override
-		public ProjectBuilder.ProjectBlueprint scenario( String label )
+		public ProjectBlueprint scenario( String label )
 		{
-			//TODO Create scenario
 			return this;
 		}
 
 		@Override
-		public ProjectBlueprint label( String name )
+		public ProjectBlueprint label( String label )
 		{
-			setLabel( name );
+			projectFile = new File( projectFile.getParentFile(), label + projectFile.getName() );
+			setLabel( label );
 			return this;
 		}
 

@@ -273,7 +273,7 @@ validateLogFilePath = { filePath ->
 addTimestampToFileName = { it.replaceAll('^(.*?)(\\.\\w+)?$', '$1-'+System.currentTimeMillis()+'$2') }
 
 refreshLayout = {
-    if ( !controller ) return;
+    if ( LoadUI.headless ) return;
 	rebuildTable()
 	layout(layout: 'wrap 4') {
 		node( component: table, constraints: 'span' )

@@ -19,10 +19,8 @@
  *
  * @id com.eviware.WebRunner
  * @help http://www.loadui.org/Runners/web-page-runner-component.html
- * @name Web Page Runner
+ * @name HTTP Runner
  * @category runners
- * @dependency org.apache.httpcomponents:httpcore:4.3
- * @dependency org.apache.httpcomponents:httpclient:4.3
  */
 
 import org.apache.http.*
@@ -100,12 +98,14 @@ proxyPassword = createProperty('_proxyPassword', String)
 authUsername = createProperty('_authUsername', String)
 authPassword = createProperty('_authPassword', String)
 
+def latencyVariable = addStatisticVariable( "Latency", '', "SAMPLE" )
+
 http = new DefaultHttpClient(cm)
 
 inlineUrlAuthUsername = null
 inlineUrlAuthPassword = null
 
-def runningSamples = ([] as Set).asSynchronized()
+def runningSamples = [].asSynchronized()
 runAction = null
 
 def dummyUrl = "http://GoSpamYourself.com"
@@ -224,6 +224,8 @@ sample = { message, sampleId ->
                 int contentLength = response.entity.contentLength
                 message['Bytes'] = contentLength
 
+                determineLatency(response.entity.content, sampleId)
+
                 if (outputBody.value)
                     message['Response'] = EntityUtils.toString(response.entity)
 
@@ -267,6 +269,12 @@ sample = { message, sampleId ->
         throw new SampleCancelledException()
     }
 
+}
+
+def firstByte = new byte[1]
+determineLatency = { content, startTime ->
+    content.read(firstByte)
+    latencyVariable.update(System.currentTimeMillis(), (System.nanoTime() - startTime)/1000000)
 }
 
 onCancel = {
