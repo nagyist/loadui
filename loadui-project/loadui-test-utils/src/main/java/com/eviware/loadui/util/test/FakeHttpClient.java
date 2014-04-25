@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 public class FakeHttpClient extends CloseableHttpClient
 {
 	protected static final Logger log = LoggerFactory.getLogger( FakeHttpClient.class );
+	public static final byte[] RESPONSE_BYTES = "Ok!".getBytes();
 
 	private final BlockingQueue<HttpUriRequest> handledRequests = new LinkedBlockingQueue<>();
 
@@ -80,7 +81,8 @@ public class FakeHttpClient extends CloseableHttpClient
 		handledRequests.add( httpUriRequest );
 
 		HttpEntity entity = mock( HttpEntity.class );
-		when(entity.getContent()).thenReturn( new ByteArrayInputStream( "Ok!".getBytes() ) );
+		when( entity.getContent() ).thenReturn( new ByteArrayInputStream( RESPONSE_BYTES ) );
+		when( entity.getContentLength() ).thenReturn( ( long )RESPONSE_BYTES.length );
 
 		CloseableHttpResponse response = mock(CloseableHttpResponse.class);
 		when(response.getEntity()).thenReturn( entity );
