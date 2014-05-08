@@ -63,11 +63,6 @@ public class RequestRunner implements Callable<Boolean>
 		}
 	}
 
-	public void resetCounters()
-	{
-		statsSender.reset();
-	}
-
 	public int cancelAllRequests()
 	{
 		return requestRunnerExecutor.cancelAll();

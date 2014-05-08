@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static com.eviware.loadui.webdata.StatisticConstants.*;
 
@@ -44,14 +43,6 @@ public class WebRunnerStatsSender implements Releasable
 		resourceToVariableGroup = ImmutableMap.copyOf( mapBuilder );
 	}
 
-	public void reset()
-	{
-		for( VariableGroup variables : resourceToVariableGroup.values() )
-		{
-			variables.resetCounters();
-		}
-	}
-
 	private VariableGroup getVariablesFor( String resource )
 	{
 		return resourceToVariableGroup.get( resource );
@@ -65,7 +56,7 @@ public class WebRunnerStatsSender implements Releasable
 
 		if( resourceVariables != null )
 		{
-			resourceVariables.sentVariable.update( timeStamp, resourceVariables.sentCount.incrementAndGet() );
+			resourceVariables.sentVariable.update( timeStamp, 1 );
 		}
 		else
 		{
@@ -113,7 +104,7 @@ public class WebRunnerStatsSender implements Releasable
 
 		if( resorceVariables != null )
 		{
-			resorceVariables.failureVariable.update( timeStamp, resorceVariables.failureCount.incrementAndGet() );
+			resorceVariables.failureVariable.update( timeStamp, 1 );
 		}
 		else
 		{
@@ -143,9 +134,6 @@ public class WebRunnerStatsSender implements Releasable
 		private final StatisticVariable.Mutable failureVariable;
 		private final StatisticVariable.Mutable sentVariable;
 
-		private final AtomicLong failureCount = new AtomicLong( 0L );
-		private final AtomicLong sentCount = new AtomicLong( 0L );
-
 		public VariableGroup( String identifier )
 		{
 			timeTakenVariable = context.addStatisticVariable(
@@ -173,11 +161,6 @@ public class WebRunnerStatsSender implements Releasable
 			context.removeStatisticVariable( failureVariable.getLabel() );
 		}
 
-		public void resetCounters()
-		{
-			failureCount.set( 0L );
-			sentCount.set( 0L );
-		}
 	}
 
 }
