@@ -374,7 +374,6 @@ public class WorkspaceItemImpl extends ModelItemImpl<WorkspaceItemConfig> implem
 		return true;
 	}
 
-	//TODO: Remove and make the distribution mode selector disabled when running instead?
 	@Override
 	public void setLocalMode( boolean localMode )
 	{

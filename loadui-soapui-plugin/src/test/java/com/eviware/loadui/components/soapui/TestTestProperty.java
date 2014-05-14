@@ -23,21 +23,18 @@ import com.eviware.soapui.model.testsuite.TestProperty;
 		@Override
 		public String getDefaultValue()
 		{
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
 		public String getDescription()
 		{
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
 		public ModelItem getModelItem()
 		{
-			// TODO Auto-generated method stub
 			return null;
 		}
 
@@ -50,14 +47,12 @@ import com.eviware.soapui.model.testsuite.TestProperty;
 		@Override
 		public SchemaType getSchemaType()
 		{
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
 		public QName getType()
 		{
-			// TODO Auto-generated method stub
 			return null;
 		}
 
@@ -70,14 +65,12 @@ import com.eviware.soapui.model.testsuite.TestProperty;
 		@Override
 		public boolean isReadOnly()
 		{
-			// TODO Auto-generated method stub
 			return false;
 		}
 
 		@Override
 		public boolean isRequestPart()
 		{
-			// TODO Auto-generated method stub
 			return false;
 		}
 
