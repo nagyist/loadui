@@ -122,7 +122,7 @@ public class LoadUIUtils
 		List<String> runnersLablesList = Lists.newArrayList();
 		Collection<? extends ProjectItem> projectList = workspaceProvider.getWorkspace().getProjects();
 		ProjectItem theProject = null;
-		if( projectList != null && !projectList.isEmpty() )
+		if( !projectList.isEmpty() )
 		{
 			theProject = Iterables.getOnlyElement( projectList );
 		}

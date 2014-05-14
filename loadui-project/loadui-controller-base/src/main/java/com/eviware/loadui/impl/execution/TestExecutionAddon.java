@@ -128,13 +128,13 @@ public class TestExecutionAddon implements Addon
 					{
 						if(!canvas.isCompleted())
 						{
-							WaitforReadyEvent();
+							waitforReadyEvent();
 						}
 					}
 				}
 			}
 
-			private void WaitforReadyEvent()
+			private void waitforReadyEvent()
 			{
 				try
 				{

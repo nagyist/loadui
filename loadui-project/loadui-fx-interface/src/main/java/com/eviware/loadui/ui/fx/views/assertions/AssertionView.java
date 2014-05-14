@@ -90,7 +90,7 @@ public class AssertionView extends VBox implements Deletable
 			//FIXME the renaming algorithm here will add a new (n) instead of just increasing the current (n) if any
 			while( assertionLabels.contains( assertion.getLabel() ) )
 				( ( Labeled.Mutable )assertion ).setLabel( assertion.getLabel() + " (" + ( append++ ) + ")" );
-			if( attemptedName != assertion.getLabel() )
+			if( !attemptedName.equals( assertion.getLabel() ) )
 				log.debug( "Name was already taken, changed to: " + assertion.getLabel() );
 		}
 
