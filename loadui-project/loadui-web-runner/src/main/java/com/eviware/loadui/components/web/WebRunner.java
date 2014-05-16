@@ -47,10 +47,6 @@ public class WebRunner extends RunnerBase implements ListenableValue.ValueListen
 		isLoadTestRunning.set( running );
 		if( running )
 		{
-			if( requestRunner != null )
-			{
-				requestRunner.resetCounters();
-			}
 			updateWebPageUrl( webPageUrlProperty.getUrl() );
 		}
 	}
