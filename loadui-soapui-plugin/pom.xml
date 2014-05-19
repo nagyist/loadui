@@ -17,7 +17,7 @@
 
     <properties>
         <loadUIVersion>${project.version}</loadUIVersion>
-        <soapUIVersion>5.0.0</soapUIVersion>
+        <soapUIVersion>5.1.0-SNAPSHOT</soapUIVersion>
     </properties>
     <repositories>
         <repository>
@@ -86,7 +86,7 @@
                         </Bundle-Activator>
                         <Embed-Dependency>*;scope=provided</Embed-Dependency>
                         <Import-Package>
-                            !com.eviware.loadui.api.charting.line,!,!com.eviware.loadui.api.reporting,!org.tbee.javafx.scene.layout,!com.apple.eawt,!sun.awt,!org.apache.commons.httpclient.*,!org.apache.tools.*,!org.fusesource.*,!org.apache.log,!org.apache.ivy.*,!org.apache.bsf.*,!org.apache.batik.*,!javax.xml.rpc.*,!jline,!org.apache.xml.resolver.*,!org.apache.axis.*,!org.apache.crimson.*;!org.mozilla.*,!com.sun.javadoc,!com.sun.tools.javadoc,!com.teamdev.xpcom.*,!com.teamdev.xulrunner-linux, !com.teamdev.xulrunner-mac,!com.teamdev.xulrunner-windows, !com.teamdev.xulrunner-linux64,!javax.servlet.jsp,!groovyjarjarasm.asm.util,!groovyjarjarasm.asm.tree.analysis,!org.dom4j.*,!org.apache.avalon.framework.logger,!org.apache.oro.text.regex,!com.sun.jdmk.comm,!com.sun.org.apache.xerces.internal.*,!com.sun.net.ssl.*,!com.sun.crypto.provider,!com.sun.java.swing.plaf.windows.*,!sun.io,!sun.misc,!sun.reflect.generics.reflectiveObjects,!org.jgroups*,!com.adbs*,!hermes*,!com.eviware.soapui.coverage*,!com.toedter.calendar*,!net.infonode.docking*,!net.infonode.properties.gui.util*,!net.infonode.tabbedpanel*,!net.infonode.util*,!*net.sf.jasperreports*,!org.jfree.util*,!com.jniwrapper*,!net.sf.cglib.proxy*,!org.codehaus.jettison*,!org.jdom*,!org.xmlpull.mxp1*,!org.xmlpull.v1*,!sun.reflect*,!net.sf.saxon.xpath,!org.apache.http*,!com.jp.protection*,!net.jcip.annotations*,!com.werken.xpath*,!org.apache.log.*,!org.apache.oro*,!org.owasp.*,*
+                            !com.eviware.loadui.api.charting.line,!com.eviware.loadui.api.reporting,!org.tbee.javafx.scene.layout,!com.apple.eawt,!sun.awt,!org.apache.commons.httpclient.*,!org.apache.tools.*,!org.fusesource.*,!org.apache.log,!org.apache.ivy.*,!org.apache.bsf.*,!org.apache.batik.*,!javax.xml.rpc.*,!jline,!org.apache.xml.resolver.*,!org.apache.axis.*,!org.apache.crimson.*;!org.mozilla.*,!com.sun.javadoc,!com.sun.tools.javadoc,!com.teamdev.xpcom.*,!com.teamdev.xulrunner-linux, !com.teamdev.xulrunner-mac,!com.teamdev.xulrunner-windows, !com.teamdev.xulrunner-linux64,!javax.servlet.jsp,!groovyjarjarasm.asm.util,!groovyjarjarasm.asm.tree.analysis,!org.dom4j.*,!org.apache.avalon.framework.logger,!org.apache.oro.text.regex,!com.sun.jdmk.comm,!com.sun.org.apache.xerces.internal.*,!com.sun.net.ssl.*,!com.sun.crypto.provider,!com.sun.java.swing.plaf.windows.*,!sun.io,!sun.misc,!sun.reflect.generics.reflectiveObjects,!org.jgroups*,!com.adbs*,!hermes*,!com.eviware.soapui.coverage*,!com.toedter.calendar*,!net.infonode.docking*,!net.infonode.properties.gui.util*,!net.infonode.tabbedpanel*,!net.infonode.util*,!*net.sf.jasperreports*,!org.jfree.util*,!com.jniwrapper*,!net.sf.cglib.proxy*,!org.codehaus.jettison*,!org.jdom*,!org.xmlpull.mxp1*,!org.xmlpull.v1*,!sun.reflect*,!net.sf.saxon.xpath,!org.apache.http*,!com.jp.protection*,!net.jcip.annotations*,!com.werken.xpath*,!org.apache.log.*,!org.apache.oro*,!org.owasp.*,*
                         </Import-Package>
                     </instructions>
                 </configuration>
@@ -787,6 +787,60 @@
             <groupId>org.apache.oltu.oauth2</groupId>
             <artifactId>org.apache.oltu.oauth2.common</artifactId>
             <version>0.31</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>0.9.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.minidev</groupId>
+            <artifactId>json-smart</artifactId>
+            <version>1.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>3.10-FINAL</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>3.10-FINAL</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml-schemas</artifactId>
+            <version>3.10-FINAL</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-scratchpad</artifactId>
+            <version>3.10-FINAL</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-core-lgpl</artifactId>
+            <version>1.9.13</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-lgpl</artifactId>
+            <version>1.9.13</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>ooxml-schemas</artifactId>
+            <version>1.1</version>
             <scope>provided</scope>
         </dependency>
         <!--<dependency>-->
