@@ -35,7 +35,6 @@ public abstract class AbstractStatisticsWriter implements StatisticsWriter
 	private final static Logger log = LoggerFactory.getLogger( AbstractStatisticsWriter.class );
 
 	public static final String DELAY = "delay";
-	public static final String NAMES = "names";
 
 	private final StatisticVariable variable;
 	private final TrackDescriptor descriptor;
@@ -62,7 +61,7 @@ public abstract class AbstractStatisticsWriter implements StatisticsWriter
 		delay = config.containsKey( DELAY ) ? ( ( Number )config.get( DELAY ) ).longValue() : manager
 				.getMinimumWriteDelay();
 
-		// TODO
+		// FIXME this line may cause bug LOADUI-1447
 		if( LoadUI.isController() )
 			manager.getExecutionManager().registerTrackDescriptor( descriptor );
 
