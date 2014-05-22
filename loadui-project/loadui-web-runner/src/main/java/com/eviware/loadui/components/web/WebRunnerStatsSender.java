@@ -149,7 +149,7 @@ public class WebRunnerStatsSender implements Releasable
 					identifier + ":" + FAILURE_IDENTIFIER, "Failed requests", CounterStatisticsWriter.TYPE );
 
 			sentVariable = context.addStatisticVariable(
-					identifier + ":" + SENT_IDENTIFIER, "Sent for the resource", CounterStatisticsWriter.TYPE );
+					identifier + ":" + COMPLETED_IDENTIFIER, "Sent for the resource", CounterStatisticsWriter.TYPE );
 		}
 
 		public void release()
